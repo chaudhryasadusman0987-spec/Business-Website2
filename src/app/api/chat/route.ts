@@ -45,8 +45,13 @@ export async function POST(req: Request) {
     const cleanReply = reply.replace("[LEAD_COLLECTED]", "").trim()
 
     return NextResponse.json({ reply: cleanReply, leadCollected })
-  } catch (err) {
-    console.error("Gemini chat error:", err)
+  } catch (err: any) {
+    console.error("Gemini chat error FULL:", {
+      message: err?.message,
+      status: err?.status,
+      statusText: err?.statusText,
+      errorDetails: err?.errorDetails,
+    })
     return NextResponse.json(
       {
         reply: "Sorry, I am having trouble right now. Please call us directly.",
