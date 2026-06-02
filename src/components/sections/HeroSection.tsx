@@ -157,7 +157,6 @@ export default function HeroSection() {
                 <span className="w-2.5 h-2.5 rounded-full bg-[#5dcaa5] animate-pulse" />
                 <span>
                   <span className="block text-white text-[13px] font-semibold">500+ Installs Completed</span>
-                  <span className="block text-[#5dcaa5] text-[11px] mt-0.5">Australia-wide</span>
                 </span>
               </div>
 
@@ -165,7 +164,6 @@ export default function HeroSection() {
               <div className="absolute top-5 right-5 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] rounded-[12px] px-4 py-3 text-center">
                 <p className="text-[#f5a623] text-[14px]">★★★★★</p>
                 <p className="text-white text-[12px] font-semibold mt-1">4.9/5 Rating</p>
-                <p className="text-[#9496a8] text-[10px] mt-0.5">500+ reviews</p>
               </div>
             </div>
           </div>
