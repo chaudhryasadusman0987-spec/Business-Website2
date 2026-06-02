@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Star } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import { testimonials } from "@/data/testimonials"
@@ -22,10 +23,21 @@ export default function TestimonialsStrip() {
               <p className="text-[#666] mt-4 leading-relaxed">
                 &ldquo;{t.text}&rdquo;
               </p>
-              <p className="font-bold text-[#2f2f2f] mt-4">{t.name}</p>
-              <p className="text-sm text-gray-400">
-                {t.suburb}, {t.state}
-              </p>
+              <div className="flex items-center gap-3 mt-6">
+                <Image
+                  src={t.image}
+                  alt={t.name}
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <div>
+                  <p className="font-bold text-[#2f2f2f]">{t.name}</p>
+                  <p className="text-sm text-gray-400">
+                    {t.suburb}, {t.state}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

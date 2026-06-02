@@ -1,3 +1,4 @@
+import Image from "next/image"
 import SectionTitle from "@/components/ui/SectionTitle"
 import Button from "@/components/ui/Button"
 import { SITE_FULL } from "@/data/site"
@@ -7,9 +8,15 @@ export default function AboutStrip() {
     <section className="pt-[200px] bg-brand-section">
       <div className="max-w-[1170px] mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-12">
-          {/* Left — image placeholder */}
-          <div className="lg:w-[45%] w-full bg-gray-200 rounded-2xl min-h-[400px] flex items-center justify-center">
-            <p className="text-sm text-gray-500">About Image</p>
+          {/* Left — image */}
+          <div className="lg:w-[45%] w-full relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
+            <Image
+              src="/images/about.jpg"
+              alt={`The ${SITE_FULL} team at work`}
+              fill
+              sizes="(max-width: 1024px) 100vw, 45vw"
+              className="object-cover"
+            />
           </div>
 
           {/* Right — text */}

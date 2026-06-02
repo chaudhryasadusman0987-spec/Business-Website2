@@ -2,31 +2,58 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { navLinks } from "@/data/navigation"
 import { SITE_FULL } from "@/data/site"
 
 export default function Header() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <>
-      <header className="bg-transparent w-full px-[15px] py-[35px] relative z-10">
-        <div className="max-w-[1170px] mx-auto flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-[#2d2d2c]">
+      <header className="bg-brand-primary shadow-sm w-full px-[15px] py-[28px] relative z-10">
+        <div className="max-w-[1170px] mx-auto flex items-center justify-between gap-6">
+          <Link
+            href="/"
+            className="text-2xl font-bold text-white shrink-0"
+          >
             {SITE_FULL}
           </Link>
+
+          {/* Desktop navigation bar */}
+          <nav className="hidden lg:flex items-center gap-x-5 xl:gap-x-7">
+            {navLinks.map((link) => {
+              const active = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-[14px] whitespace-nowrap transition-colors ${
+                    active
+                      ? "text-white font-semibold underline underline-offset-4"
+                      : "text-white/85 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Mobile hamburger */}
           <button
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="text-[#2d2d2c] hover:text-brand-primary transition-colors"
+            className="lg:hidden text-white hover:text-white/70 transition-colors"
           >
             <Menu size={28} />
           </button>
         </div>
       </header>
 
-      {/* Overlay */}
+      {/* Overlay (mobile slide-out) */}
       <div
         onClick={() => setOpen(false)}
         className={`fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-500 ${
@@ -34,7 +61,7 @@ export default function Header() {
         }`}
       />
 
-      {/* Slide-out panel */}
+      {/* Slide-out panel (mobile) */}
       <nav
         className={`fixed top-0 right-0 h-full w-[280px] bg-brand-panel z-[9999] pt-[60px] transition-transform duration-500 ${
           open ? "translate-x-0" : "translate-x-full"

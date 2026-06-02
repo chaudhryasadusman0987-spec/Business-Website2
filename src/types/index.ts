@@ -44,6 +44,7 @@ export interface Testimonial {
   text: string;
   service: string;
   date: string;
+  image: string;
 }
 
 export interface Lead {
