@@ -1,0 +1,669 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .logo-box {
+    width: 38px; height: 38px;
+    background: #0F6E56;
+    border-radius: var(--border-radius-md);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-box i { color: #fff; font-size: 20px; }
+
+  .brand { font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
+  .brand span { color: #0F6E56; }
+
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.75rem;
+  }
+
+  .progress-bar .seg {
+    height: 4px;
+    flex: 1;
+    border-radius: 99px;
+    background: var(--color-border-tertiary);
+    transition: background 0.3s;
+  }
+
+  .progress-bar .seg.active { background: #0F6E56; }
+  .progress-bar .seg.done { background: #5DCAA5; }
+
+  .step { display: none; }
+  .step.visible { display: block; }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #0F6E56;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .step-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .option-card {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--color-background-primary);
+    text-align: center;
+  }
+
+  .option-card:hover {
+    border-color: #5DCAA5;
+    background: var(--color-background-secondary);
+  }
+
+  .option-card.selected {
+    border: 2px solid #0F6E56;
+    background: #E1F5EE;
+  }
+
+  .option-card i {
+    font-size: 26px;
+    color: #0F6E56;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .option-card .opt-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .option-card .opt-price {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 3px;
+  }
+
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--color-background-primary);
+  }
+
+  .check-item:hover { border-color: #5DCAA5; }
+  .check-item.selected { border: 1.5px solid #0F6E56; background: #E1F5EE; }
+
+  .check-item i { font-size: 18px; color: #0F6E56; flex-shrink: 0; }
+  .check-item .ci-label { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .check-item .ci-price { font-size: 11px; color: var(--color-text-secondary); }
+
+  .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: var(--color-background-primary);
+  }
+
+  .qty-left { display: flex; align-items: center; gap: 10px; }
+  .qty-left i { font-size: 18px; color: #0F6E56; }
+  .qty-label { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .qty-sub { font-size: 11px; color: var(--color-text-secondary); }
+
+  .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+  .qty-btn {
+    width: 28px; height: 28px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: 50%;
+    background: var(--color-background-primary);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--color-text-primary);
+    transition: background 0.15s;
+  }
+  .qty-btn:hover { background: var(--color-background-secondary); }
+  .qty-num { font-size: 14px; font-weight: 500; min-width: 20px; text-align: center; color: var(--color-text-primary); }
+
+  .field-group { margin-bottom: 1rem; }
+  .field-group label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+  .field-group input, .field-group select {
+    width: 100%;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 9px 12px;
+    font-size: 14px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .summary-card {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .summary-card h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-text-primary);
+    padding: 4px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .summary-line:last-child { border-bottom: none; }
+  .summary-line.total {
+    font-size: 16px;
+    font-weight: 500;
+    padding-top: 10px;
+    color: var(--color-text-primary);
+  }
+
+  .summary-line.gst { font-size: 12px; color: var(--color-text-secondary); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 99px;
+    background: #E1F5EE;
+    color: #085041;
+    margin-top: 8px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+
+  .btn-back {
+    flex: 0;
+    padding: 10px 18px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s;
+  }
+
+  .btn-back:hover { background: var(--color-background-secondary); }
+
+  .btn-next {
+    flex: 1;
+    padding: 11px 20px;
+    background: #0F6E56;
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+
+  .btn-next:hover { background: #085041; }
+  .btn-next:disabled { background: var(--color-border-tertiary); cursor: not-allowed; }
+
+  .success-box {
+    text-align: center;
+    padding: 2rem 1rem;
+    display: none;
+  }
+
+  .success-icon {
+    width: 56px; height: 56px;
+    background: #E1F5EE;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+  }
+
+  .success-icon i { font-size: 28px; color: #0F6E56; }
+
+  .success-box h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+  .success-box p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
+
+  .err { font-size: 12px; color: #A32D2D; margin-top: 6px; display: none; }
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">CCTV Security Quote Request Form</h2>
+
+  <div class="header">
+    <div class="logo-box"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+    <div>
+      <div class="brand">Secure<span>Vision</span> Australia</div>
+    </div>
+  </div>
+
+  <div class="progress-bar" id="progress">
+    <div class="seg active" id="seg0"></div>
+    <div class="seg" id="seg1"></div>
+    <div class="seg" id="seg2"></div>
+    <div class="seg" id="seg3"></div>
+    <div class="seg" id="seg4"></div>
+  </div>
+
+  <div id="form-area">
+
+    <div class="step visible" id="step0">
+      <div class="step-label">Step 1 of 5</div>
+      <div class="step-title">What type of property are you securing?</div>
+      <div class="option-grid">
+        <div class="option-card" data-val="residential" onclick="selectOne(this,'ptype')">
+          <i class="ti ti-home-2" aria-hidden="true"></i>
+          <div class="opt-label">Residential</div>
+          <div class="opt-price">Home & apartments</div>
+        </div>
+        <div class="option-card" data-val="commercial" onclick="selectOne(this,'ptype')">
+          <i class="ti ti-building" aria-hidden="true"></i>
+          <div class="opt-label">Commercial</div>
+          <div class="opt-price">Offices & retail</div>
+        </div>
+        <div class="option-card" data-val="industrial" onclick="selectOne(this,'ptype')">
+          <i class="ti ti-building-factory" aria-hidden="true"></i>
+          <div class="opt-label">Industrial</div>
+          <div class="opt-price">Warehouses & sites</div>
+        </div>
+        <div class="option-card" data-val="strata" onclick="selectOne(this,'ptype')">
+          <i class="ti ti-buildings" aria-hidden="true"></i>
+          <div class="opt-label">Strata / Body Corp</div>
+          <div class="opt-price">Multi-unit buildings</div>
+        </div>
+      </div>
+      <div class="err" id="err0">Please select a property type.</div>
+      <div class="btn-row">
+        <button class="btn-next" onclick="nextStep(0)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="step" id="step1">
+      <div class="step-label">Step 2 of 5</div>
+      <div class="step-title">Which security solutions do you need?</div>
+      <div class="checkbox-grid">
+        <div class="check-item" data-val="cctv" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-video" aria-hidden="true"></i>
+          <div><div class="ci-label">CCTV Cameras</div><div class="ci-price">From $299/cam</div></div>
+        </div>
+        <div class="check-item" data-val="alarm" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-bell-ringing" aria-hidden="true"></i>
+          <div><div class="ci-label">Alarm System</div><div class="ci-price">From $799</div></div>
+        </div>
+        <div class="check-item" data-val="access" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-door" aria-hidden="true"></i>
+          <div><div class="ci-label">Access Control</div><div class="ci-price">From $499/door</div></div>
+        </div>
+        <div class="check-item" data-val="intercom" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-phone-call" aria-hidden="true"></i>
+          <div><div class="ci-label">Intercom</div><div class="ci-price">From $349</div></div>
+        </div>
+        <div class="check-item" data-val="perimeter" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-radar" aria-hidden="true"></i>
+          <div><div class="ci-label">Perimeter Detection</div><div class="ci-price">From $599</div></div>
+        </div>
+        <div class="check-item" data-val="smoke" onclick="toggleCheck(this,'solutions')">
+          <i class="ti ti-flame" aria-hidden="true"></i>
+          <div><div class="ci-label">Smoke Alarms</div><div class="ci-price">From $149/unit</div></div>
+        </div>
+      </div>
+      <div class="err" id="err1">Please select at least one solution.</div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="btn-next" onclick="nextStep(1)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="step" id="step2">
+      <div class="step-label">Step 3 of 5</div>
+      <div class="step-title">How many of each do you need?</div>
+
+      <div class="qty-row" id="qrow-cctv" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-video" aria-hidden="true"></i>
+          <div><div class="qty-label">CCTV Cameras</div><div class="qty-sub">$299 each + install</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('cctv',-1)">−</button>
+          <span class="qty-num" id="qty-cctv">1</span>
+          <button class="qty-btn" onclick="changeQty('cctv',1)">+</button>
+        </div>
+      </div>
+
+      <div class="qty-row" id="qrow-alarm" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-bell-ringing" aria-hidden="true"></i>
+          <div><div class="qty-label">Alarm Systems</div><div class="qty-sub">$799 per system</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('alarm',-1)">−</button>
+          <span class="qty-num" id="qty-alarm">1</span>
+          <button class="qty-btn" onclick="changeQty('alarm',1)">+</button>
+        </div>
+      </div>
+
+      <div class="qty-row" id="qrow-access" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-door" aria-hidden="true"></i>
+          <div><div class="qty-label">Access Control Doors</div><div class="qty-sub">$499 per door</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('access',-1)">−</button>
+          <span class="qty-num" id="qty-access">1</span>
+          <button class="qty-btn" onclick="changeQty('access',1)">+</button>
+        </div>
+      </div>
+
+      <div class="qty-row" id="qrow-intercom" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-phone-call" aria-hidden="true"></i>
+          <div><div class="qty-label">Intercom Units</div><div class="qty-sub">$349 per unit</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('intercom',-1)">−</button>
+          <span class="qty-num" id="qty-intercom">1</span>
+          <button class="qty-btn" onclick="changeQty('intercom',1)">+</button>
+        </div>
+      </div>
+
+      <div class="qty-row" id="qrow-perimeter" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-radar" aria-hidden="true"></i>
+          <div><div class="qty-label">Perimeter Sensors</div><div class="qty-sub">$599 per zone</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('perimeter',-1)">−</button>
+          <span class="qty-num" id="qty-perimeter">1</span>
+          <button class="qty-btn" onclick="changeQty('perimeter',1)">+</button>
+        </div>
+      </div>
+
+      <div class="qty-row" id="qrow-smoke" style="display:none">
+        <div class="qty-left">
+          <i class="ti ti-flame" aria-hidden="true"></i>
+          <div><div class="qty-label">Smoke Alarm Units</div><div class="qty-sub">$149 per unit</div></div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('smoke',-1)">−</button>
+          <span class="qty-num" id="qty-smoke">1</span>
+          <button class="qty-btn" onclick="changeQty('smoke',1)">+</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="btn-next" onclick="nextStep(2)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="step" id="step3">
+      <div class="step-label">Step 4 of 5</div>
+      <div class="step-title">When are you looking to install?</div>
+      <div class="option-grid">
+        <div class="option-card" data-val="now" onclick="selectOne(this,'timing')">
+          <i class="ti ti-bolt" aria-hidden="true"></i>
+          <div class="opt-label">ASAP</div>
+          <div class="opt-price">Within this week</div>
+        </div>
+        <div class="option-card" data-val="2weeks" onclick="selectOne(this,'timing')">
+          <i class="ti ti-calendar-week" aria-hidden="true"></i>
+          <div class="opt-label">Next 2 weeks</div>
+          <div class="opt-price">Planning ahead</div>
+        </div>
+        <div class="option-card" data-val="month" onclick="selectOne(this,'timing')">
+          <i class="ti ti-calendar-month" aria-hidden="true"></i>
+          <div class="opt-label">This month</div>
+          <div class="opt-price">No rush</div>
+        </div>
+        <div class="option-card" data-val="later" onclick="selectOne(this,'timing')">
+          <i class="ti ti-clock" aria-hidden="true"></i>
+          <div class="opt-label">Just exploring</div>
+          <div class="opt-price">Getting a price idea</div>
+        </div>
+      </div>
+      <div class="err" id="err3">Please select a timeframe.</div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="btn-next" onclick="nextStep(3)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="step" id="step4">
+      <div class="step-label">Step 5 of 5</div>
+      <div class="step-title">Your details & instant quote</div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>First name</label>
+          <input type="text" id="fname" placeholder="John" />
+        </div>
+        <div class="field-group">
+          <label>Last name</label>
+          <input type="text" id="lname" placeholder="Smith" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Email address</label>
+        <input type="email" id="email" placeholder="john@example.com.au" />
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Phone number</label>
+          <input type="tel" id="phone" placeholder="04xx xxx xxx" />
+        </div>
+        <div class="field-group">
+          <label>Suburb / Postcode</label>
+          <input type="text" id="suburb" placeholder="Brisbane, 4000" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>How did you hear about us?</label>
+        <select id="source">
+          <option value="">Select an option</option>
+          <option>Google</option>
+          <option>Social Media</option>
+          <option>Referral</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="summary-card" id="summary-box"></div>
+
+      <div class="err" id="err4">Please fill in all required fields.</div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(4)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="btn-next" onclick="submitQuote()"><i class="ti ti-file-invoice" aria-hidden="true"></i> Generate My Quote & Send Email</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="success-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+    <h2>Quote sent successfully!</h2>
+    <p>Your personalised quote has been emailed to you.<br>Our team will also follow up within 1 business day.<br><br>
+    <span class="badge"><i class="ti ti-shield-check" aria-hidden="true"></i> Quote valid for 30 days</span>
+    </p>
+  </div>
+
+</div>
+
+<script>
+const state = {
+  ptype: null,
+  solutions: [],
+  qty: { cctv:1, alarm:1, access:1, intercom:1, perimeter:1, smoke:1 },
+  timing: null
+};
+
+const prices = { cctv:299, alarm:799, access:499, intercom:349, perimeter:599, smoke:149 };
+const installFee = 150;
+
+function selectOne(el, key) {
+  el.closest('.option-grid').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key] = el.dataset.val;
+}
+
+function toggleCheck(el, key) {
+  const val = el.dataset.val;
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!state[key].includes(val)) state[key].push(val);
+  } else {
+    state[key] = state[key].filter(v => v !== val);
+  }
+}
+
+function changeQty(item, delta) {
+  state.qty[item] = Math.max(1, state.qty[item] + delta);
+  document.getElementById('qty-' + item).textContent = state.qty[item];
+}
+
+function showQtyRows() {
+  Object.keys(prices).forEach(k => {
+    const row = document.getElementById('qrow-' + k);
+    if (row) row.style.display = state.solutions.includes(k) ? 'flex' : 'none';
+  });
+}
+
+function calcTotal() {
+  let sub = 0;
+  state.solutions.forEach(s => {
+    sub += prices[s] * state.qty[s];
+  });
+  sub += installFee;
+  const gst = sub * 0.1;
+  const total = sub + gst;
+  return { sub, gst, total };
+}
+
+const labels = { cctv:'CCTV Cameras', alarm:'Alarm Systems', access:'Access Control', intercom:'Intercoms', perimeter:'Perimeter Detection', smoke:'Smoke Alarms' };
+
+function buildSummary() {
+  const { sub, gst, total } = calcTotal();
+  let rows = '';
+  state.solutions.forEach(s => {
+    const line = prices[s] * state.qty[s];
+    rows += `<div class="summary-line"><span>${labels[s]} × ${state.qty[s]}</span><span>$${line.toLocaleString('en-AU')}</span></div>`;
+  });
+  rows += `<div class="summary-line"><span>Installation & labour</span><span>$${installFee.toLocaleString('en-AU')}</span></div>`;
+  rows += `<div class="summary-line gst"><span>Subtotal (ex. GST)</span><span>$${sub.toLocaleString('en-AU')}</span></div>`;
+  rows += `<div class="summary-line gst"><span>GST (10%)</span><span>$${Math.round(gst).toLocaleString('en-AU')}</span></div>`;
+  rows += `<div class="summary-line total"><span>Total (AUD)</span><span>$${Math.round(total).toLocaleString('en-AU')}</span></div>`;
+  document.getElementById('summary-box').innerHTML = `<h3>Quote summary</h3>${rows}<div class="badge"><i class="ti ti-shield-check" aria-hidden="true"></i> Valid 30 days · GST included</div>`;
+}
+
+function nextStep(cur) {
+  const err = document.getElementById('err'+cur);
+  if (cur === 0 && !state.ptype) { err.style.display='block'; return; }
+  if (cur === 1 && state.solutions.length === 0) { err.style.display='block'; return; }
+  if (cur === 3 && !state.timing) { err.style.display='block'; return; }
+  if (cur === 4) { submitQuote(); return; }
+  err && (err.style.display='none');
+  if (cur === 1) showQtyRows();
+  if (cur === 3) buildSummary();
+  document.getElementById('step'+cur).classList.remove('visible');
+  document.getElementById('step'+(cur+1)).classList.add('visible');
+  updateProgress(cur+1);
+}
+
+function prevStep(cur) {
+  document.getElementById('step'+cur).classList.remove('visible');
+  document.getElementById('step'+(cur-1)).classList.add('visible');
+  updateProgress(cur-1);
+}
+
+function updateProgress(active) {
+  for (let i=0;i<5;i++) {
+    const s = document.getElementById('seg'+i);
+    s.className = 'seg';
+    if (i < active) s.classList.add('done');
+    else if (i === active) s.classList.add('active');
+  }
+}
+
+function submitQuote() {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const err = document.getElementById('err4');
+  if (!fname || !email || !phone) { err.style.display='block'; return; }
+  err.style.display='none';
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('progress').style.display='none';
+  document.getElementById('success-box').style.display='block';
+}
+</script>
