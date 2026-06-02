@@ -8,7 +8,7 @@ export const services: Service[] = [
     description:
       "Professional security camera systems installed across Australia. Free site assessment and licensed installers.",
     href: "/services/cctv-installation",
-    iconName: "Camera",
+    iconName: "Shield",
     comingSoon: false,
   },
   {
@@ -53,7 +53,7 @@ export const services: Service[] = [
     description:
       "Strategic technology advice, infrastructure, and support to keep your business running.",
     href: "/services/it-services",
-    iconName: "Headset",
+    iconName: "Monitor",
     comingSoon: false,
   },
 ];

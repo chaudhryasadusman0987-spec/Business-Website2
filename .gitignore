@@ -28,6 +28,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# prototype lead storage (may contain PII)
+/data/leads.json
+
 # vercel
 .vercel
 
