@@ -151,20 +151,6 @@ export default function HeroSection() {
                   <p className="text-[13px] text-[#444770] mt-2">Add hero.jpg to public/images/</p>
                 </div>
               )}
-
-              {/* Floating badge — bottom-left */}
-              <div className="absolute bottom-5 left-5 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] rounded-[12px] px-4 py-3 flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#5dcaa5] animate-pulse" />
-                <span>
-                  <span className="block text-white text-[13px] font-semibold">500+ Installs Completed</span>
-                </span>
-              </div>
-
-              {/* Floating rating badge — top-right */}
-              <div className="absolute top-5 right-5 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm border border-[rgba(255,255,255,0.1)] rounded-[12px] px-4 py-3 text-center">
-                <p className="text-[#f5a623] text-[14px]">★★★★★</p>
-                <p className="text-white text-[12px] font-semibold mt-1">4.9/5 Rating</p>
-              </div>
             </div>
           </div>
         </div>
