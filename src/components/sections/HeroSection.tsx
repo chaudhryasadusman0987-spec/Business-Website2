@@ -1,5 +1,3 @@
-import { existsSync } from "fs"
-import path from "path"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
@@ -62,8 +60,6 @@ const servicePills = [
 ]
 
 export default function HeroSection() {
-  const heroExists = existsSync(path.join(process.cwd(), "public", "images", "hero.jpg"))
-
   return (
     <section className="relative overflow-hidden flex items-center bg-[#0d0d1a] lg:min-h-screen">
       {/* Layer 1 — dot grid */}
@@ -130,27 +126,13 @@ export default function HeroSection() {
           {/* RIGHT — hero image */}
           <div className="w-full lg:w-[45%] flex-shrink-0 relative">
             <div className="relative w-full h-[420px] lg:h-[520px] rounded-[24px] overflow-hidden">
-              {heroExists ? (
-                <Image
-                  src="/images/hero.jpg"
-                  alt="Professional services team"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div
-                  className="w-full h-full flex flex-col items-center justify-center gap-4"
-                  style={{ background: "linear-gradient(135deg, #1e2140 0%, #2d3561 50%, #1a1a2e 100%)" }}
-                >
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(127,133,247,0.4)" strokeWidth="1" strokeLinecap="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                  <p className="text-[13px] text-[#444770] mt-2">Add hero.jpg to public/images/</p>
-                </div>
-              )}
+              <Image
+                src="/images/hero.jpg"
+                alt="Brisbane Australia skyline — professional services"
+                fill
+                className="object-cover object-center"
+                priority
+              />
             </div>
           </div>
         </div>
