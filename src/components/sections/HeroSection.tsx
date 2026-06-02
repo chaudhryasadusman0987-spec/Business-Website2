@@ -1,10 +1,9 @@
-import { Fragment } from "react"
 import { existsSync } from "fs"
 import path from "path"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { SITE_TAGLINE } from "@/data/site"
+import { SITE_FULL } from "@/data/site"
 
 /* Custom service SVGs — same shapes/colors as the hero cards */
 function CctvIcon() {
@@ -63,7 +62,6 @@ const servicePills = [
 ]
 
 export default function HeroSection() {
-  const taglineWords = SITE_TAGLINE.split(" ")
   const heroExists = existsSync(path.join(process.cwd(), "public", "images", "hero.jpg"))
 
   return (
@@ -98,15 +96,8 @@ export default function HeroSection() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* LEFT — headline + service pills */}
           <div className="flex-1">
-            <h1 className="text-[38px] lg:text-[64px] font-extrabold leading-[1.1] mb-6">
-              {taglineWords.map((word, i) => (
-                <Fragment key={word}>
-                  <span className={i === taglineWords.length - 1 ? "text-[#7f85f7]" : "text-white"}>
-                    {word}
-                  </span>
-                  {i < taglineWords.length - 1 && <br />}
-                </Fragment>
-              ))}
+            <h1 className="text-[38px] lg:text-[64px] font-extrabold leading-[1.1] mb-6 text-white">
+              {SITE_FULL}
             </h1>
 
             <p className="text-[13px] text-[#9496a8] font-medium mb-3 mt-6 uppercase tracking-wide">
