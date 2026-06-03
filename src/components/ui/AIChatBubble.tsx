@@ -12,7 +12,7 @@ export default function AIChatBubble() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Hi! 👋 I am the ${SITE_FULL} assistant. Are you looking for CCTV installation, car rental, or IT services today?`,
+      content: `Hi! 👋 I am the ${SITE_FULL} assistant. Are you looking for security solutions, car rental, or IT services today?`,
     },
   ])
   const [input, setInput] = useState("")

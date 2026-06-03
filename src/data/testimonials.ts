@@ -10,7 +10,7 @@ export const testimonials: Testimonial[] = [
     rating: 5,
     text:
       "The team installed our CCTV system the same week and walked us through the whole setup. Professional, tidy, and great value.",
-    service: "CCTV Installation",
+    service: "Security Solutions",
     date: "2026-03-12",
     image: "/images/t1.jpg",
   },

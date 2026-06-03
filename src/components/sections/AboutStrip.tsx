@@ -25,7 +25,7 @@ export default function AboutStrip() {
             <p className="text-[17px] leading-[28px] text-[#666666] mt-5">
               {SITE_FULL} is an Australian multi-service company bringing
               security, mobility, and technology together under one roof. From
-              professional CCTV installation to flexible car rental and custom
+              complete security solutions to flexible car rental and custom
               software, we help homes and businesses across the country run
               safer and smarter.
             </p>

@@ -1,18 +1,23 @@
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
-import { cctvProducts, installFee } from "@/data/cctv-products"
+import { securitySolutions, installFee } from "@/data/security-solutions"
 import { vehicles } from "@/data/car-rental"
+import { itServices } from "@/data/it-services"
 
 export function buildSystemPrompt(): string {
-  const cctvPrices = cctvProducts.map((p) => `${p.name}: $${p.price}`).join(", ")
+  // One "from $X" line per security solution (lowest product price)
+  const securityPrices = securitySolutions
+    .map((s) => `${s.name}: from $${Math.min(...s.products.map((p) => p.price))}`)
+    .join(", ")
   const rentalRates = vehicles.map((v) => `${v.name}: $${v.dailyRate}/day`).join(", ")
+  const itList = itServices.map((s) => `${s.name} (from ${s.startingFrom})`).join(", ")
 
   return `You are a friendly customer service assistant for ${SITE_FULL},
 an Australian multi-service business. You speak concisely in Australian English.
 
 SERVICES:
-1. CCTV Installation — ${cctvPrices}, plus $${installFee} installation fee. Free site assessment.
+1. Security Solutions — ${securityPrices}; plus $${installFee} installation fee. Free site assessment.
 2. Car Rental — ${rentalRates}. Free cancellation available.
-3. IT Services — Web development, app development, AI automation. Free consultation.
+3. IT Services — ${itList}. Free consultation.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}
 
