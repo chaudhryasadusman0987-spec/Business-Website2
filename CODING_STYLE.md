@@ -80,24 +80,146 @@ export const metadata = { title: `${SITE_FULL} | CCTV Installation` }
   {/* Price amount */}
   <p className="text-[#363636] font-bold text-2xl group-hover:text-white
                 transition-colors duration-500">
-    $299
+    {formatAUD(product.price)}
+  </p>
+
+  {/* Unit label — NEW row below the price (e.g. "per camera", "per door") */}
+  <p className="text-[12px] text-gray-400 group-hover:text-white/70 mt-1
+                transition-colors duration-500">
+    {product.unit}
   </p>
 
   {/* Product name */}
   <h3 className="text-[#363636] font-bold text-xl mt-2 group-hover:text-white
                  transition-colors duration-500">
-    HD Camera
+    {product.name}
   </h3>
 
-  {/* Button — inverts on hover */}
-  <button className="mt-6 bg-brand-dark text-brand-text px-8 h-[38px]
-                     rounded-[5px] text-[15px] font-normal
-                     group-hover:bg-white group-hover:text-brand-dark
-                     transition-all duration-500">
-    Buy Now
-  </button>
+  {/* "Get Quote" — Link to the security quote, carrying solution + product */}
+  <Link
+    href={`/services/security-solutions/quote?solution=${solution.id}&product=${product.id}`}
+    className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[42px]
+               leading-[42px] rounded-[5px] text-[14px]
+               group-hover:bg-white group-hover:text-brand-dark
+               transition-all duration-500">
+    Get Quote
+  </Link>
 </div>
 ```
+
+> The real implementation lives in `src/components/sections/SecurityProductCard.tsx`.
+> The product-card href is ALWAYS `/services/security-solutions/quote?solution=X&product=Y`
+> — never the old `/services/cctv-installation/...` URL.
+
+---
+
+## 4b. Dark hero pattern — REQUIRED for ALL service landing pages
+
+Every service landing page (Security Solutions ✅, and future Car Rental + IT
+Services) MUST use this dark hero treatment. Reference implementation:
+`src/components/sections/SecuritySolutionsHero.tsx` (and the home `HeroSection.tsx`).
+
+```tsx
+<section className="relative overflow-hidden bg-[#0d0d1a]">
+  {/* Layer 1 — dot grid */}
+  <div className="absolute inset-0 z-0 pointer-events-none" style={{
+    backgroundImage:
+      "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
+    backgroundSize: "36px 36px",
+  }} />
+  {/* Layer 2 — purple glow top-right */}
+  <div className="absolute z-0 w-[500px] h-[500px] rounded-full top-[-120px] right-[-60px] pointer-events-none"
+       style={{ background: "radial-gradient(circle, rgba(127,133,247,0.2) 0%, transparent 65%)" }} />
+  {/* Layer 3 — teal glow bottom-left (home hero) */}
+  <div className="absolute z-0 w-[300px] h-[300px] rounded-full bottom-[-60px] left-[-40px] pointer-events-none"
+       style={{ background: "radial-gradient(circle, rgba(93,202,165,0.12) 0%, transparent 65%)" }} />
+
+  <div className="relative z-10 max-w-[1170px] mx-auto px-4 py-20 lg:py-28">
+    {/* left: badge + h1 + sub + buttons   |   right: #8187fa block or hero.jpg */}
+  </div>
+</section>
+```
+
+Rules: bg `#0d0d1a`, dot grid + purple glow (+ teal glow on home), content in a
+`max-w-[1170px]` container, `z-10` above the decorative layers.
+
+---
+
+## 4c. Solution card pattern — Security Solutions landing grid
+
+DIFFERENT from the product card. Used on `/services/security-solutions`. Reference:
+`src/components/sections/SolutionCard.tsx`. Note `rounded-[40px]` (NOT `[80px]`),
+the lift-on-hover, and the data-driven icon colours passed as **CSS variables**
+(so `group-hover` can still override them — plain inline `style` colour would win
+over `group-hover` and break the effect).
+
+```tsx
+<Link
+  href={`/services/security-solutions/${solution.slug}`}
+  className="group relative block bg-[#f7f7f7] rounded-[40px] p-10 text-center
+             cursor-pointer transition-all duration-500 hover:bg-[#7f85f7]
+             hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]">
+
+  {/* Icon box — colour from data via --ibg / --ic CSS vars */}
+  <div className="w-16 h-16 rounded-[16px] mx-auto mb-5 flex items-center justify-center
+                  [background-color:var(--ibg)] group-hover:bg-white/20 transition-all duration-500"
+       style={{ "--ibg": solution.iconBg } as React.CSSProperties}>
+    <span className="flex [color:var(--ic)] group-hover:text-white transition-colors duration-500"
+          style={{ "--ic": solution.iconColor } as React.CSSProperties}>
+      <SolutionIcon name={solution.icon} size={32} />
+    </span>
+  </div>
+
+  <h3 className="font-bold text-[20px] text-[#1a1a2e] group-hover:text-white
+                 transition-colors duration-500 mt-2">{solution.name}</h3>
+  <p className="text-brand-primary font-medium text-[13px] mt-1
+                group-hover:text-white/80 transition-colors duration-500">{solution.tagline}</p>
+  <p className="text-[14px] text-gray-500 mt-3 leading-relaxed
+                group-hover:text-white/80 transition-colors duration-500">{solution.description}</p>
+
+  {/* Product count badge */}
+  <span className="mt-4 inline-flex items-center gap-1 bg-white/60 group-hover:bg-white/20
+                   rounded-full px-3 py-1 text-[12px] text-gray-600 group-hover:text-white
+                   transition-all duration-500">
+    {solution.products.length} products available
+  </span>
+
+  {/* Arrow bottom-right */}
+  <ArrowRight size={18} className="absolute bottom-6 right-6 text-gray-300
+              group-hover:text-white/60 transition-colors duration-500" />
+</Link>
+```
+
+---
+
+## 4d. Navbar dropdown pattern (CSS group-hover, no JavaScript)
+
+The top nav (`src/components/layout/Header.tsx`) is a purple bar
+`bg-[rgba(127,133,247,0.95)]`, sticky, blur. The Services dropdown opens on hover
+with `group` / `group-hover` — no state, no JS:
+
+```tsx
+<div className="relative group inline-block">
+  <Link href="/#services" className="... flex items-center gap-1">
+    Services
+    <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+  </Link>
+
+  {/* Panel: hidden until hover */}
+  <div className="absolute top-full left-0 mt-1 bg-white rounded-[12px] shadow-xl
+                  border border-gray-100 py-2 min-w-[200px]
+                  opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                  transition-all duration-200 z-50">
+    {/* 3 services, each an icon tile + title + sub: */}
+    {/* Security Solutions → /services/security-solutions  (orange icon tile)  */}
+    {/* Car Rental         → /services/car-rental          (green icon tile)   */}
+    {/* IT & AI Services    → /services/it-services         (purple icon tile)  */}
+  </div>
+</div>
+```
+
+A separate **Plus (+) menu** on the right uses the same `group-hover` pattern for
+Testimonials + Contact Us.
 
 ---
 
@@ -187,6 +309,56 @@ export function formatAUD(amount: number): string {
 
 ---
 
+## 9b. QUOTE FORMS USE GREEN — NOT PURPLE
+
+The whole site is purple-blue (`#7f85f7`). **Quote forms are the exception — they
+use GREEN.** This applies to `/services/security-solutions/quote` and any future
+service quote page.
+
+```
+GREEN palette (quote forms only):
+  primary  #0F6E56
+  accent   #5DCAA5
+  tint     #E1F5EE   (selected tiles, success badge bg)
+  dark     #085041   (hover / badge text)
+```
+
+Progress bar: done = `#5DCAA5`, active = `#0F6E56`. Continue/submit buttons:
+`bg-[#0F6E56] hover:bg-[#085041]`. Do NOT use `brand-primary` purple inside a
+quote form.
+
+---
+
+## 9c. AI chat route — Google Gemini (NOT Anthropic)
+
+`src/app/api/chat/route.ts` uses `@google/generative-ai`. Key points:
+
+```tsx
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash",
+  systemInstruction: buildSystemPrompt(),
+})
+
+// Gemini uses role "model" (not "assistant"); history must START with a user turn
+const history = messages.slice(0, -1).map((m) => ({
+  role: m.role === "assistant" ? "model" : "user",
+  parts: [{ text: m.content }],
+}))
+while (history.length && history[0].role === "model") history.shift()
+
+const chat = model.startChat({ history })
+const result = await chat.sendMessage(messages[messages.length - 1].content)
+const reply = result.response.text()
+// return { reply: cleanReply, leadCollected }
+```
+
+Never use `@anthropic-ai/sdk`, `claude-*` models, or `ANTHROPIC_API_KEY`.
+
+---
+
 ## 10. What NEVER to do
 
 ```
@@ -200,4 +372,9 @@ export function formatAUD(amount: number): string {
 ❌ component > 150 lines               → split into smaller components
 ❌ @import url() in CSS                → use next/font/google
 ❌ bg-purple-* or text-violet-*        → use bg-brand-primary etc
+❌ process.env.ANTHROPIC_API_KEY      → use GEMINI_API_KEY (agent is Gemini)
+❌ @anthropic-ai/sdk / claude-* model → use @google/generative-ai, gemini-2.5-flash
+❌ /services/cctv-installation         → use /services/security-solutions
+❌ rounded-[80px] on solution cards   → solution cards use rounded-[40px]
+                                         (product cards still use rounded-[80px])
 ```

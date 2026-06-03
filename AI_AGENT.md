@@ -13,6 +13,21 @@ It knows the business name from SITE_FULL (site.ts) — never hard-coded.
 
 ---
 
+## 1b. Tech (CURRENT — Google Gemini)
+
+```
+SDK:     @google/generative-ai      (NOT @anthropic-ai/sdk)
+Model:   gemini-2.5-flash           (FREE — no cost)
+Env var: GEMINI_API_KEY             (key starts with AIzaSy...)
+Cost:    $0 — free tier, ~1500 requests/day
+Returns: { reply, leadCollected }
+```
+
+There are **no** Anthropic / Claude / `claude-haiku` / `ANTHROPIC_API_KEY`
+references anywhere — the agent runs entirely on Google Gemini.
+
+---
+
 ## 2. Visual spec
 
 ```
@@ -44,28 +59,36 @@ OPEN STATE:
 
 Location: `src/lib/agent-prompt.ts`
 
+Pricing for the security section comes from `securitySolutions` (all 6 solutions,
+each summarised by its lowest "from" price), plus `vehicles` and `itServices`:
+
 ```ts
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
-import { cctvProducts, installFee } from "@/data/cctv-products"
+import { securitySolutions, installFee } from "@/data/security-solutions"
 import { vehicles } from "@/data/car-rental"
 import { itServices } from "@/data/it-services"
 
 export function buildSystemPrompt(): string {
-  const cctvPrices = cctvProducts
-    .map(p => `${p.name}: $${p.price}`)
+  // One "from $X" line per security solution
+  const securityPrices = securitySolutions
+    .map(s => `${s.name}: from $${Math.min(...s.products.map(p => p.price))}`)
     .join(", ")
 
   const rentalRates = vehicles
     .map(v => `${v.name}: $${v.dailyRate}/day`)
     .join(", ")
 
-  return `You are a friendly customer service assistant for ${SITE_FULL}, 
+  const itList = itServices
+    .map(s => `${s.name} (from ${s.startingFrom})`)
+    .join(", ")
+
+  return `You are a friendly customer service assistant for ${SITE_FULL},
 an Australian multi-service business. You speak concisely in Australian English.
 
 SERVICES:
-1. CCTV Installation — ${cctvPrices}, plus $${installFee} installation fee. Free site assessment.
+1. Security Solutions — ${securityPrices}; plus $${installFee} installation fee. Free site assessment.
 2. Car Rental — ${rentalRates}. Free cancellation available.
-3. IT Services — Web development, app development, AI automation. Free consultation.
+3. IT Services — ${itList}. Free consultation.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}
 
@@ -89,6 +112,11 @@ This triggers the system to save their details.`
 }
 ```
 
+> NOTE on current code: the live `src/lib/agent-prompt.ts` still imports
+> `cctvProducts` from `cctv-products.ts` (the shim → surveillance products).
+> Migrate it to the `securitySolutions` version above so the agent quotes all 6
+> solutions, not just the surveillance cameras.
+
 ---
 
 ## 4. API route
@@ -96,7 +124,7 @@ This triggers the system to save their details.`
 `src/app/api/chat/route.ts`
 
 ```ts
-import Anthropic from "@anthropic-ai/sdk"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import { buildSystemPrompt } from "@/lib/agent-prompt"
 import { NextResponse } from "next/server"
 
@@ -104,37 +132,55 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
-    // Cap at 40 messages to control costs
+    // Cap at 40 messages to control abuse
     if (messages.length > 40) {
       return NextResponse.json({
-        reply: "This chat session has ended. Please call us or email us directly."
+        reply: "This chat session has ended. Please call us or email us directly.",
+        leadCollected: false,
       })
     }
 
-    const client = new Anthropic()
-    const response = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
-      system: buildSystemPrompt(),
-      messages,
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: buildSystemPrompt(),
     })
 
-    const reply = response.content[0].type === "text"
-      ? response.content[0].text
-      : ""
+    // Gemini uses role "model" instead of "assistant".
+    const history = messages
+      .slice(0, -1)
+      .map((m: { role: string; content: string }) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }))
 
-    // Check if agent collected a lead
+    // Gemini requires history to START with a "user" turn — drop the leading
+    // assistant greeting (and any other leading model turns).
+    while (history.length && history[0].role === "model") history.shift()
+
+    const chat = model.startChat({ history })
+    const lastMessage = messages[messages.length - 1].content
+    const result = await chat.sendMessage(lastMessage)
+    const reply = result.response.text()
+
     const leadCollected = reply.includes("[LEAD_COLLECTED]")
     const cleanReply = reply.replace("[LEAD_COLLECTED]", "").trim()
 
     return NextResponse.json({ reply: cleanReply, leadCollected })
   } catch (err) {
-    console.error("Chat API error:", err)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    // Full logging so the real cause is visible in the terminal
+    const e = err as { message?: string; status?: number; statusText?: string; errorDetails?: unknown }
+    console.error("Gemini chat error FULL:", {
+      message: e?.message, status: e?.status, statusText: e?.statusText, errorDetails: e?.errorDetails,
+    })
+    return NextResponse.json(
+      { reply: "Sorry, I am having trouble right now. Please call us directly.", leadCollected: false },
+      { status: 500 }
+    )
   }
 }
 ```
@@ -204,3 +250,24 @@ export default function RootLayout({ children }) {
   )
 }
 ```
+
+---
+
+## 7. Debugging
+
+**Common issue:** the chat replies `"Sorry, I am having trouble right now"`.
+
+Causes and fixes:
+
+1. **`GEMINI_API_KEY` not set or still a placeholder** in `.env.local`.
+   Fix: go to **aistudio.google.com** → create a new API key → paste into
+   `.env.local` as `GEMINI_API_KEY=AIzaSy...` → **restart the dev server**.
+   (On Vercel: add it under Project → Settings → Environment Variables, then redeploy.)
+2. **Wrong model name.** It must be exactly `"gemini-2.5-flash"`.
+3. **Leftover Anthropic code.** The route must read `process.env.GEMINI_API_KEY`
+   and use `@google/generative-ai` — no `ANTHROPIC_API_KEY` / `claude-*`.
+4. **History doesn't start with a user turn.** Gemini rejects history that begins
+   with a `model` turn — the route must drop leading `model` turns (the greeting).
+5. **See the full error.** The catch block logs `"Gemini chat error FULL"` with
+   message/status/errorDetails. Run `npm run dev`, open the chat, send a message,
+   and read the VS Code terminal.

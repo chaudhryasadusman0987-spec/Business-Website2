@@ -14,13 +14,19 @@ Each service has its own ad-focused landing page.
 
 Built **one page at a time** — complete each page fully before the next.
 
-**Current build order:**
-1. Home page ← START HERE
-2. CCTV Installation landing + products + quote
-3. Car Rental landing + vehicles + quote (placeholder)
-4. IT Services landing + subpages
-5. Contact + About
-6. Dashboard (admin)
+**Current build order & status** (reflects what actually exists in `src/app/`):
+1. ✅ DONE — Home page (`/`)
+2. ✅ DONE — **Security Solutions** hub (renamed from CCTV Installation):
+   landing + 6 solution subpages (`[slug]`) + all-products page + 5-step quote
+   wizard + `/api/quote/security` email route. See §7.
+3. ❌ NOT STARTED — Car Rental landing + vehicles + quote (placeholder)
+4. ❌ NOT STARTED — IT Services landing + subpages
+5. ❌ NOT STARTED — Contact + About
+6. ❌ NOT STARTED — Dashboard (admin) — planned 6-solution Products tab (§10)
+
+Also: AI chat agent ✅ DONE (Google Gemini, see §9). `/testimonials` and
+`/blog` routes ❌ NOT STARTED (a `TestimonialsStrip` *component* exists and is
+reused on home + service pages, but there is no `/testimonials` page yet).
 
 ---
 
@@ -88,7 +94,9 @@ Vercel redeploys automatically in ~60 seconds.
 - **Tailwind CSS** — utility classes, brand colors in tailwind.config.ts
 - **Poppins** font via next/font/google
 - **Lucide React** for icons
-- **Anthropic SDK** (`@anthropic-ai/sdk`) — AI agent (server-side only)
+- **Google Gemini** (`@google/generative-ai`) — AI agent, model **`gemini-2.5-flash`**
+  (server-side only, env var **`GEMINI_API_KEY`**). FREE tier — this **replaced
+  Anthropic/Claude**. There are no Anthropic references anywhere in the code.
 - **Nodemailer** (`nodemailer`) — sending quote emails
 - **React Hook Form** — all forms
 - **Framer Motion** — hover transitions
@@ -162,37 +170,66 @@ colors: {
 ## 5. Site architecture
 
 ```
-/                                     Home — all services
-/services/cctv-installation           CCTV landing (ad target)
-/services/cctv-installation/products  Products + prices
-/services/cctv-installation/quote     5-step quote wizard
-/services/car-rental                  Car rental landing (ad target)
-/services/car-rental/vehicles         Vehicles + rates
-/services/car-rental/quote            Booking form (logic TBD)
-/services/it-services                 IT services landing (ad target)
-/services/it-services/web-development
-/services/it-services/app-development
-/services/it-services/ai-automation
-/about
-/contact
-/testimonials
-/blog                                 Placeholder
-/dashboard                            Admin (password protected)
+/                                       ✅ Home — all services
+/services/security-solutions            ✅ Security Solutions landing (ad target)
+/services/security-solutions/[slug]     ✅ Solution detail — 6 SSG pages (see §7)
+/services/security-solutions/products   ✅ All products, grouped by solution
+/services/security-solutions/quote      ✅ 5-step quote wizard → /api/quote/security
+/services/car-rental                    ❌ Car rental landing (ad target)
+/services/car-rental/vehicles           ❌ Vehicles + rates
+/services/car-rental/quote              ❌ Booking form (logic TBD)
+/services/it-services                   ❌ IT services landing (ad target)
+/services/it-services/web-development    ❌
+/services/it-services/app-development    ❌
+/services/it-services/ai-automation      ❌
+/about                                  ❌
+/contact                                ❌
+/testimonials                           ❌ (component exists; route does not)
+/blog                                   ❌ Placeholder
+/dashboard                              ❌ Admin (password protected)
+```
+
+API routes:
+```
+/api/chat             ✅ AI agent (Google Gemini)
+/api/leads            ✅ Lead capture → data/leads.json (GET returns all)
+/api/quote/security   ✅ Security quote — emails customer + logs lead
+```
+
+Redirects (`next.config.mjs`, **not** next.config.js — it does not exist):
+```
+/services/cctv-installation         → /services/security-solutions          (308 permanent)
+/services/cctv-installation/:path*  → /services/security-solutions/:path*    (308 permanent)
 ```
 
 ---
 
 ## 6. Data files (single source of truth)
 
+All of these files currently exist in `src/data/`:
 ```
 src/data/
-  site.ts            ← THE ONE FILE TO CHANGE FOR BUSINESS NAME/DOMAIN
-  services.ts        Master services list
-  cctv-products.ts   CCTV products + prices + installFee + gstRate
-  car-rental.ts      Vehicles + rates
-  it-services.ts     IT packages + features
-  testimonials.ts    Customer reviews
-  navigation.ts      Sidepanel nav links
+  site.ts                ← THE ONE FILE TO CHANGE FOR BUSINESS NAME/DOMAIN
+                           exports SITE_NAME, SITE_SUFFIX, SITE_FULL, SITE_TAGLINE,
+                           SITE_DOMAIN, SITE_EMAIL, SITE_PHONE, SITE_ADDRESS,
+                           SITE_ABN, SITE_HOURS
+  services.ts            Master services list (6 cards on home grid).
+                           NOTE: the security entry now reads name "Security Solutions",
+                           href "/services/security-solutions" (id still "cctv-installation")
+  security-solutions.ts  ★ SOURCE OF TRUTH for the security section.
+                           exports: interface SecurityProduct, interface SecuritySolution,
+                           securitySolutions[] (6 solutions), installFee = 150, gstRate = 0.10
+                           The 6 solutions: surveillance, deterrence, commercial,
+                           access-control, smoke-alarms, intercoms (see §7 for slugs)
+  cctv-products.ts       Backwards-compat SHIM ONLY. Re-exports { installFee, gstRate }
+                           from security-solutions.ts and exports
+                           cctvProducts = the "surveillance" solution's products.
+                           Kept so the AI agent prompt keeps working.
+  car-rental.ts          Vehicles + rates (data exists; pages not built yet)
+  it-services.ts         IT packages + features (data exists; pages not built yet)
+  testimonials.ts        Customer reviews — includes an `image` field per review
+  navigation.ts          Nav links (mobile slide-out). Security entry updated to
+                           { label: "Security Solutions", href: "/services/security-solutions" }
 ```
 
 Every price/content block gets this comment:
@@ -202,50 +239,66 @@ Every price/content block gets this comment:
 
 ---
 
-## 7. CCTV quote wizard (EXACT logic — do not change)
+## 7. Security Solutions quote wizard (current implementation)
 
-Template file: `cctv_quote_form_template__1_.html` in project root.
+File: `src/app/services/security-solutions/quote/page.tsx` (`"use client"`).
+Ported from `cctv_quote_form_template (1).html` in project root.
+This now handles ALL 6 security solutions, not just CCTV.
 
-### Quote theme
-The template uses GREEN (#0F6E56) not purple. Keep it green for this form.
-The rest of the site uses #7f85f7 purple-blue, but this quote form stays green.
-Green: primary #0F6E56, light #5DCAA5, tint #E1F5EE
+### The 6 solutions (id → slug → detail page)
+```
+surveillance     → surveillance-evidence  → /services/security-solutions/surveillance-evidence
+deterrence       → deterrence             → /services/security-solutions/deterrence
+commercial       → commercial-security    → /services/security-solutions/commercial-security
+access-control   → access-control         → /services/security-solutions/access-control
+smoke-alarms     → smoke-alarms           → /services/security-solutions/smoke-alarms
+intercoms        → intercoms              → /services/security-solutions/intercoms
+```
 
-### Step flow (port exactly)
+### Quote theme — GREEN (not the site's purple)
+The quote form stays GREEN. The rest of the site uses #7f85f7 purple-blue.
+Green: primary #0F6E56, light #5DCAA5, tint #E1F5EE, dark #085041
+
+### Step flow (5 steps, ported exactly)
 1. Property type — single select tiles: Residential, Commercial, Industrial, Strata
-2. Solutions — multi-select checkboxes: CCTV, Alarm, Access Control,
-   Intercom, Perimeter, Smoke (show price hint under each)
+2. Solutions — multi-select tiles built from `securitySolutions` (the 6 solutions
+   above), each showing a "From $X" hint = lowest product price in that solution
 3. Quantities — +/- counter for each SELECTED solution only (hide others)
 4. Timing — single select: ASAP, Next 2 weeks, This month, Just exploring
 5. Contact details: First name, Last name, Email, Phone, Suburb/Postcode,
    How did you hear about us (dropdown)
    + Live quote summary card built dynamically
 
-### Pricing logic (from cctv-products.ts — shared source of truth)
+A `?solution=<id>&product=<id>` query param (used by product-card "Get Quote"
+buttons) pre-selects that solution on step 2.
+
+### Pricing logic (from security-solutions.ts — shared source of truth)
 ```ts
-prices = { cctv: 299, alarm: 799, access: 499, intercom: 349, perimeter: 599, smoke: 149 }
-installFee = 150
-gstRate = 0.10
+import { securitySolutions, installFee, gstRate } from "@/data/security-solutions"
+// installFee = 150, gstRate = 0.10
+// "from" price per solution = lowest product price in that solution:
+const fromPrice = (sol) => Math.min(...sol.products.map(p => p.price))
+// prices map fed to the calculator: { [solution.id]: fromPrice(solution) }
 ```
-Calculation:
+Calculation (uses `calcCCTVQuote()` in `src/lib/formatters.ts` — name kept):
 ```
-subtotal  = sum(price[s] × qty[s] for each selected s) + installFee
+subtotal  = sum(fromPrice[s] × qty[s] for each selected s) + installFee
 gst       = subtotal × 0.10
 total     = subtotal + gst
 ```
-Format: `toLocaleString('en-AU')` with AUD prefix
+Format: `formatAUD()` → `toLocaleString('en-AU')` with `$` prefix
 
 ### On submit — EMAIL SENDING (critical requirement)
 When the customer clicks "Generate My Quote & Send Email":
 1. Validate: firstName, email, phone are required
-2. POST to `/api/quote/cctv` with full quote data
+2. POST to `/api/quote/security` with full quote data
 3. Server sends email to the CUSTOMER'S EMAIL ADDRESS they entered
 4. Email contains the full quote summary (itemised list, totals, valid 30 days)
 5. Show success screen: "Quote sent successfully! Check your email."
 6. Also: log lead to leads store for dashboard
 
 ### Email content (send to customer)
-Subject: `Your CCTV Security Quote from ${SITE_FULL}`
+Subject: `Your Security Solutions Quote from ${SITE_FULL}`
 Body (HTML email):
 - Business name + logo text header
 - "Hi [FirstName], thank you for your quote request"
@@ -285,11 +338,18 @@ Body (HTML email):
 </div>
 ```
 
-**This quote is ONLY for CCTV.** Add comment at top of file:
-```
-// CCTV-SPECIFIC QUOTE — do not reuse for other services
-// Car rental quote logic will be provided separately by owner
-```
+### API route — `src/app/api/quote/security/route.ts`
+- Validates `fname`, `email`, `phone`
+- Builds the itemised HTML email **inline** via a local `buildEmail()` (there is
+  no separate `src/lib/email-templates/` file) and sends it with `sendEmail()`
+  from `src/lib/mailer.ts`
+- Logs the lead to `data/leads.json` (same store as the AI chat) with
+  `source: "quote_form"`, `service: "security-solutions"`
+- Email requires SMTP env vars; with placeholders the submit returns 500 and the
+  form shows a retry message instead of the success screen
+
+This wizard handles ALL 6 solutions. Car rental will get its own separate quote
+flow (logic TBD — see §8).
 
 ---
 
@@ -317,11 +377,16 @@ Floating chat bubble fixed bottom-right on every page via root layout.
 Visual: 60px circle, #7f85f7, white chat icon, pulse after 3s
 Panel: 380×520px, slides up, dark header, message bubbles
 
-Tech:
+Tech (CURRENT — Google Gemini, not Anthropic):
 - API route: `src/app/api/chat/route.ts`
-- Model: `claude-haiku-4-5-20251001` (fast + cheap)
-- Max tokens: 300
+- SDK: `@google/generative-ai`
+- Model: **`gemini-2.5-flash`** (free tier, ~1500 requests/day, $0 cost)
+- Env var: **`GEMINI_API_KEY`** (`process.env.GEMINI_API_KEY`)
 - System prompt: `src/lib/agent-prompt.ts` — built dynamically from site.ts + data files
+- Message format: Gemini uses role `"model"` (not `"assistant"`). The route maps
+  `assistant → model` and **drops any leading `model` turns** so history starts
+  with a `user` turn (Gemini requires this).
+- Returns `{ reply, leadCollected }`
 - Lead collection: when customer gives name+phone+email → POST /api/leads
 
 Agent behaviour:
@@ -331,15 +396,38 @@ Agent behaviour:
 - Australian English, 2-3 sentences max per reply
 - Uses SITE_FULL in greeting (not hard-coded name)
 
+### Debugging the agent
+If the chat replies "Sorry, I am having trouble right now":
+1. Check `GEMINI_API_KEY` is set (not a placeholder) in `.env.local` — get a key
+   at aistudio.google.com, then **restart the dev server**.
+2. Confirm the model name is exactly `"gemini-2.5-flash"`.
+3. Confirm the route reads `process.env.GEMINI_API_KEY` (no leftover
+   `ANTHROPIC_API_KEY`).
+4. To see the real cause, the catch block already logs the full error
+   ("Gemini chat error FULL") — run `npm run dev`, open the chat, and read the
+   VS Code terminal.
+
 ---
 
 ## 10. Dashboard
 
-Password protected client-side (prototype level).
-Password from env: NEXT_PUBLIC_DASHBOARD_PASSWORD
+Status: ❌ NOT BUILT YET (`src/app/dashboard/` does not exist).
 
-Tabs: CCTV Products (edit prices) | Car Rental (edit rates) | Leads | Settings
+Password protected client-side (prototype level).
+Password from env: NEXT_PUBLIC_DASHBOARD_PASSWORD (currently `admin123`)
+
+Tabs: **Products** | Car Rental (edit rates) | Leads | Settings
 Stitch screen: 47e2f4daaefd4f51851aa58e48947d88
+
+### Products tab — 6-solution structure (planned)
+The Products tab must reflect the new Security Solutions data, NOT a flat CCTV list:
+- A row of solution selector tabs — one per solution: Surveillance, Deterrence,
+  Commercial, Access Control, Smoke Alarms, Intercoms
+- Selecting a tab shows that solution's products in a table:
+  `Product Name | Price (editable input) | Unit | In Stock (toggle) | Save`
+- Each row has an editable price + Save button
+  `// TODO(dashboard): wire Save to an API route that updates the price in security-solutions.ts`
+- Leads tab reads `GET /api/leads`. Settings tab shows read-only site.ts values.
 
 ---
 
@@ -359,10 +447,10 @@ Stitch screen: 47e2f4daaefd4f51851aa58e48947d88
 ## 12. Environment variables (.env.local — never commit)
 
 ```bash
-# AI Agent
-ANTHROPIC_API_KEY=sk-ant-...
+# AI Agent (Google Gemini — free tier, key starts with AIzaSy...)
+GEMINI_API_KEY=AIzaSy...
 
-# Email (CCTV quote sending)
+# Email (Security Solutions quote sending)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=youremail@gmail.com
@@ -373,7 +461,10 @@ SMTP_FROM=youremail@gmail.com
 NEXT_PUBLIC_DASHBOARD_PASSWORD=admin123
 ```
 
-README must explain how to set up Gmail app password for SMTP.
+There is **no `ANTHROPIC_API_KEY`** — the agent uses `GEMINI_API_KEY`.
+The same env vars must also be set in Vercel → Project Settings → Environment
+Variables. README must explain how to set up a Gmail app password for SMTP and
+how to get a Gemini key from aistudio.google.com.
 
 ---
 
@@ -412,3 +503,33 @@ console.log(`   Now run: git add . && git commit -m "Rename to ${name}" && git p
 - Keep components under 150 lines — split if larger.
 - Never install new packages without telling me first.
 - Update this PROJECT.md if decisions change.
+
+---
+
+## 15. Decisions log
+
+Every UI/design/architecture decision made so far:
+
+- **AI model:** switched from Anthropic/Claude to **Google Gemini**
+  (`@google/generative-ai`, `gemini-2.5-flash`) — free tier, $0 cost.
+  Env var is `GEMINI_API_KEY`. All Anthropic references removed.
+- **Security section renamed:** "CCTV Installation" → **"Security Solutions"**, now
+  a hub with **6 sub-solutions** (Surveillance & Evidence, Deterrence, Commercial
+  Security, Access Control, Smoke Alarms, Intercoms) via a dynamic `[slug]` route.
+  Old `/services/cctv-installation*` URLs **308-redirect** to the new paths.
+- **Hero style:** Option 1 — **dark `#0d0d1a`** hero with a Brisbane skyline image.
+  - Hero image: `public/images/hero.jpg` (Brisbane skyline).
+  - Hero LEFT: badge + h1 (`{SITE_FULL}`) + 3 service "pill" links.
+  - Hero RIGHT: `hero.jpg` image — **no floating badges** (both removed).
+  - The Security Solutions landing reuses this dark-hero treatment (dot grid +
+    purple glow) with a `#8187fa` block + ShieldCheck on the right.
+- **Navbar:** purple top nav `rgba(127,133,247,0.95)`, sticky, blur. Has a
+  **Services dropdown** (CSS `group-hover`, no JS) listing Security Solutions /
+  Car Rental / IT & AI Services, and a **Plus (+) menu** for Testimonials +
+  Contact. Mobile = slide-out panel from `navigation.ts`.
+- **Services grid order** (home, `src/data/services.ts`): Web Development,
+  App Development, AI Automation, **Security Solutions**, Car Rental, IT Consulting.
+- **Quote form theme:** stays **GREEN** (`#0F6E56`) while the rest of the site is
+  purple `#7f85f7`.
+- **Backwards compat:** `cctv-products.ts` is now a shim re-exporting from
+  `security-solutions.ts` so the AI prompt and any old imports keep working.

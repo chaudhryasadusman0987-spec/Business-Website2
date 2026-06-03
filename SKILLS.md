@@ -11,7 +11,7 @@ export interface Service {
   id: string; name: string; description: string
   href: string; iconName: string; comingSoon: boolean
 }
-export interface CCTVProduct {
+export interface CCTVProduct {     // kept for backwards compat (shim consumers)
   id: string; name: string; description: string
   price: number; category: string; inStock: boolean
 }
@@ -27,6 +27,7 @@ export interface ITService {
 export interface Testimonial {
   id: string; name: string; suburb: string; state: string
   rating: number; text: string; service: string; date: string
+  image?: string                 // avatar path, e.g. "/images/t1.jpg"
 }
 export interface Lead {
   id: string; name: string; phone: string; email: string
@@ -38,6 +39,18 @@ export interface Message {
 }
 export interface NavLink {
   label: string; href: string
+}
+
+// ── Security Solutions ── (defined in src/data/security-solutions.ts, not types/)
+export interface SecurityProduct {
+  id: string; name: string; description: string
+  price: number; unit: string; inStock: boolean   // unit e.g. "per camera", "per door"
+}
+export interface SecuritySolution {
+  id: string; name: string; slug: string
+  tagline: string; description: string; longDescription: string
+  icon: string; iconColor: string; iconBg: string  // icon = Lucide name
+  products: SecurityProduct[]
 }
 ```
 
@@ -60,6 +73,11 @@ export interface NavLink {
       {formatAUD(product.price)}
     </span>
   </p>
+  {/* Unit label line below the price */}
+  <p className="text-[12px] text-gray-400 group-hover:text-white/70 mt-1
+                transition-colors duration-500">
+    {product.unit}
+  </p>
   <h3 className="text-[#363636] font-bold text-xl mt-3 group-hover:text-white
                  transition-colors duration-500">
     {product.name}
@@ -68,14 +86,108 @@ export interface NavLink {
                 transition-colors duration-500">
     {product.description}
   </p>
-  <Link href={`/services/cctv-installation/quote?product=${product.id}`}
-    className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[38px]
-               leading-[38px] rounded-[5px] text-[15px]
+  <Link href={`/services/security-solutions/quote?solution=${solution.id}&product=${product.id}`}
+    className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[42px]
+               leading-[42px] rounded-[5px] text-[14px]
                group-hover:bg-white group-hover:text-brand-dark
                transition-all duration-500">
-    Buy Now
+    Get Quote
   </Link>
 </div>
+```
+> Real file: `src/components/sections/SecurityProductCard.tsx`.
+
+---
+
+## 2b. Dynamic icon helper (icon name from data → Lucide component)
+
+Solution cards/products store their icon as a **string** (e.g. `"Video"`). The
+implemented helper is `src/lib/solution-icons.tsx` → `SolutionIcon`, which maps the
+6 names explicitly (safe, tree-shakeable):
+
+```tsx
+// src/lib/solution-icons.tsx
+import { Video, ShieldAlert, Building2, Lock, Flame, Phone, type LucideIcon } from "lucide-react"
+
+const ICON_MAP: Record<string, LucideIcon> = { Video, ShieldAlert, Building2, Lock, Flame, Phone }
+
+export function SolutionIcon({ name, size, className, style }: {
+  name: string; size?: number; className?: string; style?: React.CSSProperties
+}) {
+  const Icon = ICON_MAP[name] ?? Video
+  return <Icon size={size} className={className} style={style} />
+}
+```
+
+> A generic `import * as Icons from "lucide-react"; const Icon = Icons[name]`
+> version also works, but the explicit map above is what the project uses
+> (predictable bundle, no accidental name collisions).
+
+---
+
+## 2c. Solution card pattern (landing grid — NOT the product card)
+
+`src/components/sections/SolutionCard.tsx`. Key differences from the product card:
+`rounded-[40px]` (not `[80px]`), lifts on hover, data-driven icon colours via CSS
+vars so `group-hover` still wins, product-count badge, arrow bottom-right.
+
+```tsx
+<Link href={`/services/security-solutions/${solution.slug}`}
+  className="group relative block bg-[#f7f7f7] rounded-[40px] p-10 text-center
+             cursor-pointer transition-all duration-500 hover:bg-[#7f85f7]
+             hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]">
+  <div className="w-16 h-16 rounded-[16px] mx-auto mb-5 flex items-center justify-center
+                  [background-color:var(--ibg)] group-hover:bg-white/20 transition-all duration-500"
+       style={{ "--ibg": solution.iconBg } as React.CSSProperties}>
+    <span className="flex [color:var(--ic)] group-hover:text-white transition-colors duration-500"
+          style={{ "--ic": solution.iconColor } as React.CSSProperties}>
+      <SolutionIcon name={solution.icon} size={32} />
+    </span>
+  </div>
+  <h3 className="font-bold text-[20px] text-[#1a1a2e] group-hover:text-white transition-colors duration-500 mt-2">{solution.name}</h3>
+  <p className="text-brand-primary font-medium text-[13px] mt-1 group-hover:text-white/80 transition-colors duration-500">{solution.tagline}</p>
+  <p className="text-[14px] text-gray-500 mt-3 leading-relaxed group-hover:text-white/80 transition-colors duration-500">{solution.description}</p>
+  <span className="mt-4 inline-flex items-center gap-1 bg-white/60 group-hover:bg-white/20 rounded-full px-3 py-1 text-[12px] text-gray-600 group-hover:text-white transition-all duration-500">
+    {solution.products.length} products available
+  </span>
+  <ArrowRight size={18} className="absolute bottom-6 right-6 text-gray-300 group-hover:text-white/60 transition-colors duration-500" />
+</Link>
+```
+
+---
+
+## 2d. Security solutions — data quick reference
+
+The 6 solutions (`src/data/security-solutions.ts`):
+
+| id              | slug                  | products |
+|-----------------|-----------------------|----------|
+| surveillance    | surveillance-evidence | 6        |
+| deterrence      | deterrence            | 5        |
+| commercial      | commercial-security   | 4        |
+| access-control  | access-control        | 5        |
+| smoke-alarms    | smoke-alarms          | 4        |
+| intercoms       | intercoms             | 4        |
+
+Shared exports: `installFee = 150`, `gstRate = 0.10`.
+
+Helpers:
+```ts
+// lowest product price in a solution — the "from $X" hint
+const fromPrice = (sol: SecuritySolution) =>
+  Math.min(...sol.products.map(p => p.price))
+
+// look up a single product (used by ?solution=&product= deep links)
+const getProduct = (solutionId: string, productId: string) =>
+  securitySolutions.find(s => s.id === solutionId)?.products
+    .find(p => p.id === productId)
+```
+
+Backwards compat — `src/data/cctv-products.ts` is a shim:
+```ts
+export { installFee, gstRate } from "./security-solutions"
+export const cctvProducts =
+  securitySolutions.find(s => s.id === "surveillance")?.products ?? []
 ```
 
 ---
@@ -179,11 +291,18 @@ export default function Header() {
 
 ## 5. Quote email HTML template
 
+Subject line: **`Your Security Solutions Quote from ${SITE_FULL}`**.
+
+> CURRENT CODE: the HTML is built **inline** as `buildEmail()` inside
+> `src/app/api/quote/security/route.ts` (there is no `src/lib/email-templates/`
+> file). The structure/GST breakdown below is the canonical template — name it
+> `buildSecurityQuoteEmail` if you extract it to its own module.
+
 ```ts
-// src/lib/email-templates/cctv-quote.ts
+// canonical template (extract as src/lib/email-templates/security-quote.ts if desired)
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
-export function buildCCTVQuoteEmail(data: {
+export function buildSecurityQuoteEmail(data: {
   fname: string; lname: string; ptype: string; timing: string
   items: { label: string; qty: number; unitPrice: number; lineTotal: number }[]
   installFee: number; subtotal: number; gst: number; total: number
@@ -200,11 +319,11 @@ export function buildCCTVQuoteEmail(data: {
   <!DOCTYPE html><html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto">
     <div style="background:#0F6E56;padding:24px;text-align:center">
       <h1 style="color:white;margin:0;font-size:24px">${SITE_FULL}</h1>
-      <p style="color:#5DCAA5;margin:4px 0 0">CCTV Security Quote</p>
+      <p style="color:#5DCAA5;margin:4px 0 0">Security Solutions Quote</p>
     </div>
     <div style="padding:32px">
       <p>Hi ${data.fname},</p>
-      <p>Thank you for requesting a CCTV security quote. Here is your personalised estimate:</p>
+      <p>Thank you for requesting a security solutions quote. Here is your personalised estimate:</p>
       <p><strong>Property type:</strong> ${data.ptype} &nbsp;|&nbsp;
          <strong>Timeline:</strong> ${data.timing}</p>
       <table style="width:100%;border-collapse:collapse;margin:24px 0">
@@ -375,4 +494,67 @@ Fix: Move useState/useEffect to "use client" components only
 
 Error: Image not optimized
 Fix: Use next/image <Image> instead of <img>
+
+Error (chat): "Sorry, I am having trouble right now"
+Fix: GEMINI_API_KEY missing/placeholder → get key at aistudio.google.com,
+     set in .env.local (and Vercel env vars), restart dev server.
+     Confirm model is exactly "gemini-2.5-flash" and route uses GEMINI_API_KEY.
+
+Error (chat): Gemini "First content should be with role 'user'"
+Fix: history must start with a user turn — drop leading "model"/assistant turns.
+
+Error: generateStaticParams missing on a dynamic route
+Fix: [slug] pages must export generateStaticParams() returning
+     securitySolutions.map(s => ({ slug: s.slug })); call notFound() if no match.
 ```
+
+---
+
+## 11. AI chat route — Google Gemini (replaces Anthropic)
+
+`src/app/api/chat/route.ts`. Role mapping: **`assistant` → `model`**, and the
+history must START with a `user` turn.
+
+```ts
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import { buildSystemPrompt } from "@/lib/agent-prompt"
+import { NextResponse } from "next/server"
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json()
+    if (!messages || !Array.isArray(messages) || messages.length === 0)
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    if (messages.length > 40)
+      return NextResponse.json({ reply: "This chat session has ended. Please call us.", leadCollected: false })
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: buildSystemPrompt(),
+    })
+
+    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",   // ← Gemini uses "model"
+      parts: [{ text: m.content }],
+    }))
+    while (history.length && history[0].role === "model") history.shift()  // ← start on user
+
+    const chat = model.startChat({ history })
+    const result = await chat.sendMessage(messages[messages.length - 1].content)
+    const reply = result.response.text()
+
+    const leadCollected = reply.includes("[LEAD_COLLECTED]")
+    return NextResponse.json({ reply: reply.replace("[LEAD_COLLECTED]", "").trim(), leadCollected })
+  } catch (err) {
+    console.error("Gemini chat error FULL:", err)
+    return NextResponse.json(
+      { reply: "Sorry, I am having trouble right now. Please call us directly.", leadCollected: false },
+      { status: 500 }
+    )
+  }
+}
+```
+
+Returns `{ reply, leadCollected }`. Never import `@anthropic-ai/sdk` or use
+`claude-*` / `ANTHROPIC_API_KEY`.
