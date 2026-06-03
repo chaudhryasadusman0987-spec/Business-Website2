@@ -37,11 +37,11 @@ function MonitorIcon() {
 
 const servicePills = [
   {
-    href: "/services/cctv-installation",
+    href: "/services/security-solutions",
     iconBg: "bg-[rgba(245,124,0,0.15)]",
     icon: <CctvIcon />,
-    name: "CCTV Installation",
-    sub: "Security cameras & systems",
+    name: "Security Solutions",
+    sub: "Surveillance, alarms, access & more",
   },
   {
     href: "/services/car-rental",

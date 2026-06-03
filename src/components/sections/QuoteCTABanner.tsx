@@ -1,6 +1,12 @@
 import Link from "next/link"
 
-export default function QuoteCTABanner() {
+interface QuoteCTABannerProps {
+  href?: string
+}
+
+export default function QuoteCTABanner({
+  href = "/contact",
+}: QuoteCTABannerProps) {
   return (
     <section className="bg-brand-primary py-[80px] text-center">
       <div className="max-w-[1170px] mx-auto px-4">
@@ -12,7 +18,7 @@ export default function QuoteCTABanner() {
         </p>
         <div className="mt-8">
           <Link
-            href="/contact"
+            href={href}
             className="inline-flex items-center justify-center border-2 border-white text-white hover:bg-white hover:text-brand-primary rounded-[5px] text-[17px] font-medium h-[69px] px-10 transition-all duration-500"
           >
             Get Free Quote

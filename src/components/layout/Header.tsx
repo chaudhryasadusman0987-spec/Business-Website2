@@ -41,11 +41,11 @@ function MonitorIcon() {
 
 const serviceItems = [
   {
-    href: "/services/cctv-installation",
+    href: "/services/security-solutions",
     iconBg: "bg-[rgba(245,124,0,0.12)]",
     icon: <CctvIcon />,
-    title: "CCTV Installation",
-    sub: "Security cameras & systems",
+    title: "Security Solutions",
+    sub: "Surveillance, alarms, access & more",
   },
   {
     href: "/services/car-rental",
@@ -160,7 +160,7 @@ export default function Header() {
 
             {/* Get Quote button (desktop only) */}
             <Link
-              href="/services/cctv-installation/quote"
+              href="/services/security-solutions/quote"
               className="hidden lg:inline-flex items-center justify-center bg-white text-[#7f85f7] font-semibold text-[13px] rounded-[8px] px-5 h-[36px] hover:bg-white/90 transition-all duration-200"
             >
               Get Quote

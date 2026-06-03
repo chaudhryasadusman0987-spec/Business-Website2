@@ -31,10 +31,10 @@ export const services: Service[] = [
   },
   {
     id: "cctv-installation",
-    name: "CCTV Installation",
+    name: "Security Solutions",
     description:
-      "Professional security camera systems installed across Australia. Free site assessment and licensed installers.",
-    href: "/services/cctv-installation",
+      "Surveillance, deterrence, access control, intercoms and more — fully installed.",
+    href: "/services/security-solutions",
     iconName: "Shield",
     comingSoon: false,
   },
