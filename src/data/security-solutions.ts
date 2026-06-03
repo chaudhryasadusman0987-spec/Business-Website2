@@ -18,7 +18,7 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Video",
     iconColor: "#f57c00",
     iconBg: "rgba(245,124,0,0.12)",
-    heroImage: "/images/solutions/surveillance.jpg",
+    heroImage: "/images/solutions/surveillance1.jpg",
     heroImageAlt: "Professional CCTV surveillance camera installation",
     products: [
       {
@@ -155,7 +155,7 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Building2",
     iconColor: "#1565c0",
     iconBg: "rgba(21,101,192,0.12)",
-    heroImage: "/images/solutions/commercial.jpg",
+    heroImage: "/images/solutions/commercial-security.jpg",
     heroImageAlt: "Commercial building security system",
     products: [
       {
