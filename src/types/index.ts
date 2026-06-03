@@ -68,3 +68,29 @@ export interface NavLink {
   label: string;
   href: string;
 }
+
+export interface SecurityProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  unit: string;
+  inStock: boolean;
+  image: string; // path like "/images/products/hd-bullet-cam.jpg"
+  badge?: string; // optional badge like "Best Seller" "New" "Popular"
+}
+
+export interface SecuritySolution {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  description: string;
+  longDescription: string;
+  icon: string;
+  iconColor: string;
+  iconBg: string;
+  heroImage: string; // path like "/images/solutions/surveillance.jpg"
+  heroImageAlt: string; // descriptive alt text for SEO
+  products: SecurityProduct[];
+}

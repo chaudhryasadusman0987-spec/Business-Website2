@@ -1,25 +1,9 @@
 // TODO(dashboard): replace with API call when admin is live
-export interface SecurityProduct {
-  id: string
-  name: string
-  description: string
-  price: number
-  unit: string // e.g. "per camera", "per door", "per device"
-  inStock: boolean
-}
+import type { SecuritySolution } from "@/types"
 
-export interface SecuritySolution {
-  id: string
-  name: string
-  slug: string // used in URL
-  tagline: string
-  description: string
-  longDescription: string
-  icon: string // lucide icon name
-  iconColor: string // e.g. "#f57c00"
-  iconBg: string // e.g. "rgba(245,124,0,0.15)"
-  products: SecurityProduct[]
-}
+// Canonical interfaces live in src/types/index.ts. Re-exported here so existing
+// imports (`@/data/security-solutions`) keep working.
+export type { SecurityProduct, SecuritySolution } from "@/types"
 
 export const securitySolutions: SecuritySolution[] = [
   {
@@ -34,6 +18,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Video",
     iconColor: "#f57c00",
     iconBg: "rgba(245,124,0,0.12)",
+    heroImage: "/images/solutions/surveillance.jpg",
+    heroImageAlt: "Professional CCTV surveillance camera installation",
     products: [
       {
         id: "hd-bullet-cam",
@@ -42,6 +28,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 299,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/hd-bullet-cam.jpg",
+        badge: "Best Seller",
       },
       {
         id: "dome-cam",
@@ -50,6 +38,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 349,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/dome-cam.jpg",
       },
       {
         id: "ptz-cam",
@@ -58,6 +47,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 599,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/ptz-cam.jpg",
+        badge: "Popular",
       },
       {
         id: "nvr-system",
@@ -66,6 +57,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 799,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/nvr-system.jpg",
       },
       {
         id: "solar-cam",
@@ -74,6 +66,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 449,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/solar-cam.jpg",
+        badge: "New",
       },
       {
         id: "doorbell-cam",
@@ -82,6 +76,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 249,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/doorbell-cam.jpg",
       },
     ],
   },
@@ -97,6 +92,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "ShieldAlert",
     iconColor: "#e53935",
     iconBg: "rgba(229,57,53,0.12)",
+    heroImage: "/images/solutions/deterrence.jpg",
+    heroImageAlt: "Security alarm system and deterrence technology",
     products: [
       {
         id: "alarm-panel",
@@ -105,6 +102,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 799,
         unit: "per system",
         inStock: true,
+        image: "/images/products/alarm-panel.jpg",
+        badge: "Best Seller",
       },
       {
         id: "outdoor-siren",
@@ -113,6 +112,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 199,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/outdoor-siren.jpg",
       },
       {
         id: "motion-sensor",
@@ -121,6 +121,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 89,
         unit: "per sensor",
         inStock: true,
+        image: "/images/products/motion-sensor.jpg",
       },
       {
         id: "security-light",
@@ -129,6 +130,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 149,
         unit: "per light",
         inStock: true,
+        image: "/images/products/security-light.jpg",
       },
       {
         id: "glass-break",
@@ -137,6 +139,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 119,
         unit: "per detector",
         inStock: true,
+        image: "/images/products/glass-break.jpg",
       },
     ],
   },
@@ -152,6 +155,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Building2",
     iconColor: "#1565c0",
     iconBg: "rgba(21,101,192,0.12)",
+    heroImage: "/images/solutions/commercial.jpg",
+    heroImageAlt: "Commercial building security system",
     products: [
       {
         id: "commercial-nvr",
@@ -160,6 +165,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 1499,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/commercial-nvr.jpg",
       },
       {
         id: "commercial-cam",
@@ -168,6 +174,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 899,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/commercial-cam.jpg",
       },
       {
         id: "thermal-cam",
@@ -176,6 +183,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 1299,
         unit: "per camera",
         inStock: true,
+        image: "/images/products/thermal-cam.jpg",
+        badge: "Enterprise",
       },
       {
         id: "monitoring",
@@ -184,6 +193,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 599,
         unit: "per year",
         inStock: true,
+        image: "/images/products/monitoring.jpg",
       },
     ],
   },
@@ -199,6 +209,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Lock",
     iconColor: "#6200ea",
     iconBg: "rgba(98,0,234,0.12)",
+    heroImage: "/images/solutions/access-control.jpg",
+    heroImageAlt: "Access control keypad and door security",
     products: [
       {
         id: "keypad-access",
@@ -207,6 +219,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 349,
         unit: "per door",
         inStock: true,
+        image: "/images/products/keypad-access.jpg",
       },
       {
         id: "biometric",
@@ -215,6 +228,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 499,
         unit: "per door",
         inStock: true,
+        image: "/images/products/biometric.jpg",
+        badge: "Popular",
       },
       {
         id: "electric-strike",
@@ -223,6 +238,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 199,
         unit: "per door",
         inStock: true,
+        image: "/images/products/electric-strike.jpg",
       },
       {
         id: "magnetic-lock",
@@ -231,6 +247,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 249,
         unit: "per door",
         inStock: true,
+        image: "/images/products/magnetic-lock.jpg",
       },
       {
         id: "gate-controller",
@@ -239,6 +256,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 699,
         unit: "per gate",
         inStock: true,
+        image: "/images/products/gate-controller.jpg",
+        badge: "New",
       },
     ],
   },
@@ -254,6 +273,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Flame",
     iconColor: "#e65100",
     iconBg: "rgba(230,81,0,0.12)",
+    heroImage: "/images/solutions/smoke-alarms.jpg",
+    heroImageAlt: "Smoke alarm installation Australia",
     products: [
       {
         id: "photoelectric",
@@ -262,6 +283,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 89,
         unit: "per alarm",
         inStock: true,
+        image: "/images/products/photoelectric.jpg",
+        badge: "Compliant",
       },
       {
         id: "hardwired-alarm",
@@ -270,6 +293,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 129,
         unit: "per alarm",
         inStock: true,
+        image: "/images/products/hardwired-alarm.jpg",
       },
       {
         id: "heat-detector",
@@ -279,6 +303,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 99,
         unit: "per detector",
         inStock: true,
+        image: "/images/products/heat-detector.jpg",
       },
       {
         id: "wireless-system",
@@ -287,6 +312,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 449,
         unit: "per pack",
         inStock: true,
+        image: "/images/products/wireless-system.jpg",
+        badge: "Best Value",
       },
     ],
   },
@@ -302,6 +329,8 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Phone",
     iconColor: "#2e7d32",
     iconBg: "rgba(46,125,50,0.12)",
+    heroImage: "/images/solutions/intercoms.jpg",
+    heroImageAlt: "Video intercom system installation",
     products: [
       {
         id: "video-intercom",
@@ -310,6 +339,8 @@ export const securitySolutions: SecuritySolution[] = [
         price: 549,
         unit: "per system",
         inStock: true,
+        image: "/images/products/video-intercom.jpg",
+        badge: "Best Seller",
       },
       {
         id: "apartment-intercom",
@@ -318,6 +349,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 1299,
         unit: "per building",
         inStock: true,
+        image: "/images/products/apartment-intercom.jpg",
       },
       {
         id: "wifi-intercom",
@@ -326,6 +358,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 349,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/wifi-intercom.jpg",
       },
       {
         id: "audio-intercom",
@@ -334,6 +367,7 @@ export const securitySolutions: SecuritySolution[] = [
         price: 199,
         unit: "per unit",
         inStock: true,
+        image: "/images/products/audio-intercom.jpg",
       },
     ],
   },

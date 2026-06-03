@@ -34,3 +34,27 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Adding Product & Solution Images
+
+### Where to put images
+- Solution hero images: `public/images/solutions/`
+- Product images:       `public/images/products/`
+- Home hero image:      `public/images/hero.jpg` (already added)
+
+### File naming
+Match the paths in `src/data/security-solutions.ts`. Examples:
+- `public/images/products/hd-bullet-cam.jpg`
+- `public/images/solutions/surveillance.jpg`
+
+### Recommended image sizes
+- Product images:  800×600px, JPG, under 200KB
+- Solution heroes: 1200×800px, JPG, under 400KB
+
+### How to update from the dashboard
+Go to `/dashboard` → **Products** tab → select a solution → edit the image path
+→ click **Save**.
+
+### If no image is uploaded
+The site shows a professional **"Image Coming Soon"** placeholder automatically
+(via `ImageWithFallback`). The site works fine without any product images.

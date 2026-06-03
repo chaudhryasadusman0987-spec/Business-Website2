@@ -1,9 +1,13 @@
 import Link from "next/link"
-import { ShieldCheck } from "lucide-react"
+import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import { securitySolutions } from "@/data/security-solutions"
 
 // Dark hero for the Security Solutions landing page.
 // Mirrors the home hero's #0d0d1a dot-grid + glow treatment.
 export default function SecuritySolutionsHero() {
+  const heroImage =
+    securitySolutions.find((s) => s.id === "surveillance")?.heroImage ?? ""
+
   return (
     <section className="relative overflow-hidden bg-[#0d0d1a]">
       {/* Layer 1 — dot grid */}
@@ -58,10 +62,29 @@ export default function SecuritySolutionsHero() {
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="w-full lg:w-[45%] flex-shrink-0">
-            <div className="bg-[#8187fa] rounded-[24px] min-h-[380px] flex items-center justify-center">
-              <ShieldCheck size={140} className="text-white opacity-80" />
+          {/* RIGHT — hero image */}
+          <div className="lg:w-[45%] w-full relative">
+            <div className="relative w-full h-[420px] lg:h-[500px] rounded-[24px] overflow-hidden">
+              <ImageWithFallback
+                src={heroImage}
+                alt="Professional security solutions Australia"
+                fill
+                className="object-cover object-center"
+                fallbackBg="linear-gradient(135deg, #1e2140, #2d3561)"
+                priority
+              />
+              {/* Dark overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-[24px]" />
+            </div>
+
+            {/* Floating info badge — bottom left of image */}
+            <div className="absolute bottom-5 left-5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-[12px] px-4 py-3">
+              <p className="text-white font-semibold text-[13px]">
+                {securitySolutions.length} Security Solutions
+              </p>
+              <p className="text-[#5dcaa5] text-[11px] mt-0.5">
+                All professionally installed
+              </p>
             </div>
           </div>
         </div>
