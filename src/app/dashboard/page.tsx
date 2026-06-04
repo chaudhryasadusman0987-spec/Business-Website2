@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import ProductsTab from "@/components/dashboard/ProductsTab"
+import VehiclesTab from "@/components/dashboard/VehiclesTab"
 import LeadsTab from "@/components/dashboard/LeadsTab"
 import { SITE_NAME, SITE_DOMAIN, SITE_EMAIL } from "@/data/site"
 
-const TABS = ["Products", "Leads", "Settings"] as const
+const TABS = ["Products", "Car Rental", "Leads", "Settings"] as const
 type Tab = (typeof TABS)[number]
 
 export default function DashboardPage() {
@@ -96,6 +97,7 @@ export default function DashboardPage() {
         <h2 className="text-[22px] font-bold text-[#1a1a2e] mb-5">{tab}</h2>
 
         {tab === "Products" && <ProductsTab />}
+        {tab === "Car Rental" && <VehiclesTab />}
         {tab === "Leads" && <LeadsTab />}
         {tab === "Settings" && (
           <div className="bg-white rounded-[12px] p-6 max-w-[480px] space-y-3">

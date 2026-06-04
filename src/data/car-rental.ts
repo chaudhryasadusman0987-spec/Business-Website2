@@ -11,7 +11,8 @@ export interface Vehicle {
   passengers: number
   features: string[]
   badge?: string          // e.g. "Most Popular"
-  image?: string          // path to vehicle image
+  image: string           // path to vehicle image (e.g. /images/vehicles/economy.jpg)
+  imageAlt: string        // SEO alt text for the vehicle image
   inStock: boolean
 }
 
@@ -44,6 +45,8 @@ export const vehicles: Vehicle[] = [
     bond: 500,
     passengers: 5,
     features: ["Auto transmission", "Bluetooth", "USB charging", "Fuel efficient"],
+    image: "/images/vehicles/economy.jpg",
+    imageAlt: "Economy car rental Brisbane — MG3 or Kia Rio",
     inStock: true
   },
   {
@@ -57,6 +60,8 @@ export const vehicles: Vehicle[] = [
     passengers: 5,
     features: ["Auto transmission", "Apple CarPlay", "Reverse camera", "Android Auto"],
     badge: "Most Popular",
+    image: "/images/vehicles/compact-suv.jpg",
+    imageAlt: "Compact SUV rental Brisbane — Kia Sportage",
     inStock: true
   },
   {
@@ -69,6 +74,8 @@ export const vehicles: Vehicle[] = [
     bond: 750,
     passengers: 5,
     features: ["Comfortable ride", "Large boot", "Apple CarPlay", "Cruise control"],
+    image: "/images/vehicles/midsize.jpg",
+    imageAlt: "Mid-size sedan rental Brisbane — Toyota Camry",
     inStock: true
   },
   {
@@ -81,6 +88,8 @@ export const vehicles: Vehicle[] = [
     bond: 1000,
     passengers: 7,
     features: ["7 seats", "Large luggage space", "Entertainment system", "Ideal for families"],
+    image: "/images/vehicles/large-suv.jpg",
+    imageAlt: "7-seat large SUV rental Brisbane — Kia Carnival",
     inStock: true
   },
   {
@@ -93,6 +102,8 @@ export const vehicles: Vehicle[] = [
     bond: 1000,
     passengers: 12,
     features: ["12 seats", "Large cargo space", "Ideal for groups", "Air conditioning"],
+    image: "/images/vehicles/van.jpg",
+    imageAlt: "Van minibus rental Brisbane — Toyota HiAce",
     inStock: true
   },
   {
@@ -105,6 +116,8 @@ export const vehicles: Vehicle[] = [
     bond: 2000,
     passengers: 5,
     features: ["Premium interior", "Prestige brand", "Full tech suite", "Corporate use"],
+    image: "/images/vehicles/luxury.jpg",
+    imageAlt: "Luxury car rental Brisbane — BMW or Audi",
     inStock: true
   },
 ]

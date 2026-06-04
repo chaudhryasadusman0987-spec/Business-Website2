@@ -22,6 +22,7 @@ import {
 } from "@/data/car-rental"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
+import ImageWithFallback from "@/components/ui/ImageWithFallback"
 
 const STEP_TITLES = [
   "Where and when do you need the car?",
@@ -398,7 +399,16 @@ function QuoteWizard() {
                   {v.badge}
                 </span>
               )}
-              <div className="text-[32px] mb-2">{v.icon}</div>
+              <div className="relative w-full h-[100px] overflow-hidden rounded-t-[14px] mb-3 flex-shrink-0">
+                <ImageWithFallback
+                  src={v.image}
+                  alt={v.imageAlt}
+                  fill
+                  className="object-cover object-center"
+                  fallbackBg="#f0f4ff"
+                  fallbackIcon="Car"
+                />
+              </div>
               <div className="text-[13px] font-semibold text-[#1a1a2e]">{v.name}</div>
               <div className="text-[11px] text-gray-500 mt-0.5">{v.example}</div>
               <div className="text-[17px] font-bold text-[#1565c0] mt-2">

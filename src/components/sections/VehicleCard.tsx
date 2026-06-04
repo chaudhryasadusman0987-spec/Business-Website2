@@ -1,4 +1,5 @@
 import Link from "next/link"
+import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { formatAUD } from "@/lib/formatters"
 import type { Vehicle } from "@/data/car-rental"
 
@@ -19,7 +20,20 @@ export default function VehicleCard({
         </span>
       )}
 
-      <span className="block text-[64px] mb-4">{vehicle.icon}</span>
+      {/* Vehicle image with "Image Coming Soon" fallback */}
+      <div className="relative w-full h-[160px] rounded-t-[80px] overflow-hidden mb-6">
+        <ImageWithFallback
+          src={vehicle.image}
+          alt={vehicle.imageAlt}
+          fill
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          fallbackBg="#f0f0ff"
+          fallbackIcon="Car"
+          priority={false}
+        />
+        {/* Purple overlay on card hover */}
+        <div className="absolute inset-0 bg-transparent group-hover:bg-brand-primary/30 transition-all duration-500" />
+      </div>
 
       <p className="text-brand-primary group-hover:text-white font-medium text-[13px] transition-colors duration-500">
         From

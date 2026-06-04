@@ -9,6 +9,7 @@ import {
   Flame,
   Phone,
   AlertTriangle,
+  Car,
   type LucideIcon,
 } from "lucide-react"
 
@@ -19,6 +20,7 @@ const FALLBACK_ICONS: Record<string, LucideIcon> = {
   Flame,
   Phone,
   AlertTriangle,
+  Car,
 }
 
 interface Props {

@@ -58,3 +58,35 @@ Go to `/dashboard` → **Products** tab → select a solution → edit the image
 ### If no image is uploaded
 The site shows a professional **"Image Coming Soon"** placeholder automatically
 (via `ImageWithFallback`). The site works fine without any product images.
+
+## Adding Vehicle Images
+
+### Where to put images
+`public/images/vehicles/`
+
+### File names (match exactly)
+- `public/images/vehicles/economy.jpg`
+- `public/images/vehicles/compact-suv.jpg`
+- `public/images/vehicles/midsize.jpg`
+- `public/images/vehicles/large-suv.jpg`
+- `public/images/vehicles/van.jpg`
+- `public/images/vehicles/luxury.jpg`
+
+### Recommended size
+800×500px landscape JPG, under 250KB.
+
+### Free image sources
+Search these on [unsplash.com](https://unsplash.com) or [pexels.com](https://pexels.com):
+- **Economy:**     "small hatchback car white"
+- **Compact SUV:** "kia sportage silver SUV"
+- **Mid-size:**    "toyota camry sedan"
+- **Large SUV:**   "7 seat SUV people mover"
+- **Van:**         "toyota hiace minibus"
+- **Luxury:**      "bmw 5 series silver"
+
+### If no image is uploaded
+The site shows a **"Photo coming soon"** placeholder automatically. The site
+works fine without any vehicle images.
+
+### Update from the dashboard
+Go to `/dashboard` → **Car Rental** tab → edit the image path → click **Save**.
