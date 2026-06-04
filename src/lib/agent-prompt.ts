@@ -20,7 +20,7 @@ export function buildSystemPrompt(): string {
       l.surcharge === 0 ? `${l.name} (no surcharge)` : `${l.name} (+$${l.surcharge})`
     )
     .join(", ")
-  const itList = itServices.map((s) => `${s.name} (from ${s.startingFrom})`).join(", ")
+  const itList = itServices.map((s) => `${s.name} (${s.startingFrom})`).join(", ")
 
   return `You are a friendly customer service assistant for ${SITE_FULL},
 an Australian multi-service business. You speak concisely in Australian English.
