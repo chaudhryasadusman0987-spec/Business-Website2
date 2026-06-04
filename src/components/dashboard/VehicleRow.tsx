@@ -20,6 +20,7 @@ export default function VehicleRow({ vehicle }: { vehicle: Vehicle }) {
               className="object-cover"
               fallbackBg="#f0f4ff"
               fallbackIcon="Car"
+              placeholderText="Photo coming soon"
             />
           </div>
           <input

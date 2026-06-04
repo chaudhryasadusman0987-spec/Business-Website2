@@ -29,6 +29,7 @@ export default function VehicleCard({
           className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
           fallbackBg="#f0f0ff"
           fallbackIcon="Car"
+          placeholderText="Photo coming soon"
           priority={false}
         />
         {/* Purple overlay on card hover */}

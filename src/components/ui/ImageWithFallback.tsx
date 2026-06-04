@@ -32,6 +32,7 @@ interface Props {
   className?: string
   fallbackIcon?: string // lucide icon name hint
   fallbackBg?: string // bg color (or gradient) for placeholder
+  placeholderText?: string // text shown under the fallback icon
   priority?: boolean
 }
 
@@ -44,6 +45,7 @@ export default function ImageWithFallback({
   className,
   fallbackIcon = "Camera",
   fallbackBg = "#f0f0ff",
+  placeholderText = "Image Coming Soon",
   priority = false,
 }: Props) {
   const [error, setError] = useState(false)
@@ -66,7 +68,7 @@ export default function ImageWithFallback({
           <Icon size={48} color="#7f85f7" />
         </div>
         <p className="text-[11px] text-[#9496a8] mt-2 font-medium">
-          Image Coming Soon
+          {placeholderText}
         </p>
       </div>
     )

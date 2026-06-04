@@ -407,6 +407,7 @@ function QuoteWizard() {
                   className="object-cover object-center"
                   fallbackBg="#f0f4ff"
                   fallbackIcon="Car"
+                  placeholderText="Photo coming soon"
                 />
               </div>
               <div className="text-[13px] font-semibold text-[#1a1a2e]">{v.name}</div>
