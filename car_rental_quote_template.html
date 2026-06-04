@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Rental Quote — AuzServ Australia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    color: #1a1a2e;
+  }
+
+  /* ─── Brand colours ─────────────────────── */
+  :root {
+    --blue:      #1565c0;
+    --blue-lt:   #e6f1fb;
+    --blue-mid:  #185fa5;
+    --blue-dk:   #0c447c;
+    --green:     #0f6e56;
+    --green-lt:  #e1f5ee;
+    --green-mid: #5dcaa5;
+    --amber:     #854f0b;
+    --amber-lt:  #faeeda;
+    --red:       #a32d2d;
+    --red-lt:    #fcebeb;
+    --gray:      #f7f7f7;
+    --border:    #e0e0e8;
+    --text:      #1a1a2e;
+    --muted:     #666880;
+  }
+
+  /* ─── Wrapper ────────────────────────────── */
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  /* ─── Card ───────────────────────────────── */
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  /* ─── Header ─────────────────────────────── */
+  .header {
+    background: #1565c0;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-box {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  .brand {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .brand span { color: #90caf9; }
+
+  .header-sub {
+    margin-left: auto;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    text-align: right;
+  }
+
+  /* ─── Progress bar ───────────────────────── */
+  .progress-wrap {
+    padding: 1.25rem 2rem 0;
+  }
+
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: .5rem;
+  }
+
+  .progress-bar .seg {
+    height: 4px;
+    flex: 1;
+    border-radius: 99px;
+    background: #e0e0e8;
+    transition: background 0.3s;
+  }
+
+  .progress-bar .seg.done   { background: #5dcaa5; }
+  .progress-bar .seg.active { background: #1565c0; }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* ─── Step ───────────────────────────────── */
+  .step { display: none; padding: 0 2rem 2rem; }
+  .step.visible { display: block; }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1565c0;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    padding-top: 1.5rem;
+  }
+
+  .step-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+  }
+
+  /* ─── Option tiles ───────────────────────── */
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .tile {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    background: #fff;
+    user-select: none;
+  }
+
+  .tile:hover { border-color: #90caf9; background: #f5f9ff; }
+
+  .tile.selected {
+    border-color: #1565c0;
+    background: #e6f1fb;
+  }
+
+  .tile-icon {
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .tile-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tile-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .tile.selected .tile-name { color: #1565c0; }
+
+  /* ─── Vehicle cards ──────────────────────── */
+  .vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .vehicle-card {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all .2s;
+    background: #fff;
+    position: relative;
+    user-select: none;
+  }
+
+  .vehicle-card:hover { border-color: #90caf9; }
+
+  .vehicle-card.selected {
+    border-color: #1565c0;
+    background: #e6f1fb;
+  }
+
+  .vehicle-badge {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    background: #1565c0;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  .vehicle-icon { font-size: 32px; margin-bottom: 8px; }
+
+  .vehicle-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .vehicle-example {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .vehicle-price {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1565c0;
+    margin-top: 8px;
+  }
+
+  .vehicle-price-week {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .vehicle-bond {
+    margin-top: 8px;
+    font-size: 11px;
+    background: #e6f1fb;
+    color: #185fa5;
+    border-radius: 6px;
+    padding: 3px 8px;
+    display: inline-block;
+  }
+
+  .vehicle-card.selected .vehicle-bond {
+    background: #fff;
+    color: #1565c0;
+  }
+
+  /* ─── Date inputs ────────────────────────── */
+  .date-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+    font-family: inherit;
+    background: #fff;
+  }
+
+  .field-input:focus { border-color: #1565c0; }
+
+  select.field-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666880' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .rental-days-badge {
+    background: #e6f1fb;
+    border: 1px solid #90caf9;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #185fa5;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  /* ─── Extras ─────────────────────────────── */
+  .extras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .extra-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    user-select: none;
+  }
+
+  .extra-card:hover { border-color: #90caf9; }
+
+  .extra-card.selected {
+    border-color: #1565c0;
+    background: #e6f1fb;
+  }
+
+  .extra-checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+  }
+
+  .extra-card.selected .extra-checkbox {
+    background: #1565c0;
+    border-color: #1565c0;
+    color: #fff;
+  }
+
+  .extra-info { flex: 1; }
+
+  .extra-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .extra-price {
+    font-size: 12px;
+    color: #1565c0;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .extra-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* ─── Bond section ───────────────────────── */
+  .bond-box {
+    background: #e6f1fb;
+    border: 1.5px solid #90caf9;
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .bond-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0c447c;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bond-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #185fa5;
+    padding: 6px 0;
+    border-bottom: 1px solid #b5d4f4;
+  }
+
+  .bond-row:last-child { border: none; }
+
+  .bond-row span:last-child { font-weight: 600; }
+
+  .bond-timeline {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bond-tl-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .bond-tl-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #1565c0;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .bond-tl-txt {
+    font-size: 12px;
+    color: #185fa5;
+    line-height: 1.5;
+    padding-top: 3px;
+  }
+
+  /* ─── Checkbox confirm ───────────────────── */
+  .confirm-check {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .2s;
+  }
+
+  .confirm-check:hover { border-color: #1565c0; }
+
+  .confirm-check.checked {
+    border-color: #1565c0;
+    background: #e6f1fb;
+  }
+
+  .confirm-check input[type="checkbox"] {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: #1565c0;
+    cursor: pointer;
+  }
+
+  .confirm-check label {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    cursor: pointer;
+  }
+
+  .confirm-check label b { color: #1565c0; font-weight: 600; }
+
+  /* ─── Payment method ─────────────────────── */
+  .payment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ─── Contact form ───────────────────────── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-row.full { grid-template-columns: 1fr; }
+
+  .form-group { display: flex; flex-direction: column; }
+
+  /* ─── Quote summary ──────────────────────── */
+  .summary-card {
+    background: #f9fcff;
+    border: 1.5px solid #90caf9;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0c447c;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #b5d4f4;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #185fa5;
+    padding: 5px 0;
+    border-bottom: 1px solid #dceefb;
+  }
+
+  .summary-row:last-child { border: none; }
+
+  .summary-section {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 10px 0 4px;
+    border-bottom: 1px solid #90caf9;
+    margin-top: 4px;
+  }
+
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0c447c;
+    padding: 10px 0 6px;
+    border-top: 2px solid #90caf9;
+    margin-top: 6px;
+  }
+
+  .summary-bond-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #185fa5;
+    padding: 5px 0;
+    font-weight: 600;
+  }
+
+  .valid-badge {
+    background: #e6f1fb;
+    color: #185fa5;
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* ─── Info/warning boxes ─────────────────── */
+  .info-box {
+    background: var(--blue-lt);
+    border-left: 3px solid var(--blue-mid);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--blue-dk);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .warn-box {
+    background: var(--amber-lt);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .green-box {
+    background: var(--green-lt);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--green);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  /* ─── Navigation buttons ─────────────────── */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--border);
+    background: #fafaff;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 0;
+    font-family: inherit;
+    transition: color .2s;
+  }
+
+  .btn-back:hover { color: var(--text); }
+
+  .btn-next {
+    background: #1565c0;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .2s;
+  }
+
+  .btn-next:hover { background: #185fa5; }
+
+  .btn-next:disabled {
+    background: #b0bec5;
+    cursor: not-allowed;
+  }
+
+  .btn-submit {
+    background: #1565c0;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .2s;
+    margin-top: .5rem;
+  }
+
+  .btn-submit:hover { background: #185fa5; }
+  .btn-submit:disabled { background: #b0bec5; cursor: not-allowed; }
+
+  /* ─── Error messages ─────────────────────── */
+  .error-msg {
+    color: #a32d2d;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ─── Young driver surcharge badge ──────── */
+  .surcharge-badge {
+    background: #faeeda;
+    border: 1px solid #f0997b;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #633806;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  /* ─── Success screen ─────────────────────── */
+  #success {
+    display: none;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .success-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: #e6f1fb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 40px;
+  }
+
+  .success-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .5rem;
+  }
+
+  .success-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: .5rem;
+    line-height: 1.6;
+  }
+
+  .success-timeline {
+    background: #f9fcff;
+    border: 1.5px solid #90caf9;
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    text-align: left;
+  }
+
+  .success-timeline-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0c447c;
+    margin-bottom: 10px;
+  }
+
+  .stl-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+
+  .stl-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .stl-txt {
+    font-size: 12px;
+    color: #185fa5;
+    line-height: 1.5;
+    padding-top: 4px;
+  }
+
+  .success-valid-badge {
+    background: #e6f1fb;
+    color: #185fa5;
+    border-radius: 99px;
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: .5rem;
+  }
+
+  /* ─── Mobile ─────────────────────────────── */
+  @media (max-width: 600px) {
+    body { padding: 1rem .5rem; }
+    .step { padding: 0 1.25rem 1.5rem; }
+    .progress-wrap { padding: 1rem 1.25rem 0; }
+    .header { padding: 1rem 1.25rem; }
+    .nav-row { padding: 1rem 1.25rem; }
+    .date-grid, .form-row, .payment-grid { grid-template-columns: 1fr; }
+    .vehicle-grid { grid-template-columns: 1fr 1fr; }
+    .tile-grid { grid-template-columns: 1fr 1fr; }
+    .extras-grid { grid-template-columns: 1fr; }
+    .btn-next { padding: 11px 20px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div class="card">
+
+  <!-- ── HEADER ───────────────────────────────── -->
+  <div class="header">
+    <div class="logo-box">🚗</div>
+    <div>
+      <div class="brand">AuzServ <span>Australia</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px">Car Rental Quote — Brisbane</div>
+    </div>
+    <div class="header-sub">Free Quote<br>No obligation</div>
+  </div>
+
+  <!-- ── PROGRESS ──────────────────────────────── -->
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="seg active" id="seg0"></div>
+      <div class="seg" id="seg1"></div>
+      <div class="seg" id="seg2"></div>
+      <div class="seg" id="seg3"></div>
+      <div class="seg" id="seg4"></div>
+      <div class="seg" id="seg5"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Step 1 of 6</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 0 — Pick-up & Return Details
+  ═══════════════════════════════════════════ -->
+  <div class="step visible" id="step0">
+    <div class="step-label">Step 1 of 6</div>
+    <div class="step-title">Where and when do you need the car?</div>
+
+    <div class="field-label">Pick-up location</div>
+    <div class="tile-grid" id="location-tiles">
+      <div class="tile" onclick="selectLocation(this,'Brisbane CBD',0)">
+        <div class="tile-icon">🏙️</div>
+        <div class="tile-name">Brisbane CBD</div>
+        <div class="tile-sub">No surcharge</div>
+      </div>
+      <div class="tile" onclick="selectLocation(this,'Brisbane Airport',25)">
+        <div class="tile-icon">✈️</div>
+        <div class="tile-name">Brisbane Airport</div>
+        <div class="tile-sub">+$25 surcharge</div>
+      </div>
+      <div class="tile" onclick="selectLocation(this,'Gold Coast Delivery',50)">
+        <div class="tile-icon">🌊</div>
+        <div class="tile-name">Gold Coast</div>
+        <div class="tile-sub">+$50 delivery</div>
+      </div>
+      <div class="tile" onclick="selectLocation(this,'Sunshine Coast Delivery',50)">
+        <div class="tile-icon">☀️</div>
+        <div class="tile-name">Sunshine Coast</div>
+        <div class="tile-sub">+$50 delivery</div>
+      </div>
+    </div>
+
+    <div class="date-grid">
+      <div>
+        <div class="field-label">Pick-up date</div>
+        <input type="date" class="field-input" id="pickup-date" onchange="calcDays()">
+      </div>
+      <div>
+        <div class="field-label">Pick-up time</div>
+        <select class="field-input" id="pickup-time">
+          <option>07:00 AM</option><option>08:00 AM</option>
+          <option>09:00 AM</option><option selected>10:00 AM</option>
+          <option>11:00 AM</option><option>12:00 PM</option>
+          <option>01:00 PM</option><option>02:00 PM</option>
+          <option>03:00 PM</option><option>04:00 PM</option>
+          <option>05:00 PM</option><option>06:00 PM</option>
+          <option>07:00 PM</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Return date</div>
+        <input type="date" class="field-input" id="return-date" onchange="calcDays()">
+      </div>
+      <div>
+        <div class="field-label">Return time</div>
+        <select class="field-input" id="return-time">
+          <option>07:00 AM</option><option>08:00 AM</option>
+          <option>09:00 AM</option><option selected>10:00 AM</option>
+          <option>11:00 AM</option><option>12:00 PM</option>
+          <option>01:00 PM</option><option>02:00 PM</option>
+          <option>03:00 PM</option><option>04:00 PM</option>
+          <option>05:00 PM</option><option>06:00 PM</option>
+          <option>07:00 PM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rental-days-badge" id="days-badge" style="display:none"></div>
+
+    <div class="field-label" style="margin-top:.5rem">Return to same location?</div>
+    <div class="tile-grid" style="grid-template-columns:1fr 1fr;margin-top:.5rem">
+      <div class="tile selected" id="same-loc-yes" onclick="selectSameLoc(true)">
+        <div class="tile-icon">✅</div>
+        <div class="tile-name">Yes, same location</div>
+        <div class="tile-sub">No extra fee</div>
+      </div>
+      <div class="tile" id="same-loc-no" onclick="selectSameLoc(false)">
+        <div class="tile-icon">🔄</div>
+        <div class="tile-name">No, different location</div>
+        <div class="tile-sub">+$75 one-way fee</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem">
+      🚧 <strong>Brisbane toll roads:</strong> Gateway Motorway, Logan Motorway, Airport Link, Clem7 Tunnel and Go Between Bridge all require a Linkt pass. We strongly recommend adding the toll pass in Step 4.
+    </div>
+
+    <p class="error-msg" id="err-location">Please select a pick-up location.</p>
+    <p class="error-msg" id="err-dates">Please select valid pick-up and return dates.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 1 — Choose Vehicle
+  ═══════════════════════════════════════════ -->
+  <div class="step" id="step1">
+    <div class="step-label">Step 2 of 6</div>
+    <div class="step-title">Choose your vehicle</div>
+
+    <div class="vehicle-grid">
+      <div class="vehicle-card" onclick="selectVehicle(this,'Economy','MG3 or Kia Rio',55,330,500)">
+        <div class="vehicle-icon">🚗</div>
+        <div class="vehicle-name">Economy</div>
+        <div class="vehicle-example">MG3, Kia Rio or similar</div>
+        <div class="vehicle-price" id="vp0">$55 / day</div>
+        <div class="vehicle-price-week" id="vw0">$330 / week</div>
+        <div class="vehicle-bond">Bond: $500</div>
+      </div>
+      <div class="vehicle-card" onclick="selectVehicle(this,'Compact SUV','Kia Sportage or similar',75,450,750)">
+        <div class="vehicle-badge">Most Popular</div>
+        <div class="vehicle-icon">🚙</div>
+        <div class="vehicle-name">Compact SUV</div>
+        <div class="vehicle-example">Kia Sportage or similar</div>
+        <div class="vehicle-price" id="vp1">$75 / day</div>
+        <div class="vehicle-price-week" id="vw1">$450 / week</div>
+        <div class="vehicle-bond">Bond: $750</div>
+      </div>
+      <div class="vehicle-card" onclick="selectVehicle(this,'Mid-size Sedan','Toyota Camry or similar',85,510,750)">
+        <div class="vehicle-icon">🚘</div>
+        <div class="vehicle-name">Mid-size Sedan</div>
+        <div class="vehicle-example">Toyota Camry or similar</div>
+        <div class="vehicle-price" id="vp2">$85 / day</div>
+        <div class="vehicle-price-week" id="vw2">$510 / week</div>
+        <div class="vehicle-bond">Bond: $750</div>
+      </div>
+      <div class="vehicle-card" onclick="selectVehicle(this,'Large SUV 7-Seat','Kia Carnival or similar',120,720,1000)">
+        <div class="vehicle-icon">🚐</div>
+        <div class="vehicle-name">Large SUV 7-Seat</div>
+        <div class="vehicle-example">Kia Carnival or similar</div>
+        <div class="vehicle-price" id="vp3">$120 / day</div>
+        <div class="vehicle-price-week" id="vw3">$720 / week</div>
+        <div class="vehicle-bond">Bond: $1,000</div>
+      </div>
+      <div class="vehicle-card" onclick="selectVehicle(this,'Van / Minibus','Toyota HiAce or similar',140,840,1000)">
+        <div class="vehicle-icon">🚌</div>
+        <div class="vehicle-name">Van / Minibus</div>
+        <div class="vehicle-example">Toyota HiAce or similar</div>
+        <div class="vehicle-price" id="vp4">$140 / day</div>
+        <div class="vehicle-price-week" id="vw4">$840 / week</div>
+        <div class="vehicle-bond">Bond: $1,000</div>
+      </div>
+      <div class="vehicle-card" onclick="selectVehicle(this,'Luxury','BMW 5 Series or Audi A6',250,1400,2000)">
+        <div class="vehicle-icon">🏎️</div>
+        <div class="vehicle-name">Luxury</div>
+        <div class="vehicle-example">BMW 5 Series or Audi A6</div>
+        <div class="vehicle-price" id="vp5">$250 / day</div>
+        <div class="vehicle-price-week" id="vw5">$1,400 / week</div>
+        <div class="vehicle-bond">Bond: $2,000</div>
+      </div>
+    </div>
+
+    <p class="error-msg" id="err-vehicle">Please select a vehicle.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 2 — Add Extras
+  ═══════════════════════════════════════════ -->
+  <div class="step" id="step2">
+    <div class="step-label">Step 3 of 6</div>
+    <div class="step-title">Add extras to your rental</div>
+
+    <div class="extras-grid">
+      <div class="extra-card" onclick="toggleExtra(this,'linkt',5.50,'Linkt Toll Pass','perDay')">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">🛣️ Linkt Toll Pass</div>
+          <div class="extra-price">$5.50 / day</div>
+          <div class="extra-desc">Covers all Brisbane toll roads — Gateway, Logan, Airport Link, Clem7</div>
+        </div>
+      </div>
+      <div class="extra-card" onclick="toggleExtra(this,'cdw',28,'Super CDW Insurance','perDay')">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">🛡️ Super CDW Insurance</div>
+          <div class="extra-price">$28 / day</div>
+          <div class="extra-desc">Reduces damage excess to $0. Strongly recommended.</div>
+        </div>
+      </div>
+      <div class="extra-card" onclick="toggleExtra(this,'childseat',15,'Child Seat (under 7)','perDayCapped',60)">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">👶 Child Seat (under 7)</div>
+          <div class="extra-price">$15 / day · max $60</div>
+          <div class="extra-desc">QLD law requires child seat for children under 7 years old</div>
+        </div>
+      </div>
+      <div class="extra-card" onclick="toggleExtra(this,'booster',10,'Booster Seat (7–10)','perDayCapped',40)">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">🪑 Booster Seat (7–10 yrs)</div>
+          <div class="extra-price">$10 / day · max $40</div>
+          <div class="extra-desc">Recommended for children aged 7 to 10 years</div>
+        </div>
+      </div>
+      <div class="extra-card" onclick="toggleExtra(this,'adddriver',15,'Additional Driver','perDayCapped',75)">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">👤 Additional Driver</div>
+          <div class="extra-price">$15 / day · max $75</div>
+          <div class="extra-desc">Additional driver must be present at pick-up with valid licence</div>
+        </div>
+      </div>
+      <div class="extra-card" onclick="toggleExtra(this,'gps',12,'GPS Navigation','perDayCapped',50)">
+        <div class="extra-checkbox">✓</div>
+        <div class="extra-info">
+          <div class="extra-name">🗺️ GPS Navigation</div>
+          <div class="extra-price">$12 / day · max $50</div>
+          <div class="extra-desc">Pre-loaded Queensland & Australia maps</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      ⚠️ <strong>Brisbane tip:</strong> The Linkt Toll Pass is highly recommended. Without it, toll charges plus a $3.50 processing fee per toll will be automatically charged to your card after return.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 3 — Security Bond & Payment
+  ═══════════════════════════════════════════ -->
+  <div class="step" id="step3">
+    <div class="step-label">Step 4 of 6</div>
+    <div class="step-title">Security bond & payment method</div>
+
+    <div class="bond-box">
+      <div class="bond-title">💳 How the security bond works</div>
+      <div class="bond-row">
+        <span>Rental cost (quote total)</span>
+        <span>Charged at pick-up ✓</span>
+      </div>
+      <div class="bond-row">
+        <span>Security bond / pre-auth hold</span>
+        <span id="bond-amount-display">$750 held — NOT charged</span>
+      </div>
+      <div class="bond-row">
+        <span>No damage on return</span>
+        <span>Bond released in 3–10 days ✓</span>
+      </div>
+      <div class="bond-row">
+        <span>If damage occurs</span>
+        <span>Deducted from bond only</span>
+      </div>
+
+      <div class="bond-timeline" style="margin-top:14px">
+        <div style="font-size:12px;font-weight:700;color:#0c447c;margin-bottom:8px">What happens after you return the car:</div>
+        <div class="bond-tl-row">
+          <div class="bond-tl-dot" style="background:#1565c0">R</div>
+          <div class="bond-tl-txt"><strong>Return day:</strong> Vehicle inspected. Final rental charge processed. Bond hold begins releasing.</div>
+        </div>
+        <div class="bond-tl-row">
+          <div class="bond-tl-dot" style="background:#7f85f7">1-3</div>
+          <div class="bond-tl-txt"><strong>Days 1–3:</strong> Final charge appears on your statement. Bond may still show as pending — this is completely normal.</div>
+        </div>
+        <div class="bond-tl-row">
+          <div class="bond-tl-dot" style="background:#5dcaa5">10</div>
+          <div class="bond-tl-txt"><strong>Up to 10 days:</strong> Bond fully released. Your available balance increases. No action needed from you.</div>
+        </div>
+        <div class="bond-tl-row">
+          <div class="bond-tl-dot" style="background:#185fa5">?</div>
+          <div class="bond-tl-txt"><strong>Still showing after 10 days?</strong> Contact your bank — we have already released the hold on our end.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-label">Payment method</div>
+    <div class="payment-grid">
+      <div class="tile" id="pay-credit" onclick="selectPayment('credit')">
+        <div class="tile-icon">💳</div>
+        <div class="tile-name">Credit Card</div>
+        <div class="tile-sub">Pre-auth hold — funds not debited. Recommended.</div>
+      </div>
+      <div class="tile" id="pay-debit" onclick="selectPayment('debit')">
+        <div class="tile-icon">🏦</div>
+        <div class="tile-name">Debit Card</div>
+        <div class="tile-sub">Bond debited then refunded. May take 5–10 days.</div>
+      </div>
+    </div>
+
+    <div class="warn-box" id="debit-warn" style="display:none">
+      ⚠️ <strong>Debit card note:</strong> The $<span id="debit-bond-amt"></span> bond will be <strong>debited</strong> from your account at pick-up and <strong>refunded</strong> within 5–10 business days after return (not held — actual debit/refund).
+    </div>
+
+    <div class="confirm-check" id="bond-confirm" onclick="toggleBondConfirm()">
+      <input type="checkbox" id="bond-checkbox" onclick="event.stopPropagation();toggleBondConfirm()">
+      <label for="bond-checkbox">
+        I understand a security bond of <b>$<span id="confirm-bond-amt">750</span></b> will be held on my card for the rental period. The hold will be released within 3–10 business days of vehicle return, provided no damage or additional charges apply.
+      </label>
+    </div>
+
+    <p class="error-msg" id="err-payment">Please select a payment method.</p>
+    <p class="error-msg" id="err-bond-confirm">Please confirm you understand the security bond to continue.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 4 — Driver Details
+  ═══════════════════════════════════════════ -->
+  <div class="step" id="step4">
+    <div class="step-label">Step 5 of 6</div>
+    <div class="step-title">Your details</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">First name *</div>
+        <input type="text" class="field-input" id="fname" placeholder="John">
+        <p class="error-msg" id="err-fname">First name is required</p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Last name *</div>
+        <input type="text" class="field-input" id="lname" placeholder="Smith">
+        <p class="error-msg" id="err-lname">Last name is required</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">Email address *</div>
+        <input type="email" class="field-input" id="email" placeholder="john@email.com">
+        <p class="error-msg" id="err-email">Valid email is required</p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Phone number *</div>
+        <input type="tel" class="field-input" id="phone" placeholder="04XX XXX XXX">
+        <p class="error-msg" id="err-phone">Phone number is required</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">Age *</div>
+        <input type="number" class="field-input" id="age" placeholder="e.g. 28" min="18" max="99" onchange="checkAge()">
+        <p class="error-msg" id="err-age">Must be 21 or older to rent</p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Suburb / Postcode</div>
+        <input type="text" class="field-input" id="suburb" placeholder="Brisbane, 4000">
+      </div>
+    </div>
+
+    <div class="surcharge-badge" id="young-driver-badge">
+      ⚠️ Young driver surcharge applies: +$25/day has been added to your quote total.
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">Licence type *</div>
+        <select class="field-input" id="licence">
+          <option value="">Select licence type</option>
+          <option>Australian Licence</option>
+          <option>International Licence + Passport</option>
+        </select>
+        <p class="error-msg" id="err-licence">Please select licence type</p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Purpose of rental</div>
+        <select class="field-input" id="purpose">
+          <option>Personal / Holiday</option>
+          <option>Business</option>
+          <option>Airport Transfer</option>
+          <option>Queensland Road Trip</option>
+          <option>Moving / Relocation</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row full">
+      <div class="form-group">
+        <div class="field-label">Special requests</div>
+        <textarea class="field-input" id="notes" rows="3" placeholder="Any special requirements, preferred car colour, baby capsule details, etc."></textarea>
+      </div>
+    </div>
+
+    <div class="info-box">
+      📋 Minimum rental age is <strong>21 years</strong>. Under 25 incurs a $25/day young driver surcharge. International licence holders must present passport at pick-up.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 5 — Review & Submit
+  ═══════════════════════════════════════════ -->
+  <div class="step" id="step5">
+    <div class="step-label">Step 6 of 6</div>
+    <div class="step-title">Review your quote</div>
+
+    <div class="summary-card">
+      <div class="summary-title">📋 Quote Summary</div>
+
+      <div class="summary-section">Rental Details</div>
+      <div class="summary-row">
+        <span id="sum-location">Location</span>
+        <span id="sum-dates">Dates</span>
+      </div>
+      <div class="summary-row">
+        <span id="sum-vehicle">Vehicle</span>
+        <span id="sum-days">Days</span>
+      </div>
+
+      <div class="summary-section">Charges</div>
+      <div class="summary-row" id="sum-base-row">
+        <span id="sum-base-label">Vehicle rental</span>
+        <span id="sum-base-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-linkt-row" style="display:none">
+        <span id="sum-linkt-label">Linkt Toll Pass</span>
+        <span id="sum-linkt-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-cdw-row" style="display:none">
+        <span id="sum-cdw-label">Super CDW Insurance</span>
+        <span id="sum-cdw-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-child-row" style="display:none">
+        <span>Child Seat</span>
+        <span id="sum-child-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-booster-row" style="display:none">
+        <span>Booster Seat</span>
+        <span id="sum-booster-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-adddriver-row" style="display:none">
+        <span>Additional Driver</span>
+        <span id="sum-adddriver-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-gps-row" style="display:none">
+        <span>GPS Navigation</span>
+        <span id="sum-gps-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-location-surcharge-row" style="display:none">
+        <span id="sum-location-surcharge-label">Location surcharge</span>
+        <span id="sum-location-surcharge-amt">$0.00</span>
+      </div>
+      <div class="summary-row" id="sum-oneway-row" style="display:none">
+        <span>One-way fee</span>
+        <span>$75.00</span>
+      </div>
+      <div class="summary-row" id="sum-young-row" style="display:none">
+        <span id="sum-young-label">Young driver surcharge</span>
+        <span id="sum-young-amt">$0.00</span>
+      </div>
+
+      <div class="summary-section">Tax</div>
+      <div class="summary-row">
+        <span>GST (10%)</span>
+        <span id="sum-gst">$0.00</span>
+      </div>
+
+      <div class="summary-total">
+        <span>Total to pay at pick-up</span>
+        <span id="sum-total">$0.00</span>
+      </div>
+
+      <div class="summary-section" style="color:#185fa5">Security Bond (held — not charged)</div>
+      <div class="summary-bond-row">
+        <span>Pre-auth hold on your card</span>
+        <span id="sum-bond" style="color:#185fa5">$750.00</span>
+      </div>
+      <div class="summary-bond-row" style="font-size:13px;font-weight:700;color:#0c447c;padding-top:4px">
+        <span>Total card reservation needed</span>
+        <span id="sum-total-card" style="color:#0c447c">$0.00</span>
+      </div>
+
+      <div class="valid-badge">⏱️ Quote valid for 48 hours — vehicle availability may change</div>
+    </div>
+
+    <div class="green-box">
+      ✅ Once you submit, our team will confirm vehicle availability and send your booking confirmation within <strong>2 hours</strong>. No payment is taken online — payment is at pick-up only.
+    </div>
+
+    <button class="btn-submit" onclick="submitQuote()" id="submit-btn">
+      📧 Send My Quote
+    </button>
+
+    <p class="error-msg" id="err-submit" style="text-align:center;margin-top:.5rem"></p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SUCCESS SCREEN
+  ═══════════════════════════════════════════ -->
+  <div id="success">
+    <div class="success-circle">✅</div>
+    <div class="success-title">Quote Sent Successfully!</div>
+    <div class="success-sub">
+      Your personalised car rental quote has been emailed to you.<br>
+      Our team will confirm availability within <strong>2 hours</strong>.
+    </div>
+
+    <div class="success-timeline">
+      <div class="success-timeline-title">📅 What happens next — security bond timeline:</div>
+      <div class="stl-row">
+        <div class="stl-dot" style="background:#1565c0">1</div>
+        <div class="stl-txt"><strong>At pick-up:</strong> Rental amount charged + security bond held on your card.</div>
+      </div>
+      <div class="stl-row">
+        <div class="stl-dot" style="background:#7f85f7">2</div>
+        <div class="stl-txt"><strong>During rental:</strong> Bond shows as pending — funds are not debited, just held.</div>
+      </div>
+      <div class="stl-row">
+        <div class="stl-dot" style="background:#5dcaa5">3</div>
+        <div class="stl-txt"><strong>On return:</strong> Vehicle inspected. If no damage, bond release begins immediately.</div>
+      </div>
+      <div class="stl-row">
+        <div class="stl-dot" style="background:#185fa5">4</div>
+        <div class="stl-txt"><strong>3–10 business days:</strong> Bond fully released by your bank. Available balance increases.</div>
+      </div>
+    </div>
+
+    <div class="success-valid-badge">⏱️ Quote valid for 48 hours</div>
+
+    <p style="font-size:13px;color:#666880;margin-top:1.25rem">
+      Questions? Call us at <strong>+61 400 000 000</strong><br>
+      or email <strong>info@auzserv.com.au</strong>
+    </p>
+  </div>
+
+  <!-- ── NAVIGATION ─────────────────────────── -->
+  <div class="nav-row" id="nav-row">
+    <button class="btn-back" id="btn-back" onclick="goBack()" style="visibility:hidden">
+      ← Back
+    </button>
+    <button class="btn-next" id="btn-next" onclick="goNext()">
+      Next Step →
+    </button>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────
+let currentStep  = 0;
+const totalSteps = 6;
+
+let state = {
+  location:       null,
+  locationSurcharge: 0,
+  pickupDate:     null,
+  returnDate:     null,
+  rentalDays:     0,
+  sameLoc:        true,
+  vehicle:        null,
+  vehicleDailyRate: 0,
+  vehicleWeeklyRate: 0,
+  vehicleBond:    0,
+  extras: {
+    linkt:     false,
+    cdw:       false,
+    childseat: false,
+    booster:   false,
+    adddriver: false,
+    gps:       false
+  },
+  payment:        null,
+  bondConfirmed:  false,
+  age:            null,
+  youngDriver:    false
+};
+
+// ─── Location ──────────────────────────────────
+function selectLocation(el, name, surcharge) {
+  document.querySelectorAll('#location-tiles .tile')
+    .forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  state.location = name;
+  state.locationSurcharge = surcharge;
+}
+
+// ─── Same location ─────────────────────────────
+function selectSameLoc(yes) {
+  state.sameLoc = yes;
+  document.getElementById('same-loc-yes')
+    .classList.toggle('selected', yes);
+  document.getElementById('same-loc-no')
+    .classList.toggle('selected', !yes);
+}
+
+// ─── Date calc ─────────────────────────────────
+function calcDays() {
+  const p = document.getElementById('pickup-date').value;
+  const r = document.getElementById('return-date').value;
+  if (!p || !r) return;
+  const diff = (new Date(r) - new Date(p)) / 86400000;
+  const badge = document.getElementById('days-badge');
+  if (diff <= 0) {
+    badge.style.display = 'none';
+    state.rentalDays = 0;
+    return;
+  }
+  state.rentalDays = diff;
+  state.pickupDate = p;
+  state.returnDate = r;
+  badge.style.display = 'block';
+  badge.textContent = `🗓️ ${diff} day rental · ${fmtDate(p)} → ${fmtDate(r)}`;
+}
+
+function fmtDate(d) {
+  return new Date(d + 'T00:00:00')
+    .toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'});
+}
+
+// ─── Vehicle ───────────────────────────────────
+function selectVehicle(el, name, example, daily, weekly, bond) {
+  document.querySelectorAll('.vehicle-card')
+    .forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.vehicle         = name;
+  state.vehicleExample  = example;
+  state.vehicleDailyRate  = daily;
+  state.vehicleWeeklyRate = weekly;
+  state.vehicleBond     = bond;
+  document.getElementById('bond-amount-display').textContent =
+    `$${bond.toLocaleString()} held — NOT charged`;
+  document.getElementById('confirm-bond-amt').textContent =
+    bond.toLocaleString();
+  document.getElementById('debit-bond-amt').textContent =
+    bond.toLocaleString();
+  calcQuote();
+}
+
+// ─── Extras ────────────────────────────────────
+function toggleExtra(el, key, rate, label, type, cap) {
+  el.classList.toggle('selected');
+  state.extras[key] = el.classList.contains('selected');
+  calcQuote();
+}
+
+// ─── Payment ───────────────────────────────────
+function selectPayment(type) {
+  state.payment = type;
+  document.getElementById('pay-credit')
+    .classList.toggle('selected', type === 'credit');
+  document.getElementById('pay-debit')
+    .classList.toggle('selected', type === 'debit');
+  const warn = document.getElementById('debit-warn');
+  warn.style.display = type === 'debit' ? 'block' : 'none';
+}
+
+// ─── Bond confirm ──────────────────────────────
+function toggleBondConfirm() {
+  state.bondConfirmed = !state.bondConfirmed;
+  const box = document.getElementById('bond-confirm');
+  const cb  = document.getElementById('bond-checkbox');
+  box.classList.toggle('checked', state.bondConfirmed);
+  cb.checked = state.bondConfirmed;
+}
+
+// ─── Age / young driver ────────────────────────
+function checkAge() {
+  const age = parseInt(document.getElementById('age').value);
+  state.age = age;
+  state.youngDriver = (age >= 21 && age < 25);
+  document.getElementById('young-driver-badge').style.display =
+    state.youngDriver ? 'block' : 'none';
+  calcQuote();
+}
+
+// ─── Quote calculation ─────────────────────────
+function calcQuote() {
+  const days = state.rentalDays || 1;
+  const d    = state.vehicleDailyRate  || 0;
+  const w    = state.vehicleWeeklyRate || 0;
+
+  // Base: weekly rate if 7+ days, else daily
+  const fullWeeks = Math.floor(days / 7);
+  const remDays   = days % 7;
+  const base = (fullWeeks * w) + (remDays * d);
+
+  // Extras
+  const linkt = state.extras.linkt
+    ? Math.round(days * 5.50 * 100) / 100 : 0;
+  const cdw = state.extras.cdw
+    ? days * 28 : 0;
+  const child = state.extras.childseat
+    ? Math.min(days * 15, 60) : 0;
+  const booster = state.extras.booster
+    ? Math.min(days * 10, 40) : 0;
+  const adddrv = state.extras.adddriver
+    ? Math.min(days * 15, 75) : 0;
+  const gps = state.extras.gps
+    ? Math.min(days * 12, 50) : 0;
+
+  // Surcharges
+  const locSurcharge = state.locationSurcharge || 0;
+  const oneway       = state.sameLoc ? 0 : 75;
+  const young        = state.youngDriver ? days * 25 : 0;
+
+  const subtotal = base + linkt + cdw + child + booster
+                   + adddrv + gps + locSurcharge + oneway + young;
+  const gst   = Math.round(subtotal * 0.10 * 100) / 100;
+  const total = Math.round((subtotal + gst) * 100) / 100;
+  const bond  = state.vehicleBond || 0;
+  const totalCard = Math.round((total + bond) * 100) / 100;
+
+  // Store for summary
+  state.calc = {
+    base, linkt, cdw, child, booster, adddrv, gps,
+    locSurcharge, oneway, young, gst, total, bond, totalCard,
+    days, fullWeeks, remDays
+  };
+}
+
+const fmt = n =>
+  '$' + n.toLocaleString('en-AU',
+    {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// ─── Populate summary ──────────────────────────
+function populateSummary() {
+  calcQuote();
+  const c = state.calc;
+
+  // Header rows
+  document.getElementById('sum-location').textContent =
+    state.location || '—';
+  document.getElementById('sum-dates').textContent =
+    state.pickupDate
+      ? `${fmtDate(state.pickupDate)} – ${fmtDate(state.returnDate)}`
+      : '—';
+  document.getElementById('sum-vehicle').textContent =
+    state.vehicle ? `${state.vehicle}` : '—';
+  document.getElementById('sum-days').textContent =
+    `${c.days} day${c.days!==1?'s':''}`;
+
+  // Base
+  const baseLabel = c.fullWeeks > 0
+    ? `${state.vehicle} (${c.fullWeeks}wk${c.fullWeeks>1?'s':''}${c.remDays>0?` + ${c.remDays}d`:''})`
+    : `${state.vehicle} × ${c.days} days`;
+  document.getElementById('sum-base-label').textContent = baseLabel;
+  document.getElementById('sum-base-amt').textContent = fmt(c.base);
+
+  // Extras rows
+  const showRow = (id, show, amt) => {
+    document.getElementById(id).style.display = show ? '' : 'none';
+    if (amt !== undefined)
+      document.getElementById(id.replace('-row','') + '-amt').textContent = fmt(amt);
+  };
+
+  showRow('sum-linkt-row',     c.linkt > 0,    c.linkt);
+  showRow('sum-cdw-row',       c.cdw > 0,      c.cdw);
+  showRow('sum-child-row',     c.child > 0,    c.child);
+  showRow('sum-booster-row',   c.booster > 0,  c.booster);
+  showRow('sum-adddriver-row', c.adddrv > 0,   c.adddrv);
+  showRow('sum-gps-row',       c.gps > 0,      c.gps);
+  showRow('sum-young-row',     c.young > 0,    c.young);
+  if (c.young > 0)
+    document.getElementById('sum-young-label').textContent =
+      `Young driver surcharge × ${c.days} days`;
+
+  if (c.locSurcharge > 0) {
+    document.getElementById('sum-location-surcharge-row')
+      .style.display = '';
+    document.getElementById('sum-location-surcharge-label')
+      .textContent = state.location + ' surcharge';
+    document.getElementById('sum-location-surcharge-amt')
+      .textContent = fmt(c.locSurcharge);
+  } else {
+    document.getElementById('sum-location-surcharge-row')
+      .style.display = 'none';
+  }
+
+  document.getElementById('sum-oneway-row').style.display =
+    !state.sameLoc ? '' : 'none';
+
+  document.getElementById('sum-gst').textContent = fmt(c.gst);
+  document.getElementById('sum-total').textContent = fmt(c.total);
+  document.getElementById('sum-bond').textContent =
+    fmt(c.bond) + ' (held)';
+  document.getElementById('sum-total-card').textContent = fmt(c.totalCard);
+  if (c.days > 0)
+    document.getElementById('sum-linkt-label').textContent =
+      `Linkt Toll Pass × ${c.days} days`;
+  if (c.days > 0)
+    document.getElementById('sum-cdw-label').textContent =
+      `Super CDW Insurance × ${c.days} days`;
+}
+
+// ─── Validation ────────────────────────────────
+function clearErrors() {
+  document.querySelectorAll('.error-msg')
+    .forEach(e => e.classList.remove('visible'));
+}
+
+function showErr(id) {
+  document.getElementById(id).classList.add('visible');
+}
+
+function validateStep(step) {
+  clearErrors();
+  if (step === 0) {
+    if (!state.location) { showErr('err-location'); return false; }
+    if (!state.rentalDays || state.rentalDays <= 0) {
+      showErr('err-dates'); return false;
+    }
+    return true;
+  }
+  if (step === 1) {
+    if (!state.vehicle) { showErr('err-vehicle'); return false; }
+    return true;
+  }
+  if (step === 2) return true; // extras optional
+  if (step === 3) {
+    if (!state.payment) { showErr('err-payment'); return false; }
+    if (!state.bondConfirmed) {
+      showErr('err-bond-confirm'); return false;
+    }
+    return true;
+  }
+  if (step === 4) {
+    let ok = true;
+    if (!document.getElementById('fname').value.trim())
+      { showErr('err-fname'); ok = false; }
+    if (!document.getElementById('lname').value.trim())
+      { showErr('err-lname'); ok = false; }
+    const email = document.getElementById('email').value.trim();
+    if (!email || !email.includes('@'))
+      { showErr('err-email'); ok = false; }
+    if (!document.getElementById('phone').value.trim())
+      { showErr('err-phone'); ok = false; }
+    const age = parseInt(document.getElementById('age').value);
+    if (!age || age < 21) { showErr('err-age'); ok = false; }
+    if (!document.getElementById('licence').value)
+      { showErr('err-licence'); ok = false; }
+    return ok;
+  }
+  return true;
+}
+
+// ─── Navigation ────────────────────────────────
+function goNext() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep === 4) {
+    populateSummary();
+  }
+  currentStep++;
+  renderStep();
+}
+
+function goBack() {
+  if (currentStep > 0) { currentStep--; renderStep(); }
+}
+
+function renderStep() {
+  // Show/hide steps
+  for (let i = 0; i < totalSteps; i++) {
+    const el = document.getElementById('step' + i);
+    if (el) el.classList.toggle('visible', i === currentStep);
+  }
+
+  // Progress bar
+  for (let i = 0; i < totalSteps; i++) {
+    const s = document.getElementById('seg' + i);
+    if (!s) continue;
+    s.classList.remove('active','done');
+    if (i < currentStep) s.classList.add('done');
+    if (i === currentStep) s.classList.add('active');
+  }
+
+  document.getElementById('progress-label').textContent =
+    `Step ${currentStep + 1} of ${totalSteps}`;
+
+  // Back button
+  document.getElementById('btn-back').style.visibility =
+    currentStep > 0 ? 'visible' : 'hidden';
+
+  // Next vs submit
+  const nextBtn = document.getElementById('btn-next');
+  if (currentStep === totalSteps - 1) {
+    nextBtn.style.display = 'none';
+  } else {
+    nextBtn.style.display = '';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Submit ────────────────────────────────────
+function submitQuote() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending...';
+
+  // TODO(backend): POST to /api/quote/car-rental
+  // with state + state.calc data
+  // Send email to customer with full quote breakdown
+  // including bond timeline explanation
+  console.log('Quote data:', state);
+
+  setTimeout(() => {
+    // Show success
+    for (let i = 0; i < totalSteps; i++) {
+      const el = document.getElementById('step' + i);
+      if (el) el.classList.remove('visible');
+    }
+    document.getElementById('nav-row').style.display = 'none';
+    document.getElementById('success').style.display = 'block';
+    document.querySelector('.progress-wrap').style.display = 'none';
+  }, 1500);
+}
+
+// ─── Init ──────────────────────────────────────
+// Set min date to today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('pickup-date').min = today;
+document.getElementById('return-date').min = today;
+</script>
+</body>
+</html>

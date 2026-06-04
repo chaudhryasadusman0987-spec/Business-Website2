@@ -16,14 +16,21 @@ export interface CCTVProduct {
   inStock: boolean;
 }
 
+// NOTE: the canonical Vehicle (with bond/example/icon) lives in
+// src/data/car-rental.ts. This mirror is kept in sync for any generic consumers.
 export interface Vehicle {
   id: string;
   name: string;
-  description: string;
+  example: string;
+  icon: string;
   dailyRate: number;
   weeklyRate: number;
+  bond: number;
   passengers: number;
   features: string[];
+  badge?: string;
+  image?: string;
+  inStock: boolean;
 }
 
 export interface ITService {

@@ -2,20 +2,22 @@ import Link from "next/link"
 
 interface QuoteCTABannerProps {
   href?: string
+  title?: string
+  subtitle?: string
 }
 
 export default function QuoteCTABanner({
   href = "/contact",
+  title = "Get Your Free Quote Today",
+  subtitle = "Fast response. No obligation. Australia-wide.",
 }: QuoteCTABannerProps) {
   return (
     <section className="bg-brand-primary py-[80px] text-center">
       <div className="max-w-[1170px] mx-auto px-4">
         <h2 className="text-[45px] font-bold text-white uppercase leading-tight">
-          Get Your Free Quote Today
+          {title}
         </h2>
-        <p className="text-white/80 text-lg mt-4">
-          Fast response. No obligation. Australia-wide.
-        </p>
+        <p className="text-white/80 text-lg mt-4">{subtitle}</p>
         <div className="mt-8">
           <Link
             href={href}
