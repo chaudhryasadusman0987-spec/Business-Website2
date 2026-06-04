@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT & AI Services Quote — AuzServ Australia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont,
+      'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    color: #1a1a2e;
+  }
+
+  :root {
+    --purple:    #7f85f7;
+    --purple-lt: #eeedfe;
+    --purple-dk: #534ab7;
+    --green:     #0f6e56;
+    --green-lt:  #e1f5ee;
+    --green-md:  #5dcaa5;
+    --border:    #e0e0e8;
+    --text:      #1a1a2e;
+    --muted:     #666880;
+    --gray:      #f7f7f7;
+  }
+
+  /* ── Wrapper ─────────────────────────── */
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* ── Card ────────────────────────────── */
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  /* ── Header ──────────────────────────── */
+  .header {
+    background: #7f85f7;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-box {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .brand {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .brand span { color: #c5c8fd; }
+
+  .header-right {
+    margin-left: auto;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ── Progress ────────────────────────── */
+  .progress-wrap {
+    padding: 1.25rem 2rem 0;
+  }
+
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: .4rem;
+  }
+
+  .seg {
+    height: 4px;
+    flex: 1;
+    border-radius: 99px;
+    background: #e0e0e8;
+    transition: background .3s;
+  }
+
+  .seg.done   { background: #5dcaa5; }
+  .seg.active { background: #7f85f7; }
+
+  .prog-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── Step ────────────────────────────── */
+  .step {
+    display: none;
+    padding: 0 2rem 1.5rem;
+  }
+
+  .step.visible { display: block; }
+
+  .step-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding-top: 1.5rem;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .4rem;
+    line-height: 1.3;
+  }
+
+  .step-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  /* ── Service tiles ───────────────────── */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+
+  .service-tile {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+    position: relative;
+  }
+
+  .service-tile:hover {
+    border-color: #b0b4fb;
+    background: #f9f9ff;
+  }
+
+  .service-tile.selected {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+  }
+
+  .tile-check {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all .2s;
+    color: #fff;
+  }
+
+  .service-tile.selected .tile-check {
+    background: var(--purple);
+    border-color: var(--purple);
+  }
+
+  .tile-body { flex: 1; }
+
+  .tile-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+
+  .tile-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tile-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .tile-price {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--purple);
+    margin-top: 4px;
+  }
+
+  .service-tile.selected .tile-name { color: var(--purple-dk); }
+
+  /* ── Detail tabs ─────────────────────── */
+  .detail-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .dtab {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--muted);
+  }
+
+  .dtab.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+
+  .detail-panel { display: none; }
+  .detail-panel.visible { display: block; }
+
+  /* ── Package select ──────────────────── */
+  .package-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .pkg-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+    position: relative;
+  }
+
+  .pkg-card:hover { border-color: #b0b4fb; }
+
+  .pkg-card.selected {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+  }
+
+  .pkg-badge {
+    position: absolute;
+    top: -9px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--purple);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  .pkg-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  .pkg-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--purple);
+    margin-top: 4px;
+  }
+
+  .pkg-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  /* ── Feature checkboxes ──────────────── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .feat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    transition: all .2s;
+    user-select: none;
+  }
+
+  .feat-item:hover { border-color: #b0b4fb; }
+
+  .feat-item.selected {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+    color: var(--purple-dk);
+  }
+
+  .feat-cb {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #fff;
+    transition: all .2s;
+  }
+
+  .feat-item.selected .feat-cb {
+    background: var(--purple);
+    border-color: var(--purple);
+  }
+
+  /* ── Inputs ──────────────────────────── */
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+    font-family: inherit;
+    background: #fff;
+  }
+
+  .field-input:focus { border-color: var(--purple); }
+
+  select.field-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666880' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; }
+
+  /* ── Budget tiles ────────────────────── */
+  .budget-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .budget-tile {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: .875rem .5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    user-select: none;
+  }
+
+  .budget-tile:hover { border-color: #b0b4fb; }
+
+  .budget-tile.selected {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+  }
+
+  .budget-amt {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .budget-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .budget-tile.selected .budget-amt { color: var(--purple-dk); }
+
+  /* ── Timeline tiles ──────────────────── */
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .timeline-tile {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: .875rem .5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    user-select: none;
+  }
+
+  .timeline-tile:hover { border-color: #b0b4fb; }
+
+  .timeline-tile.selected {
+    border-color: var(--purple);
+    background: var(--purple-lt);
+  }
+
+  .tl-icon { font-size: 20px; margin-bottom: 4px; }
+
+  .tl-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .timeline-tile.selected .tl-name { color: var(--purple-dk); }
+
+  /* ── Info / note boxes ───────────────── */
+  .info-box {
+    background: var(--purple-lt);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--purple-dk);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .warn-box {
+    background: #faeeda;
+    border-left: 3px solid #854f0b;
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #633806;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .green-box {
+    background: var(--green-lt);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--green);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Quote summary ───────────────────── */
+  .summary-card {
+    background: #f9f9ff;
+    border: 1.5px solid #c5c8fd;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--purple-dk);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #c5c8fd;
+  }
+
+  .summary-sep {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 10px 0 4px;
+    border-bottom: 1px solid #ddd;
+    margin-top: 4px;
+  }
+
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--purple-dk);
+    padding: 6px 0;
+    border-bottom: 1px solid #eeeeff;
+  }
+
+  .sum-row:last-of-type { border: none; }
+
+  .sum-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--purple-dk);
+    padding: 10px 0 6px;
+    border-top: 2px solid #c5c8fd;
+    margin-top: 6px;
+  }
+
+  .sum-total span:last-child { color: var(--purple); }
+
+  .disclaimer {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eeeeff;
+    line-height: 1.6;
+  }
+
+  .valid-badge {
+    background: var(--purple-lt);
+    color: var(--purple-dk);
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── Error messages ──────────────────── */
+  .error-msg {
+    color: #a32d2d;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ── Nav buttons ─────────────────────── */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--border);
+    background: #fafaff;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 0;
+    font-family: inherit;
+    transition: color .2s;
+  }
+
+  .btn-back:hover { color: var(--text); }
+
+  .btn-next {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .2s;
+  }
+
+  .btn-next:hover { background: #6b71f0; }
+  .btn-next:disabled { background: #b0bec5; cursor: not-allowed; }
+
+  .btn-submit {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .2s;
+    margin-top: .5rem;
+  }
+
+  .btn-submit:hover { background: #6b71f0; }
+  .btn-submit:disabled { background: #b0bec5; cursor: not-allowed; }
+
+  /* ── Success ─────────────────────────── */
+  #success {
+    display: none;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .success-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--purple-lt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 40px;
+  }
+
+  .success-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .5rem;
+  }
+
+  .success-sub {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .success-summary {
+    background: #f9f9ff;
+    border: 1.5px solid #c5c8fd;
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: left;
+    margin-bottom: 1.25rem;
+  }
+
+  .success-summary-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple-dk);
+    margin-bottom: 10px;
+  }
+
+  .success-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--purple-dk);
+    padding: 5px 0;
+    border-bottom: 1px solid #eeeeff;
+  }
+
+  .success-row:last-child { border: none; }
+
+  .success-valid {
+    background: var(--purple-lt);
+    color: var(--purple-dk);
+    border-radius: 99px;
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  /* ── Mobile ──────────────────────────── */
+  @media (max-width: 600px) {
+    body { padding: 1rem .5rem; }
+    .step { padding: 0 1.25rem 1.5rem; }
+    .progress-wrap { padding: 1rem 1.25rem 0; }
+    .header { padding: 1rem 1.25rem; }
+    .nav-row { padding: 1rem 1.25rem; }
+    .service-grid { grid-template-columns: 1fr; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .budget-grid { grid-template-columns: 1fr 1fr; }
+    .timeline-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .package-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-box">💻</div>
+    <div>
+      <div class="brand">AuzServ <span>Australia</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px">
+        IT & AI Services Quote
+      </div>
+    </div>
+    <div class="header-right">
+      Free Consultation<br>No obligation
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR (5 steps) -->
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="seg active" id="seg0"></div>
+      <div class="seg" id="seg1"></div>
+      <div class="seg" id="seg2"></div>
+      <div class="seg" id="seg3"></div>
+      <div class="seg" id="seg4"></div>
+    </div>
+    <div class="prog-label" id="prog-label">Step 1 of 5</div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       STEP 0 — Service Selection
+  ═══════════════════════════════════ -->
+  <div class="step visible" id="step0">
+    <div class="step-eyebrow">Step 1 of 5</div>
+    <div class="step-title">What services do you need?</div>
+    <div class="step-sub">
+      Select one or more — you can combine services
+    </div>
+
+    <div class="service-grid">
+      <div class="service-tile" onclick="toggleService(this,'web')">
+        <div class="tile-check">✓</div>
+        <div class="tile-body">
+          <div class="tile-icon">🌐</div>
+          <div class="tile-name">Web Development</div>
+          <div class="tile-desc">Website or web application</div>
+          <!-- Price loaded from data: -->
+          <div class="tile-price" id="price-web">From $2,500</div>
+        </div>
+      </div>
+      <div class="service-tile" onclick="toggleService(this,'app')">
+        <div class="tile-check">✓</div>
+        <div class="tile-body">
+          <div class="tile-icon">📱</div>
+          <div class="tile-name">App Development</div>
+          <div class="tile-desc">iOS and/or Android app</div>
+          <div class="tile-price" id="price-app">From $8,000</div>
+        </div>
+      </div>
+      <div class="service-tile" onclick="toggleService(this,'ai')">
+        <div class="tile-check">✓</div>
+        <div class="tile-body">
+          <div class="tile-icon">🤖</div>
+          <div class="tile-name">AI Automation</div>
+          <div class="tile-desc">Chatbot, workflows, custom AI</div>
+          <div class="tile-price" id="price-ai">From $1,500</div>
+        </div>
+      </div>
+      <div class="service-tile" onclick="toggleService(this,'consulting')">
+        <div class="tile-check">✓</div>
+        <div class="tile-body">
+          <div class="tile-icon">💡</div>
+          <div class="tile-name">IT Consulting</div>
+          <div class="tile-desc">Technology audit & roadmap</div>
+          <div class="tile-price" id="price-consulting">From $150/hr</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      💡 Not sure which service you need? Select
+      <strong>IT Consulting</strong> and our team will
+      help you choose the right path in a free 30-minute call.
+    </div>
+
+    <p class="error-msg" id="err-service">
+      Please select at least one service.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       STEP 1 — Service Details
+  ═══════════════════════════════════ -->
+  <div class="step" id="step1">
+    <div class="step-eyebrow">Step 2 of 5</div>
+    <div class="step-title">Tell us about your project</div>
+    <div class="step-sub">
+      Fill in the details for each selected service
+    </div>
+
+    <!-- Tab buttons — built dynamically -->
+    <div class="detail-tabs" id="detail-tabs"></div>
+
+    <!-- ── WEB DEVELOPMENT PANEL ── -->
+    <div class="detail-panel" id="panel-web">
+      <div class="field-label" style="margin-bottom:10px">
+        Which package suits you best?
+      </div>
+      <div class="package-grid" id="web-packages">
+        <div class="pkg-card" onclick="selectPkg(this,'web','starter',2500)">
+          <div class="pkg-name">Starter</div>
+          <div class="pkg-price" id="web-pkg-price-starter">
+            From $2,500
+          </div>
+          <div class="pkg-desc">5 pages · Contact form · SEO</div>
+        </div>
+        <div class="pkg-card" onclick="selectPkg(this,'web','business',5500)">
+          <div class="pkg-badge">Most Popular</div>
+          <div class="pkg-name">Business</div>
+          <div class="pkg-price" id="web-pkg-price-business">
+            From $5,500
+          </div>
+          <div class="pkg-desc">15 pages · CMS · Analytics</div>
+        </div>
+        <div class="pkg-card" onclick="selectPkg(this,'web','ecommerce',8500)">
+          <div class="pkg-name">E-Commerce</div>
+          <div class="pkg-price" id="web-pkg-price-ecommerce">
+            From $8,500
+          </div>
+          <div class="pkg-desc">Online store · Payments</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:1rem">
+        <div class="form-group">
+          <div class="field-label">Number of pages</div>
+          <select class="field-input" id="web-pages">
+            <option value="">Select...</option>
+            <option>1–5 pages</option>
+            <option>6–15 pages</option>
+            <option>15+ pages</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Deadline</div>
+          <select class="field-input" id="web-deadline">
+            <option value="">Select...</option>
+            <option>ASAP</option>
+            <option>Within 1 month</option>
+            <option>1–3 months</option>
+            <option>Flexible</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <div class="field-label">Do you have a domain?</div>
+          <select class="field-input" id="web-domain">
+            <option value="">Select...</option>
+            <option>Yes — I have one</option>
+            <option>No — I need one</option>
+            <option>Not sure</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Existing content ready?</div>
+          <select class="field-input" id="web-content">
+            <option value="">Select...</option>
+            <option>Yes — content is ready</option>
+            <option>No — need help with content</option>
+            <option>Partially ready</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── APP DEVELOPMENT PANEL ── -->
+    <div class="detail-panel" id="panel-app">
+      <div class="field-label" style="margin-bottom:10px">
+        Which package suits you best?
+      </div>
+      <div class="package-grid">
+        <div class="pkg-card" onclick="selectPkg(this,'app','mvp',8000)">
+          <div class="pkg-name">MVP App</div>
+          <div class="pkg-price" id="app-pkg-price-mvp">
+            From $8,000
+          </div>
+          <div class="pkg-desc">1 platform · Core features</div>
+        </div>
+        <div class="pkg-card" onclick="selectPkg(this,'app','full',18000)">
+          <div class="pkg-badge">Most Popular</div>
+          <div class="pkg-name">Full App</div>
+          <div class="pkg-price" id="app-pkg-price-full">
+            From $18,000
+          </div>
+          <div class="pkg-desc">iOS + Android · All features</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:1rem">
+        <div class="form-group">
+          <div class="field-label">Platform needed</div>
+          <select class="field-input" id="app-platform">
+            <option value="">Select...</option>
+            <option>iOS only</option>
+            <option>Android only</option>
+            <option>Both iOS + Android</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="field-label">App type</div>
+          <select class="field-input" id="app-type">
+            <option value="">Select...</option>
+            <option>Customer-facing app</option>
+            <option>Internal business tool</option>
+            <option>Marketplace or platform</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:8px">
+        Key features needed (select all that apply)
+      </div>
+      <div class="feature-grid">
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-login')">
+          <div class="feat-cb">✓</div> User login
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-payments')">
+          <div class="feat-cb">✓</div> In-app payments
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-push')">
+          <div class="feat-cb">✓</div> Push notifications
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-maps')">
+          <div class="feat-cb">✓</div> Maps / location
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-admin')">
+          <div class="feat-cb">✓</div> Admin dashboard
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'app-camera')">
+          <div class="feat-cb">✓</div> Camera / media
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AI AUTOMATION PANEL ── -->
+    <div class="detail-panel" id="panel-ai">
+      <div class="field-label" style="margin-bottom:10px">
+        Which package suits you best?
+      </div>
+      <div class="package-grid">
+        <div class="pkg-card"
+             onclick="selectPkg(this,'ai','chatbot',1500)">
+          <div class="pkg-badge">Best Value</div>
+          <div class="pkg-name">AI Chat Agent</div>
+          <div class="pkg-price" id="ai-pkg-price-chatbot">
+            From $1,500
+          </div>
+          <div class="pkg-desc">Website chatbot · Lead capture</div>
+        </div>
+        <div class="pkg-card"
+             onclick="selectPkg(this,'ai','workflow',3500)">
+          <div class="pkg-name">Workflow Automation</div>
+          <div class="pkg-price" id="ai-pkg-price-workflow">
+            From $3,500
+          </div>
+          <div class="pkg-desc">Automate manual processes</div>
+        </div>
+        <div class="pkg-card"
+             onclick="selectPkg(this,'ai','custom',0)">
+          <div class="pkg-name">Custom AI</div>
+          <div class="pkg-price">Custom quote</div>
+          <div class="pkg-desc">Bespoke AI solution</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:1rem">
+        <div class="form-group">
+          <div class="field-label">Primary purpose</div>
+          <select class="field-input" id="ai-purpose">
+            <option value="">Select...</option>
+            <option>Customer support / FAQ answering</option>
+            <option>Lead collection</option>
+            <option>Document processing</option>
+            <option>Email automation</option>
+            <option>Data analysis</option>
+            <option>Custom / not sure</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Expected volume</div>
+          <select class="field-input" id="ai-volume">
+            <option value="">Select...</option>
+            <option>Under 100 interactions/day</option>
+            <option>100–1,000 per day</option>
+            <option>1,000+ per day</option>
+            <option>Not sure</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:8px">
+        Integrate with (select all that apply)
+      </div>
+      <div class="feature-grid">
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-crm')">
+          <div class="feat-cb">✓</div> CRM (HubSpot/Salesforce)
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-email')">
+          <div class="feat-cb">✓</div> Email (Gmail/Outlook)
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-website')">
+          <div class="feat-cb">✓</div> My website
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-calendar')">
+          <div class="feat-cb">✓</div> Calendar / bookings
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-docs')">
+          <div class="feat-cb">✓</div> Google Drive / Docs
+        </div>
+        <div class="feat-item"
+             onclick="toggleFeat(this,'ai-none')">
+          <div class="feat-cb">✓</div> None yet
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IT CONSULTING PANEL ── -->
+    <div class="detail-panel" id="panel-consulting">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="field-label">Topic</div>
+          <select class="field-input" id="con-topic">
+            <option value="">Select...</option>
+            <option>Technology audit and review</option>
+            <option>Software selection advice</option>
+            <option>Cybersecurity assessment</option>
+            <option>Digital transformation roadmap</option>
+            <option>IT infrastructure review</option>
+            <option>Staff technology training</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="field-label">Hours needed</div>
+          <select class="field-input" id="con-hours">
+            <option value="">Select...</option>
+            <option>1–2 hours</option>
+            <option>Half day (4 hours)</option>
+            <option>Full day (8 hours)</option>
+            <option>Ongoing / retainer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="field-label">Format</div>
+          <select class="field-input" id="con-format">
+            <option value="">Select...</option>
+            <option>Phone / video call</option>
+            <option>On-site (Brisbane)</option>
+            <option>Remote</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="error-msg" id="err-details">
+      Please fill in the details above.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       STEP 2 — Budget & Timeline
+  ═══════════════════════════════════ -->
+  <div class="step" id="step2">
+    <div class="step-eyebrow">Step 3 of 5</div>
+    <div class="step-title">Budget & timeline</div>
+    <div class="step-sub">
+      Helps us send you the most relevant proposal
+    </div>
+
+    <div class="field-label" style="margin-bottom:10px">
+      What is your approximate budget?
+    </div>
+    <div class="budget-grid">
+      <div class="budget-tile"
+           onclick="selectBudget(this,'under3k')">
+        <div class="budget-amt">Under<br>$3,000</div>
+        <div class="budget-lbl">Small project</div>
+      </div>
+      <div class="budget-tile"
+           onclick="selectBudget(this,'3k-10k')">
+        <div class="budget-amt">$3k–<br>$10k</div>
+        <div class="budget-lbl">Mid-range</div>
+      </div>
+      <div class="budget-tile"
+           onclick="selectBudget(this,'10k-30k')">
+        <div class="budget-amt">$10k–<br>$30k</div>
+        <div class="budget-lbl">Larger project</div>
+      </div>
+      <div class="budget-tile"
+           onclick="selectBudget(this,'30k+')">
+        <div class="budget-amt">$30k+</div>
+        <div class="budget-lbl">Enterprise</div>
+      </div>
+    </div>
+
+    <div class="field-label"
+         style="margin-top:1.25rem;margin-bottom:10px">
+      When do you need this delivered?
+    </div>
+    <div class="timeline-grid">
+      <div class="timeline-tile"
+           onclick="selectTimeline(this,'asap')">
+        <div class="tl-icon">⚡</div>
+        <div class="tl-name">ASAP</div>
+      </div>
+      <div class="timeline-tile"
+           onclick="selectTimeline(this,'1month')">
+        <div class="tl-icon">📅</div>
+        <div class="tl-name">Within 1 Month</div>
+      </div>
+      <div class="timeline-tile"
+           onclick="selectTimeline(this,'3months')">
+        <div class="tl-icon">🗓️</div>
+        <div class="tl-name">1–3 Months</div>
+      </div>
+      <div class="timeline-tile"
+           onclick="selectTimeline(this,'flexible')">
+        <div class="tl-icon">🌿</div>
+        <div class="tl-name">Flexible</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      💡 Your budget range helps us tailor the proposal —
+      it does <strong>not</strong> affect whether we contact
+      you. We work with all budgets.
+    </div>
+
+    <p class="error-msg" id="err-budget">
+      Please select a budget range.
+    </p>
+    <p class="error-msg" id="err-timeline">
+      Please select a timeline.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       STEP 3 — Contact Details
+  ═══════════════════════════════════ -->
+  <div class="step" id="step3">
+    <div class="step-eyebrow">Step 4 of 5</div>
+    <div class="step-title">Your contact details</div>
+    <div class="step-sub">
+      We will call you within 1 business day
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">First name *</div>
+        <input type="text" class="field-input"
+               id="fname" placeholder="John">
+        <p class="error-msg" id="err-fname">
+          First name required
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Last name *</div>
+        <input type="text" class="field-input"
+               id="lname" placeholder="Smith">
+        <p class="error-msg" id="err-lname">
+          Last name required
+        </p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">Email address *</div>
+        <input type="email" class="field-input"
+               id="email" placeholder="john@company.com">
+        <p class="error-msg" id="err-email">
+          Valid email required
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="field-label">Phone number *</div>
+        <input type="tel" class="field-input"
+               id="phone" placeholder="04XX XXX XXX">
+        <p class="error-msg" id="err-phone">
+          Phone number required
+        </p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="field-label">Company name</div>
+        <input type="text" class="field-input"
+               id="company" placeholder="Optional">
+      </div>
+      <div class="form-group">
+        <div class="field-label">Suburb / City</div>
+        <input type="text" class="field-input"
+               id="suburb" placeholder="Brisbane, 4000">
+      </div>
+    </div>
+
+    <div class="form-row full">
+      <div class="form-group">
+        <div class="field-label">
+          Describe your project *
+        </div>
+        <textarea class="field-input" id="description"
+          rows="4"
+          placeholder="Tell us what you are trying to build or solve. The more detail, the better our proposal."></textarea>
+        <p class="error-msg" id="err-description">
+          Please describe your project
+        </p>
+      </div>
+    </div>
+
+    <div class="form-row full" style="margin-top:0">
+      <div class="form-group">
+        <div class="field-label">
+          How did you hear about us?
+        </div>
+        <select class="field-input" id="source">
+          <option value="">Select...</option>
+          <option>Google Search</option>
+          <option>Social Media</option>
+          <option>Friend or Colleague</option>
+          <option>Saw your ad</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       STEP 4 — Review & Submit
+  ═══════════════════════════════════ -->
+  <div class="step" id="step4">
+    <div class="step-eyebrow">Step 5 of 5</div>
+    <div class="step-title">Review your quote estimate</div>
+    <div class="step-sub">
+      This is an estimate based on your selections.
+      A fixed quote is provided after your free consultation.
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-title">📋 Quote Estimate</div>
+
+      <div class="summary-sep">Selected Services</div>
+      <div id="sum-services"></div>
+
+      <div class="summary-sep">Project Details</div>
+      <div class="sum-row">
+        <span>Budget range</span>
+        <span id="sum-budget">—</span>
+      </div>
+      <div class="sum-row">
+        <span>Timeline</span>
+        <span id="sum-timeline">—</span>
+      </div>
+      <div class="sum-row">
+        <span>Contact</span>
+        <span id="sum-contact">—</span>
+      </div>
+
+      <div class="summary-sep">Estimate</div>
+      <div class="sum-row">
+        <span>Combined starting from</span>
+        <span id="sum-starting">$0</span>
+      </div>
+      <div class="sum-row">
+        <span>GST (10%) additional</span>
+        <span>+10%</span>
+      </div>
+
+      <div class="sum-total">
+        <span>Indicative range</span>
+        <span id="sum-range">—</span>
+      </div>
+
+      <div class="disclaimer">
+        ⚠️ This is an <strong>estimate only</strong>,
+        not a fixed price. Final pricing is confirmed
+        after a free 30-minute consultation call.
+        All prices shown are ex-GST.
+        <!-- NOTE: prices driven by admin dashboard data -->
+        <!-- TODO(dashboard): prices loaded from
+             itServiceItems packages in data file -->
+      </div>
+
+      <div class="valid-badge">
+        ✓ Estimate valid for 7 days
+      </div>
+    </div>
+
+    <div class="green-box">
+      ✅ Once you submit, our team will call you within
+      <strong>1 business day</strong> to discuss your project
+      and provide a fixed quote. No payment required at
+      this stage.
+    </div>
+
+    <button class="btn-submit"
+            onclick="submitQuote()"
+            id="submit-btn">
+      📧 Send My Quote Request
+    </button>
+
+    <p class="error-msg" id="err-submit"
+       style="text-align:center;margin-top:.5rem"></p>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="success">
+    <div class="success-circle">✅</div>
+    <div class="success-title">Quote Request Sent!</div>
+    <div class="success-sub">
+      Your estimate has been emailed to you.<br>
+      Our team will call you within
+      <strong>1 business day</strong>
+      to discuss your project and provide a
+      fixed quote.
+    </div>
+
+    <div class="success-summary">
+      <div class="success-summary-title">
+        📋 Your estimate summary
+      </div>
+      <div id="success-services"></div>
+      <div class="success-row">
+        <span>Indicative range</span>
+        <span id="success-range"
+              style="font-weight:700;color:var(--purple)">
+          —
+        </span>
+      </div>
+      <div class="success-row">
+        <span>GST additional</span>
+        <span>+10%</span>
+      </div>
+    </div>
+
+    <div class="success-valid">
+      ⏱️ Estimate valid for 7 days
+    </div>
+
+    <p style="font-size:13px;color:#666880;margin-top:1.25rem">
+      Questions? Call us at
+      <strong>+61 400 000 000</strong><br>
+      or email
+      <strong>info@auzserv.com.au</strong>
+    </p>
+  </div>
+
+  <!-- NAV ROW -->
+  <div class="nav-row" id="nav-row">
+    <button class="btn-back"
+            id="btn-back"
+            onclick="goBack()"
+            style="visibility:hidden">
+      ← Back
+    </button>
+    <button class="btn-next"
+            id="btn-next"
+            onclick="goNext()">
+      Next Step →
+    </button>
+  </div>
+
+</div><!-- /.card -->
+</div><!-- /.wrap -->
+
+<script>
+// ─── PRICES — loaded from data file ─────────────
+// TODO(dashboard): these prices are read from
+// itServiceItems packages in src/data/it-services.ts
+// Admin dashboard edits them → quote auto-updates
+const PRICES = {
+  web: {
+    starter:   2500,
+    business:  5500,
+    ecommerce: 8500,
+  },
+  app: {
+    mvp:  8000,
+    full: 18000,
+  },
+  ai: {
+    chatbot:  1500,
+    workflow: 3500,
+    custom:   0,    // custom quote — no fixed price
+  },
+  consulting: {
+    hourly: 150,    // per hour
+  }
+}
+
+// Ranges shown in summary (1.3× the starting price)
+function calcRange(base) {
+  if (!base) return "Custom quote"
+  const high = Math.round(base * 1.35 / 500) * 500
+  return `$${base.toLocaleString('en-AU')}–$${high.toLocaleString('en-AU')}`
+}
+
+// ─── STATE ───────────────────────────────────────
+let currentStep = 0
+const TOTAL = 5
+
+const state = {
+  services:       [],   // ['web','app','ai','consulting']
+  activeTab:      null,
+  webPkg:         null,
+  webPkgPrice:    0,
+  appPkg:         null,
+  appPkgPrice:    0,
+  aiPkg:          null,
+  aiPkgPrice:     0,
+  budget:         null,
+  timeline:       null,
+}
+
+// ─── SERVICE SELECTION ───────────────────────────
+function toggleService(el, key) {
+  el.classList.toggle('selected')
+  if (state.services.includes(key)) {
+    state.services = state.services.filter(s => s !== key)
+  } else {
+    state.services.push(key)
+  }
+}
+
+// ─── BUILD DETAIL TABS ───────────────────────────
+const SERVICE_LABELS = {
+  web:        '🌐 Web Dev',
+  app:        '📱 App Dev',
+  ai:         '🤖 AI Auto',
+  consulting: '💡 Consulting'
+}
+
+function buildDetailTabs() {
+  const container = document.getElementById('detail-tabs')
+  container.innerHTML = ''
+  state.services.forEach((svc, i) => {
+    const btn = document.createElement('div')
+    btn.className = 'dtab' + (i === 0 ? ' active' : '')
+    btn.textContent = SERVICE_LABELS[svc]
+    btn.onclick = () => switchTab(svc)
+    container.appendChild(btn)
+  })
+  if (state.services.length > 0) {
+    state.activeTab = state.services[0]
+    showPanel(state.services[0])
+  }
+}
+
+function switchTab(svc) {
+  state.activeTab = svc
+  document.querySelectorAll('.dtab').forEach((t, i) => {
+    t.classList.toggle('active',
+      t.textContent.includes(
+        SERVICE_LABELS[svc].replace(/^[^ ]+ /, '')))
+  })
+  // hide all, show selected
+  state.services.forEach(s => {
+    const p = document.getElementById('panel-' + s)
+    if (p) p.classList.remove('visible')
+  })
+  document.querySelectorAll('.detail-panel').forEach(p =>
+    p.classList.remove('visible'))
+  showPanel(svc)
+}
+
+function showPanel(svc) {
+  document.querySelectorAll('.detail-panel')
+    .forEach(p => p.classList.remove('visible'))
+  const p = document.getElementById('panel-' + svc)
+  if (p) p.classList.add('visible')
+}
+
+// ─── PACKAGE SELECTION ───────────────────────────
+function selectPkg(el, service, pkgId, price) {
+  const parent = el.parentElement
+  parent.querySelectorAll('.pkg-card')
+    .forEach(c => c.classList.remove('selected'))
+  el.classList.add('selected')
+  if (service === 'web') {
+    state.webPkg = pkgId; state.webPkgPrice = price
+  }
+  if (service === 'app') {
+    state.appPkg = pkgId; state.appPkgPrice = price
+  }
+  if (service === 'ai')  {
+    state.aiPkg  = pkgId; state.aiPkgPrice  = price
+  }
+}
+
+// ─── FEATURE TOGGLE ──────────────────────────────
+function toggleFeat(el, key) {
+  el.classList.toggle('selected')
+}
+
+// ─── BUDGET ──────────────────────────────────────
+function selectBudget(el, val) {
+  document.querySelectorAll('.budget-tile')
+    .forEach(t => t.classList.remove('selected'))
+  el.classList.add('selected')
+  state.budget = val
+}
+
+// ─── TIMELINE ────────────────────────────────────
+function selectTimeline(el, val) {
+  document.querySelectorAll('.timeline-tile')
+    .forEach(t => t.classList.remove('selected'))
+  el.classList.add('selected')
+  state.timeline = val
+}
+
+// ─── QUOTE CALCULATION ───────────────────────────
+function calcTotal() {
+  let total = 0
+  if (state.services.includes('web'))
+    total += state.webPkgPrice || PRICES.web.starter
+  if (state.services.includes('app'))
+    total += state.appPkgPrice || PRICES.app.mvp
+  if (state.services.includes('ai') &&
+      state.aiPkg !== 'custom')
+    total += state.aiPkgPrice || PRICES.ai.chatbot
+  if (state.services.includes('consulting'))
+    total += PRICES.consulting.hourly * 2  // 2hr min
+  return total
+}
+
+// ─── POPULATE SUMMARY ────────────────────────────
+const PKG_NAMES = {
+  web: { starter: 'Starter', business: 'Business',
+         ecommerce: 'E-Commerce' },
+  app: { mvp: 'MVP App', full: 'Full App' },
+  ai:  { chatbot: 'AI Chat Agent',
+         workflow: 'Workflow Automation',
+         custom: 'Custom AI' },
+}
+
+function populateSummary() {
+  const total = calcTotal()
+  const range = calcRange(total)
+
+  // Services rows
+  const svcContainer = document.getElementById('sum-services')
+  svcContainer.innerHTML = ''
+  state.services.forEach(svc => {
+    const row = document.createElement('div')
+    row.className = 'sum-row'
+    let name = SERVICE_LABELS[svc]
+    let price = ''
+    if (svc === 'web' && state.webPkg) {
+      name += ` — ${PKG_NAMES.web[state.webPkg] || ''}`
+      price = state.webPkgPrice
+        ? `From $${state.webPkgPrice.toLocaleString('en-AU')}`
+        : '—'
+    } else if (svc === 'app' && state.appPkg) {
+      name += ` — ${PKG_NAMES.app[state.appPkg] || ''}`
+      price = state.appPkgPrice
+        ? `From $${state.appPkgPrice.toLocaleString('en-AU')}`
+        : '—'
+    } else if (svc === 'ai' && state.aiPkg) {
+      name += ` — ${PKG_NAMES.ai[state.aiPkg] || ''}`
+      price = state.aiPkg === 'custom'
+        ? 'Custom quote'
+        : state.aiPkgPrice
+          ? `From $${state.aiPkgPrice.toLocaleString('en-AU')}`
+          : '—'
+    } else if (svc === 'consulting') {
+      price = `$${PRICES.consulting.hourly}/hr`
+    }
+    row.innerHTML = `<span>${name}</span><span>${price}</span>`
+    svcContainer.appendChild(row)
+  })
+
+  // Totals
+  const budgetLabels = {
+    'under3k': 'Under $3,000', '3k-10k': '$3,000–$10,000',
+    '10k-30k': '$10,000–$30,000', '30k+': '$30,000+'
+  }
+  const timelineLabels = {
+    'asap': 'ASAP', '1month': 'Within 1 month',
+    '3months': '1–3 months', 'flexible': 'Flexible'
+  }
+
+  document.getElementById('sum-budget').textContent =
+    budgetLabels[state.budget] || '—'
+  document.getElementById('sum-timeline').textContent =
+    timelineLabels[state.timeline] || '—'
+  document.getElementById('sum-contact').textContent =
+    document.getElementById('fname').value
+      ? `${document.getElementById('fname').value} ${document.getElementById('lname').value}`
+      : '—'
+  document.getElementById('sum-starting').textContent =
+    total ? `$${total.toLocaleString('en-AU')}` : 'Custom'
+  document.getElementById('sum-range').textContent = range
+}
+
+// ─── VALIDATION ──────────────────────────────────
+function clearErrors() {
+  document.querySelectorAll('.error-msg')
+    .forEach(e => e.classList.remove('visible'))
+}
+
+function showErr(id) {
+  const el = document.getElementById(id)
+  if (el) el.classList.add('visible')
+}
+
+function validateStep(step) {
+  clearErrors()
+  if (step === 0) {
+    if (state.services.length === 0) {
+      showErr('err-service'); return false
+    }
+    return true
+  }
+  if (step === 1) return true // details optional
+  if (step === 2) {
+    if (!state.budget) {
+      showErr('err-budget'); return false
+    }
+    if (!state.timeline) {
+      showErr('err-timeline'); return false
+    }
+    return true
+  }
+  if (step === 3) {
+    let ok = true
+    if (!document.getElementById('fname').value.trim())
+      { showErr('err-fname'); ok = false }
+    if (!document.getElementById('lname').value.trim())
+      { showErr('err-lname'); ok = false }
+    const em = document.getElementById('email').value
+    if (!em || !em.includes('@'))
+      { showErr('err-email'); ok = false }
+    if (!document.getElementById('phone').value.trim())
+      { showErr('err-phone'); ok = false }
+    if (!document.getElementById('description').value.trim())
+      { showErr('err-description'); ok = false }
+    return ok
+  }
+  return true
+}
+
+// ─── NAVIGATION ──────────────────────────────────
+function goNext() {
+  if (!validateStep(currentStep)) return
+  if (currentStep === 0) buildDetailTabs()
+  if (currentStep === 3) populateSummary()
+  currentStep++
+  renderStep()
+}
+
+function goBack() {
+  if (currentStep > 0) { currentStep--; renderStep() }
+}
+
+function renderStep() {
+  for (let i = 0; i < TOTAL; i++) {
+    const el = document.getElementById('step' + i)
+    if (el) el.classList.toggle('visible', i === currentStep)
+    const seg = document.getElementById('seg' + i)
+    if (seg) {
+      seg.classList.remove('active', 'done')
+      if (i < currentStep) seg.classList.add('done')
+      if (i === currentStep) seg.classList.add('active')
+    }
+  }
+  document.getElementById('prog-label').textContent =
+    `Step ${currentStep + 1} of ${TOTAL}`
+  document.getElementById('btn-back').style.visibility =
+    currentStep > 0 ? 'visible' : 'hidden'
+  document.getElementById('btn-next').style.display =
+    currentStep === TOTAL - 1 ? 'none' : ''
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// ─── SUBMIT ──────────────────────────────────────
+function submitQuote() {
+  const btn = document.getElementById('submit-btn')
+  btn.disabled = true
+  btn.textContent = '⏳ Sending...'
+
+  const total = calcTotal()
+  const range = calcRange(total)
+
+  // TODO(backend): POST to /api/quote/it-services
+  // Payload: state + contact details + description
+  // Send estimate email to customer
+  // Save lead to dashboard
+  console.log('IT Quote:', state, {
+    fname: document.getElementById('fname').value,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    description: document.getElementById('description').value,
+    total, range
+  })
+
+  setTimeout(() => {
+    // Build success summary
+    const sc = document.getElementById('success-services')
+    sc.innerHTML = ''
+    state.services.forEach(svc => {
+      const row = document.createElement('div')
+      row.className = 'success-row'
+      row.innerHTML = `<span>${SERVICE_LABELS[svc]}</span>`
+      sc.appendChild(row)
+    })
+    document.getElementById('success-range').textContent = range
+
+    // Show success
+    for (let i = 0; i < TOTAL; i++) {
+      const el = document.getElementById('step' + i)
+      if (el) el.classList.remove('visible')
+    }
+    document.getElementById('nav-row').style.display = 'none'
+    document.getElementById('success').style.display = 'block'
+    document.querySelector('.progress-wrap').style.display = 'none'
+  }, 1500)
+}
+</script>
+</body>
+</html>

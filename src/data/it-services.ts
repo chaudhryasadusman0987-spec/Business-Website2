@@ -10,7 +10,8 @@ export interface ITPackage {
   id: string
   name: string
   description: string
-  startingFrom: string
+  startingFrom: string // display string, e.g. "From $2,500"
+  startingFromValue: number // numeric value for quote calculation, e.g. 2500
   badge?: string
   features: string[]
 }
@@ -40,6 +41,8 @@ export interface ITServiceItem {
   technologies: string[]
 }
 
+// TODO(dashboard): admin updates startingFromValue here → quote form price
+// tiles update automatically (the IT & AI quote wizard reads these values)
 export const itServiceItems: ITServiceItem[] = [
   {
     id: "web-development",
@@ -63,6 +66,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "Starter Website",
         description: "Perfect for small businesses and tradies",
         startingFrom: "From $2,500",
+        startingFromValue: 2500,
         features: [
           "5-page professional website",
           "Mobile responsive design",
@@ -77,6 +81,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "Business Website",
         description: "For growing businesses needing more",
         startingFrom: "From $5,500",
+        startingFromValue: 5500,
         badge: "Most Popular",
         features: [
           "Up to 15 pages",
@@ -92,6 +97,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "E-Commerce Store",
         description: "Sell online — Australia-wide or globally",
         startingFrom: "From $8,500",
+        startingFromValue: 8500,
         features: [
           "Full online store",
           "Product management system",
@@ -138,6 +144,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "MVP App",
         description: "Test your idea fast on one platform",
         startingFrom: "From $8,000",
+        startingFromValue: 8000,
         features: [
           "iOS or Android (one platform)",
           "Core features only — fast to market",
@@ -152,6 +159,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "Full App",
         description: "iOS + Android with all features",
         startingFrom: "From $18,000",
+        startingFromValue: 18000,
         badge: "Most Popular",
         features: [
           "iOS + Android both platforms",
@@ -200,6 +208,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "AI Chat Agent",
         description: "Like the chat on this website",
         startingFrom: "From $1,500",
+        startingFromValue: 1500,
         badge: "Best Value",
         features: [
           "Custom AI assistant for your website",
@@ -215,6 +224,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "Workflow Automation",
         description: "Automate your manual processes",
         startingFrom: "From $3,500",
+        startingFromValue: 3500,
         features: [
           "Process mapping and analysis",
           "Custom automation scripts",
@@ -229,6 +239,7 @@ export const itServiceItems: ITServiceItem[] = [
         name: "Custom AI Solution",
         description: "Bespoke AI for your exact need",
         startingFrom: "Custom quote",
+        startingFromValue: 0,
         features: [
           "Custom AI model or agent",
           "Data analysis and insights",

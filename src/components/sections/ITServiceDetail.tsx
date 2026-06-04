@@ -77,7 +77,7 @@ export default function ITServiceDetail({
             </p>
 
             <Link
-              href="/contact"
+              href="/services/it-services/quote"
               className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold mt-8 hover:bg-[#6b71f0] transition-all"
             >
               Get a Free Quote
@@ -175,7 +175,7 @@ export default function ITServiceDetail({
                 </ul>
 
                 <Link
-                  href="/contact"
+                  href="/services/it-services/quote"
                   className="flex items-center justify-center w-full mt-8 bg-brand-primary text-white rounded-[10px] h-[52px] font-semibold hover:bg-[#6b71f0] transition-all"
                 >
                   Get a Quote

@@ -1,0 +1,191 @@
+import { NextResponse } from "next/server"
+import { promises as fs } from "fs"
+import path from "path"
+import { sendEmail } from "@/lib/mailer"
+import { formatAUD } from "@/lib/formatters"
+import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
+import type { Lead } from "@/types"
+
+// Prototype storage — leads saved to /data/leads.json (same store as the AI chat).
+// TODO(backend): replace with real CRM/database when backend is live
+const DATA_DIR = path.join(process.cwd(), "data")
+const LEADS_FILE = path.join(DATA_DIR, "leads.json")
+
+type PkgSel = { id: string; price: number } | null
+
+interface QuoteBody {
+  services: string[]
+  packages: { web: PkgSel; app: PkgSel; ai: PkgSel }
+  details: {
+    web: { webPages: string; webDeadline: string; webDomain: string; webContent: string }
+    app: { appPlatform: string; appType: string; appFeatures: string[] }
+    ai: { aiPurpose: string; aiVolume: string; aiIntegrations: string[] }
+    consulting: { conTopic: string; conHours: string; conFormat: string }
+  }
+  budget: string | null
+  timeline: string | null
+  contact: {
+    fname: string
+    lname: string
+    email: string
+    phone: string
+    company?: string
+    suburb?: string
+    description: string
+    source?: string
+  }
+  estimate: { total: number; range: string }
+}
+
+const SERVICE_LABELS: Record<string, string> = {
+  web: "Web Development",
+  app: "App Development",
+  ai: "AI Automation",
+  consulting: "IT Consulting",
+}
+const PKG_NAMES: Record<string, Record<string, string>> = {
+  web: { starter: "Starter", business: "Business", ecommerce: "E-Commerce" },
+  app: { mvp: "MVP App", full: "Full App" },
+  ai: { chatbot: "AI Chat Agent", workflow: "Workflow Automation", custom: "Custom AI" },
+}
+const BUDGET_LABELS: Record<string, string> = {
+  under3k: "Under $3,000",
+  "3k-10k": "$3,000–$10,000",
+  "10k-30k": "$10,000–$30,000",
+  "30k+": "$30,000+",
+}
+const TIMELINE_LABELS: Record<string, string> = {
+  asap: "ASAP",
+  "1month": "Within 1 month",
+  "3months": "1–3 months",
+  flexible: "Flexible",
+}
+
+function serviceLine(svc: string, body: QuoteBody): { name: string; price: string } {
+  let name = SERVICE_LABELS[svc] ?? svc
+  let price = ""
+  if (svc === "web" && body.packages.web) {
+    name += ` — ${PKG_NAMES.web[body.packages.web.id] ?? ""}`
+    price = body.packages.web.price ? `From ${formatAUD(body.packages.web.price)}` : "—"
+  } else if (svc === "app" && body.packages.app) {
+    name += ` — ${PKG_NAMES.app[body.packages.app.id] ?? ""}`
+    price = body.packages.app.price ? `From ${formatAUD(body.packages.app.price)}` : "—"
+  } else if (svc === "ai" && body.packages.ai) {
+    name += ` — ${PKG_NAMES.ai[body.packages.ai.id] ?? ""}`
+    price =
+      body.packages.ai.id === "custom"
+        ? "Custom quote"
+        : body.packages.ai.price
+          ? `From ${formatAUD(body.packages.ai.price)}`
+          : "—"
+  } else if (svc === "consulting") {
+    price = "$150/hr"
+  }
+  return { name, price }
+}
+
+async function logLead(body: QuoteBody) {
+  let leads: Lead[] = []
+  try {
+    leads = JSON.parse(await fs.readFile(LEADS_FILE, "utf-8")) as Lead[]
+  } catch {
+    leads = []
+  }
+  leads.push({
+    id: Date.now().toString(),
+    name: `${body.contact.fname} ${body.contact.lname}`.trim(),
+    phone: body.contact.phone,
+    email: body.contact.email,
+    service: body.services.map((s) => SERVICE_LABELS[s] ?? s).join(" + "),
+    message: `${body.contact.description} | Budget: ${
+      body.budget ? BUDGET_LABELS[body.budget] : "—"
+    } | Estimate: ${body.estimate.range}`,
+    timestamp: new Date().toISOString(),
+    page: "/services/it-services/quote",
+    source: "quote_form",
+  })
+  await fs.mkdir(DATA_DIR, { recursive: true })
+  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8")
+}
+
+function buildEmail(body: QuoteBody): string {
+  const rows = body.services
+    .map((svc) => {
+      const { name, price } = serviceLine(svc, body)
+      return `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #eee">${name}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${price}</td>
+      </tr>`
+    })
+    .join("")
+
+  const c = body.contact
+  return `
+  <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e">
+    <div style="background:#7f85f7;color:#fff;padding:20px;border-radius:8px 8px 0 0">
+      <h1 style="margin:0;font-size:20px">${SITE_FULL}</h1>
+      <p style="margin:4px 0 0;font-size:13px;opacity:.85">IT &amp; AI Services Quote Request</p>
+    </div>
+    <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px">
+      <p>Hi ${c.fname}, thank you for your quote request.</p>
+
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+        <thead>
+          <tr style="text-align:left;background:#f7f7f7">
+            <th style="padding:8px">Service</th>
+            <th style="padding:8px;text-align:right">Starting from</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+
+      <p style="font-size:13px;color:#555;margin:4px 0">
+        Budget range: <strong>${body.budget ? BUDGET_LABELS[body.budget] : "—"}</strong><br/>
+        Timeline: <strong>${body.timeline ? TIMELINE_LABELS[body.timeline] : "—"}</strong>
+      </p>
+
+      <p style="font-size:13px;color:#555;margin:12px 0">
+        <strong>Project description</strong><br/>${c.description}
+      </p>
+
+      <p style="background:#eeedfe;color:#534ab7;padding:14px;border-radius:8px;font-size:15px;text-align:center;margin:16px 0">
+        Indicative range: <strong>${body.estimate.range}</strong><br/>
+        <span style="font-size:12px">+ GST · estimate only, confirmed after a free consultation</span>
+      </p>
+
+      <p style="background:#eeedfe;color:#534ab7;padding:10px;border-radius:6px;font-size:13px;text-align:center">
+        Estimate valid for 7 days · Our team will call you within 1 business day.
+      </p>
+
+      <p style="font-size:12px;color:#777">
+        Contact: ${c.fname} ${c.lname}${c.company ? ` · ${c.company}` : ""}${
+          c.suburb ? ` · ${c.suburb}` : ""
+        }<br/>
+        Questions? Call ${SITE_PHONE} or email ${SITE_EMAIL}.
+      </p>
+    </div>
+  </div>`
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = (await req.json()) as QuoteBody
+    const c = body.contact
+    if (!c?.fname || !c?.email || !c?.phone) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    await sendEmail(
+      c.email,
+      `Your IT & AI Services Quote from ${SITE_FULL}`,
+      buildEmail(body)
+    )
+    await logLead(body)
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error("IT quote API error:", err)
+    return NextResponse.json({ error: "Could not send quote" }, { status: 500 })
+  }
+}

@@ -80,7 +80,7 @@ export default function ITServicesPage() {
 
             <div className="flex flex-wrap gap-4 mt-8">
               <Link
-                href="/contact"
+                href="/services/it-services/quote"
                 className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold hover:bg-[#6b71f0] transition-all"
               >
                 Free Consultation
