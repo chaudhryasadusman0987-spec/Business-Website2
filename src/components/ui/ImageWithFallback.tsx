@@ -33,6 +33,7 @@ interface Props {
   fallbackIcon?: string // lucide icon name hint
   fallbackBg?: string // bg color (or gradient) for placeholder
   placeholderText?: string // text shown under the fallback icon
+  fallbackInitial?: boolean // show first letter of alt instead of icon/text
   priority?: boolean
 }
 
@@ -46,11 +47,36 @@ export default function ImageWithFallback({
   fallbackIcon = "Camera",
   fallbackBg = "#f0f0ff",
   placeholderText = "Image Coming Soon",
+  fallbackInitial = false,
   priority = false,
 }: Props) {
   const [error, setError] = useState(false)
 
   if (error || !src) {
+    // Initial-letter fallback (used for customer photos): shows the first
+    // letter of the alt text on a coloured circle when no image is present.
+    if (fallbackInitial) {
+      const initial = alt ? alt.charAt(0).toUpperCase() : "?"
+      return (
+        <div
+          className={`flex items-center justify-center ${
+            fill ? "absolute inset-0" : ""
+          } ${className ?? ""}`}
+          style={{
+            background: fallbackBg,
+            ...(fill ? {} : { width: width ?? 400, height: height ?? 300 }),
+          }}
+        >
+          <span
+            className="font-bold text-[#7f85f7]"
+            style={{ fontSize: "40%", lineHeight: 1 }}
+          >
+            {initial}
+          </span>
+        </div>
+      )
+    }
+
     const Icon = FALLBACK_ICONS[fallbackIcon] ?? Camera
     // When used as a `fill` image, cover the (relative) parent. Otherwise size
     // the placeholder to the requested width/height.
