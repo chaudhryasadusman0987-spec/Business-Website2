@@ -7,7 +7,7 @@ interface QuoteCTABannerProps {
 }
 
 export default function QuoteCTABanner({
-  href = "/contact",
+  href = "/quote",
   title = "Get Your Free Quote Today",
   subtitle = "Fast response. No obligation. Australia-wide.",
 }: QuoteCTABannerProps) {
