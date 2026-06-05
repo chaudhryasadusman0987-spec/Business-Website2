@@ -158,14 +158,6 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Get Quote button (desktop only) */}
-            <Link
-              href="/services/security-solutions/quote"
-              className="hidden lg:inline-flex items-center justify-center bg-white text-[#7f85f7] font-semibold text-[13px] rounded-[8px] px-5 h-[36px] hover:bg-white/90 transition-all duration-200"
-            >
-              Get Quote
-            </Link>
-
             {/* Mobile hamburger */}
             <button
               onClick={() => setOpen(true)}
