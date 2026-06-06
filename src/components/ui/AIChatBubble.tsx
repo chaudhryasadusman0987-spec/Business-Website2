@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { MessageCircle, X, Send } from "lucide-react"
+import { X, Send } from "lucide-react"
 import type { Message } from "@/types"
 import { SITE_FULL } from "@/data/site"
 
@@ -95,7 +95,25 @@ export default function AIChatBubble() {
           {showPulse && (
             <span className="animate-ping absolute inset-0 rounded-full bg-brand-primary opacity-30" />
           )}
-          <MessageCircle size={28} />
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            {/* Chat bubble base */}
+            <path
+              d="M16 3C9.373 3 4 7.925 4 14c0 2.607.96 5.002 2.556 6.88L4.5 26.5l6.316-2.105A13.144 13.144 0 0016 25c6.627 0 12-4.925 12-11S22.627 3 16 3z"
+              fill="white"
+              fillOpacity="0.95"
+            />
+            {/* AI brain dots — 3 dots suggesting intelligence */}
+            <circle cx="11" cy="14" r="1.8" fill="#7f85f7" />
+            <circle cx="16" cy="14" r="1.8" fill="#7f85f7" />
+            <circle cx="21" cy="14" r="1.8" fill="#7f85f7" />
+          </svg>
           {showBadge && (
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
           )}

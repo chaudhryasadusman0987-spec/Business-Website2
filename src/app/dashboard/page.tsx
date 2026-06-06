@@ -238,6 +238,8 @@ export default function DashboardPage() {
   }, [])
 
   const login = () => {
+    console.log("Env var:", process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD)
+    console.log("Entered:", pw)
     if (pw === process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD) {
       localStorage.setItem("dash_auth", "true")
       setAuthed(true)
