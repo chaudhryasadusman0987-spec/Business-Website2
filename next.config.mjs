@@ -12,6 +12,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      // randomuser.me placeholder portraits (testimonial customer photos)
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+      },
       // TODO(dashboard): add Cloudinary or S3 domain when the owner moves to
       // cloud image storage, e.g.
       // { protocol: "https", hostname: "res.cloudinary.com" },

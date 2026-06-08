@@ -1,4 +1,9 @@
-Add customer photos with these exact filenames:
+Testimonial customer photos are currently served remotely from
+randomuser.me (placeholder portraits) — see the `image` field for each
+entry in src/data/testimonials.ts.
+
+To use real local photos instead, drop jpgs here with these filenames
+and repoint each `image` back to /images/testimonials/<file>:
   michael-chen.jpg
   sandra-williams.jpg
   david-park.jpg

@@ -23,7 +23,7 @@ export const testimonials: Testimonial[] = [
     service: "Security Solutions",
     serviceIcon: "🛡️", serviceColor: "#f57c00",
     date: "March 2025",
-    image: "/images/testimonials/michael-chen.jpg",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
     verified: true
   },
   {
@@ -35,7 +35,7 @@ export const testimonials: Testimonial[] = [
     service: "Security Solutions",
     serviceIcon: "🛡️", serviceColor: "#f57c00",
     date: "January 2025",
-    image: "/images/testimonials/sandra-williams.jpg",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
     verified: true
   },
   {
@@ -47,19 +47,19 @@ export const testimonials: Testimonial[] = [
     service: "Security Solutions",
     serviceIcon: "🛡️", serviceColor: "#f57c00",
     date: "February 2025",
-    image: "/images/testimonials/david-park.jpg",
+    image: "https://randomuser.me/api/portraits/men/45.jpg",
     verified: true
   },
   {
     id: "t4",
-    name: "Priya Sharma",
+    name: "Chloe Mitchell",
     suburb: "Parramatta", state: "NSW",
     rating: 5,
     text: "The smoke alarm system meets all Queensland standards. The technician was knowledgeable and checked every alarm was interconnected properly. Great service, great price.",
     service: "Security Solutions",
     serviceIcon: "🛡️", serviceColor: "#f57c00",
     date: "April 2025",
-    image: "/images/testimonials/priya-sharma.jpg",
+    image: "https://randomuser.me/api/portraits/women/68.jpg",
     verified: true
   },
   {
@@ -71,7 +71,7 @@ export const testimonials: Testimonial[] = [
     service: "Car Rental",
     serviceIcon: "🚗", serviceColor: "#4caf50",
     date: "December 2024",
-    image: "/images/testimonials/james-obrien.jpg",
+    image: "https://randomuser.me/api/portraits/men/52.jpg",
     verified: true
   },
   {
@@ -83,7 +83,7 @@ export const testimonials: Testimonial[] = [
     service: "Car Rental",
     serviceIcon: "🚗", serviceColor: "#4caf50",
     date: "November 2024",
-    image: "/images/testimonials/emily-thompson.jpg",
+    image: "https://randomuser.me/api/portraits/women/30.jpg",
     verified: true
   },
   {
@@ -95,7 +95,7 @@ export const testimonials: Testimonial[] = [
     service: "Car Rental",
     serviceIcon: "🚗", serviceColor: "#4caf50",
     date: "October 2024",
-    image: "/images/testimonials/robert-nguyen.jpg",
+    image: "https://randomuser.me/api/portraits/men/76.jpg",
     verified: true
   },
   {
@@ -107,7 +107,7 @@ export const testimonials: Testimonial[] = [
     service: "Web Development",
     serviceIcon: "🌐", serviceColor: "#1565c0",
     date: "February 2025",
-    image: "/images/testimonials/lisa-hoffmann.jpg",
+    image: "https://randomuser.me/api/portraits/women/22.jpg",
     verified: true
   },
   {
@@ -119,7 +119,7 @@ export const testimonials: Testimonial[] = [
     service: "AI Automation",
     serviceIcon: "🤖", serviceColor: "#0f6e56",
     date: "March 2025",
-    image: "/images/testimonials/tom-blackwell.jpg",
+    image: "https://randomuser.me/api/portraits/men/11.jpg",
     verified: true
   },
   {
@@ -131,7 +131,7 @@ export const testimonials: Testimonial[] = [
     service: "App Development",
     serviceIcon: "📱", serviceColor: "#6200ea",
     date: "January 2025",
-    image: "/images/testimonials/angela-foster.jpg",
+    image: "https://randomuser.me/api/portraits/women/57.jpg",
     verified: true
   },
   {
@@ -143,7 +143,7 @@ export const testimonials: Testimonial[] = [
     service: "IT Consulting",
     serviceIcon: "💡", serviceColor: "#f57c00",
     date: "April 2025",
-    image: "/images/testimonials/mark-sullivan.jpg",
+    image: "https://randomuser.me/api/portraits/men/85.jpg",
     verified: true
   },
   {
@@ -155,7 +155,7 @@ export const testimonials: Testimonial[] = [
     service: "AI Automation",
     serviceIcon: "🤖", serviceColor: "#0f6e56",
     date: "May 2025",
-    image: "/images/testimonials/christine-wu.jpg",
+    image: "https://randomuser.me/api/portraits/women/79.jpg",
     verified: true
   }
 ]

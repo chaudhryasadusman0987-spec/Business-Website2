@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ShieldCheck, Users, Zap, Heart, ChevronRight } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
 
@@ -103,8 +104,16 @@ export default function AboutPage() {
       {/* ── 2. STORY ── */}
       <section className="bg-[#fefefd] pt-[100px] pb-[80px]">
         <div className="max-w-[1170px] mx-auto px-4 flex flex-col lg:flex-row gap-16 items-center">
-          <div className="w-full h-[400px] lg:w-[45%] bg-[#f0f0ff] rounded-[24px] flex items-center justify-center text-[#9496a8] text-[14px]">
-            Team photo coming soon
+          <div className="relative w-full h-[400px] lg:w-[45%] rounded-[24px] overflow-hidden">
+            <ImageWithFallback
+              src="https://images.unsplash.com/photo-1572021335469-31706a17aaef?auto=format&fit=crop&w=1600&q=80"
+              alt="Our team collaborating in the office"
+              fill
+              className="object-cover object-center"
+              fallbackBg="#f0f0ff"
+              placeholderText="Team photo coming soon"
+              priority
+            />
           </div>
           <div className="flex-1">
             <p className="text-[#7f85f7] text-[11px] font-semibold uppercase tracking-widest mb-4">
@@ -196,7 +205,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── 6. CTA ── */}
-      <QuoteCTABanner href="/contact" />
+      <QuoteCTABanner />
     </>
   )
 }
