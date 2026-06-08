@@ -3,6 +3,8 @@ import { Poppins } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import NewsTicker from "@/components/layout/NewsTicker"
+import PromoProvider from "@/components/providers/PromoProvider"
 import AIChatBubble from "@/components/ui/AIChatBubble"
 import { SITE_FULL, SITE_TAGLINE } from "@/data/site"
 
@@ -25,11 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en-AU" className={poppins.className}>
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <AIChatBubble />
-
+        <PromoProvider>
+          <Header />
+          <NewsTicker />
+          <main>{children}</main>
+          <Footer />
+          <AIChatBubble />
+        </PromoProvider>
       </body>
     </html>
   )

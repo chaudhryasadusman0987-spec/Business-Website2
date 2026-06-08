@@ -31,3 +31,9 @@ body {
   51% { transform-origin: bottom; }
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
+
+/* News ticker — track holds two copies of the content, so -50% loops seamlessly. */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

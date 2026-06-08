@@ -4,6 +4,7 @@ import { ChevronRight, Check } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import DynamicIcon from "@/components/ui/DynamicIcon"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import Price from "@/components/ui/Price"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import type { ITServiceItem } from "@/data/it-services"
 
@@ -155,9 +156,18 @@ export default function ITServiceDetail({
                   {pkg.description}
                 </p>
 
-                <p className="text-[32px] font-extrabold text-brand-primary mt-6">
-                  {pkg.startingFrom}
-                </p>
+                <div className="text-[32px] font-extrabold text-brand-primary mt-6">
+                  {pkg.startingFromValue > 0 ? (
+                    <Price
+                      amount={pkg.startingFromValue}
+                      category="it"
+                      prefix="From "
+                      className="text-[32px] font-extrabold text-brand-primary"
+                    />
+                  ) : (
+                    pkg.startingFrom
+                  )}
+                </div>
 
                 <div className="w-full h-px bg-[#e8e8f0] my-6" />
 

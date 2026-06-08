@@ -1,6 +1,6 @@
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
-import { formatAUD } from "@/lib/formatters"
+import Price from "@/components/ui/Price"
 import type { SecurityProduct, SecuritySolution } from "@/data/security-solutions"
 
 interface SecurityProductCardProps {
@@ -50,9 +50,11 @@ export default function SecurityProductCard({
         <p className="text-brand-primary font-medium group-hover:text-white transition-colors duration-500 leading-tight">
           Price
           <br />
-          <span className="text-[#363636] font-bold text-[26px] group-hover:text-white transition-colors duration-500">
-            {formatAUD(product.price)}
-          </span>
+          <Price
+            amount={product.price}
+            category="security"
+            className="text-[#363636] font-bold text-[26px] group-hover:text-white transition-colors duration-500"
+          />
         </p>
         <p className="text-[11px] text-gray-400 group-hover:text-white/70 mt-1 transition-colors duration-500">
           {product.unit}

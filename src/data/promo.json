@@ -1,0 +1,7 @@
+{
+  "security": { "percent": 0, "active": false },
+  "carRental": { "percent": 0, "active": false },
+  "it": { "percent": 0, "active": false },
+  "message": "",
+  "updatedAt": ""
+}

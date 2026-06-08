@@ -1,5 +1,6 @@
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import Price from "@/components/ui/Price"
 import { formatAUD } from "@/lib/formatters"
 import type { Vehicle } from "@/data/car-rental"
 
@@ -39,11 +40,22 @@ export default function VehicleCard({
       <p className="text-brand-primary group-hover:text-white font-medium text-[13px] transition-colors duration-500">
         From
       </p>
-      <p className="text-[30px] font-bold text-[#363636] group-hover:text-white transition-colors duration-500">
-        {formatAUD(vehicle.dailyRate)}/day
-      </p>
+      <div className="text-[30px] font-bold text-[#363636] group-hover:text-white transition-colors duration-500">
+        <Price
+          amount={vehicle.dailyRate}
+          category="carRental"
+          suffix="/day"
+          className="text-[30px] font-bold text-[#363636] group-hover:text-white transition-colors duration-500"
+        />
+      </div>
       <p className="text-[13px] text-gray-400 group-hover:text-white/70 mt-1 transition-colors duration-500">
-        {formatAUD(vehicle.weeklyRate)}/week
+        <Price
+          amount={vehicle.weeklyRate}
+          category="carRental"
+          suffix="/week"
+          compact
+          className="text-[13px] text-gray-400 group-hover:text-white/70 transition-colors duration-500"
+        />
       </p>
 
       <h3 className="font-bold text-[18px] text-[#363636] group-hover:text-white mt-3 transition-colors duration-500">

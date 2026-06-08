@@ -6,6 +6,13 @@ import { vehicles } from "@/data/car-rental"
 import { itServiceItems } from "@/data/it-services"
 import { SITE_FULL } from "@/data/site"
 import {
+  buildTickerMessages,
+  CATEGORY_LABELS,
+  DEFAULT_PROMO,
+  type PromoCategory,
+  type PromoConfig,
+} from "@/lib/promo"
+import {
   LayoutDashboard,
   ShieldCheck,
   Car,
@@ -26,6 +33,7 @@ import {
   Check,
   AlertCircle,
   RefreshCw,
+  Percent,
 } from "lucide-react"
 
 /* ───────────────────────── Types ───────────────────────── */
@@ -216,6 +224,10 @@ export default function DashboardPage() {
   const [leadsLoading, setLeadsLoading] = useState(true)
   const [leadsFilter, setLeadsFilter] = useState("All")
 
+  // discounts / promo
+  const [promo, setPromo] = useState<PromoConfig>(DEFAULT_PROMO)
+  const [promoSaved, setPromoSaved] = useState(false)
+
   useEffect(() => {
     if (localStorage.getItem("dash_auth") === "true") setAuthed(true)
   }, [])
@@ -236,6 +248,36 @@ export default function DashboardPage() {
   useEffect(() => {
     loadLeads()
   }, [])
+
+  useEffect(() => {
+    fetch("/api/promo")
+      .then((r) => r.json())
+      .then((data: PromoConfig) => setPromo(data))
+      .catch(() => {
+        /* keep default */
+      })
+  }, [])
+
+  const savePromo = async () => {
+    try {
+      const res = await fetch("/api/promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(promo),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.config) setPromo(data.config as PromoConfig)
+        setPromoSaved(true)
+        setTimeout(() => setPromoSaved(false), 2000)
+      }
+    } catch {
+      /* prototype — ignore */
+    }
+  }
+
+  const setPromoCat = (cat: PromoCategory, patch: Partial<{ percent: number; active: boolean }>) =>
+    setPromo((p) => ({ ...p, [cat]: { ...p[cat], ...patch } }))
 
   const login = () => {
     console.log("Env var:", process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD)
@@ -378,6 +420,7 @@ export default function DashboardPage() {
     { id: "security", label: "Security", Icon: ShieldCheck },
     { id: "car-rental", label: "Car Rental", Icon: Car },
     { id: "it-services", label: "IT Services", Icon: Monitor },
+    { id: "discounts", label: "Discounts", Icon: Percent },
     { id: "leads", label: "Leads", Icon: Users },
     { id: "enquiries", label: "Enquiries", Icon: MessageSquare },
   ]
@@ -920,6 +963,98 @@ export default function DashboardPage() {
                 </table>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ───────── DISCOUNTS ───────── */}
+        {tab === "discounts" && (
+          <div>
+            <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-2">
+              Discounts &amp; Promotions
+            </h1>
+            <p className="text-[#666] text-[14px] mb-8">
+              Set a discount per service. Active discounts drop prices across all
+              product pages and run a scrolling announcement under the navbar.
+            </p>
+
+            {/* per-category controls */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+              {(Object.keys(CATEGORY_LABELS) as PromoCategory[]).map((key) => {
+                const cat = promo[key]
+                return (
+                  <div
+                    key={key}
+                    className="bg-white rounded-[16px] border border-[#e8e8f0] p-6"
+                  >
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="font-bold text-[15px] text-[#1a1a2e]">
+                        {CATEGORY_LABELS[key]}
+                      </h3>
+                      <Toggle
+                        on={cat.active}
+                        onClick={() => setPromoCat(key, { active: !cat.active })}
+                      />
+                    </div>
+                    <label className="text-[11px] text-[#9496a8] uppercase tracking-wider">
+                      Discount %
+                    </label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={cat.percent}
+                        onChange={(e) =>
+                          setPromoCat(key, { percent: Number(e.target.value) })
+                        }
+                        className="w-[90px] border border-[#e8e8f0] rounded-[8px] px-3 h-[42px] text-[18px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
+                      />
+                      <Percent size={18} className="text-[#9496a8]" />
+                    </div>
+                    <p className="text-[11px] text-[#9496a8] mt-3">
+                      {cat.active && cat.percent > 0
+                        ? `Live: ${cat.percent}% off all ${CATEGORY_LABELS[key]} prices.`
+                        : "Off — prices shown at full price."}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* custom ticker message */}
+            <div className="bg-white rounded-[16px] border border-[#e8e8f0] p-6 mb-6">
+              <label className="font-bold text-[15px] text-[#1a1a2e]">
+                Custom ticker message{" "}
+                <span className="font-normal text-[#9496a8] text-[13px]">
+                  (optional — overrides the auto message)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={promo.message}
+                placeholder="e.g. End of financial year sale — 20% off everything this week!"
+                onChange={(e) => setPromo((p) => ({ ...p, message: e.target.value }))}
+                className="w-full mt-3 border border-[#e8e8f0] rounded-[10px] px-4 h-[48px] text-[14px] focus:border-[#7f85f7] outline-none"
+              />
+            </div>
+
+            {/* ticker preview */}
+            <div className="bg-[#0d0d1a] rounded-[12px] px-6 py-3 mb-6 overflow-hidden">
+              <div className="text-[10px] uppercase tracking-wider text-[#666880] mb-1">
+                Ticker preview
+              </div>
+              {buildTickerMessages(promo).length > 0 ? (
+                <div className="text-white text-[13px] font-medium truncate">
+                  {buildTickerMessages(promo).join("   ◆   ")}
+                </div>
+              ) : (
+                <div className="text-[#666880] text-[13px]">
+                  No active discounts — the ticker is hidden.
+                </div>
+              )}
+            </div>
+
+            <SaveBtn saved={promoSaved} onClick={savePromo} />
           </div>
         )}
 
