@@ -57,7 +57,8 @@ export const itServiceItems: ITServiceItem[] = [
     longDescription:
       "We design and build professional websites that load fast, rank well on Google, and turn visitors into leads. Every site is mobile-first, SEO-optimised, and built with modern technology that lasts.",
     startingFrom: "From $2,500",
-    image: "/images/it-services/web-development.jpg",
+    image:
+      "https://images.unsplash.com/photo-1744555270794-6d378b9e7cd3?auto=format&fit=crop&w=1600&q=80",
     imageAlt: "Professional web development Australia",
     href: "/services/it-services/web-development",
     packages: [
@@ -135,7 +136,8 @@ export const itServiceItems: ITServiceItem[] = [
     longDescription:
       "We build mobile apps that solve real business problems. Customer-facing apps or internal business tools — we design, build and submit to the App Store for you.",
     startingFrom: "From $8,000",
-    image: "/images/it-services/app-development.jpg",
+    image:
+      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1600&q=80",
     imageAlt: "Mobile app development Australia",
     href: "/services/it-services/app-development",
     packages: [
@@ -199,7 +201,8 @@ export const itServiceItems: ITServiceItem[] = [
       "We build custom AI solutions that automate repetitive business tasks, answer customer enquiries 24/7, process documents and generate insights — built specifically for Australian businesses.",
     startingFrom: "From $1,500",
     badge: "Most Popular",
-    image: "/images/it-services/ai-automation.jpg",
+    image:
+      "https://images.unsplash.com/photo-1697577418970-95d99b5a55cf?auto=format&fit=crop&w=1600&q=80",
     imageAlt: "AI automation and chatbot development Australia",
     href: "/services/it-services/ai-automation",
     packages: [

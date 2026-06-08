@@ -7,6 +7,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.vercel.app",
       },
+      // Unsplash hotlinked imagery (e.g. service hero photos)
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
       // TODO(dashboard): add Cloudinary or S3 domain when the owner moves to
       // cloud image storage, e.g.
       // { protocol: "https", hostname: "res.cloudinary.com" },
