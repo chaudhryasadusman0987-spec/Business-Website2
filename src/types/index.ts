@@ -5,6 +5,10 @@ export interface Service {
   href: string;
   iconName: string;
   comingSoon: boolean;
+  // Hero image of the service's landing page, shown on the home services grid.
+  // Optional: services without a dedicated hero (e.g. IT Consulting) omit it.
+  image?: string;
+  imageAlt?: string;
 }
 
 export interface CCTVProduct {

@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { SITE_PHONE } from "@/data/site"
 import { vehicles } from "@/data/car-rental"
+import ImageWithFallback from "@/components/ui/ImageWithFallback"
 
 // Dark hero for the Car Rental landing page.
 // Mirrors the security solutions dark-hero treatment: #0d0d1a dot grid +
-// purple glow + teal glow. Right block uses a large car emoji + floating
-// stat pills (swap in next/image once /images/vehicles/hero-car.jpg exists).
+// purple glow + teal glow. Right block shows a real vehicle photo (Unsplash)
+// with floating stat pills; falls back to a car icon if the image fails.
 export default function CarRentalHero() {
   return (
     <section className="relative overflow-hidden bg-[#0d0d1a] min-h-[70vh]">
@@ -83,9 +84,18 @@ export default function CarRentalHero() {
           {/* RIGHT — colored block with emoji + floating stat pills */}
           <div className="w-full lg:w-[45%]">
             <div className="relative bg-brand-light rounded-[24px] min-h-[420px] lg:min-h-[500px] overflow-hidden flex items-center justify-center">
-              <span className="text-[180px] opacity-40 select-none leading-none">
-                🚗
-              </span>
+              <ImageWithFallback
+                src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80"
+                alt="Luxury rental car available in Brisbane"
+                fill
+                priority
+                className="object-cover"
+                fallbackIcon="Car"
+                fallbackBg="var(--brand-light, #e9eaff)"
+                placeholderText="Vehicle photo"
+              />
+              {/* Dark scrim so the white stat pills stay legible over the photo */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
 
               {/* Top-right pill */}
               <div className="absolute top-5 right-5 bg-black/50 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3">
