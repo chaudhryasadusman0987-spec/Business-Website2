@@ -32,7 +32,8 @@ async function logLead(body: ContactBody) {
     email: body.email,
     service: body.service || "general",
     message: body.message,
-    timestamp: new Date().toISOString(),
+    date: new Date().toISOString(),
+    status: "New",
     page: "/contact",
     source: "contact_form",
   })

@@ -100,7 +100,8 @@ async function logLead(body: QuoteBody) {
     message: `${body.contact.description} | Budget: ${
       body.budget ? BUDGET_LABELS[body.budget] : "—"
     } | Estimate: ${body.estimate.range}`,
-    timestamp: new Date().toISOString(),
+    date: new Date().toISOString(),
+    status: "New",
     page: "/services/it-services/quote",
     source: "quote_form",
   })

@@ -50,7 +50,8 @@ async function logLead(body: QuoteBody) {
     message: `Quote: ${body.items
       .map((i) => `${i.name} ×${i.qty}`)
       .join(", ")} — total ${formatAUD(body.total)}`,
-    timestamp: new Date().toISOString(),
+    date: new Date().toISOString(),
+    status: "New",
     page: "/services/security-solutions/quote",
     source: "quote_form",
   })

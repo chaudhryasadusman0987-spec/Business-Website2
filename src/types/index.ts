@@ -58,6 +58,8 @@ export interface Testimonial {
   image: string;
 }
 
+export type LeadStatus = "New" | "Contacted" | "Quoted" | "Won" | "Lost";
+
 export interface Lead {
   id: string;
   name: string;
@@ -65,9 +67,13 @@ export interface Lead {
   email: string;
   service: string;
   message: string;
-  timestamp: string;
-  page: string;
+  // Canonical timestamp field — matches the seed data and what the dashboard
+  // reads/sorts on. (Older records may carry `timestamp` instead.)
+  date: string;
+  status: LeadStatus;
   source: "ai_chat" | "quote_form" | "contact_form";
+  company?: string;
+  page?: string; // optional: origin page the lead came from
 }
 
 export interface Message {

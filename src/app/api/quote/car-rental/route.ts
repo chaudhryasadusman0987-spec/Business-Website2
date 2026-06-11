@@ -75,7 +75,8 @@ async function logLead(body: QuoteBody) {
     } day(s) from ${body.location} — total ${formatAUD(
       body.total
     )} + bond ${formatAUD(body.bond)}`,
-    timestamp: new Date().toISOString(),
+    date: new Date().toISOString(),
+    status: "New",
     page: "/services/car-rental/quote",
     source: "quote_form",
   })

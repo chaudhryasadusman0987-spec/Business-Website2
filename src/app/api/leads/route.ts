@@ -34,7 +34,8 @@ export async function POST(req: Request) {
       email: body.email ?? "",
       service: body.service ?? "unknown",
       message: body.message ?? "",
-      timestamp: body.timestamp ?? new Date().toISOString(),
+      date: body.date ?? new Date().toISOString(),
+      status: body.status ?? "New",
       page: body.page ?? "",
       source: body.source ?? "ai_chat",
     }

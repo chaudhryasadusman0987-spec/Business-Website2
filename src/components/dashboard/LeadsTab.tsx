@@ -46,7 +46,7 @@ export default function LeadsTab() {
               <td className="px-4 py-3">{l.email}</td>
               <td className="px-4 py-3">{l.service}</td>
               <td className="px-4 py-3">
-                {new Date(l.timestamp).toLocaleDateString("en-AU")}
+                {new Date(l.date).toLocaleDateString("en-AU")}
               </td>
               <td className="px-4 py-3">{l.source}</td>
             </tr>
