@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server"
-import { promises as fs } from "fs"
-import path from "path"
 import { sendEmail } from "@/lib/mailer"
+import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
-import type { Lead } from "@/types"
-
-// Prototype storage — leads saved to /data/leads.json (same store as the AI chat).
-// TODO(backend): replace with real CRM/database when backend is live
-const DATA_DIR = path.join(process.cwd(), "data")
-const LEADS_FILE = path.join(DATA_DIR, "leads.json")
 
 interface QuoteBody {
   firstName: string
@@ -58,13 +51,7 @@ const bondTimeline = [
 ]
 
 async function logLead(body: QuoteBody) {
-  let leads: Lead[] = []
-  try {
-    leads = JSON.parse(await fs.readFile(LEADS_FILE, "utf-8")) as Lead[]
-  } catch {
-    leads = []
-  }
-  leads.push({
+  await appendLead({
     id: Date.now().toString(),
     name: `${body.firstName} ${body.lastName}`.trim(),
     phone: body.phone,
@@ -80,8 +67,6 @@ async function logLead(body: QuoteBody) {
     page: "/services/car-rental/quote",
     source: "quote_form",
   })
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8")
 }
 
 function buildEmail(body: QuoteBody): string {

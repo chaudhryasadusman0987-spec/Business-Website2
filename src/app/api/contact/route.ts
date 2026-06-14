@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server"
-import { promises as fs } from "fs"
-import path from "path"
 import { sendEmail } from "@/lib/mailer"
+import { appendLead } from "@/lib/leads-store"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
-import type { Lead } from "@/types"
-
-// Prototype storage — leads saved to /data/leads.json (same store as the AI chat).
-// TODO(backend): wire to email/CRM when backend is live
-const DATA_DIR = path.join(process.cwd(), "data")
-const LEADS_FILE = path.join(DATA_DIR, "leads.json")
 
 interface ContactBody {
   name: string
@@ -19,13 +12,7 @@ interface ContactBody {
 }
 
 async function logLead(body: ContactBody) {
-  let leads: Lead[] = []
-  try {
-    leads = JSON.parse(await fs.readFile(LEADS_FILE, "utf-8")) as Lead[]
-  } catch {
-    leads = []
-  }
-  leads.push({
+  await appendLead({
     id: Date.now().toString(),
     name: body.name,
     phone: body.phone,
@@ -37,8 +24,6 @@ async function logLead(body: ContactBody) {
     page: "/contact",
     source: "contact_form",
   })
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8")
 }
 
 function buildEmail(body: ContactBody): string {
@@ -77,7 +62,13 @@ export async function POST(req: Request) {
       `New Enquiry from ${SITE_FULL} Website`,
       buildEmail(body)
     )
-    await logLead(body)
+    // Storage is best-effort: the customer's email has already gone out, so a
+    // KV/disk failure must not turn a successful send into an error response.
+    try {
+      await logLead(body)
+    } catch (err) {
+      console.error("Contact lead log failed (email already sent):", err)
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {

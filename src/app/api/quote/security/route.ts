@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server"
-import { promises as fs } from "fs"
-import path from "path"
 import { sendEmail } from "@/lib/mailer"
+import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
-import type { Lead } from "@/types"
-
-// Prototype storage — leads saved to /data/leads.json (same store as the AI chat).
-// TODO(backend): replace with real CRM/database when backend is live
-const DATA_DIR = path.join(process.cwd(), "data")
-const LEADS_FILE = path.join(DATA_DIR, "leads.json")
 
 interface QuoteItem {
   name: string
@@ -35,13 +28,7 @@ interface QuoteBody {
 }
 
 async function logLead(body: QuoteBody) {
-  let leads: Lead[] = []
-  try {
-    leads = JSON.parse(await fs.readFile(LEADS_FILE, "utf-8")) as Lead[]
-  } catch {
-    leads = []
-  }
-  leads.push({
+  await appendLead({
     id: Date.now().toString(),
     name: `${body.fname} ${body.lname}`.trim(),
     phone: body.phone,
@@ -55,8 +42,6 @@ async function logLead(body: QuoteBody) {
     page: "/services/security-solutions/quote",
     source: "quote_form",
   })
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8")
 }
 
 function buildEmail(body: QuoteBody): string {
@@ -127,7 +112,13 @@ export async function POST(req: Request) {
       `Your Security Solutions Quote from ${SITE_FULL}`,
       buildEmail(body)
     )
-    await logLead(body)
+    // Best-effort storage: the quote email has already been sent, so don't let
+    // a KV/disk failure turn a successful send into an error for the customer.
+    try {
+      await logLead(body)
+    } catch (err) {
+      console.error("Security lead log failed (email already sent):", err)
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {
