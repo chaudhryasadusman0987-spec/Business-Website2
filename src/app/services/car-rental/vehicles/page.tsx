@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import VehicleCard from "@/components/sections/VehicleCard"
+import VehicleFleet from "@/components/sections/VehicleFleet"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import { vehicles } from "@/data/car-rental"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
@@ -55,11 +54,7 @@ export default function VehiclesPage() {
       {/* VEHICLES GRID */}
       <section className="bg-[#fefefd] pt-[80px] pb-[120px]">
         <div className="max-w-[1170px] mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {vehicles.map((v) => (
-              <VehicleCard key={v.id} vehicle={v} detailed />
-            ))}
-          </div>
+          <VehicleFleet detailed />
 
           {/* BOND INFO BOX */}
           <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-[16px] p-6 max-w-[700px] mx-auto mt-14 text-center text-[14px] text-[#185fa5] leading-relaxed">

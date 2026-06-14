@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Car, Shield, MapPin, Clock } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import CarRentalHero from "@/components/sections/CarRentalHero"
-import VehicleCard from "@/components/sections/VehicleCard"
+import VehicleFleet from "@/components/sections/VehicleFleet"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { vehicles } from "@/data/car-rental"
@@ -112,10 +112,8 @@ export default function CarRentalPage() {
             title="Our Vehicle Fleet"
             subtitle="Transparent pricing · Free cancellation · Brisbane-wide"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
-            {vehicles.slice(0, 3).map((v) => (
-              <VehicleCard key={v.id} vehicle={v} />
-            ))}
+          <div className="mt-14">
+            <VehicleFleet limit={3} />
           </div>
           <div className="text-center mt-12">
             <Link

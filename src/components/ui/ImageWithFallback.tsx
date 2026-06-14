@@ -52,6 +52,11 @@ export default function ImageWithFallback({
 }: Props) {
   const [error, setError] = useState(false)
 
+  // Local files (/images/...) go through Next's optimizer. Admin-supplied images
+  // — pasted URLs or uploaded data: URLs — bypass it: arbitrary hosts aren't in
+  // next.config remotePatterns and data: URLs can't be optimized.
+  const unoptimized = !!src && !src.startsWith("/")
+
   if (error || !src) {
     // Initial-letter fallback (used for customer photos): shows the first
     // letter of the alt text on a coloured circle when no image is present.
@@ -108,6 +113,7 @@ export default function ImageWithFallback({
         fill
         className={className}
         priority={priority}
+        unoptimized={unoptimized}
         onError={() => setError(true)}
       />
     )
@@ -121,6 +127,7 @@ export default function ImageWithFallback({
       height={height ?? 300}
       className={className}
       priority={priority}
+      unoptimized={unoptimized}
       onError={() => setError(true)}
     />
   )

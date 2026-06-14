@@ -3,7 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ChevronRight } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
-import SecurityProductCard from "@/components/sections/SecurityProductCard"
+import SecurityProductsGrid from "@/components/sections/SecurityProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions, installFee } from "@/data/security-solutions"
@@ -127,15 +127,10 @@ export default function SolutionDetailPage({
             )} · GST additional`}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
-            {solution.products.map((product) => (
-              <SecurityProductCard
-                key={product.id}
-                product={product}
-                solution={solution}
-              />
-            ))}
-          </div>
+          <SecurityProductsGrid
+            solutionId={solution.id}
+            initial={solution.products}
+          />
 
           <div className="bg-[#f0f0ff] border border-[#e0e0ff] rounded-[16px] p-5 text-center max-w-[600px] mx-auto mt-14">
             <p className="text-[14px] text-[#4a4a6a]">

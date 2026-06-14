@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { securitySolutions } from "@/data/security-solutions"
-import { vehicles } from "@/data/car-rental"
 import { itServiceItems } from "@/data/it-services"
 import { SITE_FULL } from "@/data/site"
+import SecurityCatalogTab from "@/components/dashboard/SecurityCatalogTab"
+import VehicleCatalogTab from "@/components/dashboard/VehicleCatalogTab"
 import {
   buildTickerMessages,
   CATEGORY_LABELS,
@@ -29,7 +29,6 @@ import {
   TrendingUp,
   MessageSquare,
   Image as ImageIcon,
-  DollarSign,
   Check,
   AlertCircle,
   RefreshCw,
@@ -60,15 +59,6 @@ interface Lead {
   [key: string]: unknown
 }
 
-type SecEdit = { price: number; image: string; badge: string; inStock: boolean }
-type VehEdit = {
-  dailyRate: number
-  weeklyRate: number
-  bond: number
-  image: string
-  badge: string
-  inStock: boolean
-}
 type PkgEdit = {
   startingFromValue: number
   startingFrom: string
@@ -77,36 +67,6 @@ type PkgEdit = {
 }
 
 /* ──────────────────── Initial edit state ──────────────────── */
-
-function initSecEdits(): Record<string, SecEdit> {
-  const out: Record<string, SecEdit> = {}
-  securitySolutions.forEach((sol) =>
-    sol.products.forEach((p) => {
-      out[`${sol.id}:${p.id}`] = {
-        price: p.price,
-        image: p.image ?? "",
-        badge: p.badge ?? "",
-        inStock: p.inStock,
-      }
-    })
-  )
-  return out
-}
-
-function initVehEdits(): Record<string, VehEdit> {
-  const out: Record<string, VehEdit> = {}
-  vehicles.forEach((v) => {
-    out[v.id] = {
-      dailyRate: v.dailyRate,
-      weeklyRate: v.weeklyRate,
-      bond: v.bond,
-      image: v.image ?? "",
-      badge: v.badge ?? "",
-      inStock: v.inStock,
-    }
-  })
-  return out
-}
 
 function initPkgEdits(): Record<string, PkgEdit> {
   const out: Record<string, PkgEdit> = {}
@@ -210,12 +170,9 @@ export default function DashboardPage() {
 
   // navigation
   const [tab, setTab] = useState("overview")
-  const [secTab, setSecTab] = useState(securitySolutions[0].id)
   const [itTab, setItTab] = useState("web-development")
 
-  // editable data
-  const [secEdits, setSecEdits] = useState<Record<string, SecEdit>>(initSecEdits)
-  const [vehEdits, setVehEdits] = useState<Record<string, VehEdit>>(initVehEdits)
+  // editable data (IT packages still use the legacy save endpoint)
   const [pkgEdits, setPkgEdits] = useState<Record<string, PkgEdit>>(initPkgEdits)
   const [savedKey, setSavedKey] = useState<string | null>(null)
 
@@ -425,8 +382,6 @@ export default function DashboardPage() {
     { id: "enquiries", label: "Enquiries", Icon: MessageSquare },
   ]
 
-  const activeSolution =
-    securitySolutions.find((s) => s.id === secTab) ?? securitySolutions[0]
   const activeService =
     itServiceItems.find((s) => s.id === itTab) ?? itServiceItems[0]
 
@@ -574,271 +529,10 @@ export default function DashboardPage() {
         )}
 
         {/* ───────── SECURITY ───────── */}
-        {tab === "security" && (
-          <div>
-            <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-2">
-              Security Solutions — Products
-            </h1>
-            <p className="text-[#666] text-[14px] mb-8">
-              Changes save to data file and update live site immediately
-            </p>
-
-            <InfoBox text="Add product images to public/images/products/ then enter the filename below." />
-
-            {/* solution tabs */}
-            <div className="flex gap-2 flex-wrap mb-6">
-              {securitySolutions.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setSecTab(s.id)}
-                  className={`px-4 py-2 rounded-full text-[13px] font-medium border cursor-pointer transition-colors ${
-                    secTab === s.id
-                      ? "bg-[#7f85f7] border-[#7f85f7] text-white"
-                      : "bg-white border-[#e8e8f0] text-[#666] hover:border-[#7f85f7]"
-                  }`}
-                >
-                  {s.name}
-                </button>
-              ))}
-            </div>
-
-            {/* products table */}
-            <div className="bg-white rounded-[16px] border border-[#e8e8f0] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-[#f8f8ff] text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider">
-                      <Th>Image</Th>
-                      <Th>Product</Th>
-                      <Th>Price</Th>
-                      <Th>Unit</Th>
-                      <Th>Badge</Th>
-                      <Th>In Stock</Th>
-                      <Th>Save</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeSolution.products.map((p) => {
-                      const key = `${activeSolution.id}:${p.id}`
-                      const e = secEdits[key]
-                      if (!e) return null
-                      return (
-                        <tr key={key} className="border-b border-[#f0f0f8] last:border-0 align-top">
-                          <td className="px-4 py-4">
-                            <Thumb
-                              src={e.image}
-                              value={e.image}
-                              placeholder="/images/products/name.jpg"
-                              onChange={(v) =>
-                                setSecEdits((s) => ({ ...s, [key]: { ...s[key], image: v } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="font-medium text-[14px] text-[#1a1a2e]">{p.name}</div>
-                            <div className="text-[11px] text-[#9496a8] mt-0.5">
-                              {p.description.length > 40
-                                ? p.description.slice(0, 40) + "…"
-                                : p.description}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-1">
-                              <DollarSign size={13} className="text-[#9496a8]" />
-                              <input
-                                type="number"
-                                value={e.price}
-                                onChange={(ev) =>
-                                  setSecEdits((s) => ({
-                                    ...s,
-                                    [key]: { ...s[key], price: Number(ev.target.value) },
-                                  }))
-                                }
-                                className="w-[80px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
-                              />
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-[12px] text-[#9496a8]">{p.unit}</td>
-                          <td className="px-4 py-4">
-                            <input
-                              type="text"
-                              value={e.badge}
-                              placeholder="e.g. Best Seller"
-                              onChange={(ev) =>
-                                setSecEdits((s) => ({
-                                  ...s,
-                                  [key]: { ...s[key], badge: ev.target.value },
-                                }))
-                              }
-                              className="w-[110px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[12px] focus:border-[#7f85f7] outline-none"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <Toggle
-                              on={e.inStock}
-                              onClick={() =>
-                                setSecEdits((s) => ({
-                                  ...s,
-                                  [key]: { ...s[key], inStock: !s[key].inStock },
-                                }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <SaveBtn
-                              saved={savedKey === key}
-                              onClick={() =>
-                                save(
-                                  {
-                                    type: "security-product",
-                                    solutionId: activeSolution.id,
-                                    productId: p.id,
-                                    price: e.price,
-                                    image: e.image,
-                                    badge: e.badge,
-                                    inStock: e.inStock,
-                                  },
-                                  key
-                                )
-                              }
-                            />
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+        {tab === "security" && <SecurityCatalogTab />}
 
         {/* ───────── CAR RENTAL ───────── */}
-        {tab === "car-rental" && (
-          <div>
-            <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-8">
-              Car Rental — Vehicles &amp; Rates
-            </h1>
-
-            <InfoBox text="Add vehicle images to public/images/vehicles/ then enter the filename below." />
-
-            <div className="bg-white rounded-[16px] border border-[#e8e8f0] overflow-hidden mb-8">
-              <h2 className="font-bold text-[18px] text-[#1a1a2e] p-5 border-b border-[#f0f0f8]">
-                Vehicles
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-[#f8f8ff] text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider">
-                      <Th>Image</Th>
-                      <Th>Vehicle</Th>
-                      <Th>Daily Rate</Th>
-                      <Th>Weekly Rate</Th>
-                      <Th>Bond</Th>
-                      <Th>Badge</Th>
-                      <Th>In Stock</Th>
-                      <Th>Save</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vehicles.map((v) => {
-                      const e = vehEdits[v.id]
-                      if (!e) return null
-                      return (
-                        <tr key={v.id} className="border-b border-[#f0f0f8] last:border-0 align-top">
-                          <td className="px-4 py-4">
-                            <Thumb
-                              src={e.image}
-                              value={e.image}
-                              placeholder="/images/vehicles/name.jpg"
-                              onChange={(val) =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], image: val } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="font-medium text-[14px] text-[#1a1a2e]">{v.name}</div>
-                            <div className="text-[11px] text-[#9496a8]">{v.example}</div>
-                            <div className="text-[10px] text-[#b0b0b8]">{v.passengers} seats</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <NumField
-                              prefix="$"
-                              suffix="/day"
-                              value={e.dailyRate}
-                              onChange={(n) =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], dailyRate: n } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <NumField
-                              prefix="$"
-                              suffix="/wk"
-                              value={e.weeklyRate}
-                              onChange={(n) =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], weeklyRate: n } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <NumField
-                              prefix="$"
-                              value={e.bond}
-                              onChange={(n) =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], bond: n } }))
-                              }
-                            />
-                            <div className="text-[10px] text-[#1565c0] mt-0.5">held</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <input
-                              type="text"
-                              value={e.badge}
-                              placeholder="e.g. Most Popular"
-                              onChange={(ev) =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], badge: ev.target.value } }))
-                              }
-                              className="w-[110px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[12px] focus:border-[#7f85f7] outline-none"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <Toggle
-                              on={e.inStock}
-                              onClick={() =>
-                                setVehEdits((s) => ({ ...s, [v.id]: { ...s[v.id], inStock: !s[v.id].inStock } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <SaveBtn
-                              saved={savedKey === v.id}
-                              onClick={() =>
-                                save(
-                                  {
-                                    type: "vehicle",
-                                    vehicleId: v.id,
-                                    dailyRate: e.dailyRate,
-                                    weeklyRate: e.weeklyRate,
-                                    bond: e.bond,
-                                    image: e.image,
-                                    badge: e.badge,
-                                    inStock: e.inStock,
-                                  },
-                                  v.id
-                                )
-                              }
-                            />
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+        {tab === "car-rental" && <VehicleCatalogTab />}
 
         {/* ───────── IT SERVICES ───────── */}
         {tab === "it-services" && (
@@ -1131,15 +825,6 @@ function Th({ children }: { children: React.ReactNode }) {
   return <th className="px-4 py-3 whitespace-nowrap">{children}</th>
 }
 
-function InfoBox({ text }: { text: string }) {
-  return (
-    <div className="bg-[#eeedfe] rounded-[12px] p-4 mb-6 flex items-start gap-3">
-      <ImageIcon size={18} className="text-[#7f85f7] flex-shrink-0 mt-0.5" />
-      <p className="text-[13px] text-[#534ab7]">{text}</p>
-    </div>
-  )
-}
-
 function Thumb({
   src,
   value,
@@ -1168,31 +853,6 @@ function Thumb({
         onChange={(e) => onChange(e.target.value)}
         className="w-[140px] text-[11px] border border-[#e8e8f0] rounded-[6px] px-2 py-1 focus:border-[#7f85f7] outline-none text-[#666]"
       />
-    </div>
-  )
-}
-
-function NumField({
-  prefix,
-  suffix,
-  value,
-  onChange,
-}: {
-  prefix?: string
-  suffix?: string
-  value: number
-  onChange: (n: number) => void
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      {prefix && <span className="text-[#9496a8] text-[13px]">{prefix}</span>}
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-[80px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
-      />
-      {suffix && <span className="text-[#9496a8] text-[11px]">{suffix}</span>}
     </div>
   )
 }
