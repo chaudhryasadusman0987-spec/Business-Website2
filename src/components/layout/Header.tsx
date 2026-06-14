@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, ChevronDown, Plus, Star, Mail } from "lucide-react"
+import { Menu, X, ChevronDown, Plus, Star, Mail, Newspaper } from "lucide-react"
 import { navLinks } from "@/data/navigation"
 import { SITE_FULL } from "@/data/site"
 
@@ -147,6 +147,13 @@ export default function Header() {
                 >
                   <Star size={14} className="text-[#f5a623]" />
                   <span className="text-[13px] font-medium text-[#1a1a2e]">Testimonials</span>
+                </Link>
+                <Link
+                  href="/blog"
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f4ff] transition-colors"
+                >
+                  <Newspaper size={14} className="text-[#7f85f7]" />
+                  <span className="text-[13px] font-medium text-[#1a1a2e]">Blog</span>
                 </Link>
                 <Link
                   href="/contact"

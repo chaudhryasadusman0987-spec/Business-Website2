@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { X, Send } from "lucide-react"
+import { X, Send, Phone } from "lucide-react"
 import type { Message } from "@/types"
-import { SITE_FULL } from "@/data/site"
+import { SITE_FULL, SITE_CALL_NUMBER } from "@/data/site"
 
 export default function AIChatBubble() {
   const [isOpen, setIsOpen] = useState(false)
@@ -87,11 +87,24 @@ export default function AIChatBubble() {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        <button
-          onClick={openPanel}
-          aria-label="Open chat"
-          className="relative w-[60px] h-[60px] rounded-full bg-brand-primary text-white flex items-center justify-center cursor-pointer shadow-[0_4px_20px_rgba(127,133,247,0.4)]"
-        >
+        <div className="flex flex-col items-center gap-3">
+          {/* Call button — uses the temporary SITE_CALL_NUMBER placeholder.
+              Tapping it opens the device dialer (tel: link). */}
+          <a
+            href={`tel:${SITE_CALL_NUMBER.replace(/\s+/g, "")}`}
+            aria-label={`Call us on ${SITE_CALL_NUMBER}`}
+            title={`Call us: ${SITE_CALL_NUMBER}`}
+            className="group relative w-[60px] h-[60px] rounded-full bg-[#22c55e] text-white flex items-center justify-center cursor-pointer shadow-[0_4px_20px_rgba(34,197,94,0.4)] transition-transform hover:scale-105"
+          >
+            <span className="animate-ping absolute inset-0 rounded-full bg-[#22c55e] opacity-25" />
+            <Phone size={26} className="relative" fill="white" />
+          </a>
+
+          <button
+            onClick={openPanel}
+            aria-label="Open chat"
+            className="relative w-[60px] h-[60px] rounded-full bg-brand-primary text-white flex items-center justify-center cursor-pointer shadow-[0_4px_20px_rgba(127,133,247,0.4)]"
+          >
           {showPulse && (
             <span className="animate-ping absolute inset-0 rounded-full bg-brand-primary opacity-30" />
           )}
@@ -117,7 +130,8 @@ export default function AIChatBubble() {
           {showBadge && (
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
           )}
-        </button>
+          </button>
+        </div>
       ) : (
         <div className="w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-white rounded-[16px] shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}

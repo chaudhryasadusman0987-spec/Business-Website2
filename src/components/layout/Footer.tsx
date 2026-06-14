@@ -37,6 +37,32 @@ export default function Footer() {
               Your trusted Australian multi-service partner for security,
               mobility, and technology.
             </p>
+            <ul className="mt-5 space-y-2 text-[14px]">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-[#999] hover:text-white transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-[#999] hover:text-white transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/testimonials"
+                  className="text-[#999] hover:text-white transition-colors"
+                >
+                  Testimonials
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Col 2 — Services */}
