@@ -72,6 +72,11 @@ function ProductCard({
         {product.sku && (
           <p className="text-[11px] text-[#9496a8] mt-1">SKU: {product.sku}</p>
         )}
+        {product.description && (
+          <p className="text-[12px] text-[#666] mt-2 leading-relaxed line-clamp-3">
+            {product.description}
+          </p>
+        )}
 
         <div className="mt-3 flex items-baseline gap-2 flex-wrap">
           <span className="text-[#1a1a2e] font-extrabold text-[20px] sm:text-[22px]">

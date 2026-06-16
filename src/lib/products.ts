@@ -8,6 +8,7 @@
 export interface Product {
   id: string
   name: string
+  description: string
   sku: string
   imageUrl: string
   category: string
@@ -26,6 +27,7 @@ export type ProductInput = Omit<Product, "id" | "createdAt">
 export function blankProductInput(solutionSlug: string): ProductInput {
   return {
     name: "",
+    description: "",
     sku: "",
     imageUrl: "",
     category: "",

@@ -14,6 +14,7 @@ function coerceInput(p: Record<string, unknown>): ProductInput {
   const discount = p.discountPrice
   return {
     name: String(p.name ?? ""),
+    description: String(p.description ?? ""),
     sku: String(p.sku ?? ""),
     imageUrl: String(p.imageUrl ?? ""),
     category: String(p.category ?? ""),

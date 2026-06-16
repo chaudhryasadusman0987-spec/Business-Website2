@@ -41,6 +41,7 @@ const SEED_CATEGORY: Record<string, string> = {
 interface ProductRow {
   id: string
   name: string
+  description: string | null
   sku: string | null
   image_url: string | null
   category: string | null
@@ -56,6 +57,7 @@ function toProduct(r: ProductRow): Product {
   return {
     id: r.id,
     name: r.name,
+    description: r.description ?? "",
     sku: r.sku ?? "",
     imageUrl: r.image_url ?? "",
     category: r.category ?? "",
@@ -76,6 +78,7 @@ export async function ensureSchema(): Promise<void> {
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
       name           TEXT NOT NULL,
+      description    TEXT,
       sku            TEXT,
       image_url      TEXT,
       category       TEXT,
@@ -91,6 +94,8 @@ export async function ensureSchema(): Promise<void> {
     CREATE INDEX IF NOT EXISTS products_solution_slug_idx
     ON products (solution_slug)
   `
+  // Migration for tables created before the description column existed.
+  await db`ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT`
 }
 
 /**
@@ -108,10 +113,11 @@ export async function seedSurveillanceProducts(): Promise<number> {
     // conflict), which lets us count inserts without full query metadata.
     const rows = (await db`
       INSERT INTO products
-        (id, name, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
+        (id, name, description, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
       VALUES (
         ${p.id},
         ${p.name},
+        ${p.description},
         ${`SUR-${p.id.toUpperCase()}`},
         ${p.image},
         ${SEED_CATEGORY[p.id] ?? "Cameras"},
@@ -151,10 +157,11 @@ export async function createProduct(input: ProductInput): Promise<Product> {
   const id = newId()
   const rows = (await db`
     INSERT INTO products
-      (id, name, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
+      (id, name, description, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
     VALUES (
       ${id},
       ${input.name},
+      ${input.description || null},
       ${input.sku || null},
       ${input.imageUrl || null},
       ${input.category || null},
@@ -177,6 +184,7 @@ export async function updateProduct(
   const rows = (await db`
     UPDATE products SET
       name           = ${input.name},
+      description    = ${input.description || null},
       sku            = ${input.sku || null},
       image_url      = ${input.imageUrl || null},
       category       = ${input.category || null},

@@ -39,6 +39,7 @@ async function postUpdate(body: Record<string, unknown>) {
 function toInput(p: Product): ProductInput {
   return {
     name: p.name,
+    description: p.description,
     sku: p.sku,
     imageUrl: p.imageUrl,
     category: p.category,
@@ -198,6 +199,14 @@ export default function ProductsDbTab() {
               w="w-[180px]"
             />
           </Labeled>
+          <Labeled label="Description">
+            <Text
+              value={draft.description}
+              placeholder="e.g. Pan-tilt-zoom, night vision, weatherproof"
+              onChange={(v) => setDraft((d) => ({ ...d, description: v }))}
+              w="w-[280px]"
+            />
+          </Labeled>
           <Labeled label="SKU">
             <Text
               value={draft.sku}
@@ -282,6 +291,13 @@ export default function ProductsDbTab() {
                     value={row.name}
                     onChange={(v) => patch(row.id, { name: v })}
                     w="w-[180px]"
+                  />
+                </Labeled>
+                <Labeled label="Description">
+                  <Text
+                    value={row.description}
+                    onChange={(v) => patch(row.id, { description: v })}
+                    w="w-[280px]"
                   />
                 </Labeled>
                 <Labeled label="SKU">
