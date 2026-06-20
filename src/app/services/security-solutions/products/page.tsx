@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import SectionTitle from "@/components/ui/SectionTitle"
-import SecurityProductCard from "@/components/sections/SecurityProductCard"
+import AllDbProductsGrid from "@/components/sections/AllDbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import { securitySolutions, installFee } from "@/data/security-solutions"
+import { installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL } from "@/data/site"
 
@@ -38,26 +37,10 @@ export default function AllProductsPage() {
         </div>
       </section>
 
-      {/* PRODUCTS BY SOLUTION */}
+      {/* PRODUCTS BY SOLUTION (served from Postgres — see /api/products) */}
       <section className="bg-[#fefefd] pt-[80px] pb-[120px]">
         <div className="max-w-[1170px] mx-auto px-4">
-          {securitySolutions.map((solution) => (
-            <div key={solution.id} className="mb-20 last:mb-0">
-              <SectionTitle
-                title={solution.name}
-                subtitle={solution.tagline}
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-                {solution.products.map((product) => (
-                  <SecurityProductCard
-                    key={product.id}
-                    product={product}
-                    solution={solution}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+          <AllDbProductsGrid />
         </div>
       </section>
 

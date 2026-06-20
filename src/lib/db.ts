@@ -25,10 +25,9 @@ function sql(): NeonQueryFunction<false, false> {
   return client
 }
 
-const SURVEILLANCE_SLUG = "surveillance-evidence"
-
 // Categories for the seeded surveillance products (the static data file has no
-// category field). New products get whatever category the admin enters.
+// category field). Products without an entry seed with no category; the admin
+// can add one later in the dashboard.
 const SEED_CATEGORY: Record<string, string> = {
   "hd-bullet-cam": "Cameras",
   "dome-cam": "Cameras",
@@ -99,38 +98,42 @@ export async function ensureSchema(): Promise<void> {
 }
 
 /**
- * Seed the surveillance products from the static data file. Idempotent —
- * existing rows (matched by id) are left untouched. Returns rows inserted.
+ * Seed every security solution's products from the static data file. Idempotent
+ * — existing rows (matched by id) are left untouched, so re-running never
+ * duplicates or overwrites admin edits. Returns the number of rows inserted.
  */
-export async function seedSurveillanceProducts(): Promise<number> {
-  const solution = securitySolutions.find((s) => s.slug === SURVEILLANCE_SLUG)
-  if (!solution) return 0
+export async function seedAllProducts(): Promise<number> {
   const db = sql()
 
   let inserted = 0
-  for (const p of solution.products) {
-    // RETURNING id yields a row only when the INSERT actually happened (no
-    // conflict), which lets us count inserts without full query metadata.
-    const rows = (await db`
-      INSERT INTO products
-        (id, name, description, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
-      VALUES (
-        ${p.id},
-        ${p.name},
-        ${p.description},
-        ${`SUR-${p.id.toUpperCase()}`},
-        ${p.image},
-        ${SEED_CATEGORY[p.id] ?? "Cameras"},
-        ${p.price},
-        ${null},
-        ${p.badge ?? null},
-        ${p.inStock},
-        ${SURVEILLANCE_SLUG}
-      )
-      ON CONFLICT (id) DO NOTHING
-      RETURNING id
-    `) as { id: string }[]
-    inserted += rows.length
+  for (const solution of securitySolutions) {
+    // SKU prefix derived from the solution id (e.g. surveillance → "SUR"),
+    // matching the original surveillance seed convention.
+    const prefix = solution.id.slice(0, 3).toUpperCase()
+    for (const p of solution.products) {
+      // RETURNING id yields a row only when the INSERT actually happened (no
+      // conflict), which lets us count inserts without full query metadata.
+      const rows = (await db`
+        INSERT INTO products
+          (id, name, description, sku, image_url, category, price, discount_price, badge, in_stock, solution_slug)
+        VALUES (
+          ${p.id},
+          ${p.name},
+          ${p.description},
+          ${`${prefix}-${p.id.toUpperCase()}`},
+          ${p.image},
+          ${SEED_CATEGORY[p.id] ?? null},
+          ${p.price},
+          ${null},
+          ${p.badge ?? null},
+          ${p.inStock},
+          ${solution.slug}
+        )
+        ON CONFLICT (id) DO NOTHING
+        RETURNING id
+      `) as { id: string }[]
+      inserted += rows.length
+    }
   }
   return inserted
 }

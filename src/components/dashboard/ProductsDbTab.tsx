@@ -68,7 +68,9 @@ export default function ProductsDbTab() {
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    fetch(`/api/products?slug=${encodeURIComponent(slug)}`)
+    fetch(`/api/products?slug=${encodeURIComponent(slug)}`, {
+      cache: "no-store",
+    })
       .then((r) => r.json())
       .then((data) => {
         setRows(Array.isArray(data.products) ? data.products : [])
