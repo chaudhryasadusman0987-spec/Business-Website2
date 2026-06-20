@@ -5,6 +5,7 @@ import { itServiceItems } from "@/data/it-services"
 import { SITE_FULL } from "@/data/site"
 import SecurityCatalogTab from "@/components/dashboard/SecurityCatalogTab"
 import VehicleCatalogTab from "@/components/dashboard/VehicleCatalogTab"
+import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
 import {
   buildTickerMessages,
   CATEGORY_LABELS,
@@ -28,6 +29,7 @@ import {
   Calendar,
   TrendingUp,
   MessageSquare,
+  Database,
   Image as ImageIcon,
   Check,
   AlertCircle,
@@ -375,6 +377,7 @@ export default function DashboardPage() {
   const navItems = [
     { id: "overview", label: "Overview", Icon: LayoutDashboard },
     { id: "security", label: "Security", Icon: ShieldCheck },
+    { id: "products-db", label: "Products (DB)", Icon: Database },
     { id: "car-rental", label: "Car Rental", Icon: Car },
     { id: "it-services", label: "IT Services", Icon: Monitor },
     { id: "discounts", label: "Discounts", Icon: Percent },
@@ -530,6 +533,9 @@ export default function DashboardPage() {
 
         {/* ───────── SECURITY ───────── */}
         {tab === "security" && <SecurityCatalogTab />}
+
+        {/* ───────── PRODUCTS (DB) ───────── */}
+        {tab === "products-db" && <ProductsDbTab />}
 
         {/* ───────── CAR RENTAL ───────── */}
         {tab === "car-rental" && <VehicleCatalogTab />}

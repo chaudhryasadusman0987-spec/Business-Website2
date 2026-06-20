@@ -3,7 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ChevronRight } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
-import SecurityProductsGrid from "@/components/sections/SecurityProductsGrid"
+import DbProductsGrid from "@/components/sections/DbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions, installFee } from "@/data/security-solutions"
@@ -127,10 +127,8 @@ export default function SolutionDetailPage({
             )} · GST additional`}
           />
 
-          <SecurityProductsGrid
-            solutionId={solution.id}
-            initial={solution.products}
-          />
+          {/* All solutions serve their products from Postgres (see /api/products). */}
+          <DbProductsGrid slug={solution.slug} solutionId={solution.id} />
 
           <div className="bg-[#f0f0ff] border border-[#e0e0ff] rounded-[16px] p-5 text-center max-w-[600px] mx-auto mt-14">
             <p className="text-[14px] text-[#4a4a6a]">
