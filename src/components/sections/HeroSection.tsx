@@ -1,63 +1,5 @@
-import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
 import { SITE_FULL } from "@/data/site"
-
-/* Custom service SVGs — same shapes/colors as the hero cards */
-function CctvIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f57c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M23 7l-7 5 7 5V7z" />
-      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-      <circle cx="6" cy="12" r="1.5" fill="#f57c00" stroke="none" />
-    </svg>
-  )
-}
-
-function CarIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="15" height="13" rx="2" />
-      <path d="M16 8h4l3 3v5h-7V8z" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-  )
-}
-
-function MonitorIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7f85f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" />
-      <path d="M8 21h8M12 17v4" />
-      <path d="M9 9l2 2 4-4" strokeWidth="2.5" />
-    </svg>
-  )
-}
-
-const servicePills = [
-  {
-    href: "/services/security-solutions",
-    iconBg: "bg-[rgba(245,124,0,0.15)]",
-    icon: <CctvIcon />,
-    name: "Security Solutions",
-    sub: "Surveillance, alarms, access & more",
-  },
-  {
-    href: "/services/car-rental",
-    iconBg: "bg-[rgba(76,175,80,0.15)]",
-    icon: <CarIcon />,
-    name: "Car Rental",
-    sub: "Daily & weekly vehicle hire",
-  },
-  {
-    href: "/services/it-services",
-    iconBg: "bg-[rgba(127,133,247,0.15)]",
-    icon: <MonitorIcon />,
-    name: "IT & AI Services",
-    sub: "Web, App & AI automation",
-  },
-]
 
 export default function HeroSection() {
   return (
@@ -96,31 +38,6 @@ export default function HeroSection() {
               {SITE_FULL}
             </h1>
 
-            <p className="text-[13px] text-[#9496a8] font-medium mb-3 mt-6 uppercase tracking-wide">
-              Our Services
-            </p>
-
-            <div className="flex flex-col gap-2">
-              {servicePills.map((pill) => (
-                <Link
-                  key={pill.href}
-                  href={pill.href}
-                  className="group flex items-center gap-3 px-5 py-3 rounded-[10px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] cursor-pointer transition-all duration-300 w-full max-w-[320px] hover:bg-[rgba(127,133,247,0.15)] hover:border-[rgba(127,133,247,0.4)] hover:translate-x-2"
-                >
-                  <span className={`w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0 ${pill.iconBg}`}>
-                    {pill.icon}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[14px] font-semibold text-white">{pill.name}</span>
-                    <span className="block text-[11px] text-[#666880] mt-0.5">{pill.sub}</span>
-                  </span>
-                  <ArrowRight
-                    size={14}
-                    className="ml-auto text-[#666880] group-hover:text-[#7f85f7] transition-colors duration-300"
-                  />
-                </Link>
-              ))}
-            </div>
           </div>
 
           {/* RIGHT — hero image */}
