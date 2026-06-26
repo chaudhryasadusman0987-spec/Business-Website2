@@ -20,9 +20,9 @@ import ImageInput from "./ImageInput"
 import { Labeled, Text, Num, Toggle, IconBtn } from "./catalog-ui"
 
 // Postgres-backed product manager. Reads from /api/products?slug=… ; all writes
-// go through /api/dashboard/update (type: "product"). Products assigned to the
-// "surveillance-evidence" slug render live on that solution page. Other slugs
-// are storable here too, though only surveillance reads from the DB today.
+// go through /api/dashboard/update (type: "product"). Every security solution
+// renders its products live from the DB — on its own solution page and in the
+// combined /products catalog — so edits here show on the site without a redeploy.
 
 const SLUGS = securitySolutions.map((s) => ({ slug: s.slug, name: s.name }))
 
@@ -144,9 +144,8 @@ export default function ProductsDbTab() {
             Products (Database)
           </h1>
           <p className="text-[#666] text-[14px] mt-1">
-            Stored in Postgres. Products on{" "}
-            <span className="font-semibold">Surveillance &amp; Evidence</span>{" "}
-            show live on that solution page.
+            Stored in Postgres. Products show live on each solution&apos;s page
+            (and the All Products catalog) without a redeploy.
           </p>
         </div>
         <button
