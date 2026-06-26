@@ -2,8 +2,11 @@ import { getProducts } from "@/lib/db"
 
 // Public product reads. Used by the Surveillance & Evidence page grid and the
 // dashboard "Products (DB)" tab. Writes go through /api/dashboard/update.
-// Always read fresh so dashboard edits show without a redeploy.
+// Always read fresh so dashboard edits show without a redeploy. `fetchCache`
+// is force-no-store because the Neon driver queries over `fetch`, which the
+// App Router Data Cache would otherwise cache — pinning stale product lists.
 export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
 
 export async function GET(req: Request) {
   const slug = new URL(req.url).searchParams.get("slug") ?? undefined

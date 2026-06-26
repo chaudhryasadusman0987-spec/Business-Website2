@@ -21,7 +21,13 @@ function sql(): NeonQueryFunction<false, false> {
       "No database connection string — set DATABASE_URL (or POSTGRES_URL).",
     )
   }
-  client = neon(url)
+  // The Neon serverless driver runs every query as an HTTP `fetch` to the
+  // Neon SQL endpoint. In the Next.js App Router that fetch is wrapped by the
+  // Data Cache, so without this the very first SELECT result gets cached and
+  // re-served forever — newly inserted/updated products persist in Postgres but
+  // never appear on refresh. `cache: "no-store"` opts those queries out so
+  // reads always hit the live database.
+  client = neon(url, { fetchOptions: { cache: "no-store" } })
   return client
 }
 
