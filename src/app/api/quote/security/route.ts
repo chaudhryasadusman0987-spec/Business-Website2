@@ -6,8 +6,11 @@ import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 interface QuoteItem {
   name: string
+  category: string
   qty: number
   unitPrice: number
+  originalPrice: number
+  isOnSale: boolean
   lineTotal: number
 }
 
@@ -49,9 +52,21 @@ function buildEmail(body: QuoteBody): string {
     .map(
       (i) => `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee">${i.name}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee">
+          ${i.name}
+          <div style="font-size:11px;color:#888">${i.category}</div>
+        </td>
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${i.qty}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatAUD(i.unitPrice)}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">
+          ${formatAUD(i.unitPrice)}
+          ${
+            i.isOnSale
+              ? `<div style="font-size:11px;color:#999;text-decoration:line-through">was ${formatAUD(
+                  i.originalPrice
+                )}</div>`
+              : ""
+          }
+        </td>
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatAUD(i.lineTotal)}</td>
       </tr>`
     )
@@ -72,7 +87,7 @@ function buildEmail(body: QuoteBody): string {
       <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
         <thead>
           <tr style="text-align:left;background:#f7f7f7">
-            <th style="padding:8px">Solution</th>
+            <th style="padding:8px">Product</th>
             <th style="padding:8px;text-align:center">Qty</th>
             <th style="padding:8px;text-align:right">Unit</th>
             <th style="padding:8px;text-align:right">Total</th>
