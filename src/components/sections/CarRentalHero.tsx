@@ -1,6 +1,4 @@
 import Link from "next/link"
-import { SITE_PHONE } from "@/data/site"
-import { vehicles } from "@/data/car-rental"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 
 // Dark hero for the Car Rental landing page.
@@ -70,15 +68,6 @@ export default function CarRentalHero() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-6 mt-8">
-              <span className="text-[#9496a8] text-[14px]">
-                ⭐ 4.9/5 from 500+ reviews
-              </span>
-              <span className="w-px h-5 bg-white/20" />
-              <span className="text-[#9496a8] text-[14px]">
-                📞 <span className="text-white font-semibold">{SITE_PHONE}</span>
-              </span>
-            </div>
           </div>
 
           {/* RIGHT — colored block with emoji + floating stat pills */}
@@ -94,23 +83,8 @@ export default function CarRentalHero() {
                 fallbackBg="var(--brand-light, #e9eaff)"
                 placeholderText="Vehicle photo"
               />
-              {/* Dark scrim so the white stat pills stay legible over the photo */}
+              {/* Dark scrim so the photo edges stay soft */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
-
-              {/* Top-right pill */}
-              <div className="absolute top-5 right-5 bg-black/50 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3">
-                <p className="text-white font-semibold text-[13px]">
-                  {vehicles.length} Vehicle Classes
-                </p>
-              </div>
-
-              {/* Bottom-left pill */}
-              <div className="absolute bottom-5 left-5 bg-black/50 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#5dcaa5] animate-pulse" />
-                <p className="text-white font-semibold text-[13px]">
-                  Free Cancellation
-                </p>
-              </div>
             </div>
           </div>
         </div>
