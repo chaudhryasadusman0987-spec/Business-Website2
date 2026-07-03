@@ -22,6 +22,7 @@ import {
 } from "@/data/car-rental"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
+import { mergeVehicles, normaliseOverrides } from "@/lib/catalog"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 
 const STEP_TITLES = [
@@ -86,6 +87,7 @@ function QuoteWizard() {
   const [returnTime, setReturnTime] = useState("10:00 AM")
   const [sameLoc, setSameLoc] = useState(true)
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
+  const [fleet, setFleet] = useState<Vehicle[]>(vehicles)
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({})
   const [payment, setPayment] = useState<"credit" | "debit" | null>(null)
   const [bondConfirmed, setBondConfirmed] = useState(false)
@@ -105,14 +107,31 @@ function QuoteWizard() {
   const youngDriver = age >= minRentalAge && age < 25
   const rentalDays = daysBetween(pickupDate, returnDate)
 
-  // Pre-select a vehicle from ?vehicle=id
+  // Merge admin catalog overrides so dashboard vehicle edits / additions /
+  // hides appear in the wizard live (mirrors the fleet grid on the site).
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/catalog")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setFleet(mergeVehicles(vehicles, normaliseOverrides(data)))
+      })
+      .catch(() => {
+        /* keep static vehicles on error */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Pre-select a vehicle from ?vehicle=id. Depends on the merged fleet so
+  // dashboard-added custom vehicles also resolve; never clobbers a manual pick.
   useEffect(() => {
     const v = searchParams.get("vehicle")
-    if (v) {
-      const match = vehicles.find((x) => x.id === v)
-      if (match) setVehicle(match)
-    }
-  }, [searchParams])
+    if (!v) return
+    const match = fleet.find((x) => x.id === v)
+    if (match) setVehicle((cur) => cur ?? match)
+  }, [searchParams, fleet])
 
   const today = new Date().toISOString().split("T")[0]
 
@@ -384,7 +403,7 @@ function QuoteWizard() {
       {/* STEP 1 — choose vehicle */}
       {step === 1 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {vehicles.map((v) => (
+          {fleet.map((v) => (
             <button
               key={v.id}
               onClick={() => setVehicle(v)}

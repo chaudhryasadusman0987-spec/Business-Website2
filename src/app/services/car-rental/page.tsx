@@ -8,8 +8,14 @@ import CarRentalHero from "@/components/sections/CarRentalHero"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { vehicles } from "@/data/car-rental"
+import { mergeVehicles } from "@/lib/catalog"
+import { readCatalog } from "@/lib/catalog-store"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL } from "@/data/site"
+
+// Read admin catalog overrides on every request so dashboard vehicle edits go
+// live on this page without a rebuild.
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: `Car Rental Brisbane | ${SITE_FULL}`,
@@ -56,7 +62,12 @@ const dayTrips = [
   "Noosa — 2 hours north via Bruce Hwy",
 ]
 
-export default function CarRentalPage() {
+export default async function CarRentalPage() {
+  // Effective fleet = static base merged with admin overrides (edits, hides,
+  // custom additions) saved from the dashboard "Car Rental" tab.
+  const overrides = await readCatalog()
+  const fleet = mergeVehicles(vehicles, overrides)
+
   return (
     <>
       {/* SECTION 1 — Hero (unchanged) */}
@@ -139,23 +150,26 @@ export default function CarRentalPage() {
               href="/services/car-rental/vehicles"
               className="text-[#7f85f7] font-semibold text-[14px] flex items-center gap-1.5 hover:underline"
             >
-              See all 6 vehicles
+              See all {fleet.length} vehicles
               <ArrowRight size={14} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vehicles.slice(0, 3).map((vehicle) => (
+            {fleet.slice(0, 3).map((vehicle) => (
               <div
                 key={vehicle.id}
                 className="bg-white border border-[#e8e8f0] rounded-[16px] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
                 <div className="h-[200px] relative">
-                  <Image
+                  <ImageWithFallback
                     src={vehicle.image}
                     alt={vehicle.imageAlt}
                     fill
                     className="object-cover object-center"
+                    fallbackIcon="Car"
+                    fallbackBg="#f0f0ff"
+                    placeholderText="Photo coming soon"
                   />
                   {vehicle.badge && (
                     <div className="absolute top-3 left-3 bg-[#7f85f7] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
@@ -265,7 +279,7 @@ export default function CarRentalPage() {
               <h3 className="font-bold text-[16px] text-[#1a1a2e] mb-4">
                 Bond amounts by vehicle:
               </h3>
-              {vehicles.map((v) => (
+              {fleet.map((v) => (
                 <div
                   key={v.id}
                   className="flex justify-between items-center py-3 border-b border-gray-100"
