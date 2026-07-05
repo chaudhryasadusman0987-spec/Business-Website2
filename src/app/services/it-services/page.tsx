@@ -1,17 +1,11 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Check, Bot } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
-import DynamicIcon from "@/components/ui/DynamicIcon"
-import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
-import {
-  itServiceItems,
-  itConsulting,
-  itProcess,
-  itTechnologies,
-} from "@/data/it-services"
+import { itProcess, itTechnologies } from "@/data/it-services"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
@@ -21,12 +15,149 @@ export const metadata: Metadata = {
     "Australian businesses. Fixed prices. Free consultation.",
 }
 
-const aiBenefits = [
-  "AI chat agents collecting leads 24/7",
-  "Automated email and document processing",
-  "Connect your CRM and business tools",
-  "Custom AI trained on your business data",
+interface ServiceRow {
+  eyebrow: string
+  title: string
+  paragraph: string
+  facts: string[]
+  price: string
+  priceNote?: string
+  linkHref: string
+  linkText: string
+  image: string
+  imageAlt: string
+  reverse: boolean
+}
+
+const serviceRows: ServiceRow[] = [
+  {
+    eyebrow: "Web Development",
+    title: "A website that actually brings in customers.",
+    paragraph:
+      "We build websites that load fast, rank well on Google and turn visitors into leads. Not templates — proper custom builds that represent your business the right way.",
+    facts: [
+      "Mobile-first, SEO-ready from day one",
+      "You can edit the content yourself",
+      "Fixed price — no hourly surprises",
+    ],
+    price: "From $2,500",
+    linkHref: "/services/it-services/web-development",
+    linkText: "See packages",
+    image: "/images/it-services/web-development.jpg",
+    imageAlt: "Web development Brisbane",
+    reverse: false,
+  },
+  {
+    eyebrow: "App Development",
+    title: "iOS and Android — done properly, not cheaply.",
+    paragraph:
+      "We build apps that get real downloads and real reviews. From the design to the App Store submission, we handle the whole thing and keep you in the loop throughout.",
+    facts: [
+      "iOS + Android from one build",
+      "We handle App Store submission",
+      "Regular demos so you see progress",
+    ],
+    price: "From $8,000",
+    linkHref: "/services/it-services/app-development",
+    linkText: "See packages",
+    image: "/images/it-services/app-development.jpg",
+    imageAlt: "Mobile app development Brisbane",
+    reverse: true,
+  },
+  {
+    eyebrow: "AI Automation",
+    title: "Stop doing the same tasks manually every day.",
+    paragraph:
+      "We build AI tools that actually save your staff time — not demos that look impressive but don't do anything. Chat agents, document processing, workflow automation. Real tools for real businesses.",
+    facts: [
+      "AI chat agent collecting leads 24/7",
+      "Connects to your existing tools",
+      "Trained on your business — not generic",
+    ],
+    price: "From $1,500",
+    priceNote: "(The chat on this site is built by us)",
+    linkHref: "/services/it-services/ai-automation",
+    linkText: "See packages",
+    image: "/images/it-services/ai-automation.jpg",
+    imageAlt: "AI automation business Australia",
+    reverse: false,
+  },
 ]
+
+const consultingRow: ServiceRow = {
+  eyebrow: "IT Consulting",
+  title: "Not sure what technology your business actually needs?",
+  paragraph:
+    "Most businesses waste money on technology that doesn't solve the right problem. We spend a few hours with you, map out what you have, what you need, and give you a plain English roadmap — no jargon, no upselling.",
+  facts: [
+    "Technology audit from $150/hr",
+    "Plain English — no jargon",
+    "Practical advice, not a sales pitch",
+  ],
+  price: "From $150/hr",
+  linkHref: "/contact",
+  linkText: "Book a session",
+  image: "/images/it-services/it-consulting.jpg",
+  imageAlt: "IT consulting Brisbane business",
+  reverse: true,
+}
+
+function ServiceEditorialRow({ row }: { row: ServiceRow }) {
+  return (
+    <div
+      className={`flex flex-col ${
+        row.reverse ? "lg:flex-row-reverse" : "lg:flex-row"
+      } items-center gap-12`}
+    >
+      {/* Photo */}
+      <div className="w-full lg:w-[45%] h-[320px] rounded-[20px] overflow-hidden relative flex-shrink-0 shadow-lg">
+        <Image src={row.image} alt={row.imageAlt} fill className="object-cover" />
+      </div>
+
+      {/* Text */}
+      <div className="flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7] mb-3">
+          {row.eyebrow}
+        </p>
+        <h3 className="font-bold text-[28px] text-[#1a1a2e] leading-tight">
+          {row.title}
+        </h3>
+        <p className="text-[15px] text-[#555] leading-[1.8] mt-4">
+          {row.paragraph}
+        </p>
+
+        <div className="flex flex-col gap-3 mt-6">
+          {row.facts.map((fact) => (
+            <div key={fact} className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#eeedfe] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check size={11} className="text-[#7f85f7]" />
+              </div>
+              <span className="text-[14px] text-[#444]">{fact}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-6 mt-6">
+          <span className="text-[24px] font-bold text-[#7f85f7]">
+            {row.price}
+            {row.priceNote && (
+              <span className="text-[12px] text-[#9496a8] ml-2 font-normal">
+                {row.priceNote}
+              </span>
+            )}
+          </span>
+          <Link
+            href={row.linkHref}
+            className="text-[14px] font-semibold text-[#1a1a2e] hover:text-[#7f85f7] transition-colors flex items-center gap-1.5"
+          >
+            {row.linkText}
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ITServicesPage() {
   return (
@@ -92,267 +223,38 @@ export default function ITServicesPage() {
                 Explore Services
               </Link>
             </div>
-
-            <div className="mt-8 flex items-center gap-6 flex-wrap">
-              <span className="text-[13px] text-[#9496a8]">50+ Projects</span>
-              <span className="w-px h-5 bg-white/20" />
-              <span className="text-[13px] text-[#9496a8]">100% Aus Team</span>
-              <span className="w-px h-5 bg-white/20" />
-              <span className="text-[13px] text-[#9496a8]">Free Consult</span>
-            </div>
           </div>
 
-          {/* RIGHT — mini-cards */}
-          <div className="w-full lg:w-[420px] bg-[rgba(127,133,247,0.08)] border border-[rgba(127,133,247,0.15)] rounded-[24px] p-6 flex flex-col gap-3">
-            {itServiceItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[14px] p-4 flex items-center gap-4 hover:border-[rgba(127,133,247,0.4)] hover:bg-[rgba(127,133,247,0.08)] transition-all duration-300"
-              >
-                <span
-                  className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0"
-                  style={{ background: item.iconBg }}
-                >
-                  <DynamicIcon name={item.icon} size={20} color={item.iconColor} />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-white font-semibold text-[14px]">
-                    {item.name}
-                  </span>
-                  <span className="block text-[#666880] text-[11px] mt-0.5">
-                    {item.tagline}
-                  </span>
-                </span>
-                <ArrowRight size={14} className="ml-auto text-[#7f85f7]" />
-              </Link>
-            ))}
-
-            {/* IT Consulting — 4th mini-card (no subpage) */}
-            <Link
-              href="/contact"
-              className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[14px] p-4 flex items-center gap-4 hover:border-[rgba(127,133,247,0.4)] hover:bg-[rgba(127,133,247,0.08)] transition-all duration-300"
-            >
-              <span
-                className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0"
-                style={{ background: itConsulting.iconBg }}
-              >
-                <DynamicIcon
-                  name={itConsulting.icon}
-                  size={20}
-                  color={itConsulting.iconColor}
-                />
-              </span>
-              <span className="flex-1">
-                <span className="block text-white font-semibold text-[14px]">
-                  {itConsulting.name}
-                </span>
-                <span className="block text-[#666880] text-[11px] mt-0.5">
-                  {itConsulting.tagline}
-                </span>
-              </span>
-              <ArrowRight size={14} className="ml-auto text-[#7f85f7]" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 2 — 3 SERVICE CARDS ── */}
-      <section id="services" className="bg-[#fefefd] pt-[100px] pb-[80px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <SectionTitle
-            title="Our Services"
-            subtitle="Click any service to explore in detail"
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-14">
-            {itServiceItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="group relative block bg-brand-card rounded-[40px] overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-[0_20px_60px_rgba(127,133,247,0.25)] hover:-translate-y-2"
-              >
-                {/* image strip */}
-                <div className="h-[160px] relative overflow-hidden">
-                  <ImageWithFallback
-                    src={item.image}
-                    alt={item.imageAlt}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    fallbackBg={item.iconBg}
-                  />
-                  <div className="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/40 transition duration-500" />
-                  {item.badge && (
-                    <span className="absolute top-3 left-3 bg-brand-primary text-white group-hover:bg-white group-hover:text-brand-primary rounded-full px-3 py-1 text-[10px] font-bold transition-colors duration-500">
-                      {item.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* body */}
-                <div className="p-8 text-center bg-brand-card group-hover:bg-brand-primary transition-colors duration-500">
-                  <div
-                    className="mx-auto mb-3 flex justify-center [color:var(--ic)] group-hover:text-white transition-colors duration-500"
-                    style={{ "--ic": item.iconColor } as React.CSSProperties}
-                  >
-                    <DynamicIcon name={item.icon} size={36} />
-                  </div>
-
-                  <h3 className="font-bold text-[20px] text-[#1a1a2e] group-hover:text-white transition-colors duration-500">
-                    {item.name}
-                  </h3>
-                  <p className="text-brand-primary text-[12px] mt-1 font-medium group-hover:text-white/80 transition-colors duration-500">
-                    {item.tagline}
-                  </p>
-                  <p className="text-[13px] text-gray-500 mt-3 leading-relaxed line-clamp-2 group-hover:text-white/80 transition-colors duration-500">
-                    {item.description}
-                  </p>
-                  <p className="font-bold text-[16px] text-[#1a1a2e] mt-4 group-hover:text-white transition-colors duration-500">
-                    {item.startingFrom}
-                  </p>
-
-                  <span className="mt-3 inline-flex items-center gap-1 bg-white/60 group-hover:bg-white/20 rounded-full px-3 py-1 text-[11px] text-gray-600 group-hover:text-white transition-all duration-500">
-                    {item.packages.length} packages available
-                  </span>
-
-                  <span className="flex items-center justify-center gap-1 mt-4 text-brand-primary group-hover:text-white transition-colors text-[13px] font-semibold">
-                    Explore Service
-                    <ArrowRight
-                      size={14}
-                      className="group-hover:translate-x-1 transition-transform"
-                    />
-                  </span>
-                </div>
-
-                <ArrowRight
-                  size={18}
-                  className="absolute bottom-5 right-5 text-gray-300 group-hover:text-white/60 transition-colors duration-500"
-                />
-              </Link>
-            ))}
-          </div>
-
-          {/* IT Consulting — half-width card below grid */}
-          <div className="bg-[#f0f4ff] border border-[#e0e0ff] rounded-[24px] p-8 flex flex-col lg:flex-row items-center gap-8 mt-8 max-w-[900px] mx-auto">
-            <div
-              className="p-4 rounded-[16px] flex-shrink-0"
-              style={{ background: itConsulting.iconBg }}
-            >
-              <DynamicIcon
-                name={itConsulting.icon}
-                size={48}
-                color={itConsulting.iconColor}
+          {/* RIGHT — hero photo */}
+          <div className="w-full lg:w-[45%] flex-shrink-0">
+            <div className="relative w-full h-[420px] lg:h-[500px] rounded-[24px] overflow-hidden shadow-2xl">
+              <Image
+                src="/images/it-services/hero.jpg"
+                alt="IT and AI services professional development team"
+                fill
+                className="object-cover object-center"
+                priority
               />
-            </div>
-            <div className="flex-1 text-center lg:text-left">
-              <h3 className="font-bold text-[20px] text-[#1a1a2e]">
-                {itConsulting.name}
-              </h3>
-              <p className="text-[#7f85f7] text-[13px] mt-1 font-medium">
-                {itConsulting.tagline}
-              </p>
-              <p className="text-[14px] text-gray-500 mt-2">
-                {itConsulting.description}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="font-bold text-[18px] text-[#1565c0]">
-                {itConsulting.startingFrom}
-              </p>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center bg-brand-primary text-white rounded-[8px] h-[44px] px-6 text-[14px] font-semibold mt-3 hover:bg-[#6b71f0] transition-all"
-              >
-                Get Consultation
-              </Link>
+              {/* Dark overlay bottom for depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 3 — AI HIGHLIGHT ── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] pt-[100px] pb-[100px]">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4 flex flex-col lg:flex-row gap-16 items-center">
-          {/* LEFT */}
-          <div className="flex-1">
-            <p className="text-[#7f85f7] text-[11px] font-semibold uppercase tracking-widest mb-4">
-              AI Automation
-            </p>
-            <h2 className="font-extrabold text-[36px] lg:text-[48px] text-white leading-tight">
-              Automate Your Business.{" "}
-              <span className="text-[#7f85f7]">Save Hours Every Week.</span>
-            </h2>
-            <p className="text-[15px] text-[#9496a8] mt-4 max-w-[460px]">
-              Stop spending time on repetitive tasks. Our AI agents handle
-              customer enquiries, process documents and connect your tools — so
-              you can focus on growing your business.
-            </p>
+      {/* ── SECTION 2 — EDITORIAL SERVICE ROWS ── */}
+      <section id="services" className="bg-[#fefefd] pt-[100px] pb-[100px]">
+        <div className="max-w-[1170px] mx-auto px-4 flex flex-col gap-20">
+          {serviceRows.map((row) => (
+            <ServiceEditorialRow key={row.eyebrow} row={row} />
+          ))}
+        </div>
+      </section>
 
-            <div className="mt-6 flex flex-col gap-4">
-              {aiBenefits.map((b) => (
-                <div key={b} className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#0f6e56]/20 flex items-center justify-center flex-shrink-0">
-                    <Check size={12} className="text-[#5dcaa5]" />
-                  </span>
-                  <span className="text-[14px] text-[#9496a8]">{b}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/services/it-services/ai-automation"
-                className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold hover:bg-[#6b71f0] transition-all"
-              >
-                Explore AI Automation
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center border border-white/20 text-white rounded-[8px] h-[52px] px-8 hover:bg-white/5 transition-all"
-              >
-                Get Free Consultation
-              </Link>
-            </div>
-          </div>
-
-          {/* RIGHT — demo chat */}
-          <div className="lg:w-[420px] w-full bg-[rgba(255,255,255,0.04)] border border-white/10 rounded-[20px] p-6">
-            <div className="bg-[#2d2d2c] rounded-[10px] px-4 py-3 mb-4 flex items-center gap-3">
-              <span className="bg-[#7f85f7] w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot size={16} className="text-white" />
-              </span>
-              <span className="text-white font-semibold text-[14px]">
-                {SITE_FULL} Assistant
-              </span>
-              <span className="ml-auto flex items-center gap-1.5 text-[#5dcaa5] text-[11px]">
-                <span className="w-2 h-2 rounded-full bg-[#5dcaa5]" />
-                Online
-              </span>
-            </div>
-
-            <div className="bg-[rgba(255,255,255,0.08)] text-white/80 rounded-[12px] rounded-tl-none p-3 text-[12px] max-w-[85%] mb-3">
-              Hi! I&apos;m your AI assistant. How can I help today?
-            </div>
-            <div className="bg-[#7f85f7] text-white rounded-[12px] rounded-tr-none p-3 text-[12px] max-w-[85%] ml-auto mb-3">
-              What are your CCTV prices?
-            </div>
-            <div className="bg-[rgba(255,255,255,0.08)] text-white/80 rounded-[12px] rounded-tl-none p-3 text-[12px] max-w-[85%] mb-3">
-              Our cameras start from $149. Would you like a free quote? I can
-              take your details now.
-            </div>
-
-            <p className="text-[11px] text-[#666880] text-center mt-4">
-              👇 Try the live AI chat — bottom right corner
-            </p>
-          </div>
+      {/* IT Consulting — different background editorial row */}
+      <section className="bg-[#f4f4ff] pt-[80px] pb-[80px]">
+        <div className="max-w-[1170px] mx-auto px-4">
+          <ServiceEditorialRow row={consultingRow} />
         </div>
       </section>
 

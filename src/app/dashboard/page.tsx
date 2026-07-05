@@ -30,7 +30,6 @@ import {
   TrendingUp,
   MessageSquare,
   Database,
-  Image as ImageIcon,
   Check,
   AlertCircle,
   RefreshCw,
@@ -64,8 +63,14 @@ interface Lead {
 type PkgEdit = {
   startingFromValue: number
   startingFrom: string
-  image: string
   badge: string
+  features: string[]
+}
+
+type OverviewEdit = {
+  tagline: string
+  startingFrom: string
+  description: string
 }
 
 /* ──────────────────── Initial edit state ──────────────────── */
@@ -77,11 +82,23 @@ function initPkgEdits(): Record<string, PkgEdit> {
       out[`${svc.id}:${p.id}`] = {
         startingFromValue: p.startingFromValue,
         startingFrom: p.startingFrom,
-        image: (p as { image?: string }).image ?? "",
         badge: p.badge ?? "",
+        features: [...p.features],
       }
     })
   )
+  return out
+}
+
+function initOverviewEdits(): Record<string, OverviewEdit> {
+  const out: Record<string, OverviewEdit> = {}
+  itServiceItems.forEach((svc) => {
+    out[svc.id] = {
+      tagline: svc.tagline,
+      startingFrom: svc.startingFrom,
+      description: svc.description,
+    }
+  })
   return out
 }
 
@@ -176,6 +193,8 @@ export default function DashboardPage() {
 
   // editable data (IT packages still use the legacy save endpoint)
   const [pkgEdits, setPkgEdits] = useState<Record<string, PkgEdit>>(initPkgEdits)
+  const [overviewEdits, setOverviewEdits] =
+    useState<Record<string, OverviewEdit>>(initOverviewEdits)
   const [savedKey, setSavedKey] = useState<string | null>(null)
 
   // leads
@@ -544,7 +563,7 @@ export default function DashboardPage() {
         {tab === "it-services" && (
           <div>
             <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-8">
-              IT &amp; AI Services — Packages
+              IT &amp; AI Services
             </h1>
 
             <div className="flex gap-2 flex-wrap mb-6">
@@ -563,106 +582,221 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="bg-white rounded-[16px] border border-[#e8e8f0] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-[#f8f8ff] text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider">
-                      <Th>Image</Th>
-                      <Th>Package</Th>
-                      <Th>Starting From</Th>
-                      <Th>Display Price</Th>
-                      <Th>Badge</Th>
-                      <Th>Save</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeService.packages.map((p) => {
-                      const key = `${activeService.id}:${p.id}`
-                      const e = pkgEdits[key]
-                      if (!e) return null
-                      return (
-                        <tr key={key} className="border-b border-[#f0f0f8] last:border-0 align-top">
-                          <td className="px-4 py-4">
-                            <Thumb
-                              src={e.image}
-                              value={e.image}
-                              placeholder="/images/it-services/name.jpg"
-                              onChange={(v) =>
-                                setPkgEdits((s) => ({ ...s, [key]: { ...s[key], image: v } }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="font-medium text-[14px] text-[#1a1a2e]">{p.name}</div>
-                            <div className="text-[11px] text-[#9496a8] mt-0.5">{p.description}</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-[10px] text-[#9496a8] mb-1">Number (for calculations)</div>
-                            <input
-                              type="number"
-                              value={e.startingFromValue}
-                              onChange={(ev) =>
-                                setPkgEdits((s) => ({
-                                  ...s,
-                                  [key]: { ...s[key], startingFromValue: Number(ev.target.value) },
-                                }))
-                              }
-                              className="w-[100px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-[10px] text-[#9496a8] mb-1">Text shown to customers</div>
-                            <input
-                              type="text"
-                              value={e.startingFrom}
-                              placeholder="From $2,500"
-                              onChange={(ev) =>
-                                setPkgEdits((s) => ({
-                                  ...s,
-                                  [key]: { ...s[key], startingFrom: ev.target.value },
-                                }))
-                              }
-                              className="w-[130px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[13px] focus:border-[#7f85f7] outline-none"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <input
-                              type="text"
-                              value={e.badge}
-                              placeholder="e.g. Most Popular"
-                              onChange={(ev) =>
-                                setPkgEdits((s) => ({ ...s, [key]: { ...s[key], badge: ev.target.value } }))
-                              }
-                              className="w-[110px] border border-[#e8e8f0] rounded-[8px] px-2 h-[38px] text-[12px] focus:border-[#7f85f7] outline-none"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <SaveBtn
-                              saved={savedKey === key}
-                              onClick={() =>
-                                save(
-                                  {
-                                    type: "it-package",
-                                    serviceId: activeService.id,
-                                    packageId: p.id,
-                                    startingFromValue: e.startingFromValue,
-                                    startingFrom: e.startingFrom,
-                                    image: e.image,
-                                    badge: e.badge,
-                                  },
-                                  key
-                                )
-                              }
-                            />
-                          </td>
-                        </tr>
+            {/* ── SECTION A — Service Overview ── */}
+            {(() => {
+              const ov = overviewEdits[activeService.id]
+              const ovKey = `overview:${activeService.id}`
+              if (!ov) return null
+              return (
+                <div className="bg-white rounded-[16px] p-6 border border-[#e8e8f0] mb-6">
+                  <h3 className="font-bold text-[16px] mb-4">Service Overview</h3>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Tagline (shown on card)
+                      </label>
+                      <input
+                        type="text"
+                        value={ov.tagline}
+                        onChange={(ev) =>
+                          setOverviewEdits((s) => ({
+                            ...s,
+                            [activeService.id]: { ...s[activeService.id], tagline: ev.target.value },
+                          }))
+                        }
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Starting From (display text)
+                      </label>
+                      <input
+                        type="text"
+                        value={ov.startingFrom}
+                        placeholder="From $2,500"
+                        onChange={(ev) =>
+                          setOverviewEdits((s) => ({
+                            ...s,
+                            [activeService.id]: { ...s[activeService.id], startingFrom: ev.target.value },
+                          }))
+                        }
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                      Description
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={ov.description}
+                      onChange={(ev) =>
+                        setOverviewEdits((s) => ({
+                          ...s,
+                          [activeService.id]: { ...s[activeService.id], description: ev.target.value },
+                        }))
+                      }
+                      className="w-full border border-[#e8e8f0] rounded-[8px] px-3 py-2 text-[14px] leading-relaxed focus:border-[#7f85f7] outline-none resize-y"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      save(
+                        {
+                          type: "it-service-overview",
+                          serviceId: activeService.id,
+                          tagline: ov.tagline,
+                          startingFrom: ov.startingFrom,
+                          description: ov.description,
+                        },
+                        ovKey
                       )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                    }
+                    className={`mt-5 rounded-[8px] px-6 h-[38px] text-[13px] font-medium flex items-center gap-1.5 transition-colors ${
+                      savedKey === ovKey
+                        ? "bg-[#2e7d32] text-white"
+                        : "bg-[#7f85f7] text-white hover:bg-[#6b71f0]"
+                    }`}
+                  >
+                    {savedKey === ovKey ? (
+                      <>
+                        <Check size={14} /> Saved
+                      </>
+                    ) : (
+                      "Save Overview"
+                    )}
+                  </button>
+                </div>
+              )
+            })()}
+
+            {/* ── SECTION B — Packages & Pricing ── */}
+            <h3 className="font-bold text-[16px] mb-4">Packages &amp; Pricing</h3>
+
+            {activeService.packages.map((p) => {
+              const key = `${activeService.id}:${p.id}`
+              const e = pkgEdits[key]
+              if (!e) return null
+              return (
+                <div
+                  key={key}
+                  className="bg-[#f9f9ff] rounded-[14px] p-5 mb-4 border border-[#e8e8f0]"
+                >
+                  <div className="font-semibold text-[15px] text-[#1a1a2e] mb-4 flex items-center gap-2">
+                    {p.name}
+                    {e.badge && (
+                      <span className="bg-[#7f85f7] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        {e.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Display Price
+                      </label>
+                      <input
+                        type="text"
+                        value={e.startingFrom}
+                        placeholder="From $2,500"
+                        onChange={(ev) =>
+                          setPkgEdits((s) => ({
+                            ...s,
+                            [key]: { ...s[key], startingFrom: ev.target.value },
+                          }))
+                        }
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] focus:border-[#7f85f7] outline-none"
+                      />
+                      <span className="text-[10px] text-[#9496a8]">Shown to customers</span>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Numeric Value ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={e.startingFromValue}
+                        onChange={(ev) =>
+                          setPkgEdits((s) => ({
+                            ...s,
+                            [key]: { ...s[key], startingFromValue: Number(ev.target.value) },
+                          }))
+                        }
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
+                      />
+                      <span className="text-[10px] text-[#9496a8]">Used in quote calculator</span>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Badge
+                      </label>
+                      <input
+                        type="text"
+                        value={e.badge}
+                        placeholder="e.g. Most Popular"
+                        onChange={(ev) =>
+                          setPkgEdits((s) => ({ ...s, [key]: { ...s[key], badge: ev.target.value } }))
+                        }
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                      Features (one per line)
+                    </label>
+                    <textarea
+                      rows={6}
+                      value={e.features.join("\n")}
+                      onChange={(ev) =>
+                        setPkgEdits((s) => ({
+                          ...s,
+                          [key]: { ...s[key], features: ev.target.value.split("\n") },
+                        }))
+                      }
+                      className="w-full border border-[#e8e8f0] rounded-[8px] px-3 py-2 text-[13px] leading-relaxed focus:border-[#7f85f7] outline-none resize-y"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      save(
+                        {
+                          type: "it-package",
+                          serviceId: activeService.id,
+                          packageId: p.id,
+                          startingFrom: e.startingFrom,
+                          startingFromValue: e.startingFromValue,
+                          badge: e.badge,
+                          features: e.features.map((f) => f.trim()).filter((f) => f),
+                        },
+                        key
+                      )
+                    }
+                    className={`mt-5 rounded-[8px] px-5 h-[36px] text-[12px] font-medium flex items-center gap-1.5 transition-colors ${
+                      savedKey === key
+                        ? "bg-[#2e7d32] text-white"
+                        : "bg-[#1a1a2e] text-white hover:bg-[#2a2a45]"
+                    }`}
+                  >
+                    {savedKey === key ? (
+                      <>
+                        <Check size={13} /> Saved
+                      </>
+                    ) : (
+                      "Save Package"
+                    )}
+                  </button>
+                </div>
+              )
+            })}
           </div>
         )}
 
@@ -829,38 +963,6 @@ function StatCard({
 
 function Th({ children }: { children: React.ReactNode }) {
   return <th className="px-4 py-3 whitespace-nowrap">{children}</th>
-}
-
-function Thumb({
-  src,
-  value,
-  placeholder,
-  onChange,
-}: {
-  src: string
-  value: string
-  placeholder: string
-  onChange: (v: string) => void
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="w-[60px] h-[44px] rounded-[8px] overflow-hidden bg-[#f0f0ff] relative flex items-center justify-center">
-        {src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <ImageIcon size={16} className="text-[#b0b4fb]" />
-        )}
-      </div>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-[140px] text-[11px] border border-[#e8e8f0] rounded-[6px] px-2 py-1 focus:border-[#7f85f7] outline-none text-[#666]"
-      />
-    </div>
-  )
 }
 
 function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {

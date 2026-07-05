@@ -1,5 +1,6 @@
 import { createProduct, updateProduct, deleteProduct } from "@/lib/db"
 import type { ProductInput } from "@/lib/products"
+import { itServiceItems } from "@/data/it-services"
 
 // Dashboard save endpoint.
 //
@@ -56,6 +57,36 @@ async function handleProduct(data: Record<string, unknown>) {
   }
 }
 
+function handleItServiceOverview(data: Record<string, unknown>) {
+  const serviceId = String(data.serviceId ?? "")
+  const service = itServiceItems.find((s) => s.id === serviceId)
+  if (service) {
+    if (typeof data.tagline === "string") service.tagline = data.tagline
+    if (typeof data.startingFrom === "string") service.startingFrom = data.startingFrom
+    if (typeof data.description === "string") service.description = data.description
+  }
+  console.log("IT service overview updated:", serviceId, data)
+  // TODO(dashboard): write to database when Postgres integration added
+  return Response.json({ success: true })
+}
+
+function handleItPackage(data: Record<string, unknown>) {
+  const serviceId = String(data.serviceId ?? "")
+  const packageId = String(data.packageId ?? "")
+  const service = itServiceItems.find((s) => s.id === serviceId)
+  const pkg = service?.packages.find((p) => p.id === packageId)
+  if (pkg) {
+    if (typeof data.startingFrom === "string") pkg.startingFrom = data.startingFrom
+    if (data.startingFromValue !== undefined)
+      pkg.startingFromValue = Number(data.startingFromValue)
+    if (typeof data.badge === "string") pkg.badge = data.badge
+    if (Array.isArray(data.features)) pkg.features = data.features.map((f) => String(f))
+  }
+  console.log("IT package updated:", serviceId, packageId, data)
+  // TODO(dashboard): write to database when Postgres integration added
+  return Response.json({ success: true })
+}
+
 export async function POST(req: Request) {
   const data = await req.json()
 
@@ -63,7 +94,15 @@ export async function POST(req: Request) {
     return handleProduct(data as Record<string, unknown>)
   }
 
-  // Legacy prototype types (it-package, …) — not yet persisted.
+  if (data?.type === "it-service-overview") {
+    return handleItServiceOverview(data as Record<string, unknown>)
+  }
+
+  if (data?.type === "it-package") {
+    return handleItPackage(data as Record<string, unknown>)
+  }
+
+  // Other legacy prototype types — not yet persisted.
   console.log("Dashboard update:", data)
   return Response.json({ success: true })
 }
