@@ -5,7 +5,11 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   const config = await readPromo()
-  return Response.json(config)
+  // Never let a browser or the Vercel CDN cache the promo config — a stale empty
+  // response would hide a discount that was just set in the dashboard.
+  return Response.json(config, {
+    headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" },
+  })
 }
 
 export async function POST(req: Request) {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check, MessageCircle } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
@@ -75,7 +75,7 @@ const serviceRows: ServiceRow[] = [
       "Trained on your business — not generic",
     ],
     price: "From $1,500",
-    priceNote: "(The chat on this site is built by us)",
+    priceNote: "The live AI chat in the corner of this website was built by us.",
     linkHref: "/services/it-services/ai-automation",
     linkText: "See packages",
     image: "/images/it-services/ai-automation.jpg",
@@ -116,9 +116,12 @@ function ServiceEditorialRow({ row }: { row: ServiceRow }) {
 
       {/* Text */}
       <div className="flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7] mb-3">
+        <Link
+          href={row.linkHref}
+          className="inline-block text-[13px] font-bold uppercase tracking-widest text-[#7f85f7] mb-3 hover:text-[#6b71f0] transition-colors"
+        >
           {row.eyebrow}
-        </p>
+        </Link>
         <h3 className="font-bold text-[28px] text-[#1a1a2e] leading-tight">
           {row.title}
         </h3>
@@ -138,22 +141,22 @@ function ServiceEditorialRow({ row }: { row: ServiceRow }) {
         </div>
 
         <div className="flex items-center gap-6 mt-6">
-          <span className="text-[24px] font-bold text-[#7f85f7]">
-            {row.price}
-            {row.priceNote && (
-              <span className="text-[12px] text-[#9496a8] ml-2 font-normal">
-                {row.priceNote}
-              </span>
-            )}
-          </span>
+          <span className="text-[24px] font-bold text-[#7f85f7]">{row.price}</span>
           <Link
             href={row.linkHref}
-            className="text-[14px] font-semibold text-[#1a1a2e] hover:text-[#7f85f7] transition-colors flex items-center gap-1.5"
+            className="inline-flex items-center gap-2 bg-[#7f85f7] text-white text-[14px] font-semibold rounded-[8px] px-5 h-[44px] hover:bg-[#6b71f0] transition-colors"
           >
             {row.linkText}
-            <ArrowRight size={14} />
+            <ArrowRight size={16} />
           </Link>
         </div>
+
+        {row.priceNote && (
+          <p className="mt-5 inline-flex items-center gap-2 bg-[#eeedfe] text-[#534ab7] text-[13px] font-semibold rounded-full px-4 py-2">
+            <MessageCircle size={15} className="text-[#7f85f7]" />
+            {row.priceNote}
+          </p>
+        )}
       </div>
     </div>
   )
@@ -217,7 +220,7 @@ export default function ITServicesPage() {
                 Free Consultation
               </Link>
               <Link
-                href="/#services"
+                href="#services"
                 className="inline-flex items-center justify-center border border-white/20 text-white rounded-[8px] h-[52px] px-8 hover:bg-white/5 transition-all"
               >
                 Explore Services

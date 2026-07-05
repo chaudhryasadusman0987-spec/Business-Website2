@@ -187,27 +187,57 @@ export default function Header() {
 
       {/* Slide-out panel (mobile) */}
       <nav
-        className={`fixed top-0 right-0 h-full w-[280px] bg-brand-panel z-[9999] pt-[60px] transition-transform duration-500 ${
+        className={`fixed top-0 right-0 h-full w-[300px] max-w-[85vw] bg-gradient-to-b from-[#7f85f7] to-[#6b71f0] shadow-2xl z-[9999] flex flex-col transition-transform duration-500 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <button
-          onClick={() => setOpen(false)}
-          aria-label="Close menu"
-          className="absolute top-4 right-6 text-white hover:text-brand-primary transition-colors"
-        >
-          <X size={28} />
-        </button>
-        {navLinks.map((link) => (
+        {/* Panel header — matches the navbar bar */}
+        <div className="flex items-center justify-between px-6 h-[65px] border-b border-white/15 flex-shrink-0">
           <Link
-            key={link.href}
-            href={link.href}
+            href="/"
             onClick={() => setOpen(false)}
-            className="block px-8 py-3 text-white text-xl hover:text-brand-primary transition-colors duration-300"
+            className="text-white font-bold text-[18px] hover:opacity-80 transition-opacity"
           >
-            {link.label}
+            {SITE_FULL}
           </Link>
-        ))}
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="text-white hover:text-white/70 transition-colors"
+          >
+            <X size={26} />
+          </button>
+        </div>
+
+        {/* Links */}
+        <div className="flex-1 overflow-y-auto py-4">
+          {navLinks.map((link) => {
+            const active = pathname === link.href
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={`block mx-4 my-0.5 px-4 py-3 rounded-lg text-white text-[16px] font-medium transition-colors duration-200 ${
+                  active ? "bg-white/20 font-semibold" : "hover:bg-white/15"
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="p-4 border-t border-white/15 flex-shrink-0">
+          <Link
+            href="/contact"
+            onClick={() => setOpen(false)}
+            className="block text-center bg-white text-[#7f85f7] font-semibold rounded-[8px] py-3 hover:bg-white/90 transition-colors"
+          >
+            Get a Quote
+          </Link>
+        </div>
       </nav>
     </>
   )

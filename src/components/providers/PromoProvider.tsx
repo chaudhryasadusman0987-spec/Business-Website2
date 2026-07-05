@@ -15,7 +15,9 @@ export default function PromoProvider({
 
   useEffect(() => {
     let cancelled = false
-    fetch("/api/promo")
+    // no-store: always fetch the live promo, never a cached (possibly empty)
+    // response — otherwise a discount set in the dashboard won't appear online.
+    fetch("/api/promo", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: PromoConfig) => {
         if (!cancelled) setConfig(data)
