@@ -179,7 +179,7 @@ export async function POST(req: Request) {
 
     await sendEmail(
       c.email,
-      `Your IT & AI Services Quote from ${SITE_FULL}`,
+      `Your IT & AI Quote from ${SITE_FULL}`,
       buildEmail(body)
     )
     await logLead(body)

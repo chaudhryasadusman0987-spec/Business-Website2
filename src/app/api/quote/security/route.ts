@@ -124,7 +124,7 @@ export async function POST(req: Request) {
 
     await sendEmail(
       body.email,
-      `Your Security Solutions Quote from ${SITE_FULL}`,
+      `Your Security Quote from ${SITE_FULL}`,
       buildEmail(body)
     )
     // Best-effort storage: the quote email has already been sent, so don't let

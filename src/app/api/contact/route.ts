@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     await sendEmail(
       body.email,
-      `New Enquiry from ${SITE_FULL} Website`,
+      `New Enquiry — ${SITE_FULL} Website`,
       buildEmail(body)
     )
     // Storage is best-effort: the customer's email has already gone out, so a
