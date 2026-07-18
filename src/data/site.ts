@@ -8,12 +8,12 @@ export const SITE_FULL        = `${SITE_NAME} ${SITE_SUFFIX}`; // used everywher
 export const SITE_TAGLINE     = "Security. Mobility. Technology.";
 export const SITE_DOMAIN      = "https://pakozsolutions.com.au";
 export const SITE_EMAIL       = "info@pakozsolutions.com.au";
-export const SITE_PHONE       = "+61 400 000 000";             // ← real number when ready
+export const SITE_PHONE       = "+61 424 948 512";
 // TEMP placeholder used by the floating "call" button (bottom-right, above the
 // AI chat bubble). Change this to the company's real phone number when ready.
 export const SITE_CALL_NUMBER = "+61 412 345 678";            // ← TEMP — change to real number
-export const SITE_ADDRESS     = "Brisbane, Queensland, Australia";
-export const SITE_ABN         = "ABN: 77 691 962 964";
+export const SITE_ADDRESS     = "1 Cedrus Street, Sunnybank Hills QLD 4109";
+export const SITE_ABN         = "ABN: 30 478 873 445";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 export const SITE_COMPANY     = "PAK OZ SOLUTIONS PTY LTD";
 export const SITE_ACN         = "ACN: 700 444 695";
