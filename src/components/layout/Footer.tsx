@@ -8,6 +8,10 @@ import {
   SITE_PHONE,
   SITE_EMAIL,
   SITE_ADDRESS,
+  SITE_DOMAIN,
+  SITE_COMPANY,
+  SITE_ABN,
+  SITE_ACN,
 } from "@/data/site"
 
 // NOTE: lucide-react v1 removed brand glyphs (Facebook/Twitter/LinkedIn/Instagram).
@@ -103,6 +107,14 @@ export default function Footer() {
                 </a>
               </li>
               <li>{SITE_ADDRESS}</li>
+              <li>
+                <a
+                  href={SITE_DOMAIN}
+                  className="hover:text-white transition-colors"
+                >
+                  {SITE_DOMAIN.replace(/^https?:\/\//, "")}
+                </a>
+              </li>
             </ul>
             <div className="flex gap-4 mt-5">
               {socials.map(({ label, Icon }) => (
@@ -143,6 +155,9 @@ export default function Footer() {
 
         <div className="border-t border-[#444] mt-12 pt-6 text-[14px] text-center">
           © {year} {SITE_FULL}. All rights reserved.
+          <p className="text-[12px] text-[#666] mt-2">
+            {SITE_COMPANY} · {SITE_ABN} · {SITE_ACN}
+          </p>
         </div>
       </div>
     </footer>
