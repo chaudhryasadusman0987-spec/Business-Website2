@@ -1,11 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ChevronRight, Check } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import { testimonials, stats } from "@/data/testimonials"
+import { testimonials, stats, type Testimonial } from "@/data/testimonials"
+
+// Google Business Profile review link. Set NEXT_PUBLIC_GOOGLE_PLACE_ID once your
+// profile is live and this button takes customers straight to the review form.
+const PLACE_ID = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID
+const GOOGLE_REVIEW_URL = PLACE_ID
+  ? `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
+  : "#"
 
 const FILTERS = [
   "All",
@@ -19,11 +26,23 @@ const FILTERS = [
 
 export default function TestimonialsPage() {
   const [filter, setFilter] = useState("All")
+  const [googleReviews, setGoogleReviews] = useState<Testimonial[]>([])
+
+  // Pull live Google reviews (empty until the Places API env vars are set).
+  useEffect(() => {
+    fetch("/api/google-reviews")
+      .then((r) => (r.ok ? r.json() : { reviews: [] }))
+      .then((d) => setGoogleReviews(d.reviews ?? []))
+      .catch(() => setGoogleReviews([]))
+  }, [])
+
+  // Real Google reviews first, then the curated manual testimonials.
+  const allTestimonials = [...googleReviews, ...testimonials]
 
   const filtered =
     filter === "All"
-      ? testimonials
-      : testimonials.filter((t) => t.service === filter)
+      ? allTestimonials
+      : allTestimonials.filter((t) => t.service === filter)
 
   return (
     <main>
@@ -172,12 +191,16 @@ export default function TestimonialsPage() {
                       <p className="text-[14px] font-semibold text-[#1a1a2e]">
                         {t.name}
                       </p>
-                      <p className="mt-0.5 text-[12px] text-[#9496a8]">
-                        {t.suburb}, {t.state}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-[#b0b0b8]">
-                        {t.date}
-                      </p>
+                      {(t.suburb || t.state) && (
+                        <p className="mt-0.5 text-[12px] text-[#9496a8]">
+                          {[t.suburb, t.state].filter(Boolean).join(", ")}
+                        </p>
+                      )}
+                      {t.date && (
+                        <p className="mt-0.5 text-[11px] text-[#b0b0b8]">
+                          {t.date}
+                        </p>
+                      )}
                     </div>
 
                     {t.verified && (
@@ -205,7 +228,9 @@ export default function TestimonialsPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="#"
+              href={GOOGLE_REVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-[52px] items-center rounded-[8px] bg-white px-8 text-[15px] font-bold text-[#7f85f7] hover:bg-white/90"
             >
               ⭐ Leave a Google Review
