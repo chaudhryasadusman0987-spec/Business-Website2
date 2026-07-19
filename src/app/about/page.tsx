@@ -48,22 +48,22 @@ const values = [
 
 const team = [
   {
-    initials: "JD",
-    name: "James D.",
-    role: "Head of Security",
-    bio: "Licensed CCTV and alarm technician with 10 years experience across Queensland.",
+    initials: "EA",
+    name: "Ehtsham",
+    role: "Owner & Director",
+    bio: "Based in Brisbane. Leads sales, operations, client relationships and all key business decisions for Pak Oz Solutions.",
   },
   {
-    initials: "SM",
-    name: "Sarah M.",
-    role: "Lead Developer",
-    bio: "Full-stack developer specialising in React, Next.js and AI-powered web applications.",
+    initials: "TI",
+    name: "Tayyab Iftikhar",
+    role: "Director & Operations",
+    bio: "Based in Brisbane. Manages on-ground support, client installations and day-to-day business operations.",
   },
   {
-    initials: "KL",
-    name: "Kevin L.",
-    role: "Operations Manager",
-    bio: "Fleet and rental operations expert keeping our car rental service running smoothly.",
+    initials: "AM",
+    name: "Asad",
+    role: "IT & Digital",
+    bio: "Based in Pakistan. IT graduate handling website development, technology, digital systems and automation.",
   },
 ]
 

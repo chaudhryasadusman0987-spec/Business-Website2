@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Out-File *)"
+      "PowerShell(Out-File *)",
+      "PowerShell(npm run)"
     ]
   }
 }
