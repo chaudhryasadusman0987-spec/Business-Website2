@@ -17,7 +17,6 @@ export default function WebDevelopmentPage() {
       headlineWhite="Websites That"
       headlinePurple="Convert."
       packagesTitle="Web Packages"
-      floatingBadge={{ title: "50+ Websites Delivered", sub: "Brisbane & Southeast QLD" }}
     />
   )
 }

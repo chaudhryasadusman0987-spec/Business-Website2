@@ -49,7 +49,6 @@ export default function AIAutomationPage() {
       headlineWhite="AI That Works"
       headlinePurple="While You Sleep."
       packagesTitle="AI Packages"
-      floatingBadge={{ title: "30+ AI Agents Deployed", sub: "Brisbane & Southeast QLD" }}
       extra={<SeeAIInAction />}
     />
   )

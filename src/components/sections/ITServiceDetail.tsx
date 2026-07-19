@@ -13,7 +13,7 @@ interface Props {
   headlineWhite: string
   headlinePurple: string
   packagesTitle: string
-  floatingBadge: { title: string; sub: string }
+  floatingBadge?: { title: string; sub: string }
   /** Optional section rendered after packages, before the process steps. */
   extra?: ReactNode
 }
@@ -97,17 +97,19 @@ export default function ITServiceDetail({
                 priority
               />
             </div>
-            <div className="absolute bottom-5 left-5 bg-black/55 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3 flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#5dcaa5] animate-pulse" />
-              <span>
-                <span className="block text-white font-semibold text-[14px]">
-                  {floatingBadge.title}
+            {floatingBadge && (
+              <div className="absolute bottom-5 left-5 bg-black/55 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3 flex items-center gap-3">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#5dcaa5] animate-pulse" />
+                <span>
+                  <span className="block text-white font-semibold text-[14px]">
+                    {floatingBadge.title}
+                  </span>
+                  <span className="block text-[#5dcaa5] text-[11px]">
+                    {floatingBadge.sub}
+                  </span>
                 </span>
-                <span className="block text-[#5dcaa5] text-[11px]">
-                  {floatingBadge.sub}
-                </span>
-              </span>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
