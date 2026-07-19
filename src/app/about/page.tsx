@@ -63,7 +63,7 @@ const team = [
     initials: "AM",
     name: "Asad",
     role: "IT & Digital",
-    bio: "Based in Pakistan. IT graduate handling website development, technology, digital systems and automation.",
+    bio: "IT graduate handling website development, technology, digital systems and automation.",
   },
 ]
 
