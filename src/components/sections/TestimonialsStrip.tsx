@@ -1,13 +1,33 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Check } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
-import { testimonials } from "@/data/testimonials"
+import { testimonials, type Testimonial } from "@/data/testimonials"
 
+// Home-page teaser. Shows only the first few reviews and links to the full
+// list on /testimonials. Reviews come from the SAME source as that page —
+// live Google Business Profile reviews first, then any manual testimonials —
+// so every new review shows up here automatically. The whole section stays
+// hidden until at least one review exists.
 export default function TestimonialsStrip() {
-  if (!testimonials || testimonials.length === 0) return null
+  const [googleReviews, setGoogleReviews] = useState<Testimonial[]>([])
 
-  const featured = testimonials.slice(0, 3)
+  // Pull live Google reviews (empty until the Places API env vars are set).
+  useEffect(() => {
+    fetch("/api/google-reviews")
+      .then((r) => (r.ok ? r.json() : { reviews: [] }))
+      .then((d) => setGoogleReviews(d.reviews ?? []))
+      .catch(() => setGoogleReviews([]))
+  }, [])
+
+  // Real Google reviews first, then the curated manual testimonials.
+  // Home page shows only the first 3; /testimonials shows them all.
+  const featured = [...googleReviews, ...testimonials].slice(0, 3)
+
+  if (featured.length === 0) return null
 
   return (
     <section className="pt-[200px] pb-[100px] bg-brand-section">
@@ -70,9 +90,11 @@ export default function TestimonialsStrip() {
                   <p className="text-[14px] font-semibold text-[#1a1a2e]">
                     {t.name}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-[#9496a8]">
-                    {t.suburb}, {t.state}
-                  </p>
+                  {(t.suburb || t.state) && (
+                    <p className="mt-0.5 text-[12px] text-[#9496a8]">
+                      {[t.suburb, t.state].filter(Boolean).join(", ")}
+                    </p>
+                  )}
                 </div>
 
                 {t.verified && (
