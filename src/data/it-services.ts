@@ -96,7 +96,7 @@ export const itServiceItems: ITServiceItem[] = [
       {
         id: "web-ecommerce",
         name: "E-Commerce Store",
-        description: "Sell online — Australia-wide or globally",
+        description: "Sell online — Brisbane & Southeast QLD or globally",
         startingFrom: "From $8,500",
         startingFromValue: 8500,
         features: [

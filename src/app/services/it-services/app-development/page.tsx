@@ -17,7 +17,7 @@ export default function AppDevelopmentPage() {
       headlineWhite="Mobile Apps That"
       headlinePurple="Delight Users."
       packagesTitle="App Packages"
-      floatingBadge={{ title: "20+ Apps Delivered", sub: "Australia-wide" }}
+      floatingBadge={{ title: "20+ Apps Delivered", sub: "Brisbane & Southeast QLD" }}
     />
   )
 }

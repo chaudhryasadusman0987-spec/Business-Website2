@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: `Contact Us | ${SITE_FULL}`,
   description:
     `Contact ${SITE_FULL}. Free quotes on security, car rental and IT ` +
-    "services. Based in Brisbane, servicing Australia-wide.",
+    "services. Based in Brisbane, servicing Brisbane & Southeast QLD.",
 }
 
 export default function ContactLayout({

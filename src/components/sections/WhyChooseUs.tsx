@@ -15,7 +15,7 @@ const features: Feature[] = [
   },
   {
     Icon: Globe,
-    title: "Australia-Wide",
+    title: "Brisbane & Southeast QLD",
     description: "Service and support right across the country.",
   },
   {

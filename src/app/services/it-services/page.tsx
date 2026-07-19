@@ -198,7 +198,7 @@ export default function ITServicesPage() {
           <div className="flex-1">
             <span className="inline-flex items-center gap-2 bg-[rgba(127,133,247,0.15)] border border-[rgba(127,133,247,0.3)] text-[#a5a8ff] text-[11px] rounded-full px-4 py-1.5">
               <span className="w-2 h-2 rounded-full bg-[#7f85f7] animate-pulse" />
-              IT &amp; AI Services · Australia-wide
+              IT &amp; AI Services · Brisbane & Southeast QLD
             </span>
 
             <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">
@@ -308,7 +308,7 @@ export default function ITServicesPage() {
       <QuoteCTABanner
         href="/contact"
         title="Get a Free IT Consultation"
-        subtitle="30 minutes · No obligation · Australia-wide"
+        subtitle="30 minutes · No obligation · Brisbane & Southeast QLD"
       />
       <TestimonialsStrip />
     </>

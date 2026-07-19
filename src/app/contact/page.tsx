@@ -102,7 +102,7 @@ export default function ContactPage() {
             Get In Touch
           </h1>
           <p className="text-[#9496a8] text-[15px] mt-3">
-            Free quotes · Fast response · Australia-wide
+            Free quotes · Fast response · Brisbane & Southeast QLD
           </p>
         </div>
       </section>
@@ -241,7 +241,7 @@ export default function ContactPage() {
       {/* ── 3. MAP PLACEHOLDER ── */}
       <div className="max-w-[1170px] mx-auto px-4 pb-[80px]">
         <div className="bg-[#f0f0ff] rounded-[24px] h-[200px] flex items-center justify-center text-[#9496a8] text-[14px] text-center px-4">
-          🗺️ Service Area: Brisbane &amp; Queensland — Australia-wide delivery
+          🗺️ Service Area: Brisbane &amp; Southeast QLD
         </div>
       </div>
     </>

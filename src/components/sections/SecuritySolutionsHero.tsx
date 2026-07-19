@@ -33,7 +33,7 @@ export default function SecuritySolutionsHero() {
           {/* LEFT */}
           <div className="flex-1">
             <span className="inline-block text-[12px] font-medium text-[#9496a8] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] rounded-full px-4 py-1.5">
-              Security Solutions · Australia-wide
+              Security Solutions · Brisbane & Southeast QLD
             </span>
 
             <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">

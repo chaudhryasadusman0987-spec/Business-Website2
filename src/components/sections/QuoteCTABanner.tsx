@@ -9,7 +9,7 @@ interface QuoteCTABannerProps {
 export default function QuoteCTABanner({
   href = "/quote",
   title = "Get Your Free Quote Today",
-  subtitle = "Fast response. No obligation. Australia-wide.",
+  subtitle = "Fast response. No obligation. Brisbane & Southeast QLD.",
 }: QuoteCTABannerProps) {
   return (
     <section className="bg-brand-primary py-[80px] text-center">
