@@ -67,13 +67,6 @@ const team = [
   },
 ]
 
-const stats = [
-  { num: "2,400+", label: "Happy Customers" },
-  { num: "500+", label: "CCTV Installs" },
-  { num: "50+", label: "Fleet Vehicles" },
-  { num: "30+", label: "IT Projects" },
-]
-
 export default function AboutPage() {
   return (
     <>
@@ -96,7 +89,7 @@ export default function AboutPage() {
             About Us
           </h1>
           <p className="text-[#9496a8] text-[16px] mt-4">
-            Australian-owned. Expert team. Trusted by 2,400+ customers.
+            Australian-owned. Expert team.
           </p>
         </div>
       </section>
@@ -130,7 +123,7 @@ export default function AboutPage() {
             </p>
             <p className="mt-4 text-[15px] text-[#666666] leading-relaxed">
               Based in Brisbane, we service clients across Australia. Licensed,
-              insured and trusted by over 2,400 customers.
+              insured and committed to quality on every job.
             </p>
           </div>
         </div>
@@ -182,29 +175,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 5. STATS STRIP ── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-[60px]">
-        <div className="absolute inset-0 z-0 pointer-events-none" style={dotGrid} />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-y-8">
-            {stats.map((s, i) => (
-              <div key={s.label} className="flex items-center">
-                <div className="text-center px-8 w-1/2 sm:w-auto">
-                  <div className="text-[48px] font-extrabold text-[#7f85f7] leading-none">
-                    {s.num}
-                  </div>
-                  <div className="text-[#9496a8] text-[14px] mt-1">{s.label}</div>
-                </div>
-                {i < stats.length - 1 && (
-                  <div className="w-px h-16 bg-white/10 hidden sm:block" />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 6. CTA ── */}
+      {/* ── 5. CTA ── */}
       <QuoteCTABanner />
     </>
   )

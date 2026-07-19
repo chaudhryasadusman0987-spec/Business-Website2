@@ -106,6 +106,29 @@ export default function TestimonialsPage() {
         </div>
       </section>
 
+      {allTestimonials.length === 0 ? (
+        /* ── EMPTY STATE — REVIEWS COMING SOON ──────────────── */
+        <section className="bg-[#fefefd] py-[120px]">
+          <div className="max-w-[600px] mx-auto px-4 text-center">
+            <div className="text-[48px] text-[#e0e0e8] mb-6">★</div>
+            <h2 className="font-bold text-[24px] text-[#1a1a2e]">
+              Reviews Coming Soon
+            </h2>
+            <p className="text-[15px] text-[#666] mt-3 leading-relaxed">
+              We are a new business and building our reputation one happy
+              customer at a time. Check back soon or leave us a review after
+              your experience.
+            </p>
+            <a
+              href="mailto:info@pakozsolutions.com.au"
+              className="inline-block mt-8 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 leading-[52px] font-semibold text-[15px] hover:bg-[#6b71f0] transition-all"
+            >
+              Contact Us
+            </a>
+          </div>
+        </section>
+      ) : (
+        <>
       {/* ── SECTION 2 — FILTER TABS ─────────────────────────── */}
       <section className="bg-[#fefefd] pt-[60px]">
         <div className="mx-auto max-w-[1170px] px-4">
@@ -216,6 +239,8 @@ export default function TestimonialsPage() {
           )}
         </div>
       </section>
+        </>
+      )}
 
       {/* ── SECTION 4 — LEAVE A REVIEW CTA ──────────────────── */}
       <section className="bg-[#7f85f7] py-[80px] text-center">

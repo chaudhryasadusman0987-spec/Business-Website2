@@ -2,7 +2,6 @@ import Link from "next/link"
 import { Share2, Send, AtSign, Globe } from "lucide-react"
 import { services } from "@/data/services"
 import {
-  SITE_NAME,
   SITE_FULL,
   SITE_TAGLINE,
   SITE_PHONE,
@@ -34,7 +33,7 @@ export default function Footer() {
           {/* Col 1 — Brand */}
           <div>
             <h2 className="text-[50px] font-bold text-white leading-none">
-              {SITE_NAME}
+              {SITE_FULL}
             </h2>
             <p className="text-brand-primary mt-3">{SITE_TAGLINE}</p>
             <p className="mt-4 text-[14px] leading-[24px]">
@@ -156,7 +155,8 @@ export default function Footer() {
         <div className="border-t border-[#444] mt-12 pt-6 text-[14px] text-center">
           © {year} {SITE_FULL}. All rights reserved.
           <p className="text-[12px] text-[#666] mt-2">
-            {SITE_COMPANY} · {SITE_ABN} · {SITE_ACN}
+            {SITE_COMPANY}
+            {SITE_ABN && <span> · {SITE_ABN}</span>} · {SITE_ACN}
           </p>
         </div>
       </div>

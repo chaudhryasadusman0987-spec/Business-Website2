@@ -5,6 +5,8 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { testimonials } from "@/data/testimonials"
 
 export default function TestimonialsStrip() {
+  if (!testimonials || testimonials.length === 0) return null
+
   const featured = testimonials.slice(0, 3)
 
   return (

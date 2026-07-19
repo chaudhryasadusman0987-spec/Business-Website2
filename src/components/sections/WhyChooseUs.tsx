@@ -1,4 +1,4 @@
-import { ShieldCheck, Globe, Star, Clock } from "lucide-react"
+import { ShieldCheck, Globe } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 interface Feature {
@@ -17,16 +17,6 @@ const features: Feature[] = [
     Icon: Globe,
     title: "Brisbane & Southeast QLD",
     description: "Service and support right across the country.",
-  },
-  {
-    Icon: Star,
-    title: "Trusted & Top-Rated",
-    description: "Hundreds of happy homes and businesses served.",
-  },
-  {
-    Icon: Clock,
-    title: "24/7 Support",
-    description: "Help when you need it, day or night.",
   },
 ]
 
