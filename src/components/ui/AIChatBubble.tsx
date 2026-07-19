@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { X, Send, Phone } from "lucide-react"
+import { X, Send } from "lucide-react"
 import type { Message } from "@/types"
-import { SITE_FULL, SITE_CALL_NUMBER } from "@/data/site"
+import { SITE_FULL, SITE_PHONE } from "@/data/site"
 
 export default function AIChatBubble() {
   const [isOpen, setIsOpen] = useState(false)
@@ -87,19 +87,31 @@ export default function AIChatBubble() {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        <div className="flex flex-col items-center gap-3">
-          {/* Call button — uses the temporary SITE_CALL_NUMBER placeholder.
-              Tapping it opens the device dialer (tel: link). */}
+        <>
+          {/* Floating call button — real number from SITE_PHONE; tel: link opens
+              the device dialler pre-filled. Hover tooltip shows on desktop. */}
           <a
-            href={`tel:${SITE_CALL_NUMBER.replace(/\s+/g, "")}`}
-            aria-label={`Call us on ${SITE_CALL_NUMBER}`}
-            title={`Call us: ${SITE_CALL_NUMBER}`}
-            className="group relative w-[60px] h-[60px] rounded-full bg-[#22c55e] text-white flex items-center justify-center cursor-pointer shadow-[0_4px_20px_rgba(34,197,94,0.4)] transition-transform hover:scale-105"
+            href={`tel:${SITE_PHONE.replace(/\s/g, '')}`}
+            aria-label={`Call us on ${SITE_PHONE}`}
+            className="group fixed bottom-24 right-6 z-50 flex items-center gap-3"
           >
-            <span className="animate-ping absolute inset-0 rounded-full bg-[#22c55e] opacity-25" />
-            <Phone size={26} className="relative" fill="white" />
+            {/* Tooltip — shows on hover desktop */}
+            <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-[#1a1a2e] text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-lg whitespace-nowrap items-center gap-2 pointer-events-none">
+              <span className="text-[#5dcaa5]">●</span>
+              {SITE_PHONE}
+              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 border-[6px] border-transparent border-l-[#1a1a2e]" />
+            </div>
+
+            {/* Green phone circle button */}
+            <div className="w-[56px] h-[56px] rounded-full bg-[#22c55e] shadow-lg flex items-center justify-center hover:bg-[#16a34a] hover:scale-110 transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C9.6 21 3 14.4 3 6c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
+              </svg>
+            </div>
           </a>
 
+          {/* Chat launcher */}
+          <div className="flex flex-col items-center gap-3">
           <button
             onClick={openPanel}
             aria-label="Open chat"
@@ -131,7 +143,8 @@ export default function AIChatBubble() {
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
           )}
           </button>
-        </div>
+          </div>
+        </>
       ) : (
         <div className="w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-white rounded-[16px] shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}
