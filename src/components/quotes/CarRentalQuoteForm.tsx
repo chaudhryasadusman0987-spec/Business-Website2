@@ -23,6 +23,8 @@ import {
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
 import { mergeVehicles, normaliseOverrides } from "@/lib/catalog"
+import { discounted, promoActive } from "@/lib/promo"
+import { usePromo } from "@/components/providers/PromoProvider"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 
 const STEP_TITLES = [
@@ -107,6 +109,12 @@ function QuoteWizard() {
   const youngDriver = age >= minRentalAge && age < 25
   const rentalDays = daysBetween(pickupDate, returnDate)
 
+  // Live "Car Rental" category discount from the admin dashboard. When active it
+  // comes off the vehicle rental rate (not bond/surcharges/extras) here and in
+  // the emailed quote; switching it off in the dashboard reverts the price.
+  const carPromo = usePromo()?.carRental
+  const promoPct = promoActive(carPromo) ? carPromo!.percent : 0
+
   // Merge admin catalog overrides so dashboard vehicle edits / additions /
   // hides appear in the wizard live (mirrors the fleet grid on the site).
   useEffect(() => {
@@ -139,9 +147,12 @@ function QuoteWizard() {
     const days = rentalDays || 1
     const fullWeeks = Math.floor(days / 7)
     const remDays = days % 7
-    const base = vehicle
+    const baseOriginal = vehicle
       ? fullWeeks * vehicle.weeklyRate + remDays * vehicle.dailyRate
       : 0
+    // Apply the category discount to the vehicle rental cost only.
+    const base = promoPct ? discounted(baseOriginal, promoPct) : baseOriginal
+    const rentalDiscount = baseOriginal - base
 
     const extraLines = carExtras
       .filter((e) => selectedExtras[e.id])
@@ -163,7 +174,7 @@ function QuoteWizard() {
     const totalCard = total + bond
 
     return {
-      days, fullWeeks, remDays, base, extraLines, extrasTotal,
+      days, fullWeeks, remDays, base, baseOriginal, rentalDiscount, extraLines, extrasTotal,
       locationSurcharge, oneway, young, subtotal, gst, total, bond, totalCard,
     }
   }
@@ -243,7 +254,9 @@ function QuoteWizard() {
           payment,
           youngDriver,
           young: q.young,
-          base: q.base,
+          base: Math.round(q.base),
+          baseOriginal: Math.round(q.baseOriginal),
+          discountPercent: promoPct,
           extrasTotal: Math.round(q.extrasTotal),
           subtotal: Math.round(q.subtotal),
           gst: Math.round(q.gst),
@@ -431,11 +444,23 @@ function QuoteWizard() {
               </div>
               <div className="text-[13px] font-semibold text-[#1a1a2e]">{v.name}</div>
               <div className="text-[11px] text-gray-500 mt-0.5">{v.example}</div>
-              <div className="text-[17px] font-bold text-[#1565c0] mt-2">
-                {formatAUD(v.dailyRate)} / day
+              <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
+                <span className="text-[17px] font-bold text-[#1565c0]">
+                  {formatAUD(promoPct ? discounted(v.dailyRate, promoPct) : v.dailyRate)} / day
+                </span>
+                {promoPct > 0 && (
+                  <>
+                    <span className="text-[12px] text-gray-400 line-through">
+                      {formatAUD(v.dailyRate)}
+                    </span>
+                    <span className="rounded-full bg-[#e6f1fb] px-1.5 py-0.5 text-[10px] font-bold text-[#185fa5]">
+                      −{promoPct}%
+                    </span>
+                  </>
+                )}
               </div>
               <div className="text-[11px] text-gray-500 mt-0.5">
-                {formatAUD(v.weeklyRate)} / week
+                {formatAUD(promoPct ? discounted(v.weeklyRate, promoPct) : v.weeklyRate)} / week
               </div>
               <span
                 className={`inline-block mt-2 text-[11px] rounded-[6px] px-2 py-0.5 ${
@@ -677,8 +702,14 @@ function QuoteWizard() {
                   ? `${vehicle?.name} (${q.fullWeeks}wk${q.fullWeeks > 1 ? "s" : ""}${q.remDays > 0 ? ` + ${q.remDays}d` : ""})`
                   : `${vehicle?.name ?? "Vehicle"} × ${q.days} day${q.days !== 1 ? "s" : ""}`
               }
-              right={formatAUD(Math.round(q.base))}
+              right={formatAUD(Math.round(q.baseOriginal))}
             />
+            {promoPct > 0 && q.rentalDiscount > 0 && (
+              <div className="flex justify-between text-[13px] font-semibold text-[#0f6e56] py-1.5 border-b border-[#dceefb]">
+                <span>🏷️ Rental discount (−{promoPct}%)</span>
+                <span>− {formatAUD(Math.round(q.rentalDiscount))}</span>
+              </div>
+            )}
             {q.extraLines.map((e) => (
               <SummaryRow key={e.id} left={e.name} right={formatAUD(Math.round(e.amount))} />
             ))}

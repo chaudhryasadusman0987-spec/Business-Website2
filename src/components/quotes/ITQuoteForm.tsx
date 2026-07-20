@@ -16,6 +16,8 @@ import { Check, ArrowLeft, ArrowRight } from "lucide-react"
 import { itServiceItems } from "@/data/it-services"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
+import { discounted, promoActive } from "@/lib/promo"
+import { usePromo } from "@/components/providers/PromoProvider"
 
 // ─── PRICES — loaded from data file (connects to admin dashboard) ───
 const webService = itServiceItems.find((s) => s.id === "web-development")
@@ -162,6 +164,13 @@ const LABEL =
 function QuoteWizard() {
   const searchParams = useSearchParams()
 
+  // Live "IT & AI Services" category discount from the admin dashboard. When
+  // active it comes off the package prices, the combined estimate and the
+  // emailed quote; switching it off in the dashboard reverts the prices.
+  const itPromo = usePromo()?.it
+  const promoPct = promoActive(itPromo) ? itPromo!.percent : 0
+  const disc = (n: number) => (promoPct ? discounted(n, promoPct) : n)
+
   const [step, setStep] = useState(0)
   const [selectedServices, setSelectedServices] = useState<ServiceKey[]>([])
   const [activeTab, setActiveTab] = useState<ServiceKey | null>(null)
@@ -282,7 +291,8 @@ function QuoteWizard() {
         budget,
         timeline,
         contact: contactData,
-        estimate: { total: calcTotal(), range: calcRange(calcTotal()) },
+        estimate: { total: disc(calcTotal()), range: calcRange(disc(calcTotal())) },
+        discountPercent: promoPct,
         timestamp: new Date().toISOString(),
         page: "/services/it-services/quote",
         source: "quote_form",
@@ -302,7 +312,8 @@ function QuoteWizard() {
     }
   }
 
-  const total = calcTotal()
+  const totalOriginal = calcTotal()
+  const total = disc(totalOriginal)
   const range = calcRange(total)
 
   // ─── Small render helpers ───
@@ -327,8 +338,22 @@ function QuoteWizard() {
         </span>
       )}
       <div className="text-[13px] font-semibold text-[#1a1a2e] mt-1">{pkg.name}</div>
-      <div className="text-[15px] font-bold text-[#7f85f7] mt-1">
-        {pkg.custom ? "Custom quote" : `${formatAUD(pkg.price)}+`}
+      <div className="text-[15px] font-bold text-[#7f85f7] mt-1 flex items-baseline gap-1.5 flex-wrap">
+        {pkg.custom ? (
+          "Custom quote"
+        ) : promoPct > 0 ? (
+          <>
+            <span>{formatAUD(disc(pkg.price))}+</span>
+            <span className="text-[12px] font-medium text-[#a0a3c0] line-through">
+              {formatAUD(pkg.price)}
+            </span>
+            <span className="rounded-full bg-[#eeedfe] px-1.5 py-0.5 text-[10px] font-bold text-[#534ab7]">
+              −{promoPct}%
+            </span>
+          </>
+        ) : (
+          `${formatAUD(pkg.price)}+`
+        )}
       </div>
       <div className="text-[11px] text-[#666880] mt-[3px] leading-[1.4]">{pkg.desc}</div>
     </div>
@@ -875,15 +900,15 @@ function QuoteWizard() {
                   let price = ""
                   if (svc === "web" && webPkg) {
                     name += ` — ${PKG_NAMES.web[webPkg.id] ?? ""}`
-                    price = webPkg.price ? `From ${formatAUD(webPkg.price)}` : "—"
+                    price = webPkg.price ? `From ${formatAUD(disc(webPkg.price))}` : "—"
                   } else if (svc === "app" && appPkg) {
                     name += ` — ${PKG_NAMES.app[appPkg.id] ?? ""}`
-                    price = appPkg.price ? `From ${formatAUD(appPkg.price)}` : "—"
+                    price = appPkg.price ? `From ${formatAUD(disc(appPkg.price))}` : "—"
                   } else if (svc === "ai" && aiPkg) {
                     name += ` — ${PKG_NAMES.ai[aiPkg.id] ?? ""}`
-                    price = aiPkg.id === "custom" ? "Custom quote" : aiPkg.price ? `From ${formatAUD(aiPkg.price)}` : "—"
+                    price = aiPkg.id === "custom" ? "Custom quote" : aiPkg.price ? `From ${formatAUD(disc(aiPkg.price))}` : "—"
                   } else if (svc === "consulting") {
-                    price = `${formatAUD(PRICES.consulting.hourly)}/hr`
+                    price = `${formatAUD(disc(PRICES.consulting.hourly))}/hr`
                   }
                   return (
                     <div key={svc} className="flex justify-between text-[13px] text-[#534ab7] py-1.5 border-b border-[#eeeeff]">
@@ -914,8 +939,21 @@ function QuoteWizard() {
                 </div>
                 <div className="flex justify-between text-[13px] text-[#534ab7] py-1.5 border-b border-[#eeeeff]">
                   <span>Combined starting from</span>
-                  <span>{total ? formatAUD(total) : "Custom"}</span>
+                  <span className="flex items-baseline gap-1.5">
+                    {promoPct > 0 && totalOriginal > 0 && (
+                      <span className="text-[12px] text-[#a0a3c0] line-through">
+                        {formatAUD(totalOriginal)}
+                      </span>
+                    )}
+                    <span>{total ? formatAUD(total) : "Custom"}</span>
+                  </span>
                 </div>
+                {promoPct > 0 && totalOriginal > 0 && (
+                  <div className="flex justify-between text-[13px] font-semibold text-[#0f6e56] py-1.5 border-b border-[#eeeeff]">
+                    <span>🏷️ Service discount (−{promoPct}%)</span>
+                    <span>− {formatAUD(totalOriginal - total)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-[13px] text-[#534ab7] py-1.5">
                   <span>GST (10%) additional</span>
                   <span>+10%</span>

@@ -35,6 +35,8 @@ interface QuoteBody {
   youngDriver: boolean
   young: number
   base: number
+  baseOriginal?: number
+  discountPercent?: number
   extrasTotal: number
   subtotal: number
   gst: number
@@ -152,9 +154,19 @@ function buildEmail(body: QuoteBody): string {
               body.vehicle?.name ?? "Vehicle"
             } × ${body.rentalDays} day(s)</td>
             <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatAUD(
-              body.base
+              body.baseOriginal ?? body.base
             )}</td>
           </tr>
+          ${
+            body.discountPercent && (body.baseOriginal ?? 0) > body.base
+              ? `<tr>
+            <td style="padding:8px;border-bottom:1px solid #eee;color:#0f6e56;font-weight:bold">Rental discount (−${body.discountPercent}%)</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;color:#0f6e56;font-weight:bold">− ${formatAUD(
+              (body.baseOriginal ?? body.base) - body.base
+            )}</td>
+          </tr>`
+              : ""
+          }
           ${extraRows}
           ${surchargeRows}
         </tbody>

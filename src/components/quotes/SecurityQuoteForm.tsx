@@ -36,7 +36,9 @@ import {
 } from "lucide-react"
 import { securitySolutions, installFee, gstRate } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
-import { hasDiscount, type Product } from "@/lib/products"
+import { type Product } from "@/lib/products"
+import { effectivePrice, type CategoryPromo } from "@/lib/promo"
+import { usePromo } from "@/components/providers/PromoProvider"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE } from "@/data/site"
 
@@ -57,8 +59,6 @@ const prettifySlug = (slug: string) =>
 const nameOfSlug = (slug: string) =>
   CATEGORIES.find((c) => c.slug === slug)?.name ?? prettifySlug(slug)
 
-const unitPriceOf = (p: Product) => (hasDiscount(p) ? p.discountPrice! : p.price)
-
 const propertyTypes = [
   { val: "residential", label: "Residential", sub: "Home & apartments", Icon: Home },
   { val: "commercial", label: "Commercial", sub: "Offices & retail", Icon: Building },
@@ -77,6 +77,12 @@ function QuoteWizard() {
   const searchParams = useSearchParams()
   const preSolution = searchParams.get("solution")
   const preProduct = searchParams.get("product")
+
+  // Live category discount set in the admin dashboard. When active (and a
+  // product isn't already on its own sale price), it comes off every security
+  // product here and in the emailed quote; switching it off reverts prices.
+  const secPromo = usePromo()?.security
+  const priceOf = (p: Product) => effectivePrice(p.price, p.discountPrice, secPromo)
 
   const [step, setStep] = useState(0)
   const [ptype, setPtype] = useState<string | null>(null)
@@ -159,7 +165,7 @@ function QuoteWizard() {
 
   const fromPriceOf = (slug: string) => {
     const inStock = (byCategory[slug] ?? []).filter((p) => p.inStock)
-    return inStock.length ? Math.min(...inStock.map(unitPriceOf)) : null
+    return inStock.length ? Math.min(...inStock.map((p) => priceOf(p).price)) : null
   }
 
   const toggleCategory = (slug: string) => {
@@ -181,19 +187,19 @@ function QuoteWizard() {
       .filter((p) => (qtyById[p.id] ?? 0) > 0)
       .map((p) => {
         const qty = qtyById[p.id]
-        const unitPrice = unitPriceOf(p)
+        const eff = effectivePrice(p.price, p.discountPrice, secPromo)
         return {
           id: p.id,
           name: p.name,
           category: nameOfSlug(p.solutionSlug),
           qty,
-          unitPrice,
-          originalPrice: p.price,
-          isOnSale: hasDiscount(p),
-          lineTotal: unitPrice * qty,
+          unitPrice: eff.price,
+          originalPrice: eff.original,
+          isOnSale: eff.onSale,
+          lineTotal: eff.price * qty,
         }
       })
-  }, [products, qtyById])
+  }, [products, qtyById, secPromo])
 
   const itemsSubtotal = items.reduce((sum, i) => sum + i.lineTotal, 0)
   const subtotal = itemsSubtotal + installFee
@@ -401,6 +407,7 @@ function QuoteWizard() {
                           <ProductPick
                             key={p.id}
                             product={p}
+                            promo={secPromo}
                             qty={qtyById[p.id] ?? 0}
                             onChange={(delta) => changeQty(p.id, delta)}
                           />
@@ -661,15 +668,18 @@ function CheckItem({
 // One selectable product with image, sale-aware pricing and a quantity stepper.
 function ProductPick({
   product,
+  promo,
   qty,
   onChange,
 }: {
   product: Product
+  promo: CategoryPromo | undefined
   qty: number
   onChange: (delta: number) => void
 }) {
-  const discounted = hasDiscount(product)
-  const current = discounted ? product.discountPrice! : product.price
+  const eff = effectivePrice(product.price, product.discountPrice, promo)
+  const discounted = eff.onSale
+  const current = eff.price
   const out = !product.inStock
 
   return (

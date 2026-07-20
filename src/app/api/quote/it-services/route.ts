@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
+import { discounted } from "@/lib/promo"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 type PkgSel = { id: string; price: number } | null
@@ -17,6 +18,7 @@ interface QuoteBody {
   }
   budget: string | null
   timeline: string | null
+  discountPercent?: number
   contact: {
     fname: string
     lname: string
@@ -55,24 +57,26 @@ const TIMELINE_LABELS: Record<string, string> = {
 }
 
 function serviceLine(svc: string, body: QuoteBody): { name: string; price: string } {
+  const pct = body.discountPercent ?? 0
+  const d = (n: number) => (pct ? discounted(n, pct) : n)
   let name = SERVICE_LABELS[svc] ?? svc
   let price = ""
   if (svc === "web" && body.packages.web) {
     name += ` — ${PKG_NAMES.web[body.packages.web.id] ?? ""}`
-    price = body.packages.web.price ? `From ${formatAUD(body.packages.web.price)}` : "—"
+    price = body.packages.web.price ? `From ${formatAUD(d(body.packages.web.price))}` : "—"
   } else if (svc === "app" && body.packages.app) {
     name += ` — ${PKG_NAMES.app[body.packages.app.id] ?? ""}`
-    price = body.packages.app.price ? `From ${formatAUD(body.packages.app.price)}` : "—"
+    price = body.packages.app.price ? `From ${formatAUD(d(body.packages.app.price))}` : "—"
   } else if (svc === "ai" && body.packages.ai) {
     name += ` — ${PKG_NAMES.ai[body.packages.ai.id] ?? ""}`
     price =
       body.packages.ai.id === "custom"
         ? "Custom quote"
         : body.packages.ai.price
-          ? `From ${formatAUD(body.packages.ai.price)}`
+          ? `From ${formatAUD(d(body.packages.ai.price))}`
           : "—"
   } else if (svc === "consulting") {
-    price = "$150/hr"
+    price = `${formatAUD(d(150))}/hr`
   }
   return { name, price }
 }
@@ -125,6 +129,14 @@ function buildEmail(body: QuoteBody): string {
         </thead>
         <tbody>${rows}</tbody>
       </table>
+
+      ${
+        body.discountPercent
+          ? `<p style="background:#e1f5ee;color:#0f6e56;padding:10px;border-radius:6px;font-size:13px;text-align:center;font-weight:bold;margin:0 0 12px">
+        🏷️ ${body.discountPercent}% launch discount applied — prices above already include it.
+      </p>`
+          : ""
+      }
 
       <p style="font-size:13px;color:#555;margin:4px 0">
         Budget range: <strong>${body.budget ? BUDGET_LABELS[body.budget] : "—"}</strong><br/>

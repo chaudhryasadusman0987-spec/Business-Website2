@@ -50,6 +50,39 @@ export function discounted(amount: number, percent: number): number {
   return Math.round(amount * (1 - percent / 100))
 }
 
+/** True when a category promo is switched on with a real percentage. */
+export function promoActive(promo: CategoryPromo | undefined): boolean {
+  return Boolean(promo?.active && promo.percent > 0)
+}
+
+export interface EffectivePrice {
+  price: number // what the customer pays
+  original: number // undiscounted price (for strikethrough)
+  onSale: boolean // true when price < original
+  percent: number // the category % applied (0 when the price comes from a per-item sale)
+}
+
+/**
+ * Resolve a line's effective price. Rule (no double discount): a per-item sale
+ * price wins if present; otherwise the active category promo applies; otherwise
+ * the base price is used unchanged. Removing the promo reverts automatically.
+ */
+export function effectivePrice(
+  base: number,
+  salePrice: number | null | undefined,
+  promo: CategoryPromo | undefined
+): EffectivePrice {
+  const hasSale = salePrice != null && salePrice > 0 && salePrice < base
+  if (hasSale) {
+    return { price: Math.round(salePrice as number), original: base, onSale: true, percent: 0 }
+  }
+  if (promoActive(promo)) {
+    const percent = promo!.percent
+    return { price: discounted(base, percent), original: base, onSale: true, percent }
+  }
+  return { price: base, original: base, onSale: false, percent: 0 }
+}
+
 /**
  * Build the scrolling ticker messages. A custom `message` overrides everything;
  * otherwise one entry per active category.
