@@ -33,6 +33,30 @@ export function isSmtpConfigured(): boolean {
   )
 }
 
+/**
+ * Best-effort plain-text version of an HTML email. Sending a text part
+ * alongside the HTML (multipart/alternative) improves deliverability — spam
+ * filters penalise HTML-only mail — and serves text-only clients.
+ */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|h[1-6]|table|ul)>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/[ \t]+/g, " ")
+    .split("\n")
+    .map((l) => l.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
@@ -57,6 +81,7 @@ export async function sendEmail(
       to,
       subject,
       html,
+      text: htmlToText(html),
     })
     console.log("Email sent successfully:", result.messageId)
   } catch (error) {
