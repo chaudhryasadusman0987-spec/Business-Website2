@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { promises as fs } from "fs"
 import path from "path"
-import { sendEmail } from "@/lib/mailer"
+import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import type { Lead } from "@/types"
@@ -177,16 +177,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    await sendEmail(
-      c.email,
-      `Your IT & AI Quote from ${SITE_FULL}`,
-      buildEmail(body)
-    )
-    await logLead(body)
+    // Email is attempted first, but is never allowed to block the customer.
+    if (isSmtpConfigured()) {
+      try {
+        await sendEmail(
+          c.email,
+          `Your IT & AI Quote from ${SITE_FULL}`,
+          buildEmail(body)
+        )
+      } catch (emailErr) {
+        console.error("IT quote email failed:", (emailErr as Error)?.message)
+        // Continue — the lead is still saved below.
+      }
+    } else {
+      console.log("SMTP not configured — skipping email send. Lead will be saved to dashboard.")
+    }
 
+    // Best-effort storage: a disk failure must not turn a successful
+    // submission into an error for the customer.
+    try {
+      await logLead(body)
+    } catch (err) {
+      console.error("IT lead log failed (non-critical):", err)
+    }
+
+    // Always return success — the customer never sees an error.
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error("IT quote API error:", err)
-    return NextResponse.json({ error: "Could not send quote" }, { status: 500 })
+    const e = err as { message?: string; code?: string; stack?: string }
+    console.error("IT quote API error:", {
+      message: e?.message,
+      code: e?.code,
+      stack: e?.stack,
+    })
+    return NextResponse.json(
+      { error: "Failed to send quote", detail: e?.message || "Unknown error" },
+      { status: 500 }
+    )
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { sendEmail } from "@/lib/mailer"
+import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
@@ -122,24 +122,41 @@ export async function POST(req: Request) {
       )
     }
 
-    await sendEmail(
-      body.email,
-      `Your Security Quote from ${SITE_FULL}`,
-      buildEmail(body)
-    )
-    // Best-effort storage: the quote email has already been sent, so don't let
-    // a KV/disk failure turn a successful send into an error for the customer.
+    // Email is attempted first, but is never allowed to block the customer.
+    if (isSmtpConfigured()) {
+      try {
+        await sendEmail(
+          body.email,
+          `Your Security Quote from ${SITE_FULL}`,
+          buildEmail(body)
+        )
+      } catch (emailErr) {
+        console.error("Security quote email failed:", (emailErr as Error)?.message)
+        // Continue — the lead is still saved below.
+      }
+    } else {
+      console.log("SMTP not configured — skipping email send. Lead will be saved to dashboard.")
+    }
+
+    // Best-effort storage: a KV/disk failure must not turn a successful
+    // submission into an error for the customer.
     try {
       await logLead(body)
     } catch (err) {
-      console.error("Security lead log failed (email already sent):", err)
+      console.error("Security lead log failed (non-critical):", err)
     }
 
+    // Always return success — the customer never sees an error.
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error("Security quote API error:", err)
+    const e = err as { message?: string; code?: string; stack?: string }
+    console.error("Security quote API error:", {
+      message: e?.message,
+      code: e?.code,
+      stack: e?.stack,
+    })
     return NextResponse.json(
-      { error: "Could not send quote" },
+      { error: "Failed to send quote", detail: e?.message || "Unknown error" },
       { status: 500 }
     )
   }
