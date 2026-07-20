@@ -34,6 +34,8 @@ import {
   AlertCircle,
   RefreshCw,
   Percent,
+  Menu,
+  X,
 } from "lucide-react"
 
 /* ───────────────────────── Types ───────────────────────── */
@@ -190,6 +192,7 @@ export default function DashboardPage() {
   // navigation
   const [tab, setTab] = useState("overview")
   const [itTab, setItTab] = useState("web-development")
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // editable data (IT packages still use the legacy save endpoint)
   const [pkgEdits, setPkgEdits] = useState<Record<string, PkgEdit>>(initPkgEdits)
@@ -409,8 +412,77 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-[#f5f5f8] min-h-screen flex">
-      {/* SIDEBAR */}
-      <aside className="w-[240px] flex-shrink-0 bg-[#1a1a2e] min-h-screen flex flex-col fixed left-0 top-0 h-full z-40">
+      {/* MOBILE TOP BAR — shown below lg only */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e] border-b border-white/10 h-[56px] flex items-center justify-between px-4">
+        <span className="text-white font-bold text-[16px]">{SITE_FULL}</span>
+        <button
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          className="text-white p-2"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+
+      {/* MOBILE DRAWER OVERLAY */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/60 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* MOBILE SLIDE-OUT DRAWER */}
+      <div
+        className={`lg:hidden fixed top-0 left-0 h-full w-[260px] bg-[#1a1a2e] z-50 transform transition-transform duration-300 flex flex-col ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+          <span className="text-white font-bold text-[16px]">{SITE_FULL}</span>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-[#9496a8] hover:text-white"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="flex-1 py-4 overflow-y-auto">
+          {navItems.map((item) => {
+            const active = tab === item.id
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setTab(item.id)
+                  setMobileMenuOpen(false)
+                }}
+                className={`w-full flex items-center gap-3 px-6 py-3.5 text-[14px] font-medium transition-colors ${
+                  active
+                    ? "bg-[#7f85f7]/20 text-[#7f85f7]"
+                    : "text-[#9496a8] hover:text-white"
+                }`}
+              >
+                <item.Icon size={18} />
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 px-6 py-4 text-[#9496a8] hover:text-white border-t border-white/10 text-[14px]"
+        >
+          <LogOut size={16} />
+          Logout
+        </button>
+      </div>
+
+      {/* DESKTOP SIDEBAR — hidden below lg */}
+      <aside className="hidden lg:flex w-[240px] flex-shrink-0 bg-[#1a1a2e] min-h-screen flex-col fixed left-0 top-0 h-full z-40">
         <div className="px-6 py-6 border-b border-white/10">
           <div className="text-white font-bold text-[16px]">{SITE_FULL}</div>
           <div className="text-[#666880] text-[11px] mt-0.5">Admin Panel</div>
@@ -446,13 +518,13 @@ export default function DashboardPage() {
       </aside>
 
       {/* MAIN */}
-      <main className="ml-[240px] flex-1 p-8 min-w-0">
+      <main className="ml-0 lg:ml-[240px] flex-1 min-w-0 min-h-screen bg-[#f5f5f8] pt-[72px] lg:pt-8 px-4 lg:px-8 pb-4 lg:pb-8">
         {/* ───────── OVERVIEW ───────── */}
         {tab === "overview" && (
           <div>
             <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-8">Dashboard Overview</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
                 iconBg="bg-[#eeedfe]"
                 icon={<Users size={20} className="text-[#7f85f7]" />}
@@ -501,7 +573,7 @@ export default function DashboardPage() {
                 <p className="text-[#9496a8] text-[14px] py-8 text-center">No leads yet.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
+                  <table className="w-full text-left min-w-[560px]">
                     <thead>
                       <tr className="text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider">
                         <th className="py-2 pr-4">Name</th>
@@ -1083,7 +1155,7 @@ function LeadsView({
 
       <div className="bg-white rounded-[16px] border border-[#e8e8f0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[720px]">
             <thead>
               <tr className="bg-[#f8f8ff] text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider">
                 <Th>Name</Th>
