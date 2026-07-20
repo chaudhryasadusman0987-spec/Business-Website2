@@ -41,10 +41,6 @@ export async function sendEmail(
   const from = process.env.SMTP_FROM
     || "info@pakozsolutions.com.au"
 
-  // Send the quote/enquiry to the customer, and BCC the business inbox so
-  // every lead also lands in our mailbox (set LEAD_NOTIFY_EMAIL in env).
-  const bcc = process.env.LEAD_NOTIFY_EMAIL || undefined
-
   console.log("Sending email:", {
     from,
     to,
@@ -59,7 +55,6 @@ export async function sendEmail(
     const result = await transporter.sendMail({
       from: `"${SITE_FULL}" <${from}>`,
       to,
-      bcc,
       subject,
       html,
     })

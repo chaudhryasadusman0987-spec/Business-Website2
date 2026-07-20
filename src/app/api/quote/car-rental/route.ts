@@ -211,15 +211,29 @@ export async function POST(req: Request) {
 
     // Email is attempted first, but is never allowed to block the customer.
     if (isSmtpConfigured()) {
+      const html = buildEmail(body)
+      // 1. Send the quote to the customer.
       try {
         await sendEmail(
           body.email,
           `Your Car Rental Quote from ${SITE_FULL} — Brisbane`,
-          buildEmail(body)
+          html
         )
       } catch (emailErr) {
-        console.error("Car rental quote email failed:", (emailErr as Error)?.message)
-        // Continue — the lead is still saved below.
+        console.error("Car rental quote customer email failed:", (emailErr as Error)?.message)
+      }
+      // 2. Send a copy of the quote to the business inbox (the lead).
+      const owner = process.env.LEAD_NOTIFY_EMAIL || process.env.SMTP_USER
+      if (owner) {
+        try {
+          await sendEmail(
+            owner,
+            `New car rental lead: ${body.firstName} ${body.lastName} — ${formatAUD(body.total)}`,
+            html
+          )
+        } catch (ownerErr) {
+          console.error("Car rental quote owner email failed:", (ownerErr as Error)?.message)
+        }
       }
     } else {
       console.log("SMTP not configured — skipping email send. Lead will be saved to dashboard.")
