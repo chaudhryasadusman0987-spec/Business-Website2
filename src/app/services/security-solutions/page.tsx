@@ -7,6 +7,18 @@ import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
 
+// Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
+const serviceSuburbs = [
+  "Brisbane CBD", "Sunnybank", "Sunnybank Hills", "Runcorn", "Calamvale",
+  "Parkinson", "Rochedale", "Eight Mile Plains", "Springwood", "Logan",
+  "Loganholme", "Beenleigh", "Browns Plains", "Mount Gravatt", "Mansfield",
+  "Wishart", "Stretton", "Carindale", "Macgregor", "Algester", "Acacia Ridge",
+  "Coopers Plains", "Moorooka", "Salisbury", "Nathan", "Holland Park",
+  "Tarragindi", "Yeronga", "Annerley", "Greenslopes", "Woolloongabba",
+  "South Brisbane", "West End", "Highgate Hill", "Gold Coast", "Ipswich",
+  "Redlands",
+]
+
 export const metadata: Metadata = {
   title: "Security Solutions",
   description:
@@ -37,6 +49,26 @@ export default function SecuritySolutionsPage() {
       </section>
 
       <HowItWorks />
+
+      {/* Areas We Service — suburb coverage for local SEO */}
+      <section className="bg-[#fefefd] py-[60px]">
+        <div className="max-w-[1170px] mx-auto px-4">
+          <h2 className="font-bold text-[24px] text-[#1a1a2e] text-center mb-8">
+            Areas We Service
+          </h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            {serviceSuburbs.map((suburb) => (
+              <span
+                key={suburb}
+                className="bg-white border border-[#e8e8f0] rounded-full px-4 py-2 text-[13px] text-[#444] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all"
+              >
+                {suburb}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <QuoteCTABanner href="/services/security-solutions/quote" />
       <TestimonialsStrip />
     </>
