@@ -71,13 +71,27 @@ function buildOwnerEmail(body: ContactBody): string {
 }
 
 export async function POST(req: Request) {
+  let body: ContactBody
   try {
-    const body = (await req.json()) as ContactBody
-    if (!body.name || !body.email || !body.phone || !body.message) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
+    body = (await req.json()) as ContactBody
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
 
-    // Email is attempted first, but is never allowed to block the customer.
+  if (!body.name || !body.email || !body.phone || !body.message) {
+    return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+  }
+
+  // Always save the lead first — a submission must reach the dashboard even if
+  // email later fails.
+  try {
+    await logLead(body)
+  } catch (e) {
+    console.error("Lead save failed:", e)
+  }
+
+  // Try to send email — failure never shows an error to the customer.
+  try {
     if (isSmtpConfigured()) {
       // Confirmation to the customer.
       try {
@@ -104,29 +118,13 @@ export async function POST(req: Request) {
         }
       }
     } else {
-      console.log("SMTP not configured — skipping email send. Lead will be saved to dashboard.")
+      console.log("SMTP not configured — skipping email send. Lead saved to dashboard.")
     }
-
-    // Best-effort storage: a KV/disk failure must not turn a successful
-    // submission into an error for the customer.
-    try {
-      await logLead(body)
-    } catch (err) {
-      console.error("Contact lead log failed (non-critical):", err)
-    }
-
-    // Always return success — the customer never sees an error.
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    const e = err as { message?: string; code?: string; stack?: string }
-    console.error("Contact API error:", {
-      message: e?.message,
-      code: e?.code,
-      stack: e?.stack,
-    })
-    return NextResponse.json(
-      { error: "Could not send message", detail: e?.message || "Unknown error" },
-      { status: 500 }
-    )
+  } catch (e) {
+    console.error("Email failed:", e)
+    // Do not throw — the customer still sees success.
   }
+
+  // Always return success — the customer never sees an error.
+  return NextResponse.json({ success: true })
 }

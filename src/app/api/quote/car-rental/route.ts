@@ -212,16 +212,30 @@ function buildEmail(body: QuoteBody): string {
 }
 
 export async function POST(req: Request) {
+  let body: QuoteBody
   try {
-    const body = (await req.json()) as QuoteBody
-    if (!body.firstName || !body.email || !body.phone) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
-    }
+    body = (await req.json()) as QuoteBody
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
 
-    // Email is attempted first, but is never allowed to block the customer.
+  if (!body.firstName || !body.email || !body.phone) {
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    )
+  }
+
+  // Always save the lead first — a submission must reach the dashboard even if
+  // email later fails.
+  try {
+    await logLead(body)
+  } catch (err) {
+    console.error("Car rental lead log failed (non-critical):", err)
+  }
+
+  // Try to send email — failure never shows an error to the customer.
+  try {
     if (isSmtpConfigured()) {
       const html = buildEmail(body)
       // 1. Send the quote to the customer.
@@ -248,29 +262,13 @@ export async function POST(req: Request) {
         }
       }
     } else {
-      console.log("SMTP not configured — skipping email send. Lead will be saved to dashboard.")
+      console.log("SMTP not configured — skipping email send. Lead saved to dashboard.")
     }
-
-    // Best-effort storage: a KV/disk failure must not turn a successful
-    // submission into an error for the customer.
-    try {
-      await logLead(body)
-    } catch (err) {
-      console.error("Car rental lead log failed (non-critical):", err)
-    }
-
-    // Always return success — the customer never sees an error.
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    const e = err as { message?: string; code?: string; stack?: string }
-    console.error("Car rental quote API error:", {
-      message: e?.message,
-      code: e?.code,
-      stack: e?.stack,
-    })
-    return NextResponse.json(
-      { error: "Failed to send quote", detail: e?.message || "Unknown error" },
-      { status: 500 }
-    )
+  } catch (e) {
+    console.error("Email failed:", e)
+    // Do not throw — the customer still sees success.
   }
+
+  // Always return success — the customer never sees an error.
+  return NextResponse.json({ success: true })
 }
