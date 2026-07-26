@@ -8,7 +8,6 @@ import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions, installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
-import { SITE_FULL } from "@/data/site"
 
 export function generateStaticParams() {
   return securitySolutions.map((s) => ({ slug: s.slug }))
@@ -22,7 +21,7 @@ export function generateMetadata({
   const solution = securitySolutions.find((s) => s.slug === params.slug)
   if (!solution) return {}
   return {
-    title: `${solution.name} | ${SITE_FULL}`,
+    title: solution.name,
     description: solution.description,
   }
 }

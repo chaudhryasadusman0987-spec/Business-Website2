@@ -11,14 +11,13 @@ import { vehicles } from "@/data/car-rental"
 import { mergeVehicles } from "@/lib/catalog"
 import { readCatalog } from "@/lib/catalog-store"
 import { formatAUD } from "@/lib/formatters"
-import { SITE_FULL } from "@/data/site"
 
 // Read admin catalog overrides on every request so dashboard vehicle edits go
 // live on this page without a rebuild.
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: `Car Rental Brisbane | ${SITE_FULL}`,
+  title: "Car Rental Brisbane",
   description:
     "Brisbane car rental from $55/day. Economy to luxury vehicles. " +
     "Airport pick-up, CBD and Queensland-wide delivery. Free cancellation.",

@@ -1,12 +1,11 @@
 import type { Metadata } from "next"
 import ITServiceDetail from "@/components/sections/ITServiceDetail"
 import { itServiceItems } from "@/data/it-services"
-import { SITE_FULL } from "@/data/site"
 
 const service = itServiceItems.find((s) => s.id === "web-development")!
 
 export const metadata: Metadata = {
-  title: `Web Development | ${SITE_FULL}`,
+  title: "Web Development",
   description: service.description,
 }
 

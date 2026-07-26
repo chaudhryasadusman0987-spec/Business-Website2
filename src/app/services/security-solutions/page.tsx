@@ -6,10 +6,9 @@ import HowItWorks from "@/components/sections/HowItWorks"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `Security Solutions | ${SITE_FULL}`,
+  title: "Security Solutions",
   description:
     "Complete security solutions across Australia. CCTV, alarms, access " +
     "control, intercoms and more. Free site assessment. Licensed installers.",

@@ -6,10 +6,9 @@ import SectionTitle from "@/components/ui/SectionTitle"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { itProcess, itTechnologies } from "@/data/it-services"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `IT & AI Services | ${SITE_FULL}`,
+  title: "IT & AI Services",
   description:
     "Web development, mobile apps, AI automation and IT consulting for " +
     "Australian businesses. Fixed prices. Free consultation.",

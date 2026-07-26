@@ -2,10 +2,9 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import VehicleFleet from "@/components/sections/VehicleFleet"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `Vehicle Fleet | Car Rental Brisbane | ${SITE_FULL}`,
+  title: "Vehicle Fleet | Car Rental Brisbane",
   description:
     "Our full Brisbane rental fleet — economy, SUV, sedan, 7-seat, van and " +
     "luxury vehicles. Transparent daily and weekly rates. Free cancellation.",

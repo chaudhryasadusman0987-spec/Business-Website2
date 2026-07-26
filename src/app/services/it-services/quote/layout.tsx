@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `Get an IT & AI Quote | ${SITE_FULL}`,
+  title: "Get an IT & AI Quote",
   description:
     "Get a free quote for web development, app development, AI automation or " +
     "IT consulting. Estimate in 2 minutes.",

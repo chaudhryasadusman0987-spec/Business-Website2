@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `Dashboard | ${SITE_FULL}`,
+  title: "Dashboard",
   robots: "noindex, nofollow",
 }
 

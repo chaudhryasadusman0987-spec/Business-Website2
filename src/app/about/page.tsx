@@ -7,7 +7,7 @@ import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `About Us | ${SITE_FULL}`,
+  title: "About Us",
   description:
     `Learn about ${SITE_FULL} — Australian-owned multi-service business. ` +
     "Security, mobility and technology solutions.",

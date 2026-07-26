@@ -3,10 +3,9 @@ import AllDbProductsGrid from "@/components/sections/AllDbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `All Security Products | ${SITE_FULL}`,
+  title: "All Security Products",
   description:
     "Browse every security product we supply and install across Australia — " +
     "cameras, alarms, access control, smoke alarms, intercoms and more.",

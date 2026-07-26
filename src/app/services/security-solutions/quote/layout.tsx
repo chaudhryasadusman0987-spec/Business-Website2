@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: `Security Solutions Quote | ${SITE_FULL}`,
+  title: "Security Solutions Quote",
   description:
     "Get an instant, itemised security quote — surveillance, alarms, access " +
     "control, intercoms and more. Emailed to you within minutes.",

@@ -5,7 +5,6 @@ import { ChevronRight, Clock, ArrowRight } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { blogPosts, getPostBySlug, getRelatedPosts } from "@/data/blog"
-import { SITE_FULL } from "@/data/site"
 
 export function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }))
@@ -19,7 +18,7 @@ export function generateMetadata({
   const post = getPostBySlug(params.slug)
   if (!post) return {}
   return {
-    title: `${post.title} | ${SITE_FULL}`,
+    title: post.title,
     description: post.excerpt,
   }
 }
