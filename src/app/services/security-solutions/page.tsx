@@ -10,8 +10,9 @@ import { securitySolutions } from "@/data/security-solutions"
 export const metadata: Metadata = {
   title: "Security Solutions",
   description:
-    "Complete security solutions across Australia. CCTV, alarms, access " +
-    "control, intercoms and more. Free site assessment. Licensed installers.",
+    "Professional CCTV, alarms, access control and intercom installation in " +
+    "Brisbane & Southeast QLD. Free site assessment. Licensed installers. " +
+    "Same-week service.",
 }
 
 export default function SecuritySolutionsPage() {

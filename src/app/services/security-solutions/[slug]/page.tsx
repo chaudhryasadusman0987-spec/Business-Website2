@@ -13,6 +13,31 @@ export function generateStaticParams() {
   return securitySolutions.map((s) => ({ slug: s.slug }))
 }
 
+// Brisbane-specific meta descriptions per solution, keyed by slug. Overrides the
+// generic solution.description for SEO; unlisted slugs fall back to the data.
+const metaDescriptions: Record<string, string> = {
+  "surveillance-evidence":
+    "CCTV and surveillance camera installation Brisbane. HD recording, remote " +
+    "smartphone access, motion detection. Free quote. Licensed installers.",
+  deterrence:
+    "Alarm systems and security deterrence installed in Brisbane & Southeast " +
+    "QLD. Sirens, motion sensors, floodlights. Free site assessment. Licensed " +
+    "team.",
+  "commercial-security":
+    "Commercial security systems Brisbane. CCTV, NVR, thermal cameras for " +
+    "offices, retail and warehouses. Free assessment. Enterprise-grade " +
+    "installation.",
+  "access-control":
+    "Access control installation Brisbane. Keypads, biometric readers, gate " +
+    "systems. Control who enters your property. Free quote. Licensed installers.",
+  "smoke-alarms":
+    "Smoke alarm installation Brisbane. AS3786 compliant photoelectric alarms. " +
+    "Hardwired and wireless systems. Licensed installers. Free quote.",
+  intercoms:
+    "Video intercom installation Brisbane. Homes, apartments, commercial " +
+    "buildings. Smartphone integration. Free quote. Professional installation.",
+}
+
 export function generateMetadata({
   params,
 }: {
@@ -22,7 +47,7 @@ export function generateMetadata({
   if (!solution) return {}
   return {
     title: solution.name,
-    description: solution.description,
+    description: metaDescriptions[params.slug] ?? solution.description,
   }
 }
 
