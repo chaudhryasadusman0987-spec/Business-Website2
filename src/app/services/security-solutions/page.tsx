@@ -69,6 +69,28 @@ export default function SecuritySolutionsPage() {
         </div>
       </section>
 
+      {/* Leave us a Google review CTA */}
+      <section className="bg-[#7f85f7] py-[60px] text-center">
+        <div className="max-w-[1170px] mx-auto px-4">
+          <h2 className="text-white font-bold text-[28px]">
+            Happy with our service?
+          </h2>
+          <p className="text-white/80 text-[15px] mt-3 mb-8 max-w-[560px] mx-auto">
+            Leave us a Google review and help other Brisbane families find
+            quality security installation.
+          </p>
+          {/* Owner: replace with your real Google review link */}
+          <a
+            href="https://g.page/r/[your-google-place-id]/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center bg-white text-[#7f85f7] font-bold rounded-[8px] h-[52px] px-8 hover:bg-white/90 transition-all"
+          >
+            ⭐ Leave a Google Review
+          </a>
+        </div>
+      </section>
+
       <QuoteCTABanner href="/services/security-solutions/quote" />
       <TestimonialsStrip />
     </>
