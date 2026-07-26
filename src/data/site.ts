@@ -14,3 +14,6 @@ export const SITE_ABN         = "";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 export const SITE_COMPANY     = "PAK OZ SOLUTIONS PTY LTD";
 export const SITE_ACN         = "ACN: 700 444 695";
+// Security installer credential shown in trust strips. Replace with your real
+// number when available, e.g. "Queensland Security Licence: 1234567".
+export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";

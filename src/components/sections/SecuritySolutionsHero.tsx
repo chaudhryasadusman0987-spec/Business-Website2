@@ -1,6 +1,8 @@
 import Link from "next/link"
+import { ShieldCheck } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions } from "@/data/security-solutions"
+import { SITE_SECURITY_LICENCE } from "@/data/site"
 
 // Dark hero for the Security Solutions landing page.
 // Mirrors the home hero's #0d0d1a dot-grid + glow treatment.
@@ -59,6 +61,23 @@ export default function SecuritySolutionsHero() {
               >
                 View Solutions
               </a>
+            </div>
+
+            {/* Trust strip — reassurance signals below the CTAs */}
+            <div className="flex items-center gap-6 mt-6 flex-wrap">
+              {[
+                SITE_SECURITY_LICENCE,
+                "Free Site Assessment",
+                "Same-Week Installation",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 text-[#9496a8] text-[13px]"
+                >
+                  <ShieldCheck size={14} className="text-[#5dcaa5]" />
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
 
