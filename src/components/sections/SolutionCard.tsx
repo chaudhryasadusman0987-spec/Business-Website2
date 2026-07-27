@@ -12,7 +12,7 @@ export default function SolutionCard({
   return (
     <Link
       href={`/services/security-solutions/${solution.slug}`}
-      className="group relative block bg-brand-card rounded-[40px] overflow-hidden cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]"
+      className="group relative block w-full bg-brand-card rounded-[40px] overflow-hidden cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]"
     >
       {/* Image strip at top */}
       <div className="relative w-full h-[140px] overflow-hidden">

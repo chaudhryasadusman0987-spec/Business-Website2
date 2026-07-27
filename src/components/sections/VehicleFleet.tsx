@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import VehicleCard from "./VehicleCard"
+import AnimateIn from "@/components/ui/AnimateIn"
 import { vehicles as baseVehicles } from "@/data/car-rental"
 import { mergeVehicles, normaliseOverrides, type Vehicle } from "@/lib/catalog"
 
@@ -45,8 +46,15 @@ export default function VehicleFleet({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {shown.map((v) => (
-        <VehicleCard key={v.id} vehicle={v} detailed={detailed} />
+      {shown.map((v, index) => (
+        <AnimateIn
+          key={v.id}
+          animation="fade-up"
+          delay={(index % 3) * 150}
+          className="flex"
+        >
+          <VehicleCard vehicle={v} detailed={detailed} />
+        </AnimateIn>
       ))}
     </div>
   )

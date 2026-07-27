@@ -159,7 +159,17 @@ function QuoteWizard() {
       .map((e) => {
         const raw = e.ratePerDay * days
         const amount = e.capAmount ? Math.min(raw, e.capAmount) : raw
-        return { id: e.id, name: e.name, amount }
+        return {
+          id: e.id,
+          name: e.name,
+          icon: e.icon,
+          amount,
+          // How the amount was arrived at — shown as the sub-line in the
+          // emailed cost breakdown.
+          detail: e.capAmount && raw > e.capAmount
+            ? `capped at ${formatAUD(e.capAmount)}`
+            : `${formatAUD(e.ratePerDay)}/day × ${days} day${days === 1 ? "" : "s"}`,
+        }
       })
     const extrasTotal = extraLines.reduce((s, e) => s + e.amount, 0)
 
@@ -250,7 +260,12 @@ function QuoteWizard() {
                 bond: vehicle.bond,
               }
             : null,
-          extras: q.extraLines.map((e) => ({ name: e.name, amount: Math.round(e.amount) })),
+          extras: q.extraLines.map((e) => ({
+            name: e.name,
+            icon: e.icon,
+            detail: e.detail,
+            amount: Math.round(e.amount),
+          })),
           payment,
           youngDriver,
           young: q.young,

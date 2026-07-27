@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Users, Check } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import CarRentalHero from "@/components/sections/CarRentalHero"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
@@ -155,10 +156,15 @@ export default async function CarRentalPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {fleet.slice(0, 3).map((vehicle) => (
-              <div
+            {fleet.slice(0, 3).map((vehicle, index) => (
+              <AnimateIn
                 key={vehicle.id}
-                className="bg-white border border-[#e8e8f0] rounded-[16px] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                animation="fade-up"
+                delay={index * 150}
+                className="flex"
+              >
+              <div
+                className="bg-white border border-[#e8e8f0] rounded-[16px] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col w-full"
               >
                 <div className="h-[200px] relative">
                   <ImageWithFallback
@@ -236,6 +242,7 @@ export default async function CarRentalPage() {
                   </div>
                 </div>
               </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -313,15 +320,17 @@ export default async function CarRentalPage() {
 
           {/* ROW 1 — Toll Roads */}
           <div className="flex flex-col lg:flex-row items-center gap-10 mb-20">
-            <div className="w-full lg:w-[45%] h-[280px] rounded-[16px] overflow-hidden relative flex-shrink-0 shadow-md">
-              <Image
-                src="/images/brisbane/toll-road.jpg"
-                alt="Brisbane motorway toll road"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1">
+            <AnimateIn animation="slide-left" className="w-full lg:w-[45%] flex-shrink-0">
+              <div className="w-full h-[280px] rounded-[16px] overflow-hidden relative shadow-md">
+                <Image
+                  src="/images/brisbane/toll-road.jpg"
+                  alt="Brisbane motorway toll road"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </AnimateIn>
+            <AnimateIn animation="slide-right" className="flex-1">
               <p className="text-[#7f85f7] font-semibold text-[14px] mb-3">
                 🛣️ Toll Roads
               </p>
@@ -338,20 +347,22 @@ export default async function CarRentalPage() {
                 — it is $5.50 a day and pays for itself on the first trip from
                 the airport.
               </p>
-            </div>
+            </AnimateIn>
           </div>
 
-          {/* ROW 2 — Peak Hour */}
+          {/* ROW 2 — Peak Hour (photo sits right, so the sides swap) */}
           <div className="flex flex-col lg:flex-row-reverse items-center gap-10 mb-20">
-            <div className="w-full lg:w-[45%] h-[280px] rounded-[16px] overflow-hidden relative flex-shrink-0 shadow-md">
-              <Image
-                src="/images/brisbane/peak-hour.jpg"
-                alt="Brisbane peak hour traffic"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1">
+            <AnimateIn animation="slide-right" className="w-full lg:w-[45%] flex-shrink-0">
+              <div className="w-full h-[280px] rounded-[16px] overflow-hidden relative shadow-md">
+                <Image
+                  src="/images/brisbane/peak-hour.jpg"
+                  alt="Brisbane peak hour traffic"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </AnimateIn>
+            <AnimateIn animation="slide-left" className="flex-1">
               <p className="text-[#7f85f7] font-semibold text-[14px] mb-3">
                 🚦 Peak Hour
               </p>
@@ -368,20 +379,22 @@ export default async function CarRentalPage() {
                 Google Maps live traffic is your friend. Every vehicle has phone
                 mount included — no extra charge.
               </p>
-            </div>
+            </AnimateIn>
           </div>
 
           {/* ROW 3 — Day Trips */}
           <div className="flex flex-col lg:flex-row items-center gap-10">
-            <div className="w-full lg:w-[45%] h-[280px] rounded-[16px] overflow-hidden relative flex-shrink-0 shadow-md">
-              <Image
-                src="/images/brisbane/day-trip.jpg"
-                alt="Queensland scenic road trip"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1">
+            <AnimateIn animation="slide-left" className="w-full lg:w-[45%] flex-shrink-0">
+              <div className="w-full h-[280px] rounded-[16px] overflow-hidden relative shadow-md">
+                <Image
+                  src="/images/brisbane/day-trip.jpg"
+                  alt="Queensland scenic road trip"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </AnimateIn>
+            <AnimateIn animation="slide-right" className="flex-1">
               <p className="text-[#7f85f7] font-semibold text-[14px] mb-3">
                 🗺️ Day Trips
               </p>
@@ -396,7 +409,7 @@ export default async function CarRentalPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>

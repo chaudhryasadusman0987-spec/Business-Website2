@@ -6,11 +6,13 @@ import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 interface QuoteItem {
   name: string
+  description: string
   category: string
   qty: number
   unitPrice: number
   originalPrice: number
   isOnSale: boolean
+  discountPercent: number
   lineTotal: number
 }
 
@@ -50,24 +52,37 @@ async function logLead(body: QuoteBody) {
 function buildEmail(body: QuoteBody): string {
   const rows = body.items
     .map(
-      (i) => `
-      <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee">
-          ${i.name}
-          <div style="font-size:11px;color:#888">${i.category}</div>
-        </td>
-        <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${i.qty}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">
-          ${formatAUD(i.unitPrice)}
+      (i, idx) => `
+      <tr style="background:${idx % 2 === 0 ? "#fff" : "#f9fffe"}">
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea">
+          <strong style="font-size:14px;color:#1a1a2e">${i.name}</strong>
           ${
-            i.isOnSale
-              ? `<div style="font-size:11px;color:#999;text-decoration:line-through">was ${formatAUD(
-                  i.originalPrice
-                )}</div>`
+            i.description
+              ? `<br/><span style="font-size:12px;color:#666;margin-top:3px;display:block">${i.description}</span>`
+              : ""
+          }
+          ${
+            i.discountPercent > 0
+              ? `<span style="background:#e1f5ee;color:#0f6e56;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:99px;margin-top:4px;display:inline-block">${i.discountPercent}% OFF</span>`
               : ""
           }
         </td>
-        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatAUD(i.lineTotal)}</td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;font-size:13px;color:#666">${i.category}</td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:center;font-size:14px;font-weight:600;color:#1a1a2e">${i.qty}</td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:right;font-size:13px;color:#666">
+          ${
+            i.discountPercent > 0
+              ? `<span style="text-decoration:line-through;color:#999">${formatAUD(
+                  i.originalPrice
+                )}</span><br/><span style="color:#0f6e56;font-weight:600">${formatAUD(
+                  i.unitPrice
+                )}</span>`
+              : formatAUD(i.unitPrice)
+          }
+        </td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:right;font-weight:600;font-size:14px;color:#0f6e56">${formatAUD(
+          i.lineTotal
+        )}</td>
       </tr>`
     )
     .join("")
@@ -84,26 +99,44 @@ function buildEmail(body: QuoteBody): string {
         Property type: <strong>${body.propertyType ?? "—"}</strong><br/>
         Preferred timing: <strong>${body.timing ?? "—"}</strong>
       </p>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+      <table style="width:100%;border-collapse:collapse;margin:20px 0">
         <thead>
-          <tr style="text-align:left;background:#f7f7f7">
-            <th style="padding:8px">Product</th>
-            <th style="padding:8px;text-align:center">Qty</th>
-            <th style="padding:8px;text-align:right">Unit</th>
-            <th style="padding:8px;text-align:right">Total</th>
+          <tr style="background:#e1f5ee">
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:#085041;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #5dcaa5">Product</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:#085041;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #5dcaa5">Category</th>
+            <th style="padding:10px 12px;text-align:center;font-size:12px;color:#085041;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #5dcaa5">Qty</th>
+            <th style="padding:10px 12px;text-align:right;font-size:12px;color:#085041;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #5dcaa5">Unit Price</th>
+            <th style="padding:10px 12px;text-align:right;font-size:12px;color:#085041;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #5dcaa5">Line Total</th>
           </tr>
         </thead>
-        <tbody>
-          ${rows}
+        <tbody>${rows}</tbody>
+        <tfoot>
           <tr>
-            <td colspan="3" style="padding:8px;text-align:right">Installation & labour</td>
-            <td style="padding:8px;text-align:right">${formatAUD(body.installFee)}</td>
+            <td colspan="4" style="padding:10px 12px;text-align:right;color:#666;font-size:13px">Installation &amp; Labour</td>
+            <td style="padding:10px 12px;text-align:right;font-size:13px;color:#666">${formatAUD(
+              body.installFee
+            )}</td>
           </tr>
-        </tbody>
+          <tr>
+            <td colspan="4" style="padding:8px 12px;text-align:right;color:#666;font-size:13px">Subtotal (ex GST)</td>
+            <td style="padding:8px 12px;text-align:right;font-size:13px;color:#666">${formatAUD(
+              body.subtotal
+            )}</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="padding:8px 12px;text-align:right;color:#666;font-size:13px">GST (10%)</td>
+            <td style="padding:8px 12px;text-align:right;font-size:13px;color:#666">${formatAUD(
+              Math.round(body.gst)
+            )}</td>
+          </tr>
+          <tr style="background:#e1f5ee">
+            <td colspan="4" style="padding:14px 12px;text-align:right;font-weight:700;font-size:16px;color:#085041">Total (AUD)</td>
+            <td style="padding:14px 12px;text-align:right;font-weight:700;font-size:18px;color:#0f6e56">${formatAUD(
+              Math.round(body.total)
+            )}</td>
+          </tr>
+        </tfoot>
       </table>
-      <p style="text-align:right;font-size:13px;margin:4px 0">Subtotal (ex. GST): <strong>${formatAUD(body.subtotal)}</strong></p>
-      <p style="text-align:right;font-size:13px;margin:4px 0">GST (10%): <strong>${formatAUD(body.gst)}</strong></p>
-      <p style="text-align:right;font-size:18px;margin:8px 0">Total (AUD): <strong>${formatAUD(body.total)}</strong></p>
       <p style="background:#E1F5EE;color:#085041;padding:10px;border-radius:6px;font-size:13px;text-align:center">
         Quote valid for 30 days · Our team will follow up within 1 business day.
       </p>

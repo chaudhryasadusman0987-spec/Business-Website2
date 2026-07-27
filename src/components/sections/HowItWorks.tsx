@@ -1,5 +1,6 @@
 import { ClipboardCheck, PencilRuler, Wrench } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 
 const steps = [
   {
@@ -30,9 +31,9 @@ export default function HowItWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
           {steps.map((step, i) => (
+            <AnimateIn key={step.title} animation="scale" delay={i * 200}>
             <div
-              key={step.title}
-              className="bg-white rounded-2xl p-8 text-center shadow-sm"
+              className="bg-white rounded-2xl p-8 text-center shadow-sm h-full"
             >
               <div className="w-14 h-14 rounded-[16px] mx-auto flex items-center justify-center bg-[rgba(127,133,247,0.12)]">
                 <step.icon size={26} className="text-brand-primary" />
@@ -47,6 +48,7 @@ export default function HowItWorks() {
                 {step.text}
               </p>
             </div>
+            </AnimateIn>
           ))}
         </div>
       </div>

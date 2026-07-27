@@ -3,6 +3,7 @@ import { Shield, Car, Globe, Smartphone, Bot, Monitor } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import AnimateIn from "@/components/ui/AnimateIn"
 import { services } from "@/data/services"
 
 const icons: Record<string, LucideIcon> = {
@@ -24,12 +25,17 @@ export default function ServicesGrid() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
-          {services.map((service) => {
+          {services.map((service, index) => {
             const Icon = icons[service.iconName] ?? Shield
             return (
-              <div
+              <AnimateIn
                 key={service.id}
-                className="group flex flex-col bg-brand-card rounded-[40px] overflow-hidden text-center cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.25)]"
+                animation="fade-up"
+                delay={(index % 3) * 100}
+                className="flex"
+              >
+              <div
+                className="group flex flex-col w-full bg-brand-card rounded-[40px] overflow-hidden text-center cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.25)]"
               >
                 {/* Hero image strip — mirrors the service's landing-page hero.
                     Services without a dedicated hero (e.g. IT Consulting) skip it. */}
@@ -68,6 +74,7 @@ export default function ServicesGrid() {
                   </Link>
                 </div>
               </div>
+              </AnimateIn>
             )
           })}
         </div>

@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { SITE_FULL } from "@/data/site"
+import { SITE_FULL, SITE_TAGLINE } from "@/data/site"
+import AnimateIn from "@/components/ui/AnimateIn"
 
 export default function HeroSection() {
   return (
@@ -34,10 +35,15 @@ export default function HeroSection() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* LEFT — headline + service pills */}
           <div className="flex-1">
-            <h1 className="text-[38px] lg:text-[64px] font-extrabold leading-[1.1] mb-6 text-white">
-              {SITE_FULL}
-            </h1>
-
+            <AnimateIn animation="slide-left">
+              <h1 className="text-[38px] lg:text-[64px] font-extrabold leading-[1.1] text-white">
+                {SITE_FULL}
+              </h1>
+              <p className="text-[18px] lg:text-[22px] font-medium text-[#7f85f7] mt-3 tracking-wide relative inline-block">
+                {SITE_TAGLINE}
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#7f85f7] animate-expand-line" />
+              </p>
+            </AnimateIn>
           </div>
 
           {/* RIGHT — hero image */}

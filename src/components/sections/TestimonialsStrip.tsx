@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Check } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { testimonials, type Testimonial } from "@/data/testimonials"
 
@@ -38,10 +39,15 @@ export default function TestimonialsStrip() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
-          {featured.map((t) => (
-            <div
+          {featured.map((t, index) => (
+            <AnimateIn
               key={t.id}
-              className="flex flex-col rounded-[24px] border border-[#e8e8f0] bg-white p-7 transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
+              animation="fade-up"
+              delay={index * 100}
+              className="flex"
+            >
+            <div
+              className="flex w-full flex-col rounded-[24px] border border-[#e8e8f0] bg-white p-7 transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
             >
               {/* top row — service badge + stars */}
               <div className="mb-5 flex items-center justify-between">
@@ -105,6 +111,7 @@ export default function TestimonialsStrip() {
                 )}
               </div>
             </div>
+            </AnimateIn>
           ))}
         </div>
 

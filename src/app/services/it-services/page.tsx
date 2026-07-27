@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Check, MessageCircle } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { itProcess, itTechnologies } from "@/data/it-services"
@@ -108,13 +109,21 @@ function ServiceEditorialRow({ row }: { row: ServiceRow }) {
         row.reverse ? "lg:flex-row-reverse" : "lg:flex-row"
       } items-center gap-12`}
     >
-      {/* Photo */}
-      <div className="w-full lg:w-[45%] h-[320px] rounded-[20px] overflow-hidden relative flex-shrink-0 shadow-lg">
-        <Image src={row.image} alt={row.imageAlt} fill className="object-cover" />
-      </div>
+      {/* Photo — slides in from whichever side it sits on. */}
+      <AnimateIn
+        animation={row.reverse ? "slide-right" : "slide-left"}
+        className="w-full lg:w-[45%] flex-shrink-0"
+      >
+        <div className="w-full h-[320px] rounded-[20px] overflow-hidden relative shadow-lg">
+          <Image src={row.image} alt={row.imageAlt} fill className="object-cover" />
+        </div>
+      </AnimateIn>
 
       {/* Text */}
-      <div className="flex-1">
+      <AnimateIn
+        animation={row.reverse ? "slide-left" : "slide-right"}
+        className="flex-1"
+      >
         <Link
           href={row.linkHref}
           className="inline-block text-[13px] font-bold uppercase tracking-widest text-[#7f85f7] mb-3 hover:text-[#6b71f0] transition-colors"
@@ -156,7 +165,7 @@ function ServiceEditorialRow({ row }: { row: ServiceRow }) {
             {row.priceNote}
           </p>
         )}
-      </div>
+      </AnimateIn>
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ChevronRight, Check } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import AnimateIn from "@/components/ui/AnimateIn"
+import CountUp from "@/components/ui/CountUp"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { testimonials, stats, type Testimonial } from "@/data/testimonials"
 
@@ -87,21 +89,30 @@ export default function TestimonialsPage() {
 
           {/* stats row */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-8 lg:gap-16">
-            {stats.map((s, i) => (
+            {stats.map((s, i) => {
+              // Values like "100%" or "5★" count up; non-numeric ones ("QLD")
+              // render as plain text.
+              const numeric = /^(\d+)(.*)$/.exec(s.value)
+              return (
               <div key={s.label} className="flex items-center gap-8 lg:gap-16">
-                <div>
+                <AnimateIn animation="scale" delay={i * 100}>
                   <div className="text-[36px] font-extrabold text-[#7f85f7] lg:text-[44px]">
-                    {s.value}
+                    {numeric ? (
+                      <CountUp end={Number(numeric[1])} suffix={numeric[2]} />
+                    ) : (
+                      s.value
+                    )}
                   </div>
                   <div className="mt-1 text-[13px] text-[#9496a8]">
                     {s.label}
                   </div>
-                </div>
+                </AnimateIn>
                 {i < stats.length - 1 && (
                   <div className="hidden h-12 w-px bg-white/10 lg:block" />
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -162,10 +173,15 @@ export default function TestimonialsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((t) => (
-                <div
+              {filtered.map((t, index) => (
+                <AnimateIn
                   key={t.id}
-                  className="flex flex-col rounded-[24px] border border-[#e8e8f0] bg-white p-7 transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
+                  animation="fade-up"
+                  delay={(index % 3) * 100}
+                  className="flex"
+                >
+                <div
+                  className="flex w-full flex-col rounded-[24px] border border-[#e8e8f0] bg-white p-7 transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
                 >
                   {/* top row — service badge + stars */}
                   <div className="mb-5 flex items-center justify-between">
@@ -234,6 +250,7 @@ export default function TestimonialsPage() {
                     )}
                   </div>
                 </div>
+                </AnimateIn>
               ))}
             </div>
           )}

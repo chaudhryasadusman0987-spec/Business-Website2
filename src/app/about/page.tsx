@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ShieldCheck, Users, Zap, Heart, ChevronRight } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
@@ -136,14 +137,16 @@ export default function AboutPage() {
             Our Values
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((v) => (
-              <div key={v.title} className="bg-white/15 rounded-[20px] p-8 text-center">
-                <v.Icon size={40} className="text-white mx-auto mb-4" />
-                <h3 className="text-white font-bold text-[18px]">{v.title}</h3>
-                <p className="text-white text-[14px] mt-3 leading-relaxed">
-                  {v.text}
-                </p>
-              </div>
+            {values.map((v, index) => (
+              <AnimateIn key={v.title} animation="scale" delay={(index % 4) * 100}>
+                <div className="bg-white/15 rounded-[20px] p-8 text-center h-full">
+                  <v.Icon size={40} className="text-white mx-auto mb-4" />
+                  <h3 className="text-white font-bold text-[18px]">{v.title}</h3>
+                  <p className="text-white text-[14px] mt-3 leading-relaxed">
+                    {v.text}
+                  </p>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -154,10 +157,10 @@ export default function AboutPage() {
         <div className="max-w-[1170px] mx-auto px-4">
           <SectionTitle title="Our Team" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-14">
-            {team.map((m) => (
+            {team.map((m, index) => (
+              <AnimateIn key={m.initials} animation="scale" delay={index * 200}>
               <div
-                key={m.initials}
-                className="bg-white border border-[#e8e8f0] rounded-[24px] p-8 text-center"
+                className="bg-white border border-[#e8e8f0] rounded-[24px] p-8 text-center h-full"
               >
                 <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-[#7f85f7] flex items-center justify-center text-white font-bold text-[24px]">
                   {m.initials}
@@ -170,6 +173,7 @@ export default function AboutPage() {
                   {m.bio}
                 </p>
               </div>
+              </AnimateIn>
             ))}
           </div>
         </div>

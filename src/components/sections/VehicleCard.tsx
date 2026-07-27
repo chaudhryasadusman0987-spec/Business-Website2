@@ -14,7 +14,7 @@ export default function VehicleCard({
   detailed?: boolean
 }) {
   return (
-    <div className="group relative bg-brand-card rounded-[80px] py-[70px] px-8 text-center cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2">
+    <div className="group relative w-full bg-brand-card rounded-[80px] py-[70px] px-8 text-center cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2">
       {vehicle.badge && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-primary text-white text-[10px] font-bold px-4 py-1 rounded-full group-hover:bg-white group-hover:text-brand-primary transition-all duration-500">
           {vehicle.badge}

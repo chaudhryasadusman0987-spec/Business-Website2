@@ -53,6 +53,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-AU" className={poppins.className}>
+      <head>
+        {/* Scroll-reveal elements start hidden and are shown by an
+            IntersectionObserver. Without JS that observer never runs, so
+            reveal them unconditionally instead of leaving the page blank. */}
+        <noscript>
+          <style>{`.anim-fade-up,.anim-fade-in,.anim-slide-left,.anim-slide-right,.anim-scale{opacity:1!important;transform:none!important}.animate-expand-line{width:100%!important}`}</style>
+        </noscript>
+      </head>
       <body>
         <PromoProvider>
           <Header />

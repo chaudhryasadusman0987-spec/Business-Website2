@@ -38,10 +38,24 @@ const SERVICE_LABELS: Record<string, string> = {
   ai: "AI Automation",
   consulting: "IT Consulting",
 }
-const PKG_NAMES: Record<string, Record<string, string>> = {
-  web: { starter: "Starter", business: "Business", ecommerce: "E-Commerce" },
-  app: { mvp: "MVP App", full: "Full App" },
-  ai: { chatbot: "AI Chat Agent", workflow: "Workflow Automation", custom: "Custom AI" },
+// Mirrors the package cards in ITQuoteForm — the client only posts
+// { id, price }, so the label/description/badge are resolved here.
+type PkgMeta = { name: string; desc: string; badge?: string }
+const PKG_META: Record<string, Record<string, PkgMeta>> = {
+  web: {
+    starter: { name: "Starter", desc: "5 pages · Contact form · SEO" },
+    business: { name: "Business", desc: "15 pages · CMS · Analytics", badge: "Most Popular" },
+    ecommerce: { name: "E-Commerce", desc: "Online store · Payments" },
+  },
+  app: {
+    mvp: { name: "MVP App", desc: "1 platform · Core features" },
+    full: { name: "Full App", desc: "iOS + Android · All features", badge: "Most Popular" },
+  },
+  ai: {
+    chatbot: { name: "AI Chat Agent", desc: "Website chatbot · Lead capture", badge: "Best Value" },
+    workflow: { name: "Workflow Automation", desc: "Automate manual processes" },
+    custom: { name: "Custom AI", desc: "Bespoke AI solution" },
+  },
 }
 const BUDGET_LABELS: Record<string, string> = {
   under3k: "Under $3,000",
@@ -56,29 +70,61 @@ const TIMELINE_LABELS: Record<string, string> = {
   flexible: "Flexible",
 }
 
-function serviceLine(svc: string, body: QuoteBody): { name: string; price: string } {
+interface ServiceRow {
+  name: string
+  packageName: string
+  packageDescription: string
+  badge?: string
+  startingFrom: string
+  originalPrice: string
+  discountedPrice: string
+  discountPercent: number
+}
+
+function serviceLine(svc: string, body: QuoteBody): ServiceRow {
   const pct = body.discountPercent ?? 0
   const d = (n: number) => (pct ? discounted(n, pct) : n)
-  let name = SERVICE_LABELS[svc] ?? svc
-  let price = ""
-  if (svc === "web" && body.packages.web) {
-    name += ` — ${PKG_NAMES.web[body.packages.web.id] ?? ""}`
-    price = body.packages.web.price ? `From ${formatAUD(d(body.packages.web.price))}` : "—"
-  } else if (svc === "app" && body.packages.app) {
-    name += ` — ${PKG_NAMES.app[body.packages.app.id] ?? ""}`
-    price = body.packages.app.price ? `From ${formatAUD(d(body.packages.app.price))}` : "—"
-  } else if (svc === "ai" && body.packages.ai) {
-    name += ` — ${PKG_NAMES.ai[body.packages.ai.id] ?? ""}`
-    price =
-      body.packages.ai.id === "custom"
-        ? "Custom quote"
-        : body.packages.ai.price
-          ? `From ${formatAUD(d(body.packages.ai.price))}`
-          : "—"
-  } else if (svc === "consulting") {
-    price = `${formatAUD(d(150))}/hr`
+  const name = SERVICE_LABELS[svc] ?? svc
+
+  const sel =
+    svc === "web" ? body.packages.web
+    : svc === "app" ? body.packages.app
+    : svc === "ai" ? body.packages.ai
+    : null
+  const meta = sel ? PKG_META[svc]?.[sel.id] : undefined
+
+  // Consulting is hourly and has no package card.
+  if (svc === "consulting") {
+    return {
+      name,
+      packageName: "Hourly consulting",
+      packageDescription: "Technology audit and roadmap",
+      startingFrom: `${formatAUD(d(150))}/hr`,
+      originalPrice: `${formatAUD(150)}/hr`,
+      discountedPrice: `${formatAUD(d(150))}/hr`,
+      discountPercent: pct,
+    }
   }
-  return { name, price }
+
+  // "Custom AI" is quoted individually — no headline price to discount.
+  const isCustom = svc === "ai" && sel?.id === "custom"
+  const base = sel?.price ?? 0
+  const priceLabel =
+    isCustom ? "Custom quote"
+    : base ? `From ${formatAUD(d(base))}`
+    : "—"
+
+  return {
+    name,
+    packageName: meta?.name ?? "—",
+    packageDescription: meta?.desc ?? "",
+    badge: meta?.badge,
+    startingFrom: priceLabel,
+    originalPrice: base ? `From ${formatAUD(base)}` : priceLabel,
+    discountedPrice: priceLabel,
+    // Only flag a discount when there is a real price it applies to.
+    discountPercent: !isCustom && base && pct ? pct : 0,
+  }
 }
 
 async function logLead(body: QuoteBody) {
@@ -100,12 +146,35 @@ async function logLead(body: QuoteBody) {
 
 function buildEmail(body: QuoteBody): string {
   const rows = body.services
-    .map((svc) => {
-      const { name, price } = serviceLine(svc, body)
+    .map((svc, idx) => {
+      const s = serviceLine(svc, body)
       return `
-      <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee">${name}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${price}</td>
+      <tr style="background:${idx % 2 === 0 ? "#fff" : "#f9f9ff"}">
+        <td style="padding:12px;border-bottom:1px solid #eeeeff">
+          <strong style="font-size:14px;color:#1a1a2e">${s.name}</strong>
+        </td>
+        <td style="padding:12px;border-bottom:1px solid #eeeeff">
+          <span style="font-size:13px;font-weight:600;color:#534ab7">${s.packageName}</span>
+          ${
+            s.badge
+              ? `<span style="background:#eeedfe;color:#534ab7;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:99px;margin-left:6px">${s.badge}</span>`
+              : ""
+          }
+          ${
+            s.packageDescription
+              ? `<br/><span style="font-size:12px;color:#666;margin-top:4px;display:block">${s.packageDescription}</span>`
+              : ""
+          }
+        </td>
+        <td style="padding:12px;border-bottom:1px solid #eeeeff;text-align:right">
+          ${
+            s.discountPercent > 0
+              ? `<span style="text-decoration:line-through;color:#999;font-size:12px;display:block">${s.originalPrice}</span>
+             <span style="font-weight:700;font-size:15px;color:#0f6e56">${s.discountedPrice}</span>
+             <span style="background:#e1f5ee;color:#0f6e56;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:99px;display:inline-block;margin-top:3px">${s.discountPercent}% OFF</span>`
+              : `<span style="font-weight:700;font-size:15px;color:#7f85f7">${s.startingFrom}</span>`
+          }
+        </td>
       </tr>`
     })
     .join("")
@@ -120,14 +189,24 @@ function buildEmail(body: QuoteBody): string {
     <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px">
       <p>Hi ${c.fname}, thank you for your quote request.</p>
 
-      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+      <!-- SERVICES SELECTED TABLE -->
+      <table style="width:100%;border-collapse:collapse;margin:20px 0">
         <thead>
-          <tr style="text-align:left;background:#f7f7f7">
-            <th style="padding:8px">Service</th>
-            <th style="padding:8px;text-align:right">Starting from</th>
+          <tr style="background:#eeedfe">
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:#534ab7;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #7f85f7">Service</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:#534ab7;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #7f85f7">Package Selected</th>
+            <th style="padding:10px 12px;text-align:right;font-size:12px;color:#534ab7;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #7f85f7">Starting From</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
+        <tfoot>
+          <tr style="background:#eeedfe">
+            <td colspan="2" style="padding:14px 12px;font-weight:700;font-size:15px;color:#534ab7">Indicative Total Range</td>
+            <td style="padding:14px 12px;text-align:right;font-weight:700;font-size:17px;color:#7f85f7">${
+              body.estimate.range
+            }</td>
+          </tr>
+        </tfoot>
       </table>
 
       ${
@@ -138,14 +217,28 @@ function buildEmail(body: QuoteBody): string {
           : ""
       }
 
-      <p style="font-size:13px;color:#555;margin:4px 0">
-        Budget range: <strong>${body.budget ? BUDGET_LABELS[body.budget] : "—"}</strong><br/>
-        Timeline: <strong>${body.timeline ? TIMELINE_LABELS[body.timeline] : "—"}</strong>
-      </p>
-
-      <p style="font-size:13px;color:#555;margin:12px 0">
-        <strong>Project description</strong><br/>${c.description}
-      </p>
+      <!-- PROJECT DETAILS -->
+      <div style="background:#f9f9ff;border-radius:12px;padding:18px;margin:16px 0">
+        <h3 style="color:#534ab7;font-size:14px;font-weight:700;margin:0 0 12px">📋 Your Project Details</h3>
+        <table style="width:100%">
+          <tr>
+            <td style="font-size:12px;color:#9496a8;padding:4px 0;width:35%;text-transform:uppercase;letter-spacing:.04em">Budget Range</td>
+            <td style="font-size:13px;color:#1a1a2e;font-weight:500">${
+              body.budget ? BUDGET_LABELS[body.budget] : "—"
+            }</td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;color:#9496a8;padding:4px 0;text-transform:uppercase;letter-spacing:.04em">Timeline</td>
+            <td style="font-size:13px;color:#1a1a2e;font-weight:500">${
+              body.timeline ? TIMELINE_LABELS[body.timeline] : "—"
+            }</td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;color:#9496a8;padding:4px 0;text-transform:uppercase;letter-spacing:.04em">Description</td>
+            <td style="font-size:13px;color:#1a1a2e">${c.description}</td>
+          </tr>
+        </table>
+      </div>
 
       <p style="background:#eeedfe;color:#534ab7;padding:14px;border-radius:8px;font-size:15px;text-align:center;margin:16px 0">
         Indicative range: <strong>${body.estimate.range}</strong><br/>

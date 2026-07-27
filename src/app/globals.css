@@ -37,3 +37,105 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* Hero slogan underline — draws itself in once, shortly after first paint. */
+@keyframes expandLine {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+.animate-expand-line {
+  animation: expandLine 1.2s ease-out 0.5s forwards;
+}
+
+/* ============================================================
+   Scroll reveal — paired with <AnimateIn>. The `visible` class
+   is added by useScrollAnimation the first time the element
+   enters the viewport; the observer then disconnects, so each
+   element animates exactly once per visit.
+   ============================================================ */
+
+/* Fade up — for cards and sections */
+.anim-fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.anim-fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fade in — for images and heroes */
+.anim-fade-in {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.anim-fade-in.visible {
+  opacity: 1;
+}
+
+/* Slide left — for text content */
+.anim-slide-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.anim-slide-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Slide right — for images */
+.anim-slide-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.anim-slide-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scale up — for stat numbers */
+.anim-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.anim-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Stagger delays for grid items. Covers index×100, ×150 and ×200 steps —
+   AnimateIn builds the class name from its `delay` prop, so any value used
+   there must exist here. */
+.delay-100 { transition-delay: 0.1s; }
+.delay-150 { transition-delay: 0.15s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-400 { transition-delay: 0.4s; }
+.delay-450 { transition-delay: 0.45s; }
+.delay-500 { transition-delay: 0.5s; }
+.delay-600 { transition-delay: 0.6s; }
+.delay-750 { transition-delay: 0.75s; }
+.delay-800 { transition-delay: 0.8s; }
+.delay-900 { transition-delay: 0.9s; }
+.delay-1000 { transition-delay: 1s; }
+
+/* Respect reduced-motion: show everything immediately, no transforms. */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-fade-in,
+  .anim-slide-left,
+  .anim-slide-right,
+  .anim-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-expand-line {
+    animation: none;
+    width: 100%;
+  }
+}

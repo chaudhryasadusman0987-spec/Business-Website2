@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import SectionTitle from "@/components/ui/SectionTitle"
+import AnimateIn from "@/components/ui/AnimateIn"
 import SecuritySolutionsHero from "@/components/sections/SecuritySolutionsHero"
 import SolutionCard from "@/components/sections/SolutionCard"
 import HowItWorks from "@/components/sections/HowItWorks"
@@ -41,8 +42,15 @@ export default function SecuritySolutionsPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
-            {securitySolutions.map((solution) => (
-              <SolutionCard key={solution.id} solution={solution} />
+            {securitySolutions.map((solution, index) => (
+              <AnimateIn
+                key={solution.id}
+                animation="fade-up"
+                delay={(index % 3) * 150}
+                className="flex"
+              >
+                <SolutionCard solution={solution} />
+              </AnimateIn>
             ))}
           </div>
         </div>

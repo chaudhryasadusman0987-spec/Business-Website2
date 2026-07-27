@@ -191,11 +191,18 @@ function QuoteWizard() {
         return {
           id: p.id,
           name: p.name,
+          description: p.description ?? "",
           category: nameOfSlug(p.solutionSlug),
           qty,
           unitPrice: eff.price,
           originalPrice: eff.original,
           isOnSale: eff.onSale,
+          // Whole-percent saving off the original — drives the "N% OFF" pill
+          // in the emailed quote.
+          discountPercent:
+            eff.onSale && eff.original > 0
+              ? Math.round(((eff.original - eff.price) / eff.original) * 100)
+              : 0,
           lineTotal: eff.price * qty,
         }
       })
@@ -238,11 +245,13 @@ function QuoteWizard() {
           timing,
           items: items.map((i) => ({
             name: i.name,
+            description: i.description,
             category: i.category,
             qty: i.qty,
             unitPrice: i.unitPrice,
             originalPrice: i.originalPrice,
             isOnSale: i.isOnSale,
+            discountPercent: i.discountPercent,
             lineTotal: i.lineTotal,
           })),
           installFee,
