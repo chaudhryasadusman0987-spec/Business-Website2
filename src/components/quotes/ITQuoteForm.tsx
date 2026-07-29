@@ -2,65 +2,83 @@
 
 // IT & AI SERVICES QUOTE WIZARD
 // Ported from it_ai_quote_template.html
-// Prices are driven by the admin dashboard via the data file.
-// TODO(dashboard): prices loaded from itServiceItems packages in
-//   src/data/it-services.ts — admin edits startingFromValue → tiles update here.
+//
+// Prices come from src/data/it-services.ts, with the admin dashboard's saved
+// edits merged over them at runtime (see the /api/catalog fetch in the wizard).
+// So changing a package price in the dashboard updates these tiles without a
+// redeploy — the data file only supplies the starting values.
 //
 // NOTE: this wizard is PURPLE (#7f85f7), matching it_ai_quote_template.html and
 // the IT & AI Services brand. (The security quote wizard stays green.)
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { Check, ArrowLeft, ArrowRight } from "lucide-react"
-import { itServiceItems } from "@/data/it-services"
+import { itServiceItems, type ITServiceItem } from "@/data/it-services"
+import { mergeITServices, normaliseOverrides } from "@/lib/catalog"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
 import { discounted, promoActive } from "@/lib/promo"
 import { usePromo } from "@/components/providers/PromoProvider"
 
-// ─── PRICES — loaded from data file (connects to admin dashboard) ───
-const webService = itServiceItems.find((s) => s.id === "web-development")
-const appService = itServiceItems.find((s) => s.id === "app-development")
-const aiService = itServiceItems.find((s) => s.id === "ai-automation")
+// ─── PRICES ───
+interface Prices {
+  web: { starter: number; business: number; ecommerce: number }
+  app: { mvp: number; full: number }
+  ai: { chatbot: number; workflow: number; custom: number }
+  consulting: { hourly: number }
+}
 
-const pkgValue = (svc: typeof webService, id: string, fallback: number) =>
-  svc?.packages.find((p) => p.id === id)?.startingFromValue ?? fallback
+const pkgValue = (
+  services: ITServiceItem[],
+  serviceId: string,
+  pkgId: string,
+  fallback: number
+) =>
+  services.find((s) => s.id === serviceId)?.packages.find((p) => p.id === pkgId)
+    ?.startingFromValue ?? fallback
 
-const PRICES = {
-  web: {
-    starter: pkgValue(webService, "web-starter", 2500),
-    business: pkgValue(webService, "web-business", 5500),
-    ecommerce: pkgValue(webService, "web-ecommerce", 8500),
-  },
-  app: {
-    mvp: pkgValue(appService, "app-mvp", 8000),
-    full: pkgValue(appService, "app-full", 18000),
-  },
-  ai: {
-    chatbot: pkgValue(aiService, "ai-chatbot", 1500),
-    workflow: pkgValue(aiService, "ai-workflow", 3500),
-    custom: 0,
-  },
-  consulting: { hourly: 150 },
+function buildPrices(services: ITServiceItem[]): Prices {
+  return {
+    web: {
+      starter: pkgValue(services, "web-development", "web-starter", 2500),
+      business: pkgValue(services, "web-development", "web-business", 5500),
+      ecommerce: pkgValue(services, "web-development", "web-ecommerce", 8500),
+    },
+    app: {
+      mvp: pkgValue(services, "app-development", "app-mvp", 8000),
+      full: pkgValue(services, "app-development", "app-full", 18000),
+    },
+    ai: {
+      chatbot: pkgValue(services, "ai-automation", "ai-chatbot", 1500),
+      workflow: pkgValue(services, "ai-automation", "ai-workflow", 3500),
+      custom: 0,
+    },
+    consulting: { hourly: 150 },
+  }
 }
 
 // ─── Static config ───
 type ServiceKey = "web" | "app" | "ai" | "consulting"
 
-const SERVICE_TILES: {
+interface ServiceTile {
   key: ServiceKey
   icon: string
   name: string
   desc: string
   price: string
   badge?: string
-}[] = [
-  { key: "web", icon: "🌐", name: "Web Development", desc: "Website or web application", price: `${formatAUD(PRICES.web.starter)}+` },
-  { key: "app", icon: "📱", name: "App Development", desc: "iOS and/or Android app", price: `${formatAUD(PRICES.app.mvp)}+` },
-  { key: "ai", icon: "🤖", name: "AI Automation", desc: "Chatbot, workflows, custom AI", price: `${formatAUD(PRICES.ai.chatbot)}+`, badge: "Most Popular" },
-  { key: "consulting", icon: "💡", name: "IT Consulting", desc: "Technology audit and roadmap", price: `${formatAUD(PRICES.consulting.hourly)}/hr` },
-]
+}
+
+function buildServiceTiles(prices: Prices): ServiceTile[] {
+  return [
+    { key: "web", icon: "🌐", name: "Web Development", desc: "Website or web application", price: `${formatAUD(prices.web.starter)}+` },
+    { key: "app", icon: "📱", name: "App Development", desc: "iOS and/or Android app", price: `${formatAUD(prices.app.mvp)}+` },
+    { key: "ai", icon: "🤖", name: "AI Automation", desc: "Chatbot, workflows, custom AI", price: `${formatAUD(prices.ai.chatbot)}+`, badge: "Most Popular" },
+    { key: "consulting", icon: "💡", name: "IT Consulting", desc: "Technology audit and roadmap", price: `${formatAUD(prices.consulting.hourly)}/hr` },
+  ]
+}
 
 const SERVICE_LABELS: Record<ServiceKey, string> = {
   web: "🌐 Web Dev",
@@ -71,20 +89,24 @@ const SERVICE_LABELS: Record<ServiceKey, string> = {
 
 type Pkg = { id: string; name: string; price: number; desc: string; badge?: string; custom?: boolean }
 
-const WEB_PACKAGES: Pkg[] = [
-  { id: "starter", name: "Starter", price: PRICES.web.starter, desc: "5 pages · Contact form · SEO" },
-  { id: "business", name: "Business", price: PRICES.web.business, desc: "15 pages · CMS · Analytics", badge: "Most Popular" },
-  { id: "ecommerce", name: "E-Commerce", price: PRICES.web.ecommerce, desc: "Online store · Payments" },
-]
-const APP_PACKAGES: Pkg[] = [
-  { id: "mvp", name: "MVP App", price: PRICES.app.mvp, desc: "1 platform · Core features" },
-  { id: "full", name: "Full App", price: PRICES.app.full, desc: "iOS + Android · All features", badge: "Most Popular" },
-]
-const AI_PACKAGES: Pkg[] = [
-  { id: "chatbot", name: "AI Chat Agent", price: PRICES.ai.chatbot, desc: "Website chatbot · Lead capture", badge: "Best Value" },
-  { id: "workflow", name: "Workflow Automation", price: PRICES.ai.workflow, desc: "Automate manual processes" },
-  { id: "custom", name: "Custom AI", price: 0, desc: "Bespoke AI solution", custom: true },
-]
+function buildPackages(prices: Prices): Record<"web" | "app" | "ai", Pkg[]> {
+  return {
+    web: [
+      { id: "starter", name: "Starter", price: prices.web.starter, desc: "5 pages · Contact form · SEO" },
+      { id: "business", name: "Business", price: prices.web.business, desc: "15 pages · CMS · Analytics", badge: "Most Popular" },
+      { id: "ecommerce", name: "E-Commerce", price: prices.web.ecommerce, desc: "Online store · Payments" },
+    ],
+    app: [
+      { id: "mvp", name: "MVP App", price: prices.app.mvp, desc: "1 platform · Core features" },
+      { id: "full", name: "Full App", price: prices.app.full, desc: "iOS + Android · All features", badge: "Most Popular" },
+    ],
+    ai: [
+      { id: "chatbot", name: "AI Chat Agent", price: prices.ai.chatbot, desc: "Website chatbot · Lead capture", badge: "Best Value" },
+      { id: "workflow", name: "Workflow Automation", price: prices.ai.workflow, desc: "Automate manual processes" },
+      { id: "custom", name: "Custom AI", price: 0, desc: "Bespoke AI solution", custom: true },
+    ],
+  }
+}
 
 const PKG_NAMES: Record<string, Record<string, string>> = {
   web: { starter: "Starter", business: "Business", ecommerce: "E-Commerce" },
@@ -212,6 +234,30 @@ function QuoteWizard() {
     getValues,
     formState: { errors },
   } = useForm<ContactForm>()
+
+  // Admin dashboard edits are stored as catalog overrides, so merge them over
+  // the data file at runtime — a price changed in the dashboard shows up here
+  // on the next load, with no redeploy. Falls back to the data-file values if
+  // the fetch fails.
+  const [services, setServices] = useState<ITServiceItem[]>(itServiceItems)
+
+  useEffect(() => {
+    fetch("/api/catalog")
+      .then((r) => r.json())
+      .then((data) =>
+        setServices(mergeITServices(itServiceItems, normaliseOverrides(data)))
+      )
+      .catch(() => {
+        /* keep the data-file defaults */
+      })
+  }, [])
+
+  const PRICES = useMemo(() => buildPrices(services), [services])
+  const SERVICE_TILES = useMemo(() => buildServiceTiles(PRICES), [PRICES])
+  const PACKAGES = useMemo(() => buildPackages(PRICES), [PRICES])
+  const WEB_PACKAGES = PACKAGES.web
+  const APP_PACKAGES = PACKAGES.app
+  const AI_PACKAGES = PACKAGES.ai
 
   // Pre-select a service from ?service= param
   useEffect(() => {
@@ -964,8 +1010,6 @@ function QuoteWizard() {
                   <span className="text-[#7f85f7]">{range}</span>
                 </div>
 
-                {/* TODO(dashboard): prices loaded from itServiceItems in
-                    src/data/it-services.ts — admin updates packages → reflects here */}
                 <div className="text-[11px] text-[#666880] mt-2.5 pt-2.5 border-t border-[#eeeeff] leading-[1.6]">
                   ⚠️ This is an <strong>estimate only</strong>, not a fixed price. Final
                   pricing is confirmed after a free 30-minute consultation. All prices

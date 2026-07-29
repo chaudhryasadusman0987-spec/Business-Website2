@@ -1,13 +1,23 @@
 import { createProduct, updateProduct, deleteProduct } from "@/lib/db"
+import { readCatalog, writeCatalog } from "@/lib/catalog-store"
+import { itPackageKey, type ITServiceOverviewEdit } from "@/lib/catalog"
 import type { ProductInput } from "@/lib/products"
+import type { ITPackage } from "@/data/it-services"
 import { itServiceItems } from "@/data/it-services"
 
 // Dashboard save endpoint.
 //
 // type === "product": create / update / delete a Postgres-backed product
 //   (powers the Surveillance & Evidence grid and the "Products (DB)" tab).
-// Other types (it-package, …) are not yet persisted — they log and return
-// success so the existing prototype UIs keep working.
+// type === "it-service-overview" / "it-package": persist the admin's edits as
+//   catalog overrides in KV, merged over src/data/it-services.ts at read time.
+//   These used to mutate the imported module array, which looked like it worked
+//   but was lost on the next request (and was never visible to the client
+//   bundle at all) — hence "changes reset on refresh".
+//
+// Vehicles and security products are NOT handled here: their dashboard tabs
+// (VehicleCatalogTab / SecurityCatalogTab) POST the whole override object to
+// /api/catalog directly.
 
 export const dynamic = "force-dynamic"
 
@@ -57,52 +67,102 @@ async function handleProduct(data: Record<string, unknown>) {
   }
 }
 
-function handleItServiceOverview(data: Record<string, unknown>) {
-  const serviceId = String(data.serviceId ?? "")
-  const service = itServiceItems.find((s) => s.id === serviceId)
-  if (service) {
-    if (typeof data.tagline === "string") service.tagline = data.tagline
-    if (typeof data.startingFrom === "string") service.startingFrom = data.startingFrom
-    if (typeof data.description === "string") service.description = data.description
-  }
-  console.log("IT service overview updated:", serviceId, data)
-  // TODO(dashboard): write to database when Postgres integration added
-  return Response.json({ success: true })
+function fail(error: string, status: number) {
+  return Response.json({ success: false, error }, { status })
 }
 
-function handleItPackage(data: Record<string, unknown>) {
+async function handleItServiceOverview(data: Record<string, unknown>) {
+  const serviceId = String(data.serviceId ?? "")
+  if (!serviceId) return fail("Missing serviceId", 400)
+  if (!itServiceItems.some((s) => s.id === serviceId)) {
+    return fail(`Unknown service "${serviceId}"`, 404)
+  }
+
+  // Only persist fields the admin actually sent, so a partial payload never
+  // blanks out the others.
+  const edit: ITServiceOverviewEdit = {}
+  if (typeof data.tagline === "string") edit.tagline = data.tagline
+  if (typeof data.startingFrom === "string") edit.startingFrom = data.startingFrom
+  if (typeof data.description === "string") edit.description = data.description
+
+  try {
+    const current = await readCatalog()
+    const next = await writeCatalog({
+      ...current,
+      itServices: {
+        ...current.itServices,
+        services: {
+          ...current.itServices.services,
+          [serviceId]: { ...current.itServices.services[serviceId], ...edit },
+        },
+      },
+    })
+    return Response.json({ success: true, itServices: next.itServices })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not save"
+    return fail(message, 500)
+  }
+}
+
+async function handleItPackage(data: Record<string, unknown>) {
   const serviceId = String(data.serviceId ?? "")
   const packageId = String(data.packageId ?? "")
+  if (!serviceId || !packageId) return fail("Missing serviceId or packageId", 400)
+
   const service = itServiceItems.find((s) => s.id === serviceId)
-  const pkg = service?.packages.find((p) => p.id === packageId)
-  if (pkg) {
-    if (typeof data.startingFrom === "string") pkg.startingFrom = data.startingFrom
-    if (data.startingFromValue !== undefined)
-      pkg.startingFromValue = Number(data.startingFromValue)
-    if (typeof data.badge === "string") pkg.badge = data.badge
-    if (Array.isArray(data.features)) pkg.features = data.features.map((f) => String(f))
+  if (!service) return fail(`Unknown service "${serviceId}"`, 404)
+  if (!service.packages.some((p) => p.id === packageId)) {
+    return fail(`Unknown package "${packageId}"`, 404)
   }
-  console.log("IT package updated:", serviceId, packageId, data)
-  // TODO(dashboard): write to database when Postgres integration added
-  return Response.json({ success: true })
+
+  const edit: Partial<ITPackage> = {}
+  if (typeof data.startingFrom === "string") edit.startingFrom = data.startingFrom
+  if (data.startingFromValue !== undefined) {
+    const n = Number(data.startingFromValue)
+    if (!Number.isFinite(n) || n < 0) return fail("startingFromValue must be a number", 400)
+    edit.startingFromValue = n
+  }
+  // An empty badge is meaningful — it clears the badge — so store it as-is.
+  if (typeof data.badge === "string") edit.badge = data.badge
+  if (Array.isArray(data.features)) {
+    edit.features = data.features.map((f) => String(f).trim()).filter(Boolean)
+  }
+
+  const key = itPackageKey(serviceId, packageId)
+  try {
+    const current = await readCatalog()
+    const next = await writeCatalog({
+      ...current,
+      itServices: {
+        ...current.itServices,
+        packages: {
+          ...current.itServices.packages,
+          [key]: { ...current.itServices.packages[key], ...edit },
+        },
+      },
+    })
+    return Response.json({ success: true, itServices: next.itServices })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not save"
+    return fail(message, 500)
+  }
 }
 
 export async function POST(req: Request) {
-  const data = await req.json()
-
-  if (data?.type === "product") {
-    return handleProduct(data as Record<string, unknown>)
+  let data: Record<string, unknown>
+  try {
+    data = (await req.json()) as Record<string, unknown>
+  } catch {
+    return fail("Invalid JSON body", 400)
   }
 
-  if (data?.type === "it-service-overview") {
-    return handleItServiceOverview(data as Record<string, unknown>)
-  }
+  const type = String(data?.type ?? "")
 
-  if (data?.type === "it-package") {
-    return handleItPackage(data as Record<string, unknown>)
-  }
+  if (type === "product") return handleProduct(data)
+  if (type === "it-service-overview") return handleItServiceOverview(data)
+  if (type === "it-package") return handleItPackage(data)
 
-  // Other legacy prototype types — not yet persisted.
-  console.log("Dashboard update:", data)
-  return Response.json({ success: true })
+  // Previously this returned {success:true} for anything unrecognised, so a
+  // typo'd type silently "saved". Fail loudly instead.
+  return fail(`Unsupported update type "${type}"`, 400)
 }

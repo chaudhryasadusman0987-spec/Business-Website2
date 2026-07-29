@@ -8,6 +8,7 @@
 
 import type { SecurityProduct } from "@/types"
 import type { Vehicle } from "@/data/car-rental"
+import type { ITPackage, ITServiceItem } from "@/data/it-services"
 
 export type { SecurityProduct } from "@/types"
 export type { Vehicle } from "@/data/car-rental"
@@ -24,16 +25,39 @@ export interface VehiclesOverride {
   removed: string[]
 }
 
+/** The service-level fields the dashboard's "Service Overview" card can edit. */
+export type ITServiceOverviewEdit = Partial<
+  Pick<ITServiceItem, "tagline" | "startingFrom" | "description">
+>
+
+export interface ITServicesOverride {
+  /** Overview edits, keyed by service id (e.g. "web-development"). */
+  services: Record<string, ITServiceOverviewEdit>
+  /**
+   * Package edits, keyed by `${serviceId}:${packageId}` — the same composite
+   * key the dashboard UI uses. Package ids are unique today, but keying by the
+   * pair keeps this correct if two services ever reuse one.
+   */
+  packages: Record<string, Partial<ITPackage>>
+}
+
 export interface CatalogOverrides {
   // keyed by security solution id (e.g. "surveillance")
   security: Record<string, SecuritySolutionOverride>
   vehicles: VehiclesOverride
+  itServices: ITServicesOverride
   updatedAt?: string
 }
 
 export const EMPTY_OVERRIDES: CatalogOverrides = {
   security: {},
   vehicles: { added: [], edits: {}, removed: [] },
+  itServices: { services: {}, packages: {} },
+}
+
+/** Composite key for one package override. */
+export function itPackageKey(serviceId: string, packageId: string): string {
+  return `${serviceId}:${packageId}`
 }
 
 export const EMPTY_SOLUTION_OVERRIDE: SecuritySolutionOverride = {
@@ -62,12 +86,17 @@ export function normaliseOverrides(raw: unknown): CatalogOverrides {
   }
 
   const veh = asObject(r.vehicles)
+  const it = asObject(r.itServices)
   return {
     security,
     vehicles: {
       added: Array.isArray(veh.added) ? (veh.added as Vehicle[]) : [],
       edits: asObject(veh.edits) as Record<string, Partial<Vehicle>>,
       removed: Array.isArray(veh.removed) ? (veh.removed as string[]) : [],
+    },
+    itServices: {
+      services: asObject(it.services) as Record<string, ITServiceOverviewEdit>,
+      packages: asObject(it.packages) as Record<string, Partial<ITPackage>>,
     },
     updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : undefined,
   }
@@ -94,6 +123,28 @@ export function mergeVehicles(base: Vehicle[], ov: CatalogOverrides): Vehicle[] 
     .filter((v) => !o.removed.includes(v.id))
     .map((v) => ({ ...v, ...o.edits[v.id] }))
   return [...kept, ...o.added]
+}
+
+/**
+ * Effective IT services list: base data file + admin overview/package edits.
+ *
+ * Unlike security/vehicles there is no add/remove here — the dashboard only
+ * edits the built-in services and their packages, so the shape of the list is
+ * always the static one.
+ */
+export function mergeITServices(
+  base: ITServiceItem[],
+  ov: CatalogOverrides,
+): ITServiceItem[] {
+  const o = ov.itServices
+  return base.map((svc) => ({
+    ...svc,
+    ...o.services[svc.id],
+    packages: svc.packages.map((p) => ({
+      ...p,
+      ...o.packages[itPackageKey(svc.id, p.id)],
+    })),
+  }))
 }
 
 /** Stable-ish unique id for a newly added custom item. */

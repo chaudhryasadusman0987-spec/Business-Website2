@@ -1,12 +1,14 @@
 import type { Metadata } from "next"
 import ITServiceDetail from "@/components/sections/ITServiceDetail"
-import { itServiceItems } from "@/data/it-services"
+import { getITService } from "@/lib/it-services-server"
 
-const service = itServiceItems.find((s) => s.id === "ai-automation")!
+// Dashboard edits are merged in per request, so prices/copy update without a
+// redeploy. Static rendering would freeze them at build time.
+export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "AI Automation",
-  description: service.description,
+export async function generateMetadata(): Promise<Metadata> {
+  const service = await getITService("ai-automation")
+  return { title: "AI Automation", description: service.description }
 }
 
 // EXTRA SECTION — "See AI in action" (between packages and process)
@@ -41,7 +43,8 @@ function SeeAIInAction() {
   )
 }
 
-export default function AIAutomationPage() {
+export default async function AIAutomationPage() {
+  const service = await getITService("ai-automation")
   return (
     <ITServiceDetail
       service={service}

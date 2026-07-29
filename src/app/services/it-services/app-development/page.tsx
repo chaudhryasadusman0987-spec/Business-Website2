@@ -1,15 +1,18 @@
 import type { Metadata } from "next"
 import ITServiceDetail from "@/components/sections/ITServiceDetail"
-import { itServiceItems } from "@/data/it-services"
+import { getITService } from "@/lib/it-services-server"
 
-const service = itServiceItems.find((s) => s.id === "app-development")!
+// Dashboard edits are merged in per request, so prices/copy update without a
+// redeploy. Static rendering would freeze them at build time.
+export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "App Development",
-  description: service.description,
+export async function generateMetadata(): Promise<Metadata> {
+  const service = await getITService("app-development")
+  return { title: "App Development", description: service.description }
 }
 
-export default function AppDevelopmentPage() {
+export default async function AppDevelopmentPage() {
+  const service = await getITService("app-development")
   return (
     <ITServiceDetail
       service={service}

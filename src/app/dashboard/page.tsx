@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { itServiceItems } from "@/data/it-services"
+import { itServiceItems, type ITServiceItem } from "@/data/it-services"
+import { mergeITServices, normaliseOverrides } from "@/lib/catalog"
 import { SITE_FULL } from "@/data/site"
 import SecurityCatalogTab from "@/components/dashboard/SecurityCatalogTab"
 import VehicleCatalogTab from "@/components/dashboard/VehicleCatalogTab"
@@ -75,11 +76,19 @@ type OverviewEdit = {
   description: string
 }
 
+type SaveState = "saving" | "saved" | "error"
+
 /* ──────────────────── Initial edit state ──────────────────── */
 
-function initPkgEdits(): Record<string, PkgEdit> {
+// Seeded from the static data file first so the form is never blank, then
+// re-seeded from /api/catalog once the saved overrides load (see the effect in
+// DashboardPage). Without that second pass the inputs always snap back to the
+// data-file values on refresh, which is what made saves look like they were
+// being lost.
+
+function buildPkgEdits(services: ITServiceItem[]): Record<string, PkgEdit> {
   const out: Record<string, PkgEdit> = {}
-  itServiceItems.forEach((svc) =>
+  services.forEach((svc) =>
     svc.packages.forEach((p) => {
       out[`${svc.id}:${p.id}`] = {
         startingFromValue: p.startingFromValue,
@@ -92,9 +101,9 @@ function initPkgEdits(): Record<string, PkgEdit> {
   return out
 }
 
-function initOverviewEdits(): Record<string, OverviewEdit> {
+function buildOverviewEdits(services: ITServiceItem[]): Record<string, OverviewEdit> {
   const out: Record<string, OverviewEdit> = {}
-  itServiceItems.forEach((svc) => {
+  services.forEach((svc) => {
     out[svc.id] = {
       tagline: svc.tagline,
       startingFrom: svc.startingFrom,
@@ -103,6 +112,9 @@ function initOverviewEdits(): Record<string, OverviewEdit> {
   })
   return out
 }
+
+const initPkgEdits = () => buildPkgEdits(itServiceItems)
+const initOverviewEdits = () => buildOverviewEdits(itServiceItems)
 
 /* ───────────────────────── Helpers ───────────────────────── */
 
@@ -194,11 +206,13 @@ export default function DashboardPage() {
   const [itTab, setItTab] = useState("web-development")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // editable data (IT packages still use the legacy save endpoint)
+  // editable data — seeded from the data file, then re-seeded from saved
+  // overrides once /api/catalog responds
   const [pkgEdits, setPkgEdits] = useState<Record<string, PkgEdit>>(initPkgEdits)
   const [overviewEdits, setOverviewEdits] =
     useState<Record<string, OverviewEdit>>(initOverviewEdits)
-  const [savedKey, setSavedKey] = useState<string | null>(null)
+  const [saveStatus, setSaveStatus] = useState<Record<string, SaveState>>({})
+  const [itConfigLoading, setItConfigLoading] = useState(true)
 
   // leads
   const [leads, setLeads] = useState<Lead[]>([])
@@ -239,6 +253,22 @@ export default function DashboardPage() {
       })
   }, [])
 
+  // Load saved IT service overrides so the inputs show what was last saved
+  // rather than the static data-file values.
+  useEffect(() => {
+    fetch("/api/catalog")
+      .then((r) => r.json())
+      .then((data) => {
+        const merged = mergeITServices(itServiceItems, normaliseOverrides(data))
+        setPkgEdits(buildPkgEdits(merged))
+        setOverviewEdits(buildOverviewEdits(merged))
+      })
+      .catch(() => {
+        /* keep the data-file defaults */
+      })
+      .finally(() => setItConfigLoading(false))
+  }, [])
+
   const savePromo = async () => {
     try {
       const res = await fetch("/api/promo", {
@@ -261,8 +291,6 @@ export default function DashboardPage() {
     setPromo((p) => ({ ...p, [cat]: { ...p[cat], ...patch } }))
 
   const login = () => {
-    console.log("Env var:", process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD)
-    console.log("Entered:", pw)
     if (pw === process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD) {
       localStorage.setItem("dash_auth", "true")
       setAuthed(true)
@@ -279,19 +307,31 @@ export default function DashboardPage() {
   }
 
   const save = async (payload: Record<string, unknown>, key: string) => {
+    setSaveStatus((s) => ({ ...s, [key]: "saving" }))
+    let result: SaveState = "saved"
     try {
       const res = await fetch("/api/dashboard/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-      if (res.ok) {
-        setSavedKey(key)
-        setTimeout(() => setSavedKey((k) => (k === key ? null : k)), 2000)
-      }
+      // The route now returns a real status, so a failed write surfaces to the
+      // admin instead of showing a green tick over nothing.
+      if (!res.ok) result = "error"
     } catch {
-      /* prototype — silently ignore */
+      result = "error"
     }
+    setSaveStatus((s) => ({ ...s, [key]: result }))
+    setTimeout(
+      () =>
+        setSaveStatus((s) => {
+          if (s[key] !== result) return s
+          const rest = { ...s }
+          delete rest[key]
+          return rest
+        }),
+      3000
+    )
   }
 
   const updateStatus = async (leadId: string | undefined, status: string) => {
@@ -634,9 +674,14 @@ export default function DashboardPage() {
         {/* ───────── IT SERVICES ───────── */}
         {tab === "it-services" && (
           <div>
-            <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-8">
+            <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-2">
               IT &amp; AI Services
             </h1>
+            <p className="text-[#666] text-[14px] mb-8">
+              {itConfigLoading
+                ? "Loading saved values…"
+                : "Changes go live on the IT service pages and the quote wizard after you save."}
+            </p>
 
             <div className="flex gap-2 flex-wrap mb-6">
               {itServiceItems.map((s) => (
@@ -716,7 +761,12 @@ export default function DashboardPage() {
                     />
                   </div>
 
-                  <button
+                  <StatusSaveBtn
+                    state={saveStatus[ovKey]}
+                    idleLabel="Save Overview"
+                    idleClass="bg-[#7f85f7] text-white hover:bg-[#6b71f0]"
+                    sizeClass="px-6 h-[38px] text-[13px]"
+                    iconSize={14}
                     onClick={() =>
                       save(
                         {
@@ -729,20 +779,7 @@ export default function DashboardPage() {
                         ovKey
                       )
                     }
-                    className={`mt-5 rounded-[8px] px-6 h-[38px] text-[13px] font-medium flex items-center gap-1.5 transition-colors ${
-                      savedKey === ovKey
-                        ? "bg-[#2e7d32] text-white"
-                        : "bg-[#7f85f7] text-white hover:bg-[#6b71f0]"
-                    }`}
-                  >
-                    {savedKey === ovKey ? (
-                      <>
-                        <Check size={14} /> Saved
-                      </>
-                    ) : (
-                      "Save Overview"
-                    )}
-                  </button>
+                  />
                 </div>
               )
             })()}
@@ -837,7 +874,12 @@ export default function DashboardPage() {
                     />
                   </div>
 
-                  <button
+                  <StatusSaveBtn
+                    state={saveStatus[key]}
+                    idleLabel="Save Package"
+                    idleClass="bg-[#1a1a2e] text-white hover:bg-[#2a2a45]"
+                    sizeClass="px-5 h-[36px] text-[12px]"
+                    iconSize={13}
                     onClick={() =>
                       save(
                         {
@@ -852,20 +894,7 @@ export default function DashboardPage() {
                         key
                       )
                     }
-                    className={`mt-5 rounded-[8px] px-5 h-[36px] text-[12px] font-medium flex items-center gap-1.5 transition-colors ${
-                      savedKey === key
-                        ? "bg-[#2e7d32] text-white"
-                        : "bg-[#1a1a2e] text-white hover:bg-[#2a2a45]"
-                    }`}
-                  >
-                    {savedKey === key ? (
-                      <>
-                        <Check size={13} /> Saved
-                      </>
-                    ) : (
-                      "Save Package"
-                    )}
-                  </button>
+                  />
                 </div>
               )
             })}
@@ -1051,6 +1080,53 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
         }`}
       />
     </div>
+  )
+}
+
+/** Save button that reflects the real outcome of the request. */
+function StatusSaveBtn({
+  state,
+  idleLabel,
+  idleClass,
+  sizeClass,
+  iconSize,
+  onClick,
+}: {
+  state?: SaveState
+  idleLabel: string
+  idleClass: string
+  sizeClass: string
+  iconSize: number
+  onClick: () => void
+}) {
+  const tone =
+    state === "saved"
+      ? "bg-[#2e7d32] text-white"
+      : state === "error"
+        ? "bg-[#c62828] text-white"
+        : state === "saving"
+          ? "bg-[#c8c9d6] text-[#4a4b5c] cursor-not-allowed"
+          : idleClass
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={state === "saving"}
+      className={`mt-5 rounded-[8px] font-medium flex items-center gap-1.5 transition-colors ${sizeClass} ${tone}`}
+    >
+      {state === "saving" && "Saving…"}
+      {state === "saved" && (
+        <>
+          <Check size={iconSize} /> Saved
+        </>
+      )}
+      {state === "error" && (
+        <>
+          <AlertCircle size={iconSize} /> Failed — try again
+        </>
+      )}
+      {!state && idleLabel}
+    </button>
   )
 }
 
