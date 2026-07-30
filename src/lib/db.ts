@@ -9,7 +9,8 @@ import type { Product, ProductInput } from "@/lib/products"
 // clear error at query time rather than crashing on import; callers wrap reads
 // so the public page falls back to an empty grid instead of 500ing.
 //
-// Per the agreed scope this holds ONLY products — leads stay on Vercel KV.
+// This holds products plus a generic `site_settings` key/JSONB table used for
+// dashboard-editable settings (see catalog-store.ts). Leads stay on Vercel KV.
 
 let client: NeonQueryFunction<false, false> | null = null
 
@@ -76,9 +77,51 @@ function toProduct(r: ProductRow): Product {
   }
 }
 
-/** Create the products table + index if they don't exist. Idempotent. */
+/** True when a connection string is configured, so callers can pick a fallback. */
+export function hasDatabase(): boolean {
+  return Boolean(process.env.DATABASE_URL ?? process.env.POSTGRES_URL)
+}
+
+/**
+ * Generic settings table. One row per setting key, value as JSONB — dashboard
+ * settings need no schema migration when a new editable field appears.
+ * Created by ensureSchema(); createSettingsTable() lets a caller create just
+ * this table lazily without touching the products schema.
+ */
+export async function createSettingsTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key        TEXT PRIMARY KEY,
+      value      JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+}
+
+/** Read one setting, or null when the key has never been written. */
+export async function readSetting<T = unknown>(key: string): Promise<T | null> {
+  const rows = (await sql()`
+    SELECT value FROM site_settings WHERE key = ${key}
+  `) as { value: T }[]
+  return rows[0]?.value ?? null
+}
+
+/** Upsert one setting. Overwrites the whole value. */
+export async function writeSetting(key: string, value: unknown): Promise<void> {
+  // The driver serialises objects to a JSON string; cast it back to jsonb.
+  const json = JSON.stringify(value)
+  await sql()`
+    INSERT INTO site_settings (key, value, updated_at)
+    VALUES (${key}, ${json}::jsonb, now())
+    ON CONFLICT (key) DO UPDATE
+      SET value = ${json}::jsonb, updated_at = now()
+  `
+}
+
+/** Create the products table + index + settings table if absent. Idempotent. */
 export async function ensureSchema(): Promise<void> {
   const db = sql()
+  await createSettingsTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
