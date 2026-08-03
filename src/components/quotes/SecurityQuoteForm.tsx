@@ -9,6 +9,8 @@
 // static security-solutions.ts file. The customer picks categories, then picks
 // individual products with quantities; the quote total is built from each
 // product's live price (or sale price when discounted) + install fee + GST.
+// Installation is charged PER UNIT — every camera/device on the quote is its own
+// install job — so the fee scales with the total quantity selected.
 // Because the picker reads the same DB table the dashboard writes to, a product
 // added in the dashboard appears here on the next page load with no code change.
 
@@ -34,7 +36,7 @@ import {
   AlertTriangle,
   type LucideIcon,
 } from "lucide-react"
-import { securitySolutions, installFee, gstRate } from "@/data/security-solutions"
+import { securitySolutions, gstRate } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
 import { productCategories, type Product } from "@/lib/products"
 import { effectivePrice, type CategoryPromo } from "@/lib/promo"
@@ -42,9 +44,15 @@ import { usePromo } from "@/components/providers/PromoProvider"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { SITE_NAME, SITE_SUFFIX, SITE_PHONE } from "@/data/site"
 
-// TODO(dashboard): move installFee and gstRate into a settings table so the
-// owner can edit them from the dashboard without redeploying. For now they stay
-// as constants imported from security-solutions.ts.
+// TODO(dashboard): move the install rate and gstRate into a settings table so
+// the owner can edit them from the dashboard without redeploying. For now they
+// stay as constants.
+
+// Installation & labour, charged once per unit installed. Kept here as a single
+// named constant so the rate can be changed in one place.
+// NOTE: the "Installation from $150" copy on the solution/product pages reads
+// `installFee` from data/security-solutions.ts — keep the two in step.
+const INSTALL_FEE_PER_UNIT = 150
 
 // The 6 known categories, in display order, derived from the static solution
 // list. Only the LABELS come from here — every product shown comes from the DB.
@@ -239,7 +247,12 @@ function QuoteWizard() {
       })
   }, [products, qtyById, secPromo])
 
+  // Total number of units across every selected product — 2 × Camera A plus
+  // 1 × Camera B is 3 installs, not 2 line items.
+  const totalQty = items.reduce((sum, i) => sum + i.qty, 0)
   const itemsSubtotal = items.reduce((sum, i) => sum + i.lineTotal, 0)
+  // Nothing selected → nothing to install → $0, never a standing $150.
+  const installFee = totalQty * INSTALL_FEE_PER_UNIT
   const subtotal = itemsSubtotal + installFee
   const gst = subtotal * gstRate
   const total = subtotal + gst
@@ -286,6 +299,10 @@ function QuoteWizard() {
             lineTotal: i.lineTotal,
           })),
           installFee,
+          // Rate + unit count so the emailed quote can show the breakdown
+          // ("6 units × $150 per unit") rather than a bare figure.
+          installPerUnit: INSTALL_FEE_PER_UNIT,
+          totalQty,
           subtotal,
           gst: Math.round(gst),
           total: Math.round(total),
@@ -505,18 +522,43 @@ function QuoteWizard() {
                   </div>
                 )}
 
-              {/* Live running subtotal */}
-              <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-3 mt-2 flex items-center justify-between">
-                <span className="text-[12px] text-gray-500">
-                  {items.length === 0
-                    ? "No products selected yet"
-                    : `${items.reduce((n, i) => n + i.qty, 0)} item${
-                        items.reduce((n, i) => n + i.qty, 0) === 1 ? "" : "s"
-                      } selected`}
-                </span>
-                <span className="text-[15px] font-medium text-[#1a1a2e]">
-                  {formatAUD(itemsSubtotal)}
-                </span>
+              {/* Live running total — updates as quantities change so the
+                  per-unit install cost is never a surprise at step 5. */}
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-3 mt-2 pb-1">
+                <div className="flex justify-between text-[13px] text-gray-500 mb-2">
+                  <span>
+                    {totalQty === 0
+                      ? "No products selected yet"
+                      : `${totalQty} item${totalQty === 1 ? "" : "s"} selected`}
+                  </span>
+                  <span>{formatAUD(itemsSubtotal)}</span>
+                </div>
+
+                {totalQty > 0 && (
+                  <div className="flex justify-between text-[13px] text-gray-500 mb-2">
+                    <span>
+                      Installation ({totalQty} × {formatAUD(INSTALL_FEE_PER_UNIT)}
+                      /unit)
+                    </span>
+                    <span>{formatAUD(installFee)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between font-medium text-[15px] text-[#0F6E56] pt-2 mt-2 border-t border-gray-200">
+                  <span>
+                    Estimated total
+                    <span className="font-normal text-[11px] text-gray-400 ml-2">
+                      (ex. GST)
+                    </span>
+                  </span>
+                  <span>{formatAUD(subtotal)}</span>
+                </div>
+
+                {totalQty === 0 && (
+                  <p className="text-[12px] text-gray-400 text-center mt-3">
+                    Select products above to see your quote total
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -620,7 +662,24 @@ function QuoteWizard() {
                 </div>
               ))
             )}
-            <Line left="Installation & labour" right={formatAUD(installFee)} />
+            {/* Installation fee — hidden entirely until something is selected,
+                so an empty quote never shows a $0 charge line. */}
+            {totalQty > 0 && (
+              <div className="flex justify-between items-start py-1.5 border-b border-gray-200">
+                <div className="pr-3">
+                  <div className="text-[13px] text-[#1a1a2e]">
+                    Installation &amp; labour
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    {totalQty} camera{totalQty === 1 ? "" : "s"} ×{" "}
+                    {formatAUD(INSTALL_FEE_PER_UNIT)} per unit
+                  </div>
+                </div>
+                <span className="text-[13px] text-[#1a1a2e] whitespace-nowrap">
+                  {formatAUD(installFee)}
+                </span>
+              </div>
+            )}
             <Line muted left="Subtotal (ex. GST)" right={formatAUD(subtotal)} />
             <Line muted left="GST (10%)" right={formatAUD(Math.round(gst))} />
             <div className="flex justify-between text-[16px] font-medium text-[#1a1a2e] pt-2.5">

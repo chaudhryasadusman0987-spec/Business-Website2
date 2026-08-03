@@ -27,6 +27,10 @@ interface QuoteBody {
   timing: string | null
   items: QuoteItem[]
   installFee: number
+  // Per-unit install rate and the unit count behind `installFee`. Optional so a
+  // stale tab posting the old payload still renders a valid email.
+  installPerUnit?: number
+  totalQty?: number
   subtotal: number
   gst: number
   total: number
@@ -87,6 +91,17 @@ function buildEmail(body: QuoteBody): string {
     )
     .join("")
 
+  // Fall back to the item quantities when the client didn't send a unit count.
+  const totalQty =
+    body.totalQty ?? body.items.reduce((n, i) => n + i.qty, 0)
+  const installPerUnit = body.installPerUnit ?? 0
+  const installBreakdown =
+    installPerUnit > 0
+      ? `<br/><span style="font-size:12px;color:#999">${totalQty} unit${
+          totalQty === 1 ? "" : "s"
+        } &times; ${formatAUD(installPerUnit)} per unit</span>`
+      : ""
+
   return `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e">
     <div style="background:#0F6E56;color:#fff;padding:20px;border-radius:8px 8px 0 0">
@@ -112,7 +127,7 @@ function buildEmail(body: QuoteBody): string {
         <tbody>${rows}</tbody>
         <tfoot>
           <tr>
-            <td colspan="4" style="padding:10px 12px;text-align:right;color:#666;font-size:13px">Installation &amp; Labour</td>
+            <td colspan="4" style="padding:10px 12px;text-align:right;color:#666;font-size:13px">Installation &amp; Labour${installBreakdown}</td>
             <td style="padding:10px 12px;text-align:right;font-size:13px;color:#666">${formatAUD(
               body.installFee
             )}</td>
