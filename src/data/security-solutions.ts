@@ -375,5 +375,8 @@ export const securitySolutions: SecuritySolution[] = [
 
 // Keep old cctv-products.ts exports for backwards compatibility
 // Quote form still uses these price keys
+// Installation & labour, charged PER UNIT installed — the security quote wizard
+// multiplies this by the total quantity selected. The solution and product pages
+// quote it as a "from" price for a single unit.
 export const installFee = 150
 export const gstRate = 0.10

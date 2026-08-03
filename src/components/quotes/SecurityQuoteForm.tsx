@@ -36,7 +36,15 @@ import {
   AlertTriangle,
   type LucideIcon,
 } from "lucide-react"
-import { securitySolutions, gstRate } from "@/data/security-solutions"
+// Installation & labour, charged once per unit installed. Aliased on import so
+// there is exactly one place to change the rate: the same constant that drives
+// the "Installation from $150" copy on the solution and product pages, which
+// therefore can never quote a rate the wizard doesn't charge.
+import {
+  securitySolutions,
+  gstRate,
+  installFee as INSTALL_FEE_PER_UNIT,
+} from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
 import { productCategories, type Product } from "@/lib/products"
 import { effectivePrice, type CategoryPromo } from "@/lib/promo"
@@ -46,13 +54,7 @@ import { SITE_NAME, SITE_SUFFIX, SITE_PHONE } from "@/data/site"
 
 // TODO(dashboard): move the install rate and gstRate into a settings table so
 // the owner can edit them from the dashboard without redeploying. For now they
-// stay as constants.
-
-// Installation & labour, charged once per unit installed. Kept here as a single
-// named constant so the rate can be changed in one place.
-// NOTE: the "Installation from $150" copy on the solution/product pages reads
-// `installFee` from data/security-solutions.ts — keep the two in step.
-const INSTALL_FEE_PER_UNIT = 150
+// stay as constants in security-solutions.ts.
 
 // The 6 known categories, in display order, derived from the static solution
 // list. Only the LABELS come from here — every product shown comes from the DB.
