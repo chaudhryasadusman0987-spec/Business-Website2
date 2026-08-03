@@ -182,7 +182,10 @@ export default function SecurityProductsView() {
 
               <div>
                 <span className="text-[12px] bg-[#f7f7f7] text-[#666] rounded-full px-3 py-1">
-                  {p.category || "—"}
+                  {/* Trimmed to match the filter tabs, which compare on the
+                      trimmed value — admin-entered categories carry stray
+                      whitespace (e.g. " AJAX CCTV"). */}
+                  {p.category?.trim() || "—"}
                 </span>
               </div>
 
