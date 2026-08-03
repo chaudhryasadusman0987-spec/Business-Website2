@@ -36,7 +36,7 @@ import {
 } from "lucide-react"
 import { securitySolutions, installFee, gstRate } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
-import { type Product } from "@/lib/products"
+import { productCategories, type Product } from "@/lib/products"
 import { effectivePrice, type CategoryPromo } from "@/lib/promo"
 import { usePromo } from "@/components/providers/PromoProvider"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
@@ -87,6 +87,9 @@ function QuoteWizard() {
   const [step, setStep] = useState(0)
   const [ptype, setPtype] = useState<string | null>(null)
   const [selectedCats, setSelectedCats] = useState<string[]>([])
+  // Brand/category filter for step 3 ("Cameras", "HiLook", …) — the `category`
+  // field set per product in the dashboard. "All" shows every product.
+  const [activeCategory, setActiveCategory] = useState("All")
   const [qtyById, setQtyById] = useState<Record<string, number>>({})
   const [timing, setTiming] = useState<string | null>(null)
   const [form, setForm] = useState({
@@ -160,6 +163,31 @@ function QuoteWizard() {
     return map
   }, [products])
 
+  // Products across every solution picked in step 2 — the pool the brand filter
+  // works over. Scoping it to the selection means a tab is never offered that
+  // would show nothing.
+  const pickedProducts = useMemo(
+    () => selectedCats.flatMap((slug) => byCategory[slug] ?? []),
+    [selectedCats, byCategory]
+  )
+
+  const brandTabs = useMemo(
+    () => ["All", ...productCategories(pickedProducts)],
+    [pickedProducts]
+  )
+
+  const brandCount = (cat: string) =>
+    pickedProducts.filter((p) => p.category?.trim() === cat).length
+
+  /** One solution's products, narrowed to the active brand tab. */
+  const visibleIn = (slug: string) => {
+    const all = byCategory[slug] ?? []
+    if (activeCategory === "All") return all
+    return all.filter(
+      (p) => (p.category ?? "").trim().toLowerCase() === activeCategory.toLowerCase()
+    )
+  }
+
   const inStockCount = (slug: string) =>
     (byCategory[slug] ?? []).filter((p) => p.inStock).length
 
@@ -172,6 +200,9 @@ function QuoteWizard() {
     setSelectedCats((prev) =>
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     )
+    // The brand list is derived from the chosen solutions, so a filter left over
+    // from the previous selection could hide everything on step 3.
+    setActiveCategory("All")
   }
 
   const changeQty = (id: string, delta: number) =>
@@ -401,8 +432,43 @@ function QuoteWizard() {
             <SkeletonList />
           ) : (
             <>
+              {/* Brand / category filter — only worth showing when the chosen
+                  solutions actually span more than one brand. */}
+              {brandTabs.length > 1 && (
+                <div className="mb-5">
+                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    Filter by brand
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {brandTabs.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setActiveCategory(cat)}
+                        className={`px-4 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
+                          activeCategory === cat
+                            ? "bg-[#0F6E56] border-[#0F6E56] text-white"
+                            : "bg-white border-gray-200 text-gray-500 hover:border-[#0F6E56] hover:text-[#0F6E56]"
+                        }`}
+                      >
+                        {cat}
+                        {cat !== "All" && (
+                          <span className="ml-1.5 text-[10px] opacity-70">
+                            ({brandCount(cat)})
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {selectedCats.map((slug) => {
                 const all = byCategory[slug] ?? []
+                const visible = visibleIn(slug)
+                // A solution with nothing in the active brand drops out entirely
+                // rather than showing an empty heading.
+                if (all.length > 0 && visible.length === 0) return null
                 return (
                   <div key={slug} className="mb-6">
                     <h3 className="text-[14px] font-semibold text-[#1a1a2e] mb-2.5">
@@ -412,7 +478,7 @@ function QuoteWizard() {
                       <EmptyCategory />
                     ) : (
                       <div className="flex flex-col gap-2">
-                        {all.map((p) => (
+                        {visible.map((p) => (
                           <ProductPick
                             key={p.id}
                             product={p}
@@ -426,6 +492,18 @@ function QuoteWizard() {
                   </div>
                 )
               })}
+
+              {/* Every selected solution has products, but none match the brand */}
+              {pickedProducts.length > 0 &&
+                selectedCats.every((slug) => visibleIn(slug).length === 0) && (
+                  <div className="text-center py-8 text-gray-500 text-[14px] bg-gray-50 rounded-[12px] mb-4">
+                    No products in this category.
+                    <br />
+                    <span className="text-[12px]">
+                      Select &ldquo;All&rdquo; to see every product.
+                    </span>
+                  </div>
+                )}
 
               {/* Live running subtotal */}
               <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-3 mt-2 flex items-center justify-between">

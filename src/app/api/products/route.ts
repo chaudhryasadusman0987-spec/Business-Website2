@@ -7,9 +7,18 @@ import { getProducts } from "@/lib/db"
 // App Router Data Cache would otherwise cache — pinning stale product lists.
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
+export const revalidate = 0
 
 export async function GET(req: Request) {
-  const slug = new URL(req.url).searchParams.get("slug") ?? undefined
+  const params = new URL(req.url).searchParams
+  // `slug` is canonical; the aliases exist so a caller using the DB column name
+  // or the camelCase field from the Product type still filters correctly rather
+  // than silently getting every solution's products back.
+  const slug =
+    params.get("slug") ??
+    params.get("solutionId") ??
+    params.get("solution_id") ??
+    undefined
   // Never let a browser/CDN cache this response — dashboard edits must show on
   // the next page load. Without this, an early empty result can stick.
   const headers = { "Cache-Control": "no-store, max-age=0" }

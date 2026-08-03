@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { itServiceItems, type ITServiceItem } from "@/data/it-services"
 import { mergeITServices, normaliseOverrides } from "@/lib/catalog"
 import { SITE_FULL } from "@/data/site"
-import SecurityCatalogTab from "@/components/dashboard/SecurityCatalogTab"
+import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
 import VehicleCatalogTab from "@/components/dashboard/VehicleCatalogTab"
 import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
 import {
@@ -663,7 +663,7 @@ export default function DashboardPage() {
         )}
 
         {/* ───────── SECURITY ───────── */}
-        {tab === "security" && <SecurityCatalogTab />}
+        {tab === "security" && <SecurityProductsView />}
 
         {/* ───────── PRODUCTS (DB) ───────── */}
         {tab === "products-db" && <ProductsDbTab />}
