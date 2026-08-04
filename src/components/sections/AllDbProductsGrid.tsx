@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import DbProductCard from "./DbProductCard"
+import ProductModal from "@/components/ui/ProductModal"
 import { securitySolutions } from "@/data/security-solutions"
 import type { Product } from "@/lib/products"
 
@@ -12,6 +13,13 @@ import type { Product } from "@/lib/products"
 export default function AllDbProductsGrid() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  // Products are grouped per solution, so the modal carries the group it was
+  // opened from — that keeps Prev/Next inside one solution's set.
+  const [modal, setModal] = useState<{
+    product: Product
+    solutionId: string
+    group: Product[]
+  } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -58,12 +66,33 @@ export default function AllDbProductsGrid() {
             <SectionTitle title={solution.name} subtitle={solution.tagline} />
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-12">
               {items.map((p) => (
-                <DbProductCard key={p.id} product={p} solutionId={solution.id} />
+                <DbProductCard
+                  key={p.id}
+                  product={p}
+                  solutionId={solution.id}
+                  onOpenDetails={(product) =>
+                    setModal({
+                      product,
+                      solutionId: solution.id,
+                      group: items,
+                    })
+                  }
+                />
               ))}
             </div>
           </div>
         )
       })}
+
+      {/* Product detail modal */}
+      {modal && (
+        <ProductModal
+          product={modal.product}
+          solutionId={modal.solutionId}
+          allProducts={modal.group}
+          onClose={() => setModal(null)}
+        />
+      )}
     </>
   )
 }
