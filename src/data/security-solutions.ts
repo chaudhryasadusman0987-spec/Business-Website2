@@ -273,7 +273,7 @@ export const securitySolutions: SecuritySolution[] = [
     icon: "Flame",
     iconColor: "#e65100",
     iconBg: "rgba(230,81,0,0.12)",
-    heroImage: "/images/solutions/smoke-alarms.jpg",
+    heroImage: "/images/solutions/smoke-alarms.png",
     heroImageAlt: "Smoke alarm installation Australia",
     products: [
       {
