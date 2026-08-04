@@ -19,6 +19,7 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#f57c00",
     iconBg: "rgba(245,124,0,0.12)",
     heroImage: "/images/solutions/surveillance1.jpg",
+    heroImageFit: "contain",
     heroImageAlt: "Professional CCTV surveillance camera installation",
     products: [
       {
@@ -274,6 +275,7 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#e65100",
     iconBg: "rgba(230,81,0,0.12)",
     heroImage: "/images/solutions/smoke-alarms.png",
+    heroImageFit: "contain",
     heroImageAlt: "Smoke alarm installation Australia",
     products: [
       {

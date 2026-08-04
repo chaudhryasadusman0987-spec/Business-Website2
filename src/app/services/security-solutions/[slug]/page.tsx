@@ -64,6 +64,8 @@ export default function SolutionDetailPage({
   const solution = securitySolutions.find((s) => s.slug === params.slug)
   if (!solution) notFound()
 
+  const contain = solution.heroImageFit === "contain"
+
   return (
     <>
       {/* HERO STRIP */}
@@ -122,16 +124,26 @@ export default function SolutionDetailPage({
 
           {/* Right col — solution hero image */}
           <div className="lg:w-[45%] w-full">
-            <div className="relative w-full h-[400px] lg:h-[480px] rounded-[24px] overflow-hidden">
+            {/* Product-cutout images sit on a white panel and are letterboxed
+                rather than cropped; scene photos still fill the frame. */}
+            <div
+              className={`relative w-full h-[400px] lg:h-[480px] rounded-[24px] overflow-hidden ${
+                contain ? "bg-white" : ""
+              }`}
+            >
               <ImageWithFallback
                 src={solution.heroImage}
                 alt={solution.heroImageAlt}
                 fill
-                className="object-cover object-center"
+                className={`${
+                  contain ? "object-contain p-8" : "object-cover"
+                } object-center`}
                 fallbackBg={solution.iconBg}
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              {!contain && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              )}
               {/* Solution name overlay at bottom */}
               <div className="absolute bottom-5 left-5">
                 <div className="inline-flex items-center gap-2 bg-black/50 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2">

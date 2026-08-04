@@ -9,18 +9,26 @@ export default function SolutionCard({
 }: {
   solution: SecuritySolution
 }) {
+  const contain = solution.heroImageFit === "contain"
+
   return (
     <Link
       href={`/services/security-solutions/${solution.slug}`}
       className="group relative block w-full bg-brand-card rounded-[40px] overflow-hidden cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]"
     >
       {/* Image strip at top */}
-      <div className="relative w-full h-[140px] overflow-hidden">
+      <div
+        className={`relative w-full h-[140px] overflow-hidden ${
+          contain ? "bg-white" : ""
+        }`}
+      >
         <ImageWithFallback
           src={solution.heroImage}
           alt={solution.heroImageAlt}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className={`${
+            contain ? "object-contain p-3" : "object-cover"
+          } transition-transform duration-500 group-hover:scale-105`}
           fallbackBg={solution.iconBg}
         />
         <div className="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/40 transition-all duration-500" />

@@ -11,8 +11,9 @@ import {
 // Dark hero for the Security Solutions landing page.
 // Mirrors the home hero's #0d0d1a dot-grid + glow treatment.
 export default function SecuritySolutionsHero() {
-  const heroImage =
-    securitySolutions.find((s) => s.id === "surveillance")?.heroImage ?? ""
+  const heroSolution = securitySolutions.find((s) => s.id === "surveillance")
+  const heroImage = heroSolution?.heroImage ?? ""
+  const contain = heroSolution?.heroImageFit === "contain"
 
   // "Pak Oz CCTV" → lead "Pak Oz" (white), accent "CCTV" (purple).
   const brandWords = SECURITY_BRAND.split(" ")
@@ -99,17 +100,26 @@ export default function SecuritySolutionsHero() {
 
           {/* RIGHT — hero image */}
           <div className="lg:w-[45%] w-full relative">
-            <div className="relative w-full h-[420px] lg:h-[500px] rounded-[24px] overflow-hidden">
+            <div
+              className={`relative w-full h-[420px] lg:h-[500px] rounded-[24px] overflow-hidden ${
+                contain ? "bg-white" : ""
+              }`}
+            >
               <ImageWithFallback
                 src={heroImage}
                 alt="Professional security solutions Australia"
                 fill
-                className="object-cover object-center"
+                className={`${
+                  contain ? "object-contain p-10" : "object-cover"
+                } object-center`}
                 fallbackBg="linear-gradient(135deg, #1e2140, #2d3561)"
                 priority
               />
-              {/* Dark overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-[24px]" />
+              {/* Dark overlay for text readability — only over scene photos, a
+                  cutout on white would just be muddied by it. */}
+              {!contain && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-[24px]" />
+              )}
             </div>
 
             {/* Floating info badge — bottom left of image */}
