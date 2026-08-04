@@ -7,7 +7,7 @@ import HowItWorks from "@/components/sections/HowItWorks"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
-import { SECURITY_BRAND } from "@/data/site"
+import { SECURITY_BRAND, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
 
 // Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
 const serviceSuburbs = [
@@ -90,15 +90,19 @@ export default function SecuritySolutionsPage() {
             Leave us a Google review and help other Brisbane families find
             quality security installation.
           </p>
-          {/* Owner: replace with your real Google review link */}
+          {/* Points at a Google search until the Business Profile is verified;
+              swap to the direct review link once it is. */}
           <a
-            href="https://g.page/r/[your-google-place-id]/review"
+            href={SITE_GOOGLE_REVIEW_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center bg-white text-[#7f85f7] font-bold rounded-[8px] h-[52px] px-8 hover:bg-white/90 transition-all"
           >
-            ⭐ Leave a Google Review
+            ⭐ Find Us on Google
           </a>
+          <p className="text-[12px] text-white/60 text-center mt-2">
+            Search for us on Google and click &quot;Write a review&quot;
+          </p>
         </div>
       </section>
 

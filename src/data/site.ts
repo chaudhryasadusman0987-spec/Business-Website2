@@ -21,6 +21,12 @@ export const SITE_ACN         = "ACN: 700 444 695";
 // number when available, e.g. "Queensland Security Licence: 1234567".
 export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
 
+// Fallback "find us on Google" link, used until the Google Business Profile is
+// verified. Once NEXT_PUBLIC_GOOGLE_PLACE_ID is set, the review buttons switch
+// to the direct write-a-review form instead of this search page.
+export const SITE_GOOGLE_REVIEW_URL =
+  "https://www.google.com/search?q=Pak+Oz+Solutions+Brisbane+review";
+
 // ============================================================
 //  SECURITY SUB-BRAND — used ONLY under /services/security-solutions
 //  and in the security quote email. Everything else on the site keeps

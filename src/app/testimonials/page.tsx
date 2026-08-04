@@ -8,13 +8,14 @@ import AnimateIn from "@/components/ui/AnimateIn"
 import CountUp from "@/components/ui/CountUp"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { testimonials, stats, type Testimonial } from "@/data/testimonials"
+import { SITE_GOOGLE_REVIEW_URL } from "@/data/site"
 
 // Google Business Profile review link. Set NEXT_PUBLIC_GOOGLE_PLACE_ID once your
 // profile is live and this button takes customers straight to the review form.
 const PLACE_ID = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID
 const GOOGLE_REVIEW_URL = PLACE_ID
   ? `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
-  : "#"
+  : SITE_GOOGLE_REVIEW_URL
 
 const FILTERS = [
   "All",
@@ -275,7 +276,7 @@ export default function TestimonialsPage() {
               rel="noopener noreferrer"
               className="inline-flex h-[52px] items-center rounded-[8px] bg-white px-8 text-[15px] font-bold text-[#7f85f7] hover:bg-white/90"
             >
-              ⭐ Leave a Google Review
+              {PLACE_ID ? "⭐ Leave a Google Review" : "⭐ Find Us on Google"}
             </a>
             <Link
               href="/contact"
@@ -284,6 +285,13 @@ export default function TestimonialsPage() {
               Contact Us
             </Link>
           </div>
+          {/* Only needed while the button points at a search page rather than
+              the direct review form. */}
+          {!PLACE_ID && (
+            <p className="mt-2 text-center text-[12px] text-white/60">
+              Search for us on Google and click &quot;Write a review&quot;
+            </p>
+          )}
         </div>
       </section>
 
