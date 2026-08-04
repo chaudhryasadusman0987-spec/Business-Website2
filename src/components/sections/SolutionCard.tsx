@@ -37,9 +37,6 @@ export default function SolutionCard({
         <p className="text-[13px] text-gray-500 mt-3 leading-relaxed group-hover:text-white/80 transition-colors duration-500">
           {solution.description}
         </p>
-        <span className="mt-4 inline-flex items-center gap-1 bg-white/60 group-hover:bg-white/20 rounded-full px-3 py-1 text-[12px] text-gray-600 group-hover:text-white transition-all duration-500">
-          {solution.products.length} products available
-        </span>
       </div>
 
       <ArrowRight
