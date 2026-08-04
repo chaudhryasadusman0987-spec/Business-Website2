@@ -14,6 +14,11 @@ export default function SecuritySolutionsHero() {
   const heroImage =
     securitySolutions.find((s) => s.id === "surveillance")?.heroImage ?? ""
 
+  // "Pak Oz CCTV" → lead "Pak Oz" (white), accent "CCTV" (purple).
+  const brandWords = SECURITY_BRAND.split(" ")
+  const brandLead = brandWords.slice(0, -1).join(" ")
+  const brandAccent = brandWords[brandWords.length - 1]
+
   return (
     <section className="relative overflow-hidden bg-[#0d0d1a]">
       {/* Layer 1 — dot grid */}
@@ -38,24 +43,25 @@ export default function SecuritySolutionsHero() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* LEFT */}
           <div className="flex-1">
-            {/* Security section runs under the CCTV sub-brand; the rest of the
-                site stays "Pak Oz Solutions". */}
             <span className="inline-block text-[12px] font-medium text-[#9496a8] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] rounded-full px-4 py-1.5">
-              {SECURITY_BRAND} · Brisbane & Southeast QLD
+              Security Solutions · Brisbane & Southeast QLD
             </span>
 
-            <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">
-              <span className="block text-white">Complete Security</span>
-              <span className="block text-[#7f85f7]">Solutions.</span>
+            {/* The security section runs under the CCTV sub-brand, so the brand
+                itself is the headline here. Split off SECURITY_BRAND so the
+                last word takes the accent colour without hardcoding "CCTV". */}
+            <h1 className="font-extrabold text-[52px] lg:text-[76px] leading-[1.05] tracking-tight mt-6">
+              <span className="block text-white">{brandLead}</span>
+              <span className="block text-[#7f85f7]">{brandAccent}</span>
             </h1>
 
-            <p className="text-white text-[17px] font-medium mt-4">
+            <p className="text-white text-[18px] lg:text-[22px] font-semibold leading-snug max-w-[480px] mt-5">
               {SECURITY_TAGLINE}
             </p>
 
-            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-3">
+            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-4">
               Surveillance, deterrence, access control, intercoms and more —
-              professionally installed across Australia.
+              professionally installed across Brisbane & Southeast QLD.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
