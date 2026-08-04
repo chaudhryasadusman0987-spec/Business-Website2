@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, ChevronDown, Plus, Star, Mail, Newspaper } from "lucide-react"
+import { Menu, X, ChevronDown, Plus, Mail, Newspaper } from "lucide-react"
 import { navLinks } from "@/data/navigation"
 import { SITE_FULL } from "@/data/site"
 
@@ -141,13 +141,8 @@ export default function Header() {
               </button>
 
               <div className="absolute top-full right-0 mt-1 bg-white rounded-[12px] shadow-xl border border-gray-100 py-2 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <Link
-                  href="/testimonials"
-                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f4ff] transition-colors"
-                >
-                  <Star size={14} className="text-[#f5a623]" />
-                  <span className="text-[13px] font-medium text-[#1a1a2e]">Testimonials</span>
-                </Link>
+                {/* Testimonials intentionally not linked here until there are
+                    real reviews to show. The /testimonials page still exists. */}
                 <Link
                   href="/blog"
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f4ff] transition-colors"

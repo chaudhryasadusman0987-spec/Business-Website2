@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { Share2, Send, AtSign, Globe } from "lucide-react"
 import { services } from "@/data/services"
 import {
   SITE_FULL,
@@ -13,15 +12,8 @@ import {
   SITE_ACN,
 } from "@/data/site"
 
-// NOTE: lucide-react v1 removed brand glyphs (Facebook/Twitter/LinkedIn/Instagram).
-// TODO(design): swap these generic placeholders for real brand icons
-// (e.g. simple-icons / @icons-pack/react-simple-icons) once chosen.
-const socials = [
-  { label: "Facebook", Icon: Share2 },
-  { label: "Twitter", Icon: Send },
-  { label: "LinkedIn", Icon: AtSign },
-  { label: "Instagram", Icon: Globe },
-]
+// NOTE: social icons removed — they pointed at "#" with no real profiles behind
+// them. Add them back with real URLs once the accounts exist.
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -115,18 +107,6 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <div className="flex gap-4 mt-5">
-              {socials.map(({ label, Icon }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="hover:text-white transition-colors"
-                >
-                  <Icon size={20} />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Col 4 — Newsletter */}
@@ -156,7 +136,19 @@ export default function Footer() {
           © {year} {SITE_FULL}. All rights reserved.
           <p className="text-[12px] text-[#666] mt-2">
             {SITE_COMPANY}
-            {SITE_ABN && <span> · {SITE_ABN}</span>} · {SITE_ACN}
+            {SITE_ABN && (
+              <span
+                className={
+                  SITE_ABN.includes("Pending")
+                    ? "text-[#666880] italic"
+                    : "text-[#9496a8]"
+                }
+              >
+                {" "}
+                · {SITE_ABN}
+              </span>
+            )}{" "}
+            · {SITE_ACN}
           </p>
         </div>
       </div>

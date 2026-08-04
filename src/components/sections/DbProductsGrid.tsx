@@ -28,10 +28,13 @@ export default function DbProductsGrid({
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return
+        // The route answers 200 with `error` set when the DB read failed, so
+        // surface it here instead of showing a silent "no products" state.
+        if (data?.error) console.error("Products API error:", data.error)
         setProducts(Array.isArray(data.products) ? data.products : [])
       })
-      .catch(() => {
-        /* keep empty on error */
+      .catch((err) => {
+        console.error("Products fetch failed:", err)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)

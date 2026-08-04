@@ -25,9 +25,21 @@ export async function GET(req: Request) {
   try {
     const products = await getProducts(slug)
     return Response.json({ products }, { headers })
-  } catch {
-    // No DB configured / unreachable — return empty so the page shows its
-    // empty state rather than crashing.
-    return Response.json({ products: [] }, { headers })
+  } catch (err) {
+    // Log the full shape — Postgres errors carry `code`/`detail` that say
+    // whether this is a missing DATABASE_URL, a bad column, or an unreachable
+    // host. Visible in Vercel → Logs, filtered on "Products API".
+    const e = err as { message?: string; code?: string; detail?: string; stack?: string }
+    console.error("Products API FULL ERROR:", {
+      slug,
+      hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+      message: e?.message,
+      code: e?.code,
+      detail: e?.detail,
+      stack: e?.stack,
+    })
+    // Still 200 with an empty list so the page renders its empty state rather
+    // than a stuck spinner; `error` is there for debugging in the Network tab.
+    return Response.json({ products: [], error: e?.message }, { headers })
   }
 }

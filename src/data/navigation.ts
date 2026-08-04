@@ -7,7 +7,6 @@ export const navLinks: NavLink[] = [
   { label: "Security Solutions", href: "/services/security-solutions" },
   { label: "Car Rental", href: "/services/car-rental" },
   { label: "IT & AI Services", href: "/services/it-services" },
-  { label: "Testimonials", href: "/testimonials" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];

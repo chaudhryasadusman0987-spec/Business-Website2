@@ -10,7 +10,7 @@ export const securitySolutions: SecuritySolution[] = [
     id: "surveillance",
     name: "Surveillance & Evidence",
     slug: "surveillance-evidence",
-    tagline: "See everything. Miss nothing.",
+    tagline: "Always watching. Always secure.",
     description:
       "Professional CCTV and video surveillance systems for homes and businesses across Australia.",
     longDescription:
