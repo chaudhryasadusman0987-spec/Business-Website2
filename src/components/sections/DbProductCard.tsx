@@ -19,15 +19,36 @@ function badgeClasses(badge: string): string {
 export default function DbProductCard({
   product,
   solutionId,
+  onOpenDetails,
 }: {
   product: Product
   solutionId: string
+  /** When passed, the card becomes clickable and opens the detail modal. */
+  onOpenDetails?: (product: Product) => void
 }) {
   const discounted = hasDiscount(product)
   const current = discounted ? product.discountPrice! : product.price
+  const clickable = Boolean(onOpenDetails)
 
   return (
-    <div className="group flex flex-col bg-white rounded-[18px] border border-[#ececf4] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(127,133,247,0.18)]">
+    <div
+      onClick={onOpenDetails ? () => onOpenDetails(product) : undefined}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={
+        onOpenDetails
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onOpenDetails(product)
+              }
+            }
+          : undefined
+      }
+      className={`group flex flex-col bg-white rounded-[18px] border border-[#ececf4] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(127,133,247,0.18)]${
+        clickable ? " cursor-pointer" : ""
+      }`}
+    >
       {/* Image */}
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#f0f0ff]">
         <ImageWithFallback
@@ -46,6 +67,26 @@ export default function DbProductCard({
           >
             {product.badge}
           </span>
+        )}
+
+        {/* Hover hint that the card opens a detail view */}
+        {clickable && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 opacity-0 shadow-md transition-opacity duration-300 group-hover:opacity-100">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#7f85f7"
+                strokeWidth="2.5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+                <path d="M11 8v6M8 11h6" />
+              </svg>
+            </div>
+          </div>
         )}
 
         {!product.inStock && (
@@ -84,6 +125,7 @@ export default function DbProductCard({
 
         <Link
           href={`/services/security-solutions/quote?solution=${solutionId}&product=${product.id}`}
+          onClick={(e) => e.stopPropagation()}
           aria-disabled={!product.inStock}
           className={`mt-4 inline-flex items-center justify-center h-[42px] rounded-[8px] text-[13px] font-semibold transition-colors ${
             product.inStock

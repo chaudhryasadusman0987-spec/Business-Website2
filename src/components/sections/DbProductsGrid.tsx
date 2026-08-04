@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import DbProductCard from "./DbProductCard"
+import ProductModal from "@/components/ui/ProductModal"
 import { productCategories, type Product } from "@/lib/products"
 
 // DB-backed product grid for a single security solution. Fetches from
@@ -19,6 +20,7 @@ export default function DbProductsGrid({
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState("All")
+  const [modalProduct, setModalProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -91,9 +93,24 @@ export default function DbProductsGrid({
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {visible.map((p) => (
-          <DbProductCard key={p.id} product={p} solutionId={solutionId} />
+          <DbProductCard
+            key={p.id}
+            product={p}
+            solutionId={solutionId}
+            onOpenDetails={setModalProduct}
+          />
         ))}
       </div>
+
+      {/* Product detail modal — Prev/Next walks the currently filtered set. */}
+      {modalProduct && (
+        <ProductModal
+          product={modalProduct}
+          solutionId={solutionId}
+          allProducts={visible}
+          onClose={() => setModalProduct(null)}
+        />
+      )}
     </div>
   )
 }
