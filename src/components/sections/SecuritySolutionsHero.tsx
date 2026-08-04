@@ -13,7 +13,7 @@ import {
 export default function SecuritySolutionsHero() {
   const heroSolution = securitySolutions.find((s) => s.id === "surveillance")
   const heroImage = heroSolution?.heroImage ?? ""
-  const contain = heroSolution?.heroImageFit === "contain"
+  const contain = heroSolution?.heroImageFit !== "cover"
 
   // "Pak Oz CCTV" → lead "Pak Oz" (white), accent "CCTV" (purple).
   const brandWords = SECURITY_BRAND.split(" ")

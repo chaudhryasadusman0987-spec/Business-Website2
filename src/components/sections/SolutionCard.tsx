@@ -9,7 +9,7 @@ export default function SolutionCard({
 }: {
   solution: SecuritySolution
 }) {
-  const contain = solution.heroImageFit === "contain"
+  const contain = solution.heroImageFit !== "cover"
 
   return (
     <Link

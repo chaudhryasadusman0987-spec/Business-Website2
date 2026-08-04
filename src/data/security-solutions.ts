@@ -19,7 +19,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#f57c00",
     iconBg: "rgba(245,124,0,0.12)",
     heroImage: "/images/solutions/surveillance1.jpg",
-    heroImageFit: "contain",
     heroImageAlt: "Professional CCTV surveillance camera installation",
     products: [
       {
@@ -94,7 +93,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#e53935",
     iconBg: "rgba(229,57,53,0.12)",
     heroImage: "/images/solutions/deterrence.jpg",
-    heroImageFit: "contain",
     heroImageAlt: "Security alarm system and deterrence technology",
     products: [
       {
@@ -158,7 +156,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#1565c0",
     iconBg: "rgba(21,101,192,0.12)",
     heroImage: "/images/solutions/commercial-security.png",
-    heroImageFit: "contain",
     heroImageAlt: "Commercial building security system",
     products: [
       {
@@ -213,7 +210,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#6200ea",
     iconBg: "rgba(98,0,234,0.12)",
     heroImage: "/images/solutions/access-control.jpg",
-    heroImageFit: "contain",
     heroImageAlt: "Access control keypad and door security",
     products: [
       {
@@ -278,7 +274,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#e65100",
     iconBg: "rgba(230,81,0,0.12)",
     heroImage: "/images/solutions/smoke-alarms.png",
-    heroImageFit: "contain",
     heroImageAlt: "Smoke alarm installation Australia",
     products: [
       {
@@ -335,7 +330,6 @@ export const securitySolutions: SecuritySolution[] = [
     iconColor: "#2e7d32",
     iconBg: "rgba(46,125,50,0.12)",
     heroImage: "/images/solutions/intercoms.jpg",
-    heroImageFit: "contain",
     heroImageAlt: "Video intercom system installation",
     products: [
       {

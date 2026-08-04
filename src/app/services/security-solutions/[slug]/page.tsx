@@ -64,7 +64,7 @@ export default function SolutionDetailPage({
   const solution = securitySolutions.find((s) => s.slug === params.slug)
   if (!solution) notFound()
 
-  const contain = solution.heroImageFit === "contain"
+  const contain = solution.heroImageFit !== "cover"
 
   return (
     <>

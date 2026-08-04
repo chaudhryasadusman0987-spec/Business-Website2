@@ -110,10 +110,10 @@ export interface SecuritySolution {
   heroImage: string; // path like "/images/solutions/surveillance.jpg"
   heroImageAlt: string; // descriptive alt text for SEO
   /**
-   * How the hero image fills its frame. Defaults to "cover", which suits the
-   * wide scene photos. Product cutouts on a white background use "contain" so
-   * they aren't cropped — those render on a white panel instead of the dark
-   * section background.
+   * How the hero image fills its frame. Defaults to "contain": every solution
+   * image is currently a product cutout on white, letterboxed on a white panel
+   * so nothing is cropped. Set "cover" on a wide scene photo to make it fill
+   * the frame and take the dark readability overlay.
    */
   heroImageFit?: "cover" | "contain";
   products: SecurityProduct[];
