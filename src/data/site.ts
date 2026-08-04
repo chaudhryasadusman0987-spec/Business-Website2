@@ -20,3 +20,11 @@ export const SITE_ACN         = "ACN: 700 444 695";
 // Security installer credential shown in trust strips. Replace with your real
 // number when available, e.g. "Queensland Security Licence: 1234567".
 export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
+
+// ============================================================
+//  SECURITY SUB-BRAND — used ONLY under /services/security-solutions
+//  and in the security quote email. Everything else on the site keeps
+//  SITE_FULL ("Pak Oz Solutions"). SITE_COMPANY stays the legal entity.
+// ============================================================
+export const SECURITY_BRAND   = "Pak Oz CCTV";
+export const SECURITY_TAGLINE = "Professional CCTV & Security Installation Brisbane";

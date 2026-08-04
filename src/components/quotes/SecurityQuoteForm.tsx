@@ -50,7 +50,7 @@ import { productCategories, type Product } from "@/lib/products"
 import { effectivePrice, type CategoryPromo } from "@/lib/promo"
 import { usePromo } from "@/components/providers/PromoProvider"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
-import { SITE_NAME, SITE_SUFFIX, SITE_PHONE } from "@/data/site"
+import { SECURITY_BRAND, SITE_PHONE } from "@/data/site"
 
 // TODO(dashboard): move the install rate and gstRate into a settings table so
 // the owner can edit them from the dashboard without redeploying. For now they
@@ -373,9 +373,15 @@ function QuoteWizard() {
         <div className="w-[38px] h-[38px] rounded-[8px] bg-[#0F6E56] flex items-center justify-center">
           <ShieldCheck size={20} className="text-white" />
         </div>
+        {/* Security sub-brand: "Pak Oz" in the base ink, the last word in the
+            section's green accent. Derived from SECURITY_BRAND so renaming the
+            sub-brand in site.ts flows through here. */}
         <div className="text-[17px] font-medium text-[#1a1a2e]">
-          {SITE_NAME}
-          <span className="text-[#0F6E56]"> {SITE_SUFFIX}</span>
+          {SECURITY_BRAND.split(" ").slice(0, -1).join(" ")}
+          <span className="text-[#0F6E56]">
+            {" "}
+            {SECURITY_BRAND.split(" ").slice(-1)[0]}
+          </span>
         </div>
       </div>
 

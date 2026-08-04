@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
-import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
+import { SECURITY_BRAND, SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 interface QuoteItem {
   name: string
@@ -105,7 +105,7 @@ function buildEmail(body: QuoteBody): string {
   return `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e">
     <div style="background:#0F6E56;color:#fff;padding:20px;border-radius:8px 8px 0 0">
-      <h1 style="margin:0;font-size:20px">${SITE_FULL}</h1>
+      <h1 style="margin:0;font-size:20px">${SECURITY_BRAND}</h1>
       <p style="margin:4px 0 0;font-size:13px;opacity:.85">Security Solutions Quote</p>
     </div>
     <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px">
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
       try {
         await sendEmail(
           body.email,
-          `Your Security Quote from ${SITE_FULL}`,
+          `Your CCTV Security Quote from ${SECURITY_BRAND}`,
           html
         )
       } catch (emailErr) {

@@ -7,6 +7,7 @@ import HowItWorks from "@/components/sections/HowItWorks"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
+import { SECURITY_BRAND } from "@/data/site"
 
 // Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
 const serviceSuburbs = [
@@ -20,12 +21,14 @@ const serviceSuburbs = [
   "Redlands",
 ]
 
+// `absolute` bypasses the root layout's `%s | Pak Oz Solutions` template so the
+// security section carries the CCTV sub-brand in the tab title instead.
 export const metadata: Metadata = {
-  title: "Security Solutions",
+  title: { absolute: `Security Solutions | ${SECURITY_BRAND}` },
   description:
-    "Professional CCTV, alarms, access control and intercom installation in " +
-    "Brisbane & Southeast QLD. Free site assessment. Licensed installers. " +
-    "Same-week service.",
+    `${SECURITY_BRAND} — Professional CCTV and security camera installation ` +
+    "in Brisbane & Southeast QLD. Free site assessment. Licensed installers. " +
+    "Same-week service available.",
 }
 
 export default function SecuritySolutionsPage() {

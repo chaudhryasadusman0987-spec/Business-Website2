@@ -7,6 +7,7 @@ import DbProductsGrid from "@/components/sections/DbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions, installFee } from "@/data/security-solutions"
+import { SECURITY_BRAND } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
 
 export function generateStaticParams() {
@@ -46,8 +47,12 @@ export function generateMetadata({
   const solution = securitySolutions.find((s) => s.slug === params.slug)
   if (!solution) return {}
   return {
-    title: solution.name,
-    description: metaDescriptions[params.slug] ?? solution.description,
+    // `absolute` so the root `%s | Pak Oz Solutions` template doesn't override
+    // the security sub-brand.
+    title: { absolute: `${solution.name} | ${SECURITY_BRAND}` },
+    description:
+      metaDescriptions[params.slug] ??
+      `${solution.description} — ${SECURITY_BRAND}, Brisbane.`,
   }
 }
 

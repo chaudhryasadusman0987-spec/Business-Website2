@@ -2,7 +2,11 @@ import Link from "next/link"
 import { ShieldCheck } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions } from "@/data/security-solutions"
-import { SITE_SECURITY_LICENCE } from "@/data/site"
+import {
+  SITE_SECURITY_LICENCE,
+  SECURITY_BRAND,
+  SECURITY_TAGLINE,
+} from "@/data/site"
 
 // Dark hero for the Security Solutions landing page.
 // Mirrors the home hero's #0d0d1a dot-grid + glow treatment.
@@ -34,8 +38,10 @@ export default function SecuritySolutionsHero() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* LEFT */}
           <div className="flex-1">
+            {/* Security section runs under the CCTV sub-brand; the rest of the
+                site stays "Pak Oz Solutions". */}
             <span className="inline-block text-[12px] font-medium text-[#9496a8] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] rounded-full px-4 py-1.5">
-              Security Solutions · Brisbane & Southeast QLD
+              {SECURITY_BRAND} · Brisbane & Southeast QLD
             </span>
 
             <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">
@@ -43,7 +49,11 @@ export default function SecuritySolutionsHero() {
               <span className="block text-[#7f85f7]">Solutions.</span>
             </h1>
 
-            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-4">
+            <p className="text-white text-[17px] font-medium mt-4">
+              {SECURITY_TAGLINE}
+            </p>
+
+            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-3">
               Surveillance, deterrence, access control, intercoms and more —
               professionally installed across Australia.
             </p>
