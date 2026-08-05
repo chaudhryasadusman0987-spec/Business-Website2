@@ -68,11 +68,13 @@ export default function CarRentalPage() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3.5">
+              {/* Scrolls to the fleet — you pick a car before you can apply, so
+                  this can't open a form for a vehicle nobody has chosen yet. */}
               <a
                 href="#vehicles"
-                className="flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-colors duration-300"
+                className="flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-bold text-[15px] uppercase tracking-wider hover:bg-[#6b71f0] transition-colors duration-300"
               >
-                View the fleet
+                Get on Rent
               </a>
               <a
                 href={tel}
@@ -152,9 +154,11 @@ export default function CarRentalPage() {
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-1">
             {terms.map((t, i) => (
               <AnimateIn key={t.label} animation="fade-up" delay={(i % 3) * 100}>
-                <div className="flex items-baseline justify-between gap-4 py-4 border-b border-[#ececf4]">
-                  <span className="text-[13px] text-[#8a8ca0]">{t.label}</span>
-                  <span className="text-[14px] font-semibold text-[#1a1a2e] text-right">
+                <div className="flex items-baseline justify-between gap-4 py-[18px] border-b border-[#ececf4]">
+                  <span className="text-[15px] font-medium text-[#2f3149]">
+                    {t.label}
+                  </span>
+                  <span className="text-[15px] font-bold text-[#7f85f7] text-right">
                     {t.value}
                   </span>
                 </div>

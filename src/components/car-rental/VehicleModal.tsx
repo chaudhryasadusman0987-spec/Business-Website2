@@ -9,6 +9,8 @@ import { SITE_PHONE } from "@/data/site"
 interface Props {
   vehicle: RentalVehicle | null
   onClose: () => void
+  /** Step to open on. "Get on Rent" jumps straight past the photo gallery. */
+  initialView?: "details" | "apply"
 }
 
 const EMPTY_FORM = {
@@ -33,8 +35,12 @@ type View = (typeof STEPS)[number]
 /** Keep in sync with MAX_ATTACHMENT_BYTES in /api/rental-application. */
 const MAX_UPLOAD_BYTES = 3 * 1024 * 1024
 
-export default function VehicleModal({ vehicle, onClose }: Props) {
-  const [view, setView] = useState<View>("details")
+export default function VehicleModal({
+  vehicle,
+  onClose,
+  initialView = "details",
+}: Props) {
+  const [view, setView] = useState<View>(initialView)
   const [activeImg, setActiveImg] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -45,14 +51,14 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
 
   // Reset every field when a different vehicle is opened.
   useEffect(() => {
-    setView("details")
+    setView(initialView)
     setActiveImg(0)
     setSubmitted(false)
     setForm(EMPTY_FORM)
     setErrors({})
     setLicenceFront(null)
     setLicenceBack(null)
-  }, [vehicle?.id])
+  }, [vehicle?.id, initialView])
 
   // Lock body scroll while the modal is open.
   useEffect(() => {
@@ -274,11 +280,11 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="bg-[#7f85f7] text-white w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0">
-                      {v.number}
-                    </span>
                     <span className="bg-[#eeedfe] text-[#7f85f7] text-[12px] font-semibold px-3 py-1 rounded-full">
                       {v.type}
+                    </span>
+                    <span className="bg-[#e1f5ee] text-[#0f6e56] text-[12px] font-semibold px-3 py-1 rounded-full">
+                      {v.year}
                     </span>
                   </div>
 
@@ -737,9 +743,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
                 <p className="font-semibold text-[#1a1a2e] mb-2">
                   Vehicle requested:
                 </p>
-                <p>
-                  #{v.number} — {v.name}
-                </p>
+                <p>{v.name}</p>
                 <p className="text-[#9496a8]">Rego: {v.rego}</p>
               </div>
               <button
