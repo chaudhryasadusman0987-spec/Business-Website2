@@ -1,6 +1,8 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import { securitySolutions } from "@/data/security-solutions"
+import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
 import type { Product, ProductInput } from "@/lib/products"
+import type { RentalVehicle, VehicleInput } from "@/lib/vehicles"
 
 // Database layer. Server-only (imports @neondatabase/serverless) — only import
 // from route handlers, never from client components. Connects via DATABASE_URL
@@ -9,8 +11,9 @@ import type { Product, ProductInput } from "@/lib/products"
 // clear error at query time rather than crashing on import; callers wrap reads
 // so the public page falls back to an empty grid instead of 500ing.
 //
-// This holds products plus a generic `site_settings` key/JSONB table used for
-// dashboard-editable settings (see catalog-store.ts). Leads stay on Vercel KV.
+// This holds two catalogs — security `products` and car rental `vehicles` —
+// plus a generic `site_settings` key/JSONB table used for dashboard-editable
+// settings (see catalog-store.ts). Leads stay on Vercel KV.
 
 let client: NeonQueryFunction<false, false> | null = null
 
@@ -118,10 +121,38 @@ export async function writeSetting(key: string, value: unknown): Promise<void> {
   `
 }
 
-/** Create the products table + index + settings table if absent. Idempotent. */
+/** Create the vehicles table if absent. Idempotent. */
+export async function createVehiclesTable(): Promise<void> {
+  const db = sql()
+  await db`
+    CREATE TABLE IF NOT EXISTS vehicles (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      year        INTEGER NOT NULL DEFAULT 0,
+      make        TEXT,
+      model       TEXT,
+      type        TEXT,
+      rego        TEXT,
+      image       TEXT,
+      images      JSONB NOT NULL DEFAULT '[]'::jsonb,
+      image_alt   TEXT,
+      weekly_rate NUMERIC NOT NULL DEFAULT 0,
+      bond        NUMERIC NOT NULL DEFAULT 0,
+      available   BOOLEAN NOT NULL DEFAULT true,
+      sort_order  INTEGER NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  await db`
+    CREATE INDEX IF NOT EXISTS vehicles_sort_order_idx ON vehicles (sort_order)
+  `
+}
+
+/** Create the products + vehicles + settings tables if absent. Idempotent. */
 export async function ensureSchema(): Promise<void> {
   const db = sql()
   await createSettingsTable()
+  await createVehiclesTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -147,11 +178,29 @@ export async function ensureSchema(): Promise<void> {
 }
 
 /**
- * Seed every security solution's products from the static data file. Idempotent
- * — existing rows (matched by id) are left untouched, so re-running never
- * duplicates or overwrites admin edits. Returns the number of rows inserted.
+ * Marks recording that a seed has already been run, so /api/db/setup can be
+ * visited again (to create a new table, say) without resurrecting rows the
+ * admin deleted. ON CONFLICT DO NOTHING protects against duplicates but not
+ * against deletions: a deleted seed row has no id to conflict with, so a second
+ * seed run brings it straight back. These marks are the fix.
  */
-export async function seedAllProducts(): Promise<number> {
+async function seedAlreadyRun(key: string): Promise<boolean> {
+  await createSettingsTable()
+  return (await readSetting<{ at: string }>(`seed:${key}`)) !== null
+}
+
+async function markSeedRun(key: string): Promise<void> {
+  await writeSetting(`seed:${key}`, { at: new Date().toISOString() })
+}
+
+/**
+ * Seed every security solution's products from the static data file. Runs at
+ * most once — see seedAlreadyRun. Within a run, existing rows (matched by id)
+ * are left untouched so admin edits survive. Returns the number of rows
+ * inserted, or -1 when the seed was skipped because it had already run.
+ */
+export async function seedAllProducts(force = false): Promise<number> {
+  if (!force && (await seedAlreadyRun("products"))) return -1
   const db = sql()
 
   let inserted = 0
@@ -184,6 +233,7 @@ export async function seedAllProducts(): Promise<number> {
       inserted += rows.length
     }
   }
+  await markSeedRun("products")
   return inserted
 }
 
@@ -257,4 +307,165 @@ export async function deleteProduct(id: string): Promise<boolean> {
     id: string
   }[]
   return rows.length > 0
+}
+
+/* ───────────────────── Car rental fleet ───────────────────── */
+
+interface VehicleRow {
+  id: string
+  name: string
+  year: number
+  make: string | null
+  model: string | null
+  type: string | null
+  rego: string | null
+  image: string | null
+  // JSONB — the driver hands this back already parsed.
+  images: unknown
+  image_alt: string | null
+  weekly_rate: string | number
+  bond: string | number
+  available: boolean
+  sort_order: number
+  created_at: string | Date
+}
+
+function toVehicle(r: VehicleRow): RentalVehicle {
+  return {
+    id: r.id,
+    name: r.name,
+    year: Number(r.year),
+    make: r.make ?? "",
+    model: r.model ?? "",
+    type: r.type ?? "",
+    rego: r.rego ?? "",
+    image: r.image ?? "",
+    images: Array.isArray(r.images) ? r.images.map(String) : [],
+    imageAlt: r.image_alt ?? "",
+    // NUMERIC comes back as a string from the driver.
+    weeklyRate: Number(r.weekly_rate),
+    bond: Number(r.bond),
+    available: r.available,
+    sortOrder: Number(r.sort_order),
+    createdAt: r.created_at ? new Date(r.created_at).toISOString() : undefined,
+  }
+}
+
+/**
+ * The whole fleet, in display order. `sort_order` is admin-controlled so cars
+ * can be re-ordered without touching created_at, which breaks the ties.
+ */
+export async function getVehicles(): Promise<RentalVehicle[]> {
+  const rows = (await sql()`
+    SELECT * FROM vehicles ORDER BY sort_order ASC, created_at ASC
+  `) as VehicleRow[]
+  return rows.map(toVehicle)
+}
+
+/** One vehicle by id, or null. */
+export async function getVehicle(id: string): Promise<RentalVehicle | null> {
+  const rows = (await sql()`
+    SELECT * FROM vehicles WHERE id = ${id}
+  `) as VehicleRow[]
+  return rows[0] ? toVehicle(rows[0]) : null
+}
+
+function newVehicleId(): string {
+  return `veh-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+export async function createVehicle(input: VehicleInput): Promise<RentalVehicle> {
+  const db = sql()
+  const id = newVehicleId()
+  // The driver serialises arrays to a Postgres array literal, which JSONB will
+  // not accept — send JSON text and cast it, the same way writeSetting does.
+  const images = JSON.stringify(input.images)
+  const rows = (await db`
+    INSERT INTO vehicles
+      (id, name, year, make, model, type, rego, image, images, image_alt,
+       weekly_rate, bond, available, sort_order)
+    VALUES (
+      ${id},
+      ${input.name},
+      ${input.year},
+      ${input.make || null},
+      ${input.model || null},
+      ${input.type || null},
+      ${input.rego || null},
+      ${input.image || null},
+      ${images}::jsonb,
+      ${input.imageAlt || null},
+      ${input.weeklyRate},
+      ${input.bond},
+      ${input.available},
+      ${input.sortOrder}
+    )
+    RETURNING *
+  `) as VehicleRow[]
+  return toVehicle(rows[0])
+}
+
+export async function updateVehicle(
+  id: string,
+  input: VehicleInput,
+): Promise<RentalVehicle | null> {
+  const db = sql()
+  const images = JSON.stringify(input.images)
+  const rows = (await db`
+    UPDATE vehicles SET
+      name        = ${input.name},
+      year        = ${input.year},
+      make        = ${input.make || null},
+      model       = ${input.model || null},
+      type        = ${input.type || null},
+      rego        = ${input.rego || null},
+      image       = ${input.image || null},
+      images      = ${images}::jsonb,
+      image_alt   = ${input.imageAlt || null},
+      weekly_rate = ${input.weeklyRate},
+      bond        = ${input.bond},
+      available   = ${input.available},
+      sort_order  = ${input.sortOrder}
+    WHERE id = ${id}
+    RETURNING *
+  `) as VehicleRow[]
+  return rows[0] ? toVehicle(rows[0]) : null
+}
+
+export async function deleteVehicle(id: string): Promise<boolean> {
+  const rows = (await sql()`
+    DELETE FROM vehicles WHERE id = ${id} RETURNING id
+  `) as { id: string }[]
+  return rows.length > 0
+}
+
+/**
+ * Seed the fleet from the static list in src/data/car-rental.ts. Runs at most
+ * once (see seedAlreadyRun) so a later /api/db/setup never brings back a car
+ * the admin sold and deleted. Within a run, existing rows are left untouched,
+ * so the weekly rates and photos set in the dashboard survive. Returns rows
+ * inserted, or -1 when the seed was skipped because it had already run.
+ */
+export async function seedAllVehicles(force = false): Promise<number> {
+  if (!force && (await seedAlreadyRun("vehicles"))) return -1
+  const db = sql()
+  let inserted = 0
+  for (const v of VEHICLE_SEED) {
+    const images = JSON.stringify(v.images)
+    const rows = (await db`
+      INSERT INTO vehicles
+        (id, name, year, make, model, type, rego, image, images, image_alt,
+         weekly_rate, bond, available, sort_order)
+      VALUES (
+        ${v.id}, ${v.name}, ${v.year}, ${v.make}, ${v.model}, ${v.type},
+        ${v.rego}, ${v.image}, ${images}::jsonb, ${v.imageAlt},
+        ${v.weeklyRate}, ${v.bond}, ${v.available}, ${v.sortOrder}
+      )
+      ON CONFLICT (id) DO NOTHING
+      RETURNING id
+    `) as { id: string }[]
+    inserted += rows.length
+  }
+  await markSeedRun("vehicles")
+  return inserted
 }

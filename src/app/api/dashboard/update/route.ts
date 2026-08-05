@@ -1,23 +1,32 @@
-import { createProduct, updateProduct, deleteProduct } from "@/lib/db"
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVehicle,
+  updateVehicle,
+  deleteVehicle,
+} from "@/lib/db"
 import { readCatalog, writeCatalog } from "@/lib/catalog-store"
 import { itPackageKey, type ITServiceOverviewEdit } from "@/lib/catalog"
 import type { ProductInput } from "@/lib/products"
+import type { VehicleInput } from "@/lib/vehicles"
 import type { ITPackage } from "@/data/it-services"
 import { itServiceItems } from "@/data/it-services"
 
 // Dashboard save endpoint.
 //
 // type === "product": create / update / delete a Postgres-backed product
-//   (powers the Surveillance & Evidence grid and the "Products (DB)" tab).
+//   (powers the security solution grids and the "Products (DB)" tab).
+// type === "vehicle": create / update / delete a Postgres-backed car rental
+//   vehicle (powers the car rental pages and the "Car Rental" tab).
 // type === "it-service-overview" / "it-package": persist the admin's edits as
 //   catalog overrides in KV, merged over src/data/it-services.ts at read time.
 //   These used to mutate the imported module array, which looked like it worked
 //   but was lost on the next request (and was never visible to the client
 //   bundle at all) — hence "changes reset on refresh".
 //
-// Vehicles and security products are NOT handled here: their dashboard tabs
-// (VehicleCatalogTab / SecurityCatalogTab) POST the whole override object to
-// /api/catalog directly.
+// Security products are NOT handled here: their dashboard tab POSTs the whole
+// override object to /api/catalog directly.
 
 export const dynamic = "force-dynamic"
 
@@ -69,6 +78,65 @@ async function handleProduct(data: Record<string, unknown>) {
 
 function fail(error: string, status: number) {
   return Response.json({ success: false, error }, { status })
+}
+
+function coerceVehicle(v: Record<string, unknown>): VehicleInput {
+  const num = (x: unknown) => {
+    const n = Number(x ?? 0)
+    return Number.isFinite(n) ? n : 0
+  }
+  return {
+    name: String(v.name ?? ""),
+    year: Math.round(num(v.year)),
+    make: String(v.make ?? ""),
+    model: String(v.model ?? ""),
+    type: String(v.type ?? ""),
+    rego: String(v.rego ?? ""),
+    image: String(v.image ?? ""),
+    // Drop blanks so an empty gallery slot never renders as a broken photo.
+    images: Array.isArray(v.images)
+      ? v.images.map((i) => String(i).trim()).filter(Boolean)
+      : [],
+    imageAlt: String(v.imageAlt ?? ""),
+    weeklyRate: num(v.weeklyRate),
+    bond: num(v.bond),
+    available: v.available !== false,
+    sortOrder: Math.round(num(v.sortOrder)),
+  }
+}
+
+async function handleVehicle(data: Record<string, unknown>) {
+  const action = String(data.action ?? "")
+  // The vehicle is nested rather than spread at the top level: a vehicle has
+  // its own `type` field (the body style — "Hatchback", "Ute"), which would
+  // otherwise overwrite the `type` discriminator that routes this request.
+  const payload =
+    data.vehicle && typeof data.vehicle === "object"
+      ? (data.vehicle as Record<string, unknown>)
+      : {}
+  try {
+    if (action === "create") {
+      const input = coerceVehicle(payload)
+      if (!input.name.trim()) return fail("A vehicle needs a name", 400)
+      return Response.json({ success: true, vehicle: await createVehicle(input) })
+    }
+    if (action === "update") {
+      const id = String(data.id ?? "")
+      if (!id) return fail("Missing id", 400)
+      const vehicle = await updateVehicle(id, coerceVehicle(payload))
+      if (!vehicle) return fail("Not found", 404)
+      return Response.json({ success: true, vehicle })
+    }
+    if (action === "delete") {
+      const id = String(data.id ?? "")
+      if (!id) return fail("Missing id", 400)
+      return Response.json({ success: await deleteVehicle(id) })
+    }
+    return fail("Unknown action", 400)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Database error"
+    return fail(message, 500)
+  }
 }
 
 async function handleItServiceOverview(data: Record<string, unknown>) {
@@ -159,6 +227,7 @@ export async function POST(req: Request) {
   const type = String(data?.type ?? "")
 
   if (type === "product") return handleProduct(data)
+  if (type === "vehicle") return handleVehicle(data)
   if (type === "it-service-overview") return handleItServiceOverview(data)
   if (type === "it-package") return handleItPackage(data)
 

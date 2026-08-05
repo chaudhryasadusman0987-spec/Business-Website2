@@ -5,7 +5,7 @@ import { itServiceItems, type ITServiceItem } from "@/data/it-services"
 import { mergeITServices, normaliseOverrides } from "@/lib/catalog"
 import { SITE_FULL } from "@/data/site"
 import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
-import VehicleCatalogTab from "@/components/dashboard/VehicleCatalogTab"
+import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
 import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
 import {
   buildTickerMessages,
@@ -669,7 +669,7 @@ export default function DashboardPage() {
         {tab === "products-db" && <ProductsDbTab />}
 
         {/* ───────── CAR RENTAL ───────── */}
-        {tab === "car-rental" && <VehicleCatalogTab />}
+        {tab === "car-rental" && <VehiclesDbTab />}
 
         {/* ───────── IT SERVICES ───────── */}
         {tab === "it-services" && (

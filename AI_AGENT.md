@@ -60,23 +60,32 @@ OPEN STATE:
 Location: `src/lib/agent-prompt.ts`
 
 Pricing for the security section comes from `securitySolutions` (all 6 solutions,
-each summarised by its lowest "from" price), plus `vehicles` and `itServices`:
+each summarised by its lowest "from" price), plus `itServices`.
+
+The car rental fleet is **not** imported: it lives in Postgres and is managed
+from the dashboard, so `/api/chat` reads it with `getVehicles()` and passes it
+in. That keeps this file free of the server-only DB layer and stops the agent
+quoting a weekly rate the owner has since changed. Only cars with a published
+weekly rate are listed — the prompt tells the agent to refer the rest to the
+phone rather than inventing a price.
 
 ```ts
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
 import { securitySolutions, installFee } from "@/data/security-solutions"
-import { vehicles } from "@/data/car-rental"
 import { itServices } from "@/data/it-services"
+import type { RentalVehicle } from "@/lib/vehicles"
 
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
   // One "from $X" line per security solution
   const securityPrices = securitySolutions
     .map(s => `${s.name}: from $${Math.min(...s.products.map(p => p.price))}`)
     .join(", ")
 
-  const rentalRates = vehicles
-    .map(v => `${v.name}: $${v.dailyRate}/day`)
-    .join(", ")
+  // Only cars the owner has priced in the dashboard
+  const priced = fleet.filter(v => v.available && v.weeklyRate > 0)
+  const fleetList = priced
+    .map(v => `${v.name} (${v.type}): $${v.weeklyRate}/week`)
+    .join("; ")
 
   const itList = itServices
     .map(s => `${s.name} (from ${s.startingFrom})`)
@@ -87,7 +96,7 @@ an Australian multi-service business. You speak concisely in Australian English.
 
 SERVICES:
 1. Security Solutions — ${securityPrices}; plus $${installFee} installation fee. Free site assessment.
-2. Car Rental — ${rentalRates}. Free cancellation available.
+2. Car Rental — long-term weekly hire, 4 week minimum. Cars available: ${fleetList}.
 3. IT Services — ${itList}. Free consultation.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { sendEmail, type EmailAttachment } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
+import { getVehicle } from "@/lib/db"
 import { SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 // nodemailer + Buffer need the Node runtime (not edge).
@@ -57,6 +58,26 @@ export async function POST(req: Request) {
     const address = get("address")
     const vehicleName = get("vehicleName")
     const vehicleRego = get("vehicleRego")
+
+    // Price the quote from the database rather than from the submitted form —
+    // the browser could send anything, and the owner sets the weekly rate in
+    // the dashboard. A DB hiccup just omits the price; the call confirms it.
+    let weeklyLabel = ""
+    let bondLabel = ""
+    try {
+      const vehicle = get("vehicleId") ? await getVehicle(get("vehicleId")) : null
+      if (vehicle) {
+        if (vehicle.weeklyRate > 0) {
+          weeklyLabel = `$${vehicle.weeklyRate.toLocaleString("en-AU")} per week`
+        }
+        if (vehicle.bond > 0) {
+          bondLabel = `$${vehicle.bond.toLocaleString("en-AU")}`
+        }
+      }
+    } catch (e) {
+      console.error("Vehicle price lookup failed:", e)
+    }
+
     const paymentMethod =
       get("paymentMethod") === "card"
         ? "Credit / Debit Card"
@@ -88,9 +109,15 @@ export async function POST(req: Request) {
           </div>
 
           <h3 style="color:#1a1a2e;margin:0 0 12px">Vehicle Requested</h3>
-          <p style="background:#eeedfe;border-radius:8px;padding:12px;font-weight:bold;color:#534ab7;margin-bottom:20px">
-            ${esc(vehicleName)} (${esc(vehicleRego)})
-          </p>
+          <div style="background:#eeedfe;border-radius:8px;padding:12px;margin-bottom:20px">
+            <p style="font-weight:bold;color:#534ab7;margin:0">
+              ${esc(vehicleName)} (${esc(vehicleRego)})
+            </p>
+            <p style="color:#534ab7;font-size:13px;margin:6px 0 0">
+              ${weeklyLabel ? esc(weeklyLabel) : "No weekly rate published — set one in the dashboard"}
+              ${bondLabel ? ` · ${esc(bondLabel)} bond` : ""}
+            </p>
+          </div>
 
           <h3 style="color:#1a1a2e;margin:0 0 12px">Applicant Details</h3>
           <table style="width:100%;border-collapse:collapse">
@@ -158,6 +185,15 @@ export async function POST(req: Request) {
             </p>
             <p style="font-weight:700;font-size:16px;color:#1a1a2e;margin:0">${esc(vehicleName)}</p>
             <p style="font-size:12px;color:#9496a8;margin:4px 0 0">Rego: ${esc(vehicleRego)}</p>
+            ${
+              weeklyLabel
+                ? `<p style="font-weight:700;font-size:15px;color:#7f85f7;margin:10px 0 0">${esc(weeklyLabel)}${
+                    bondLabel
+                      ? `<span style="font-weight:400;font-size:12px;color:#9496a8"> · ${esc(bondLabel)} bond</span>`
+                      : ""
+                  }</p>`
+                : ""
+            }
           </div>
 
           <h3 style="color:#1a1a2e;font-size:15px;margin:20px 0 12px">Rental Terms Summary</h3>
@@ -211,7 +247,10 @@ export async function POST(req: Request) {
         phone,
         email,
         service: "car-rental",
-        message: `Rental application — ${vehicleName} (${vehicleRego}). Licence ${licenceNo}, DOB ${dob}. Preferred payment: ${paymentMethod}.`,
+        message:
+          `Rental application — ${vehicleName} (${vehicleRego})` +
+          `${weeklyLabel ? ` at ${weeklyLabel}` : ""}. ` +
+          `Licence ${licenceNo}, DOB ${dob}. Preferred payment: ${paymentMethod}.`,
         date: new Date().toISOString(),
         status: "New",
         page: "/services/car-rental",

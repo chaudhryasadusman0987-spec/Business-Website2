@@ -1,12 +1,16 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import VehicleFleet from "@/components/sections/VehicleFleet"
+import VehicleGrid from "@/components/car-rental/VehicleGrid"
+
+// Same database-backed fleet as /services/car-rental, on its own page with the
+// full-fleet framing. There is one source of truth for vehicles now — the
+// dashboard's Car Rental tab — so this page never drifts from the main one.
 
 export const metadata: Metadata = {
-  title: "Vehicle Fleet | Car Rental Brisbane",
+  title: "Vehicle Fleet | Long-Term Car Rental Brisbane",
   description:
-    "Our full Brisbane rental fleet — economy, SUV, sedan, 7-seat, van and " +
-    "luxury vehicles. Transparent daily and weekly rates. Free cancellation.",
+    "The full Pak Oz Rentals fleet in Brisbane — weekly hire with a four-week " +
+    "minimum. Roadside assistance, servicing and maintenance included.",
 }
 
 export default function VehiclesPage() {
@@ -43,22 +47,26 @@ export default function VehiclesPage() {
             Our Vehicle Fleet
           </h1>
           <p className="text-[15px] text-[#9496a8] mt-4 max-w-[480px] mx-auto leading-relaxed">
-            All prices include free cancellation. Bond holds explained at
-            booking.
+            Weekly hire, four-week minimum. Roadside assistance and servicing
+            are included on every car.
           </p>
         </div>
       </section>
 
-      {/* VEHICLES GRID */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[120px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <VehicleFleet detailed />
+      {/* FLEET GRID — the same DB-backed list the main page shows */}
+      <VehicleGrid
+        title="Every car on the yard"
+        intro="Open a car for its photos, rego and weekly rate, or go straight to the application."
+      />
 
-          {/* BOND INFO BOX */}
-          <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-[16px] p-6 max-w-[700px] mx-auto mt-14 text-center text-[14px] text-[#185fa5] leading-relaxed">
-            💳 Security bonds are pre-authorisation holds — not charges. Released
-            within 3–10 business days of return. Credit card strongly
-            recommended.
+      {/* BOND INFO BOX — continues the grid's background so the strip reads as
+          part of the same section */}
+      <section className="bg-[#f5f5f8] pb-[100px]">
+        <div className="max-w-[1170px] mx-auto px-4">
+          <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-[16px] p-6 max-w-[700px] mx-auto text-center text-[14px] text-[#185fa5] leading-relaxed">
+            💳 The security bond is refunded at the end of the rental. Weekly
+            rent is paid in advance and we confirm everything with you by phone
+            before the first payment.
           </div>
         </div>
       </section>

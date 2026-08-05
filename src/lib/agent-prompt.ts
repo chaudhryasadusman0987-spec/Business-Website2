@@ -1,20 +1,47 @@
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
 import { securitySolutions, installFee } from "@/data/security-solutions"
-import { vehicles, locationSurcharges } from "@/data/car-rental"
+import { locationSurcharges } from "@/data/car-rental"
 import { itServices } from "@/data/it-services"
+import type { RentalVehicle } from "@/lib/vehicles"
 
-export function buildSystemPrompt(): string {
+/**
+ * System prompt for the chat agent.
+ *
+ * `fleet` is the live car rental fleet, read from the database by the caller
+ * (/api/chat). It is passed in rather than imported so this file stays free of
+ * the server-only DB layer — and so the agent quotes the weekly rates the owner
+ * actually set in the dashboard instead of a stale hard-coded list. An empty
+ * fleet is fine: the agent then points people at the phone.
+ */
+export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
   // One "from $X" line per security solution (lowest product price)
   const securityPrices = securitySolutions
     .map((s) => `${s.name}: from $${Math.min(...s.products.map((p) => p.price))}`)
     .join(", ")
-  // Car rental — rate, seats and security bond per vehicle class
-  const rentalRates = vehicles
+
+  const available = fleet.filter((v) => v.available)
+  const priced = available.filter((v) => v.weeklyRate > 0)
+  const cheapest = priced.length
+    ? Math.min(...priced.map((v) => v.weeklyRate))
+    : 0
+
+  // Cars with a published weekly rate, so the agent never invents a price.
+  const fleetList = priced
     .map(
       (v) =>
-        `${v.name} (${v.example}): $${v.dailyRate}/day, $${v.weeklyRate}/week, seats ${v.passengers}, bond $${v.bond}`
+        `${v.name} (${v.type}${v.rego ? `, rego ${v.rego}` : ""}): $${v.weeklyRate}/week` +
+        `${v.bond > 0 ? `, bond $${v.bond}` : ""}`,
     )
     .join("; ")
+
+  const unpriced = available.length - priced.length
+  const fleetLine = priced.length
+    ? `Cars available now: ${fleetList}.` +
+      (unpriced > 0
+        ? ` A further ${unpriced} car${unpriced === 1 ? "" : "s"} are available with the rate confirmed by phone.`
+        : "")
+    : `We have ${available.length} cars available; weekly rates are confirmed by phone.`
+
   const rentalLocations = locationSurcharges
     .map((l) =>
       l.surcharge === 0 ? `${l.name} (no surcharge)` : `${l.name} (+$${l.surcharge})`
@@ -27,14 +54,17 @@ an Australian multi-service business. You speak concisely in Australian English.
 
 SERVICES:
 1. Security Solutions — ${securityPrices}; plus $${installFee} installation fee. Free site assessment.
-2. Car Rental (Brisbane & Queensland) — ${rentalRates}. Free cancellation available.
+2. Car Rental (Pak Oz Rentals, Brisbane) — long-term hire${cheapest > 0 ? `, from $${cheapest} per week` : ""}.
 3. IT Services — ${itList}. Free consultation.
 
 CAR RENTAL DETAILS:
-- We have ${vehicles.length} vehicle classes including 7-seat and 12-seat options for families and groups.
-- Pick-up / delivery: ${rentalLocations}. Airport pick-up is available (+$25).
-- Security bond: each class has a bond (listed above). The bond is a pre-authorisation HOLD on the customer's card — funds are reserved, NOT charged — and is released within 3–10 business days of return. A credit card is recommended; with a debit card the bond is debited then refunded within 5–10 days.
-- Free cancellation. There is NO online car rental quote form — to book or get a price, ask customers to call ${SITE_PHONE} or use /contact. They can browse the fleet at /services/car-rental/vehicles.
+- Long-term rental only: paid WEEKLY in advance, with a 4 WEEK MINIMUM. There are no daily rates.
+- ${fleetLine}
+- Included on every car: roadside assistance, servicing and maintenance. Insurance excess is $1,300 AUD.
+- Security bond: refunded at the end of the rental. Amounts are listed above where set.
+- Pick-up / delivery: ${rentalLocations}.
+- To rent a car, customers pick one from the fleet at /services/car-rental and complete the application on that page. They can also call ${SITE_PHONE}.
+- NEVER quote a weekly rate that is not listed above. If a car has no listed rate, say the team will confirm it by phone.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}
 

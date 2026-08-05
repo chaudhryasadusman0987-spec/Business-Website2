@@ -34,7 +34,7 @@ import {
 //
 // The whole override object is stored under a single key. It is small, and the
 // public pages already read it as one document (see mergeSecurityProducts /
-// mergeVehicles / mergeITServices), so a single key keeps one source of truth.
+// mergeITServices), so a single key keeps one source of truth.
 
 const CATALOG_KEY = "catalog:overrides"
 const CATALOG_FILE = path.join(process.cwd(), "src", "data", "catalog.json")

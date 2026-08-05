@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react"
 import { X, ChevronLeft, ChevronRight, Check, Upload, Phone } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
-import type { RentalVehicle } from "@/data/car-rental"
+import {
+  galleryImages,
+  vehicleAlt,
+  type RentalVehicle,
+} from "@/lib/vehicles"
 import { SITE_PHONE } from "@/data/site"
 
 interface Props {
@@ -79,7 +83,13 @@ export default function VehicleModal({
   if (!vehicle) return null
 
   const v = vehicle
-  const imgs = v.images.length > 0 ? v.images : [v.image]
+  // Main photo first, then the gallery. Always at least one entry so the
+  // carousel renders its "photo coming soon" placeholder rather than nothing.
+  const gallery = galleryImages(v)
+  const imgs = gallery.length > 0 ? gallery : [""]
+  const weekly =
+    v.weeklyRate > 0 ? `$${v.weeklyRate.toLocaleString("en-AU")}` : null
+  const bond = v.bond > 0 ? `$${v.bond.toLocaleString("en-AU")}` : null
 
   const inp =
     "w-full border border-[#e8e8f0] rounded-[10px] h-[48px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors"
@@ -205,7 +215,7 @@ export default function VehicleModal({
                   <ImageWithFallback
                     key={imgs[activeImg]}
                     src={imgs[activeImg]}
-                    alt={v.imageAlt}
+                    alt={vehicleAlt(v)}
                     fill
                     className="object-cover"
                     fallbackIcon="Car"
@@ -252,7 +262,7 @@ export default function VehicleModal({
                   <div className="flex gap-2 p-3 overflow-x-auto">
                     {imgs.map((img, i) => (
                       <button
-                        key={img}
+                        key={i}
                         onClick={() => setActiveImg(i)}
                         aria-label={`View photo ${i + 1}`}
                         className={`relative flex-shrink-0 w-[72px] h-[52px] rounded-[8px] overflow-hidden border-2 transition-all ${
@@ -288,6 +298,36 @@ export default function VehicleModal({
                     </span>
                   </div>
 
+                  {/* Weekly rent leads — it is the number customers are here
+                      for, and the one the owner sets in the dashboard. */}
+                  <div className="bg-[#f8f8ff] border border-[#e8e8f5] rounded-[14px] px-4 py-3.5 mb-5">
+                    {weekly ? (
+                      <>
+                        <p className="text-[#1a1a2e]">
+                          <span className="font-extrabold text-[28px] text-[#7f85f7] leading-none">
+                            {weekly}
+                          </span>
+                          <span className="text-[13px] text-[#666880] ml-1.5">
+                            per week
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-[#9496a8] mt-1.5">
+                          Paid weekly in advance · 4 week minimum
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-bold text-[15px] text-[#1a1a2e]">
+                          Ask us for the weekly rate
+                        </p>
+                        <p className="text-[11px] text-[#9496a8] mt-1">
+                          We will confirm the price for this car when you apply
+                          or give us a call.
+                        </p>
+                      </>
+                    )}
+                  </div>
+
                   <div className="space-y-3 mb-6">
                     {[
                       ["Make", v.make],
@@ -295,6 +335,7 @@ export default function VehicleModal({
                       ["Year", String(v.year)],
                       ["Type", v.type],
                       ["Registration", v.rego],
+                      ...(bond ? [["Security bond", bond]] : []),
                     ].map(([label, value]) => (
                       <div
                         key={label}
@@ -333,12 +374,6 @@ export default function VehicleModal({
                     </div>
                   </div>
 
-                  <div className="bg-[#eeedfe] rounded-[10px] p-3 mb-2">
-                    <p className="text-[12px] text-[#534ab7] font-medium text-center">
-                      Weekly rate confirmed when you contact us. Fill the
-                      application to get started.
-                    </p>
-                  </div>
                 </div>
 
                 <div className="p-5 border-t border-[#f0f0f8] flex flex-col gap-2.5 flex-shrink-0">

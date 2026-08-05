@@ -1,27 +1,23 @@
 // Shared catalog override model. SAFE for both client and server (no node
 // imports) — only types and pure functions live here.
 //
-// The public product/vehicle pages are built from the static data files
-// (src/data/*). Admin additions/edits/removals are stored separately as an
-// "overrides" object in KV (see catalog-store.ts) and merged on top of the
-// static base at read time. This mirrors how the promo system works.
+// The public product pages are built from the static data files (src/data/*).
+// Admin additions/edits/removals are stored separately as an "overrides" object
+// in KV (see catalog-store.ts) and merged on top of the static base at read
+// time. This mirrors how the promo system works.
+//
+// Car rental vehicles are NOT here: the fleet moved to its own Postgres table
+// (src/lib/vehicles.ts + src/lib/db.ts) so the dashboard can add cars, photos
+// and weekly rates outright rather than patching a static list.
 
 import type { SecurityProduct } from "@/types"
-import type { Vehicle } from "@/data/car-rental"
 import type { ITPackage, ITServiceItem } from "@/data/it-services"
 
 export type { SecurityProduct } from "@/types"
-export type { Vehicle } from "@/data/car-rental"
 
 export interface SecuritySolutionOverride {
   added: SecurityProduct[]
   edits: Record<string, Partial<SecurityProduct>>
-  removed: string[]
-}
-
-export interface VehiclesOverride {
-  added: Vehicle[]
-  edits: Record<string, Partial<Vehicle>>
   removed: string[]
 }
 
@@ -44,14 +40,12 @@ export interface ITServicesOverride {
 export interface CatalogOverrides {
   // keyed by security solution id (e.g. "surveillance")
   security: Record<string, SecuritySolutionOverride>
-  vehicles: VehiclesOverride
   itServices: ITServicesOverride
   updatedAt?: string
 }
 
 export const EMPTY_OVERRIDES: CatalogOverrides = {
   security: {},
-  vehicles: { added: [], edits: {}, removed: [] },
   itServices: { services: {}, packages: {} },
 }
 
@@ -85,15 +79,11 @@ export function normaliseOverrides(raw: unknown): CatalogOverrides {
     }
   }
 
-  const veh = asObject(r.vehicles)
+  // A `vehicles` key may still be present in an old stored document — it is
+  // dropped here, and on the next write, now the fleet lives in Postgres.
   const it = asObject(r.itServices)
   return {
     security,
-    vehicles: {
-      added: Array.isArray(veh.added) ? (veh.added as Vehicle[]) : [],
-      edits: asObject(veh.edits) as Record<string, Partial<Vehicle>>,
-      removed: Array.isArray(veh.removed) ? (veh.removed as string[]) : [],
-    },
     itServices: {
       services: asObject(it.services) as Record<string, ITServiceOverviewEdit>,
       packages: asObject(it.packages) as Record<string, Partial<ITPackage>>,
@@ -113,15 +103,6 @@ export function mergeSecurityProducts(
   const kept = base
     .filter((p) => !o.removed.includes(p.id))
     .map((p) => ({ ...p, ...o.edits[p.id] }))
-  return [...kept, ...o.added]
-}
-
-/** Effective vehicle list: base − removed + edits + added. */
-export function mergeVehicles(base: Vehicle[], ov: CatalogOverrides): Vehicle[] {
-  const o = ov.vehicles
-  const kept = base
-    .filter((v) => !o.removed.includes(v.id))
-    .map((v) => ({ ...v, ...o.edits[v.id] }))
   return [...kept, ...o.added]
 }
 

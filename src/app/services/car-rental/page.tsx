@@ -5,22 +5,32 @@ import { Phone } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import { SITE_PHONE } from "@/data/site"
-import { rentalVehicles } from "@/data/car-rental"
+import { getVehicles } from "@/lib/db"
+
+// The fleet is dashboard-managed, so the hero counts have to be read at request
+// time — a car added in the dashboard should change "N cars on the yard" on the
+// next load. The Neon driver reads with cache: "no-store" anyway, so this page
+// cannot be statically generated; saying so explicitly also keeps `next build`
+// working on a machine with no DATABASE_URL.
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Long-Term Car Rental Brisbane",
   description:
-    "Pak Oz Rentals — long-term car rental in Brisbane. 16 vehicles, weekly " +
-    "payment, 4 week minimum. Road assistance and maintenance included.",
+    "Pak Oz Rentals — long-term car rental in Brisbane. Weekly payment, " +
+    "4 week minimum. Road assistance and maintenance included.",
 }
 
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
 
-const heroStats = [
-  { value: String(rentalVehicles.length), label: "Cars on the yard" },
-  { value: "4", label: "Week minimum" },
-  { value: "$1,300", label: "Insurance excess" },
-]
+/** Cars visible to customers. 0 when the database is unreachable. */
+async function availableCount(): Promise<number> {
+  try {
+    return (await getVehicles()).filter((v) => v.available).length
+  } catch {
+    return 0
+  }
+}
 
 // Rental terms read as a spec sheet rather than a row of icon tiles — same
 // information, less decoration.
@@ -33,7 +43,19 @@ const terms = [
   { label: "Servicing & maintenance", value: "Included" },
 ]
 
-export default function CarRentalPage() {
+export default async function CarRentalPage() {
+  const count = await availableCount()
+
+  const heroStats = [
+    // Falls back to the terms when the count is unknown, so the row never
+    // reads "0 cars on the yard".
+    count > 0
+      ? { value: String(count), label: "Cars on the yard" }
+      : { value: "Weekly", label: "Payment cycle" },
+    { value: "4", label: "Week minimum" },
+    { value: "$1,300", label: "Insurance excess" },
+  ]
+
   return (
     <>
       {/* SECTION 1 — Hero */}
@@ -62,7 +84,7 @@ export default function CarRentalPage() {
             </h1>
 
             <p className="text-[15px] text-[#9496a8] leading-[1.8] mt-5 max-w-[440px]">
-              Sixteen cars on the yard, rented by the week with a four-week
+              Cars on the yard in Brisbane, rented by the week with a four-week
               minimum. Roadside assistance and servicing are on us — you put fuel
               in it and drive.
             </p>
@@ -127,7 +149,7 @@ export default function CarRentalPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-[#0f6e56] flex-shrink-0" />
                 <div>
                   <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">
-                    All {rentalVehicles.length} available now
+                    {count > 0 ? `All ${count} available now` : "Available now"}
                   </p>
                   <p className="text-[12px] text-[#9496a8] mt-0.5">
                     Pick up in Brisbane — usually same week

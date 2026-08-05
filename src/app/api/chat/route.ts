@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { buildSystemPrompt } from "@/lib/agent-prompt"
+import { getVehicles } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
@@ -17,10 +18,20 @@ export async function POST(req: Request) {
       })
     }
 
+    // The fleet and its weekly rates are dashboard-managed, so read them live
+    // rather than baking a stale list into the prompt. If the database is
+    // unreachable the agent still answers — it just refers rates to the phone.
+    let fleet: Awaited<ReturnType<typeof getVehicles>> = []
+    try {
+      fleet = await getVehicles()
+    } catch (e) {
+      console.error("Chat fleet lookup failed:", e)
+    }
+
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: buildSystemPrompt(),
+      systemInstruction: buildSystemPrompt(fleet),
     })
 
     // Convert messages to Gemini format (Gemini uses "model" instead of "assistant").
