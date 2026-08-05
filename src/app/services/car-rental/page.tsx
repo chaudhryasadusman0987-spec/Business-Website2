@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
+import { Phone } from "lucide-react"
+import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import { SITE_PHONE } from "@/data/site"
 import { rentalVehicles } from "@/data/car-rental"
@@ -14,113 +17,148 @@ export const metadata: Metadata = {
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
 
 const heroStats = [
-  { value: String(rentalVehicles.length), label: "Vehicles" },
-  { value: "4 Wks", label: "Minimum" },
-  { value: "$1,300", label: "Insurance Excess" },
-  { value: "✓", label: "Maintenance" },
+  { value: String(rentalVehicles.length), label: "Cars on the yard" },
+  { value: "4", label: "Week minimum" },
+  { value: "$1,300", label: "Insurance excess" },
 ]
 
+// Rental terms read as a spec sheet rather than a row of icon tiles — same
+// information, less decoration.
 const terms = [
-  { icon: "💰", label: "Payment", value: "Weekly in Advance" },
-  { icon: "📅", label: "Minimum", value: "4 Weeks" },
-  { icon: "🔒", label: "Bond", value: "Refundable" },
-  { icon: "🛡️", label: "Insurance Excess", value: "$1,300 AUD" },
-  { icon: "🚗", label: "Road Assistance", value: "Included" },
-  { icon: "🔧", label: "Maintenance", value: "Included" },
+  { label: "Payment", value: "Weekly, in advance" },
+  { label: "Minimum term", value: "4 weeks" },
+  { label: "Security bond", value: "Refunded at the end" },
+  { label: "Insurance excess", value: "$1,300 AUD" },
+  { label: "Roadside assistance", value: "Included" },
+  { label: "Servicing & maintenance", value: "Included" },
 ]
 
 export default function CarRentalPage() {
   return (
     <>
       {/* SECTION 1 — Hero */}
-      <section className="bg-[#0d0d1a] relative overflow-hidden min-h-[65vh] flex items-center">
-        {/* Dot grid */}
+      <section className="bg-[#0d0d1a] relative overflow-hidden">
+        {/* Single soft glow behind the copy — no pattern fill, the photo carries
+            the visual weight. */}
         <div
-          className="absolute inset-0 opacity-[0.18]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #7f85f7 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        {/* Purple glow */}
-        <div
-          className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
+          className="absolute -top-40 -left-24 w-[620px] h-[620px] rounded-full pointer-events-none"
           style={{
             background:
-              "radial-gradient(circle, rgba(127,133,247,0.35) 0%, transparent 70%)",
+              "radial-gradient(circle, rgba(127,133,247,0.22) 0%, transparent 68%)",
           }}
         />
 
-        <div className="relative max-w-[1170px] mx-auto px-4 py-[80px] w-full flex flex-col lg:flex-row items-center gap-14">
+        <div className="relative max-w-[1170px] mx-auto px-4 py-[72px] lg:py-[96px] flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* LEFT — copy */}
-          <div className="flex-1">
-            <span className="inline-block bg-white/10 border border-white/15 text-[#c5c8fd] text-[11px] font-semibold uppercase tracking-widest px-4 py-2 rounded-full">
+          <AnimateIn animation="slide-left" className="flex-1 w-full">
+            <span className="inline-block bg-white/[0.07] border border-white/10 text-[#c5c8fd] text-[11px] font-semibold uppercase tracking-widest px-4 py-2 rounded-full">
               Pak Oz Rentals · Brisbane QLD
             </span>
 
-            <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.1] mt-6">
-              Long-Term Car Rental
+            <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.08] mt-6">
+              Long-term car rental,
               <br />
               <span className="text-[#7f85f7]">Brisbane.</span>
             </h1>
 
-            <p className="text-[15px] text-[#9496a8] leading-[1.8] mt-4 max-w-[440px]">
-              {rentalVehicles.length} vehicles available. Weekly rental. Minimum
-              4 weeks. Road assistance and maintenance included.
+            <p className="text-[15px] text-[#9496a8] leading-[1.8] mt-5 max-w-[440px]">
+              Sixteen cars on the yard, rented by the week with a four-week
+              minimum. Roadside assistance and servicing are on us — you put fuel
+              in it and drive.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row gap-3.5">
               <a
                 href="#vehicles"
-                className="flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-all duration-300"
+                className="flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-colors duration-300"
               >
-                View Fleet
+                View the fleet
               </a>
               <a
                 href={tel}
-                className="flex items-center justify-center border border-white/20 text-white rounded-[8px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/5 transition-all duration-300"
+                className="flex items-center justify-center gap-2 border border-white/20 text-white rounded-[8px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/[0.06] transition-colors duration-300"
               >
-                Call Us
+                <Phone size={16} />
+                Call us
               </a>
             </div>
-          </div>
 
-          {/* RIGHT — stats card */}
-          <div className="w-full lg:w-[400px] flex-shrink-0">
-            <div className="bg-white/[0.06] border border-white/10 rounded-[20px] p-6 grid grid-cols-2 gap-5 backdrop-blur-sm">
-              {heroStats.map((s) => (
-                <div key={s.label} className="text-center py-3">
-                  <p className="text-[#7f85f7] font-extrabold text-[32px] leading-none">
+            {/* Stats as a typographic row, divided — not a glass card grid. */}
+            <div className="mt-10 flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-10">
+              {heroStats.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={
+                    i > 0 ? "sm:pl-10 sm:border-l sm:border-white/10" : ""
+                  }
+                >
+                  <p className="text-white font-extrabold text-[26px] leading-none">
                     {s.value}
                   </p>
-                  <p className="text-[#9496a8] text-[12px] mt-2 uppercase tracking-wider">
-                    {s.label}
-                  </p>
+                  <p className="text-[#767892] text-[12px] mt-2">{s.label}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </AnimateIn>
+
+          {/* RIGHT — hero photo with an overlapping availability card */}
+          <AnimateIn
+            animation="slide-right"
+            delay={150}
+            className="w-full lg:w-[46%] flex-shrink-0"
+          >
+            <div className="relative">
+              <div className="relative h-[300px] sm:h-[380px] lg:h-[440px] rounded-[20px] overflow-hidden ring-1 ring-white/10">
+                <Image
+                  src="/images/vehicles/car-rental-keys.jpg"
+                  alt="Driver behind the wheel of a Pak Oz Rentals car in Brisbane"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 540px"
+                  className="object-cover"
+                />
+                {/* Grounds the photo against the dark section. */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d1a] via-transparent to-transparent opacity-70" />
+              </div>
+
+              <div className="absolute -bottom-5 left-5 right-5 sm:right-auto sm:w-[290px] bg-white rounded-[14px] p-4 shadow-xl flex items-center gap-3.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0f6e56] flex-shrink-0" />
+                <div>
+                  <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">
+                    All {rentalVehicles.length} available now
+                  </p>
+                  <p className="text-[12px] text-[#9496a8] mt-0.5">
+                    Pick up in Brisbane — usually same week
+                  </p>
+                </div>
+              </div>
+            </div>
+          </AnimateIn>
         </div>
       </section>
 
-      {/* SECTION 2 — Rental terms */}
-      <section className="bg-[#fefefd] py-[80px]">
+      {/* SECTION 2 — Rental terms, as a spec sheet */}
+      <section className="bg-[#fefefd] pt-[92px] pb-[80px]">
         <div className="max-w-[1170px] mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {terms.map((t) => (
-              <div
-                key={t.label}
-                className="bg-white border border-[#e8e8f0] rounded-[14px] p-5 text-center hover:border-[#7f85f7] transition-colors"
-              >
-                <div className="text-[26px] leading-none">{t.icon}</div>
-                <p className="text-[10px] font-semibold text-[#9496a8] uppercase tracking-wider mt-3">
-                  {t.label}
-                </p>
-                <p className="text-[13px] font-bold text-[#1a1a2e] mt-1 leading-snug">
-                  {t.value}
-                </p>
-              </div>
+          <AnimateIn animation="fade-up">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7] mb-3">
+              How it works
+            </p>
+            <h2 className="text-[28px] lg:text-[34px] font-bold text-[#1a1a2e] leading-tight max-w-[520px]">
+              Same terms on every car. No fine print.
+            </h2>
+          </AnimateIn>
+
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-1">
+            {terms.map((t, i) => (
+              <AnimateIn key={t.label} animation="fade-up" delay={(i % 3) * 100}>
+                <div className="flex items-baseline justify-between gap-4 py-4 border-b border-[#ececf4]">
+                  <span className="text-[13px] text-[#8a8ca0]">{t.label}</span>
+                  <span className="text-[14px] font-semibold text-[#1a1a2e] text-right">
+                    {t.value}
+                  </span>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -130,29 +168,33 @@ export default function CarRentalPage() {
       <VehicleGrid />
 
       {/* SECTION 4 — Contact CTA */}
-      <section className="bg-[#1a1a2e] py-[60px]">
-        <div className="max-w-[700px] mx-auto px-4 text-center">
-          <h2 className="text-white font-bold text-[28px] leading-tight">
-            Have a question?
-          </h2>
-          <p className="text-[#9496a8] text-[15px] mt-3 mb-8 leading-relaxed">
-            Call us directly or send a message — we respond within 2 hours.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={tel}
-              className="flex items-center justify-center gap-2 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-all duration-300"
-            >
-              📞 Call {SITE_PHONE}
-            </a>
-            <Link
-              href="/contact"
-              className="flex items-center justify-center gap-2 border-2 border-white/20 text-white rounded-[10px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/5 transition-all duration-300"
-            >
-              Send a Message
-            </Link>
+      <section className="bg-[#1a1a2e] py-[68px]">
+        <AnimateIn animation="fade-up">
+          <div className="max-w-[700px] mx-auto px-4 text-center">
+            <h2 className="text-white font-bold text-[28px] leading-tight">
+              Not sure which one suits you?
+            </h2>
+            <p className="text-[#9496a8] text-[15px] mt-3 mb-8 leading-relaxed">
+              Give us a call and tell us what you need it for — we will point you
+              at the right car. We answer within two hours.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href={tel}
+                className="flex items-center justify-center gap-2 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-colors duration-300"
+              >
+                <Phone size={16} />
+                {SITE_PHONE}
+              </a>
+              <Link
+                href="/contact"
+                className="flex items-center justify-center border-2 border-white/20 text-white rounded-[10px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/[0.06] transition-colors duration-300"
+              >
+                Send a message
+              </Link>
+            </div>
           </div>
-        </div>
+        </AnimateIn>
       </section>
     </>
   )

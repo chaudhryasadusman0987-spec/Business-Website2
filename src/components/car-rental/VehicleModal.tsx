@@ -133,7 +133,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end lg:items-center justify-center p-0 lg:p-4"
+      className="modal-backdrop fixed inset-0 z-[100] flex items-end lg:items-center justify-center p-0 lg:p-4"
       style={{ background: "rgba(0,0,0,0.75)" }}
       onClick={onClose}
       role="dialog"
@@ -141,7 +141,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
       aria-label={`${v.name} — rental details`}
     >
       <div
-        className="bg-white w-full lg:max-w-[960px] lg:rounded-[20px] max-h-[96vh] lg:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="modal-panel bg-white w-full lg:max-w-[960px] rounded-t-[20px] lg:rounded-[20px] max-h-[96vh] lg:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Top bar ── */}
@@ -192,7 +192,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
         <div className="flex-1 overflow-y-auto">
           {/* ═══ VIEW 1 — DETAILS ═══ */}
           {view === "details" && !submitted && (
-            <div className="flex flex-col lg:flex-row h-full">
+            <div className="view-in flex flex-col lg:flex-row h-full">
               {/* LEFT — image gallery */}
               <div className="lg:w-[52%] bg-[#f8f8ff] flex flex-col">
                 <div className="relative h-[240px] lg:h-[320px] overflow-hidden bg-[#eeeeff]">
@@ -310,12 +310,12 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
                     </p>
                     <div className="space-y-2">
                       {[
-                        ["💰 Payment", "Weekly in advance"],
-                        ["📅 Minimum", "4 weeks"],
-                        ["🔒 Bond", "Refundable at end"],
-                        ["🛡️ Insurance excess", "$1,300 AUD"],
-                        ["🚗 Road assistance", "Included"],
-                        ["🔧 Maintenance", "Included"],
+                        ["Payment", "Weekly in advance"],
+                        ["Minimum term", "4 weeks"],
+                        ["Bond", "Refunded at the end"],
+                        ["Insurance excess", "$1,300 AUD"],
+                        ["Roadside assistance", "Included"],
+                        ["Maintenance", "Included"],
                       ].map(([k, val]) => (
                         <div key={k} className="flex items-center justify-between">
                           <span className="text-[12px] text-[#666]">{k}</span>
@@ -338,9 +338,9 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
                 <div className="p-5 border-t border-[#f0f0f8] flex flex-col gap-2.5 flex-shrink-0">
                   <button
                     onClick={() => setView("apply")}
-                    className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-all"
+                    className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-colors"
                   >
-                    🚗 Get on Rent
+                    Apply for this car
                   </button>
                   <a
                     href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
@@ -356,7 +356,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
 
           {/* ═══ VIEW 2 — APPLICATION ═══ */}
           {view === "apply" && !submitted && (
-            <div className="p-6 max-w-[640px] mx-auto">
+            <div className="view-in p-6 max-w-[640px] mx-auto">
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Your Details
               </h3>
@@ -572,7 +572,7 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
 
           {/* ═══ VIEW 3 — PAYMENT ═══ */}
           {view === "payment" && !submitted && (
-            <div className="p-6 max-w-[640px] mx-auto">
+            <div className="view-in p-6 max-w-[640px] mx-auto">
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Payment Details
               </h3>
@@ -708,19 +708,19 @@ export default function VehicleModal({ vehicle, onClose }: Props) {
                   disabled={submitting}
                   className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all"
                 >
-                  {submitting ? "⏳ Submitting..." : "✅ Submit Application"}
+                  {submitting ? "Submitting…" : "Submit application"}
                 </button>
               </div>
 
               <p className="text-[11px] text-[#9496a8] text-center mt-4">
-                🔒 Secure. We call you before any payment is processed.
+                We call you before any payment is processed.
               </p>
             </div>
           )}
 
           {/* ═══ SUCCESS ═══ */}
           {submitted && (
-            <div className="p-10 text-center max-w-[500px] mx-auto">
+            <div className="view-in p-10 text-center max-w-[500px] mx-auto">
               <div className="w-16 h-16 rounded-full bg-[#e1f5ee] flex items-center justify-center mx-auto mb-5">
                 <Check size={32} className="text-[#0f6e56]" />
               </div>

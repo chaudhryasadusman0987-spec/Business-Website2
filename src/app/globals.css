@@ -123,6 +123,33 @@ body {
 .delay-900 { transition-delay: 0.9s; }
 .delay-1000 { transition-delay: 1s; }
 
+/* Modal entry — backdrop fades, panel rises. Mobile sheets slide up from the
+   bottom edge, desktop dialogs lift a little and settle. */
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-backdrop {
+  animation: modal-backdrop-in 0.25s ease forwards;
+}
+.modal-panel {
+  animation: modal-panel-in 0.32s cubic-bezier(0.16, 0.84, 0.44, 1) forwards;
+}
+
+/* Step views inside the modal — each swap fades the new view in rather than
+   snapping, so moving between details → apply → payment feels continuous. */
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.view-in {
+  animation: view-in 0.3s ease forwards;
+}
+
 /* Respect reduced-motion: show everything immediately, no transforms. */
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-up,
@@ -137,5 +164,10 @@ body {
   .animate-expand-line {
     animation: none;
     width: 100%;
+  }
+  .modal-backdrop,
+  .modal-panel,
+  .view-in {
+    animation: none;
   }
 }
