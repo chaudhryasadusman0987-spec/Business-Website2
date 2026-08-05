@@ -207,3 +207,298 @@ export const youngDriverSurcharge = 25   // per day, age 21–24
 export const oneWayFee            = 75   // different return location
 export const gstRate              = 0.10
 export const minRentalAge         = 21
+
+// ============================================================
+//  PAK OZ RENTALS — long-term fleet (weekly hire, 4 week min)
+//  Separate from the daily-rate `vehicles` catalog above: these
+//  are the 16 real cars on the yard, listed by rego.
+// ============================================================
+
+export interface RentalVehicle {
+  id: string
+  number: number
+  name: string
+  year: number
+  make: string
+  model: string
+  type: string
+  rego: string
+  // Main image shown on listing card
+  image: string
+  // Additional images shown in detail modal
+  // Owner adds these filenames after
+  // uploading to public/images/vehicles/
+  images: string[]
+  imageAlt: string
+  weeklyRate: number
+  bond: number
+  available: boolean
+}
+
+export const rentalVehicles: RentalVehicle[] = [
+  {
+    id: "v1", number: 1,
+    name: "2013 Toyota Prius Hatchback",
+    year: 2013, make: "Toyota",
+    model: "Prius", type: "Hatchback",
+    rego: "346WSI",
+    image: "/images/vehicles/v1-main.jpg",
+    images: [
+      "/images/vehicles/v1-main.jpg",
+      "/images/vehicles/v1-front.jpg",
+      "/images/vehicles/v1-interior.jpg",
+      "/images/vehicles/v1-rear.jpg",
+    ],
+    imageAlt: "2013 Toyota Prius Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v2", number: 2,
+    name: "2016 Ford Kuga",
+    year: 2016, make: "Ford",
+    model: "Kuga", type: "SUV",
+    rego: "260QK8",
+    image: "/images/vehicles/v2-main.jpg",
+    images: [
+      "/images/vehicles/v2-main.jpg",
+      "/images/vehicles/v2-front.jpg",
+      "/images/vehicles/v2-interior.jpg",
+      "/images/vehicles/v2-rear.jpg",
+    ],
+    imageAlt: "2016 Ford Kuga SUV",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v3", number: 3,
+    name: "2008 Suzuki Swift Hatchback",
+    year: 2008, make: "Suzuki",
+    model: "Swift", type: "Hatchback",
+    rego: "290QT9",
+    image: "/images/vehicles/v3-main.jpg",
+    images: [
+      "/images/vehicles/v3-main.jpg",
+      "/images/vehicles/v3-front.jpg",
+      "/images/vehicles/v3-interior.jpg",
+      "/images/vehicles/v3-rear.jpg",
+    ],
+    imageAlt: "2008 Suzuki Swift Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v4", number: 4,
+    name: "2010 Honda Jazz Hatchback",
+    year: 2010, make: "Honda",
+    model: "Jazz", type: "Hatchback",
+    rego: "003QR8",
+    image: "/images/vehicles/v4-main.jpg",
+    images: [
+      "/images/vehicles/v4-main.jpg",
+      "/images/vehicles/v4-front.jpg",
+      "/images/vehicles/v4-interior.jpg",
+      "/images/vehicles/v4-rear.jpg",
+    ],
+    imageAlt: "2010 Honda Jazz Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v5", number: 5,
+    name: "2004 Toyota Prius Hatchback",
+    year: 2004, make: "Toyota",
+    model: "Prius", type: "Hatchback",
+    rego: "093OR8",
+    image: "/images/vehicles/v5-main.jpg",
+    images: [
+      "/images/vehicles/v5-main.jpg",
+      "/images/vehicles/v5-front.jpg",
+      "/images/vehicles/v5-interior.jpg",
+      "/images/vehicles/v5-rear.jpg",
+    ],
+    imageAlt: "2004 Toyota Prius Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v6", number: 6,
+    name: "2013 Nissan Pulsar",
+    year: 2013, make: "Nissan",
+    model: "Pulsar", type: "Sedan",
+    rego: "735ZQW",
+    image: "/images/vehicles/v6-main.jpg",
+    images: [
+      "/images/vehicles/v6-main.jpg",
+      "/images/vehicles/v6-front.jpg",
+      "/images/vehicles/v6-interior.jpg",
+      "/images/vehicles/v6-rear.jpg",
+    ],
+    imageAlt: "2013 Nissan Pulsar Sedan",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v7", number: 7,
+    name: "2007 Toyota Yaris Hatchback",
+    year: 2007, make: "Toyota",
+    model: "Yaris", type: "Hatchback",
+    rego: "626NN6",
+    image: "/images/vehicles/v7-main.jpg",
+    images: [
+      "/images/vehicles/v7-main.jpg",
+      "/images/vehicles/v7-front.jpg",
+      "/images/vehicles/v7-interior.jpg",
+      "/images/vehicles/v7-rear.jpg",
+    ],
+    imageAlt: "2007 Toyota Yaris Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v8", number: 8,
+    name: "2007 Toyota Prius",
+    year: 2007, make: "Toyota",
+    model: "Prius", type: "Hybrid",
+    rego: "976QP2",
+    image: "/images/vehicles/v8-main.jpg",
+    images: [
+      "/images/vehicles/v8-main.jpg",
+      "/images/vehicles/v8-front.jpg",
+      "/images/vehicles/v8-interior.jpg",
+      "/images/vehicles/v8-rear.jpg",
+    ],
+    imageAlt: "2007 Toyota Prius Hybrid",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v9", number: 9,
+    name: "2016 Toyota Camry Hybrid",
+    year: 2016, make: "Toyota",
+    model: "Camry", type: "Hybrid Sedan",
+    rego: "046QH5",
+    image: "/images/vehicles/v9-main.jpg",
+    images: [
+      "/images/vehicles/v9-main.jpg",
+      "/images/vehicles/v9-front.jpg",
+      "/images/vehicles/v9-interior.jpg",
+      "/images/vehicles/v9-rear.jpg",
+    ],
+    imageAlt: "2016 Toyota Camry Hybrid",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v10", number: 10,
+    name: "2013 Toyota Camry Sedan",
+    year: 2013, make: "Toyota",
+    model: "Camry", type: "Sedan",
+    rego: "997QG5",
+    image: "/images/vehicles/v10-main.jpg",
+    images: [
+      "/images/vehicles/v10-main.jpg",
+      "/images/vehicles/v10-front.jpg",
+      "/images/vehicles/v10-interior.jpg",
+      "/images/vehicles/v10-rear.jpg",
+    ],
+    imageAlt: "2013 Toyota Camry Sedan",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v11", number: 11,
+    name: "2016 Toyota Camry Hybrid",
+    year: 2016, make: "Toyota",
+    model: "Camry", type: "Hybrid Sedan",
+    rego: "450PO8",
+    image: "/images/vehicles/v11-main.jpg",
+    images: [
+      "/images/vehicles/v11-main.jpg",
+      "/images/vehicles/v11-front.jpg",
+      "/images/vehicles/v11-interior.jpg",
+      "/images/vehicles/v11-rear.jpg",
+    ],
+    imageAlt: "2016 Toyota Camry Hybrid",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v12", number: 12,
+    name: "2007 Toyota Yaris Hatchback",
+    year: 2007, make: "Toyota",
+    model: "Yaris", type: "Hatchback",
+    rego: "483EH5",
+    image: "/images/vehicles/v12-main.jpg",
+    images: [
+      "/images/vehicles/v12-main.jpg",
+      "/images/vehicles/v12-front.jpg",
+      "/images/vehicles/v12-interior.jpg",
+      "/images/vehicles/v12-rear.jpg",
+    ],
+    imageAlt: "2007 Toyota Yaris Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v13", number: 13,
+    name: "2007 Honda Jazz Hatchback",
+    year: 2007, make: "Honda",
+    model: "Jazz", type: "Hatchback",
+    rego: "004QR8",
+    image: "/images/vehicles/v13-main.jpg",
+    images: [
+      "/images/vehicles/v13-main.jpg",
+      "/images/vehicles/v13-front.jpg",
+      "/images/vehicles/v13-interior.jpg",
+      "/images/vehicles/v13-rear.jpg",
+    ],
+    imageAlt: "2007 Honda Jazz Hatchback",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v14", number: 14,
+    name: "2015 Toyota Camry Hybrid",
+    year: 2015, make: "Toyota",
+    model: "Camry", type: "Hybrid Sedan",
+    rego: "070LM3",
+    image: "/images/vehicles/v14-main.jpg",
+    images: [
+      "/images/vehicles/v14-main.jpg",
+      "/images/vehicles/v14-front.jpg",
+      "/images/vehicles/v14-interior.jpg",
+      "/images/vehicles/v14-rear.jpg",
+    ],
+    imageAlt: "2015 Toyota Camry Hybrid",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v15", number: 15,
+    name: "2008 Hyundai Getz",
+    year: 2008, make: "Hyundai",
+    model: "Getz", type: "Hatchback",
+    rego: "343QF8",
+    image: "/images/vehicles/v15-main.jpg",
+    images: [
+      "/images/vehicles/v15-main.jpg",
+      "/images/vehicles/v15-front.jpg",
+      "/images/vehicles/v15-interior.jpg",
+      "/images/vehicles/v15-rear.jpg",
+    ],
+    imageAlt: "2008 Hyundai Getz",
+    weeklyRate: 0, bond: 0, available: true
+  },
+  {
+    id: "v16", number: 16,
+    name: "2017 Toyota HiLux",
+    year: 2017, make: "Toyota",
+    model: "HiLux", type: "Ute",
+    rego: "816QU8",
+    image: "/images/vehicles/v16-main.jpg",
+    images: [
+      "/images/vehicles/v16-main.jpg",
+      "/images/vehicles/v16-front.jpg",
+      "/images/vehicles/v16-interior.jpg",
+      "/images/vehicles/v16-rear.jpg",
+    ],
+    imageAlt: "2017 Toyota HiLux Ute",
+    weeklyRate: 0, bond: 0, available: true
+  },
+]
+
+export const rentalTerms = {
+  paymentCycle: "Weekly in advance",
+  minimumRental: "4 weeks minimum",
+  securityBond: "Refunded at end of rental",
+  insuranceExcess: "$1,300 AUD",
+  roadAssistance: "Included",
+  maintenanceService: "Included",
+}

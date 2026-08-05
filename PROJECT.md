@@ -177,7 +177,8 @@ colors: {
 /services/security-solutions/quote      ✅ 5-step quote wizard → /api/quote/security
 /services/car-rental                    ❌ Car rental landing (ad target)
 /services/car-rental/vehicles           ❌ Vehicles + rates
-/services/car-rental/quote              ❌ Booking form (logic TBD)
+(removed) /services/car-rental/quote     — replaced by the in-page vehicle
+                                          modal → /api/rental-application
 /services/it-services                   ❌ IT services landing (ad target)
 /services/it-services/web-development    ❌
 /services/it-services/app-development    ❌

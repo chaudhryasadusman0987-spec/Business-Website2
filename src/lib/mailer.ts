@@ -57,10 +57,18 @@ function htmlToText(html: string): string {
     .trim()
 }
 
+/** File attached to an outgoing email (e.g. an uploaded licence photo). */
+export interface EmailAttachment {
+  filename: string
+  content: Buffer
+  contentType?: string
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
-  html: string
+  html: string,
+  attachments?: EmailAttachment[]
 ): Promise<void> {
   const from = process.env.SMTP_FROM
     || "info@pakozsolutions.com.au"
@@ -82,6 +90,7 @@ export async function sendEmail(
       subject,
       html,
       text: htmlToText(html),
+      ...(attachments?.length ? { attachments } : {}),
     })
     console.log("Email sent successfully:", result.messageId)
   } catch (error) {
