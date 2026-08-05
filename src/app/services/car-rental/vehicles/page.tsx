@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import VehicleFleet from "@/components/sections/VehicleFleet"
-import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 
 export const metadata: Metadata = {
   title: "Vehicle Fleet | Car Rental Brisbane",
@@ -63,12 +62,6 @@ export default function VehiclesPage() {
           </div>
         </div>
       </section>
-
-      <QuoteCTABanner
-        href="/services/car-rental/quote"
-        title="Get Your Car Rental Quote"
-        subtitle="Free quote · 48 hour validity · 2-hour confirmation"
-      />
     </>
   )
 }

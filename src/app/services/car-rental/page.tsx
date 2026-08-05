@@ -6,8 +6,8 @@ import SectionTitle from "@/components/ui/SectionTitle"
 import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import CarRentalHero from "@/components/sections/CarRentalHero"
-import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
+import { SITE_PHONE } from "@/data/site"
 import { vehicles } from "@/data/car-rental"
 import { mergeVehicles } from "@/lib/catalog"
 import { readCatalog } from "@/lib/catalog-store"
@@ -231,15 +231,6 @@ export default async function CarRentalPage() {
                     <Users size={14} />
                     {vehicle.passengers} seats
                   </div>
-
-                  <div className="mt-auto pt-5">
-                    <Link
-                      href={`/services/car-rental/quote?vehicle=${vehicle.id}`}
-                      className="block w-full bg-[#1a1a2e] text-white rounded-[10px] h-[46px] font-semibold text-[14px] text-center leading-[46px] hover:bg-[#7f85f7] transition-all duration-300"
-                    >
-                      Book Now
-                    </Link>
-                  </div>
                 </div>
               </div>
               </AnimateIn>
@@ -451,12 +442,36 @@ export default async function CarRentalPage() {
         </div>
       </section>
 
-      {/* SECTION 7 — Quote CTA + testimonials (unchanged) */}
-      <QuoteCTABanner
-        href="/services/car-rental/quote"
-        title="Get Your Car Rental Quote"
-        subtitle="Free quote · 48 hour validity · 2-hour confirmation"
-      />
+      {/* SECTION 7 — Contact CTA. Replaces the quote banner: car rental has no
+          online quote form, enquiries come in by phone or the contact page. */}
+      <section className="bg-[#1a1a2e] py-[60px]">
+        <div className="max-w-[700px] mx-auto px-4 text-center">
+          <p className="text-[#7f85f7] text-[13px] font-semibold uppercase tracking-widest mb-3">
+            Interested in renting?
+          </p>
+          <h2 className="text-white font-bold text-[28px] lg:text-[36px] leading-tight mb-4">
+            Contact Us to Check Availability
+          </h2>
+          <p className="text-[#9496a8] text-[15px] mb-8 leading-relaxed">
+            Call or message us with your dates and preferred vehicle — we will
+            confirm availability and pricing within 2 hours.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
+              className="flex items-center justify-center gap-2 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-all duration-300"
+            >
+              📞 Call {SITE_PHONE}
+            </a>
+            <Link
+              href="/contact"
+              className="flex items-center justify-center gap-2 border-2 border-white/20 text-white rounded-[10px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/5 transition-all duration-300"
+            >
+              Send a Message
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <TestimonialsStrip />
     </>

@@ -33,7 +33,8 @@ const SERVICES = [
 
 const quickLinks = [
   { label: "Security Solutions Quote", href: "/services/security-solutions/quote" },
-  { label: "Car Rental Quote", href: "/services/car-rental/quote" },
+  // Car rental has no online quote — link to the fleet, enquiries come by phone.
+  { label: "Car Rental Vehicles", href: "/services/car-rental/vehicles" },
   { label: "IT & AI Quote", href: "/services/it-services/quote" },
 ]
 

@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation"
 import { ArrowRight, ArrowLeft } from "lucide-react"
 import { SITE_FULL } from "@/data/site"
 import SecurityQuoteForm from "@/components/quotes/SecurityQuoteForm"
-import CarRentalQuoteForm from "@/components/quotes/CarRentalQuoteForm"
 import ITQuoteForm from "@/components/quotes/ITQuoteForm"
 
-const SERVICE_KEYS = ["security", "car-rental", "it-services"]
+// Car rental is deliberately absent — it takes enquiries by phone/contact form
+// rather than an online quote.
+const SERVICE_KEYS = ["security", "it-services"]
 
 /* Custom service SVGs — same shapes/colors as the navbar + hero cards */
 function CameraIcon() {
@@ -17,17 +18,6 @@ function CameraIcon() {
       <path d="M23 7l-7 5 7 5V7z" />
       <rect x="1" y="5" width="15" height="14" rx="2" />
       <circle cx="6" cy="12" r="1.5" fill="#f57c00" stroke="none" />
-    </svg>
-  )
-}
-
-function CarIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="15" height="13" rx="2" />
-      <path d="M16 8h4l3 3v5h-7V8z" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
     </svg>
   )
 }
@@ -52,16 +42,6 @@ const cards = [
     price: "From $149",
     priceColor: "text-[#f57c00]",
     tag: "5-step quote · Email sent instantly",
-  },
-  {
-    key: "car-rental",
-    iconBg: "bg-[rgba(76,175,80,0.15)]",
-    icon: <CarIcon />,
-    title: "Car Rental",
-    sub: "Brisbane · Economy to luxury",
-    price: "From $55/day",
-    priceColor: "text-[#4caf50]",
-    tag: "6-step quote · Bond explained clearly",
   },
   {
     key: "it-services",
@@ -101,7 +81,6 @@ function QuotePicker() {
           </button>
         </div>
         {selectedService === "security" && <SecurityQuoteForm />}
-        {selectedService === "car-rental" && <CarRentalQuoteForm />}
         {selectedService === "it-services" && <ITQuoteForm />}
       </div>
     )

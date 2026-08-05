@@ -55,14 +55,8 @@ export default function CarRentalHero() {
 
             <div className="flex flex-wrap gap-4 mt-8">
               <Link
-                href="/services/car-rental/quote"
-                className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold hover:bg-[#6b71f0] transition-all duration-300"
-              >
-                Get a Quote
-              </Link>
-              <Link
                 href="/services/car-rental/vehicles"
-                className="inline-flex items-center justify-center border border-white/20 text-white rounded-[8px] h-[52px] px-8 hover:bg-white/5 transition-all duration-300"
+                className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold hover:bg-[#6b71f0] transition-all duration-300"
               >
                 View Vehicles
               </Link>

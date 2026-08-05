@@ -1,4 +1,3 @@
-import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import Price from "@/components/ui/Price"
 import { formatAUD } from "@/lib/formatters"
@@ -89,12 +88,6 @@ export default function VehicleCard({
         </span>
       </div>
 
-      <Link
-        href={`/services/car-rental/quote?vehicle=${vehicle.id}`}
-        className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[40px] leading-[40px] rounded-[5px] text-[14px] group-hover:bg-white group-hover:text-brand-dark transition-all duration-500"
-      >
-        Book Now
-      </Link>
     </div>
   )
 }

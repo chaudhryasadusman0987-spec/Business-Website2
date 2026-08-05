@@ -34,7 +34,7 @@ CAR RENTAL DETAILS:
 - We have ${vehicles.length} vehicle classes including 7-seat and 12-seat options for families and groups.
 - Pick-up / delivery: ${rentalLocations}. Airport pick-up is available (+$25).
 - Security bond: each class has a bond (listed above). The bond is a pre-authorisation HOLD on the customer's card — funds are reserved, NOT charged — and is released within 3–10 business days of return. A credit card is recommended; with a debit card the bond is debited then refunded within 5–10 days.
-- Free cancellation. To book or get a price, send customers to /services/car-rental/quote.
+- Free cancellation. There is NO online car rental quote form — to book or get a price, ask customers to call ${SITE_PHONE} or use /contact. They can browse the fleet at /services/car-rental/vehicles.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}
 
