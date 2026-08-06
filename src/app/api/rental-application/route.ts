@@ -2,6 +2,13 @@ import { NextResponse } from "next/server"
 import { sendEmail, type EmailAttachment } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { getVehicle } from "@/lib/db"
+import {
+  MAX_UPLOAD_BYTES,
+  licenceStateName,
+  validateEmail,
+  validateLicence,
+  validateMobile,
+} from "@/lib/rental-validation"
 import { SITE_PHONE, SITE_EMAIL } from "@/data/site"
 
 // nodemailer + Buffer need the Node runtime (not edge).
@@ -10,7 +17,23 @@ export const runtime = "nodejs"
 // Licence uploads are attached to the owner email. Anything larger is skipped
 // rather than failing the whole application — serverless request bodies are
 // capped (~4.5MB on Vercel) and a lost photo should not lose the lead.
-const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024
+const MAX_ATTACHMENT_BYTES = MAX_UPLOAD_BYTES
+
+/**
+ * Re-run a browser-side format check here. The client validates for the
+ * customer's benefit, but anyone can POST straight at this route, so the value
+ * the owner reads in the email is the normalised one where it passes — and is
+ * flagged, not dropped, where it does not. A malformed number is still a lead
+ * worth chasing, so nothing here rejects the request.
+ */
+function normalised(
+  raw: string,
+  check: (v: string) => { ok: boolean; value: string },
+): string {
+  if (!raw) return ""
+  const result = check(raw)
+  return result.ok ? result.value : `${raw} ⚠️ unverified format`
+}
 
 /** Escape user-supplied text before interpolating it into the email HTML. */
 function esc(s: string): string {
@@ -51,11 +74,24 @@ export async function POST(req: Request) {
 
     const firstName = get("firstName")
     const lastName = get("lastName")
-    const phone = get("phone")
-    const email = get("email")
-    const licenceNo = get("licenceNumber")
     const dob = get("dob")
     const address = get("address")
+
+    // Format-checked and tidied for the owner's email. `phone` keeps the raw
+    // value for tel: links and the lead record; `phoneLabel` is what is shown.
+    const phone = get("phone")
+    const email = get("email")
+    const licenceState = get("licenceState") || "QLD"
+    const licenceNo = get("licenceNumber")
+
+    const phoneCheck = validateMobile(phone)
+    // The owner sees the flag; the customer never does.
+    const phoneLabel = normalised(phone, validateMobile)
+    const phoneClean = phoneCheck.ok ? phoneCheck.value : phone
+    const emailLabel = normalised(email, validateEmail)
+    const licenceLabel = licenceNo
+      ? `${normalised(licenceNo, (v) => validateLicence(v, licenceState))} (${licenceStateName(licenceState)})`
+      : ""
     const vehicleName = get("vehicleName")
     const vehicleRego = get("vehicleRego")
 
@@ -105,7 +141,7 @@ export async function POST(req: Request) {
         <div style="padding:28px">
           <div style="background:#fff3cd;border-left:4px solid #f0ad4e;padding:14px;border-radius:0 8px 8px 0;margin-bottom:20px">
             <strong style="color:#856404">⚠️ Call within 2 hours:</strong>
-            <span style="color:#856404">${esc(firstName)} ${esc(lastName)} — ${esc(phone)}</span>
+            <span style="color:#856404">${esc(firstName)} ${esc(lastName)} — ${esc(phoneLabel)}</span>
           </div>
 
           <h3 style="color:#1a1a2e;margin:0 0 12px">Vehicle Requested</h3>
@@ -122,9 +158,9 @@ export async function POST(req: Request) {
           <h3 style="color:#1a1a2e;margin:0 0 12px">Applicant Details</h3>
           <table style="width:100%;border-collapse:collapse">
             ${row("Full Name", `${esc(firstName)} ${esc(lastName)}`)}
-            ${row("Phone", esc(phone))}
-            ${row("Email", esc(email))}
-            ${row("Licence No.", esc(licenceNo))}
+            ${row("Mobile", esc(phoneLabel))}
+            ${row("Email", esc(emailLabel))}
+            ${row("Licence No.", esc(licenceLabel))}
             ${row("Date of Birth", esc(dob))}
             ${row("Address", esc(address))}
             ${row("Preferred Payment", esc(paymentMethod))}
@@ -140,7 +176,7 @@ export async function POST(req: Request) {
 
           <div style="margin-top:20px;padding:14px;background:#f0f4ff;border-radius:8px">
             <p style="margin:0;color:#534ab7;font-size:13px">
-              <strong>Next steps:</strong> Call ${esc(firstName)} on ${esc(phone)},
+              <strong>Next steps:</strong> Call ${esc(firstName)} on ${esc(phoneLabel)},
               confirm vehicle and weekly rate, take payment over the phone, and
               arrange pickup in Brisbane.
             </p>
@@ -202,7 +238,7 @@ export async function POST(req: Request) {
           <div style="margin-top:24px;padding:14px;background:#e1f5ee;border-radius:8px">
             <p style="margin:0;color:#085041;font-size:13px">
               <strong>What happens next:</strong><br/>
-              We will call you on ${esc(phone)} to confirm the weekly rate, arrange
+              We will call you on ${esc(phoneClean)} to confirm the weekly rate, arrange
               a vehicle inspection, take payment, and complete the rental agreement.
             </p>
           </div>
@@ -244,13 +280,14 @@ export async function POST(req: Request) {
       await appendLead({
         id: Date.now().toString(),
         name: `${firstName} ${lastName}`.trim(),
-        phone,
+        phone: phoneClean,
         email,
         service: "car-rental",
         message:
           `Rental application — ${vehicleName} (${vehicleRego})` +
           `${weeklyLabel ? ` at ${weeklyLabel}` : ""}. ` +
-          `Licence ${licenceNo}, DOB ${dob}. Preferred payment: ${paymentMethod}.`,
+          `Licence ${licenceLabel || "not supplied"}, DOB ${dob}. ` +
+          `Preferred payment: ${paymentMethod}.`,
         date: new Date().toISOString(),
         status: "New",
         page: "/services/car-rental",

@@ -13,12 +13,18 @@ import {
 } from "lucide-react"
 import {
   blankVehicleInput,
+  formatColours,
+  parseColours,
+  FUEL_TYPES,
+  TRANSMISSIONS,
+  SEAT_OPTIONS,
   type RentalVehicle,
   type VehicleInput,
 } from "@/lib/vehicles"
+import { getColourHex } from "@/lib/colourHex"
 import ImageInput from "./ImageInput"
 import GalleryInput from "./GalleryInput"
-import { Labeled, Text, Num, Toggle, IconBtn } from "./catalog-ui"
+import { Labeled, Text, Num, Select, Toggle, IconBtn } from "./catalog-ui"
 
 // Postgres-backed car rental fleet manager. Reads from /api/vehicles?all=1 ;
 // all writes go through /api/dashboard/update (type: "vehicle"). The public car
@@ -57,6 +63,12 @@ function toInput(v: RentalVehicle): VehicleInput {
     bond: v.bond,
     available: v.available,
     sortOrder: v.sortOrder,
+    variant: v.variant,
+    fuelType: v.fuelType,
+    engine: v.engine,
+    transmission: v.transmission,
+    seats: v.seats,
+    colours: v.colours,
   }
 }
 
@@ -439,6 +451,112 @@ function VehicleFields({
         instead of a price. Lower &ldquo;Order&rdquo; numbers appear first in
         the fleet.
       </p>
+
+      {/* specifications — the grid shown in the customer's detail modal */}
+      <div className="border-t border-[#f0f0f8] pt-5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1a1a2e] mb-4">
+          Specifications
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Labeled label="Variant">
+            <Text
+              value={v.variant}
+              placeholder="e.g. AVV50R Atara SL Sedan"
+              onChange={(variant) => onChange({ variant })}
+              w="w-full"
+            />
+          </Labeled>
+          <Labeled label="Fuel type">
+            <Select
+              value={v.fuelType}
+              options={FUEL_TYPES}
+              onChange={(fuelType) => onChange({ fuelType })}
+              w="w-full"
+            />
+          </Labeled>
+          <Labeled label="Engine">
+            <Text
+              value={v.engine}
+              placeholder="e.g. 2.5L 4 Cylinder"
+              onChange={(engine) => onChange({ engine })}
+              w="w-full"
+            />
+          </Labeled>
+          <Labeled label="Transmission">
+            <Select
+              value={v.transmission}
+              options={TRANSMISSIONS}
+              onChange={(transmission) => onChange({ transmission })}
+              w="w-full"
+            />
+          </Labeled>
+          <Labeled label="Seats">
+            <Select
+              value={String(v.seats)}
+              options={SEAT_OPTIONS.map(String)}
+              onChange={(s) => onChange({ seats: Number(s) || 5 })}
+              w="w-full"
+            />
+          </Labeled>
+          <Labeled label="Available colours">
+            <ColoursInput
+              value={v.colours}
+              onChange={(colours) => onChange({ colours })}
+            />
+          </Labeled>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Colours as one comma-separated box. The raw text is held locally while the
+ * admin types — parsing on every keystroke would delete the comma they just
+ * typed — and the parsed list is pushed up as they go.
+ */
+function ColoursInput({
+  value,
+  onChange,
+}: {
+  value: string[]
+  onChange: (colours: string[]) => void
+}) {
+  const [raw, setRaw] = useState(() => formatColours(value))
+
+  // Re-sync when the row is replaced from outside (a refresh, or the add form
+  // clearing after a save) but not while the admin is mid-word.
+  useEffect(() => {
+    if (formatColours(parseColours(raw)) !== formatColours(value)) {
+      setRaw(formatColours(value))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={raw}
+        placeholder="White, Silver, Black"
+        onChange={(e) => {
+          setRaw(e.target.value)
+          onChange(parseColours(e.target.value))
+        }}
+        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[38px] text-[13px] text-[#1a1a2e] focus:border-[#7f85f7] outline-none"
+      />
+      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+        <span className="text-[10px] text-[#9496a8]">Comma separated</span>
+        {value.map((c) => (
+          <span
+            key={c}
+            title={c}
+            className="w-3.5 h-3.5 rounded-full border border-[#e0e0e0] flex-shrink-0"
+            style={{ background: getColourHex(c) }}
+          />
+        ))}
+      </div>
     </div>
   )
 }

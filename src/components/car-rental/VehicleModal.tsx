@@ -8,6 +8,19 @@ import {
   vehicleAlt,
   type RentalVehicle,
 } from "@/lib/vehicles"
+import { getColourHex } from "@/lib/colourHex"
+import {
+  DEFAULT_LICENCE_STATE,
+  LICENCE_RULES,
+  UPLOAD_ACCEPT,
+  validateDob,
+  validateEmail,
+  validateLicence,
+  validateMobile,
+  validateRequired,
+  validateUpload,
+  type FieldResult,
+} from "@/lib/rental-validation"
 import { SITE_PHONE } from "@/data/site"
 
 interface Props {
@@ -21,6 +34,7 @@ const EMPTY_FORM = {
   firstName: "",
   lastName: "",
   licenceNumber: "",
+  licenceState: DEFAULT_LICENCE_STATE,
   dob: "",
   address: "",
   phone: "",
@@ -33,11 +47,37 @@ const EMPTY_FORM = {
   authorise: false,
 }
 
+type FormState = typeof EMPTY_FORM
+
 const STEPS = ["details", "apply", "payment"] as const
 type View = (typeof STEPS)[number]
 
-/** Keep in sync with MAX_ATTACHMENT_BYTES in /api/rental-application. */
-const MAX_UPLOAD_BYTES = 3 * 1024 * 1024
+const STEP_LABELS: Record<View, string> = {
+  details: "Details",
+  apply: "Your Info",
+  payment: "Payment",
+}
+
+/**
+ * Format rules for the application step, in display order. Each returns a
+ * FieldResult; the tidied `value` is written back to the form so what gets
+ * submitted is normalised (mobile spaced as 04XX XXX XXX, licence upper-cased).
+ */
+const APPLY_CHECKS: {
+  field: keyof FormState
+  check: (form: FormState) => FieldResult
+}[] = [
+  { field: "firstName", check: (f) => validateRequired(f.firstName, "First name") },
+  { field: "lastName", check: (f) => validateRequired(f.lastName, "Last name") },
+  {
+    field: "licenceNumber",
+    check: (f) => validateLicence(f.licenceNumber, f.licenceState),
+  },
+  { field: "dob", check: (f) => validateDob(f.dob) },
+  { field: "address", check: (f) => validateRequired(f.address, "Address", 6) },
+  { field: "phone", check: (f) => validateMobile(f.phone) },
+  { field: "email", check: (f) => validateEmail(f.email) },
+]
 
 export default function VehicleModal({
   vehicle,
@@ -91,24 +131,86 @@ export default function VehicleModal({
     v.weeklyRate > 0 ? `$${v.weeklyRate.toLocaleString("en-AU")}` : null
   const bond = v.bond > 0 ? `$${v.bond.toLocaleString("en-AU")}` : null
 
+  // The specification grid, in reading order down two columns. Blanks render
+  // as an em dash rather than an empty cell — a car the owner has not filled
+  // in yet still lines up with the rest.
+  const specs: [string, string][] = [
+    ["VARIANT", v.variant],
+    ["FUEL TYPE", v.fuelType],
+    ["ENGINE", v.engine],
+    ["TRANSMISSION", v.transmission],
+    ["SEATS", v.seats > 0 ? `${v.seats} Seats` : ""],
+    ["REGISTRATION", v.rego],
+    ["YEAR", String(v.year)],
+    ["TYPE", v.type],
+  ]
+
+  // Licence guidance follows the selected state, so the customer is told the
+  // expected format before they get an error rather than after.
+  const licenceRule =
+    LICENCE_RULES.find((r) => r.code === form.licenceState) ?? LICENCE_RULES[0]
+  const licenceHint = `${licenceRule.code} — ${licenceRule.hint}`
+  const licencePlaceholder =
+    { QLD: "123456789", NSW: "12AB3456", VIC: "0123456789", SA: "A123BC", WA: "1234567", TAS: "AB12345", ACT: "1234567", NT: "123456" }[
+      form.licenceState
+    ] ?? "Licence number"
+
   const inp =
     "w-full border border-[#e8e8f0] rounded-[10px] h-[48px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors"
   const lbl =
     "block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mb-1.5"
   const err = "text-red-500 text-[11px] mt-1"
 
-  const set = (k: keyof typeof EMPTY_FORM, val: string | boolean) =>
+  // Editing a field clears its error: keeping a red message under a box the
+  // customer is actively fixing just nags them.
+  const set = (k: keyof FormState, val: string | boolean) => {
     setForm((f) => ({ ...f, [k]: val }))
+    setErrors((prev) => {
+      if (!prev[k]) return prev
+      const next = { ...prev }
+      delete next[k]
+      return next
+    })
+  }
+
+  /** Re-check one field on blur, so mistakes surface before the Next click. */
+  const checkField = (field: keyof FormState) => {
+    const entry = APPLY_CHECKS.find((c) => c.field === field)
+    if (!entry) return
+    // An empty field the customer has not filled in yet should not be scolded.
+    if (!String(form[field] ?? "").trim()) return
+    const result = entry.check(form)
+    setErrors((prev) => {
+      const next = { ...prev }
+      if (result.ok) {
+        delete next[field]
+      } else {
+        next[field] = result.error
+      }
+      return next
+    })
+    if (result.ok && result.value !== form[field]) {
+      setForm((f) => ({ ...f, [field]: result.value }))
+    }
+  }
 
   const validateApply = () => {
     const e: Record<string, string> = {}
-    if (!form.firstName) e.firstName = "Required"
-    if (!form.lastName) e.lastName = "Required"
-    if (!form.licenceNumber) e.licenceNumber = "Required"
-    if (!form.dob) e.dob = "Required"
-    if (!form.address) e.address = "Required"
-    if (!form.phone) e.phone = "Required"
-    if (!form.email) e.email = "Required"
+    const tidied: Partial<FormState> = {}
+
+    for (const { field, check } of APPLY_CHECKS) {
+      const result: FieldResult = check(form)
+      if (result.ok) tidied[field] = result.value as never
+      else e[field] = result.error
+    }
+
+    // Licence photos are optional — the owner can chase them — but a file
+    // rejected on selection must not be silently dropped by this rebuild of
+    // the error map.
+    if (errors.licenceFront) e.licenceFront = errors.licenceFront
+    if (errors.licenceBack) e.licenceBack = errors.licenceBack
+
+    if (Object.keys(tidied).length) setForm((f) => ({ ...f, ...tidied }))
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -157,48 +259,52 @@ export default function VehicleModal({
       aria-label={`${v.name} — rental details`}
     >
       <div
-        className="modal-panel bg-white w-full lg:max-w-[960px] rounded-t-[20px] lg:rounded-[20px] max-h-[96vh] lg:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="modal-panel bg-white w-full lg:max-w-[860px] rounded-t-[20px] lg:rounded-[20px] max-h-[96vh] lg:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Top bar ── */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f0f8] flex-shrink-0">
-          <div>
-            <h2 className="font-bold text-[17px] text-[#1a1a2e]">{v.name}</h2>
-            <p className="text-[12px] text-[#9496a8]">
-              Rego: {v.rego} · {v.type}
-            </p>
-          </div>
-
-          {/* Step indicator */}
-          <div className="hidden sm:flex items-center gap-2 mr-4">
-            {STEPS.map((s, i) => (
-              <div key={s} className="flex items-center gap-2">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                    view === s && !submitted
-                      ? "bg-[#7f85f7] text-white"
-                      : submitted || i < stepIndex
-                        ? "bg-[#0f6e56] text-white"
-                        : "bg-[#f0f0f8] text-[#9496a8]"
-                  }`}
-                >
-                  {submitted || i < stepIndex ? <Check size={10} /> : i + 1}
-                </div>
-                {i < STEPS.length - 1 && (
+        {/* ── Top bar — step indicator + close ── */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#f0f0f8] flex-shrink-0 bg-white z-10">
+          <div className="flex items-center gap-2">
+            {STEPS.map((s, i) => {
+              const done = submitted || i < stepIndex
+              return (
+                <div key={s} className="flex items-center gap-1.5">
                   <div
-                    className={`w-8 h-px ${
-                      submitted || i < stepIndex ? "bg-[#7f85f7]" : "bg-[#e8e8f0]"
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                      view === s && !submitted
+                        ? "bg-[#7f85f7] text-white"
+                        : done
+                          ? "bg-[#0f6e56] text-white"
+                          : "bg-[#f0f0f8] text-[#9496a8]"
                     }`}
-                  />
-                )}
-              </div>
-            ))}
+                  >
+                    {done ? <Check size={10} /> : i + 1}
+                  </div>
+                  <span
+                    className={`text-[11px] hidden sm:block ${
+                      view === s && !submitted
+                        ? "text-[#7f85f7] font-semibold"
+                        : "text-[#9496a8]"
+                    }`}
+                  >
+                    {STEP_LABELS[s]}
+                  </span>
+                  {i < STEPS.length - 1 && (
+                    <div
+                      className={`w-6 h-px ml-1 ${
+                        done ? "bg-[#7f85f7]" : "bg-[#e8e8f0]"
+                      }`}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-8 h-8 rounded-full bg-[#f0f0f8] flex items-center justify-center hover:bg-[#1a1a2e] hover:text-white transition-all"
+            className="w-8 h-8 rounded-full bg-[#f0f0f8] flex items-center justify-center hover:bg-[#1a1a2e] hover:text-white transition-all flex-shrink-0"
           >
             <X size={15} />
           </button>
@@ -208,188 +314,199 @@ export default function VehicleModal({
         <div className="flex-1 overflow-y-auto">
           {/* ═══ VIEW 1 — DETAILS ═══ */}
           {view === "details" && !submitted && (
-            <div className="view-in flex flex-col lg:flex-row h-full">
-              {/* LEFT — image gallery */}
-              <div className="lg:w-[52%] bg-[#f8f8ff] flex flex-col">
-                <div className="relative h-[240px] lg:h-[320px] overflow-hidden bg-[#eeeeff]">
-                  <ImageWithFallback
-                    key={imgs[activeImg]}
-                    src={imgs[activeImg]}
-                    alt={vehicleAlt(v)}
-                    fill
-                    className="object-cover"
-                    fallbackIcon="Car"
-                    fallbackBg="#eeeeff"
-                    placeholderText="Photo coming soon"
-                  />
+            <div className="view-in flex flex-col">
+              {/* A — hero photo, full width */}
+              <div
+                className="relative w-full bg-[#0d0d1a] overflow-hidden"
+                style={{ height: "clamp(220px, 40vw, 400px)" }}
+              >
+                <ImageWithFallback
+                  key={imgs[activeImg]}
+                  src={imgs[activeImg]}
+                  alt={vehicleAlt(v)}
+                  fill
+                  className="object-cover object-center"
+                  fallbackIcon="Car"
+                  fallbackBg="#0d0d1a"
+                  placeholderText="Photo coming soon"
+                />
 
-                  {imgs.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setActiveImg((i) => Math.max(i - 1, 0))}
-                        disabled={activeImg === 0}
-                        aria-label="Previous photo"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center disabled:opacity-30 hover:bg-[#7f85f7] hover:text-white transition-all"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setActiveImg((i) => Math.min(i + 1, imgs.length - 1))
-                        }
-                        disabled={activeImg === imgs.length - 1}
-                        aria-label="Next photo"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center disabled:opacity-30 hover:bg-[#7f85f7] hover:text-white transition-all"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </>
-                  )}
+                {/* Keeps the name legible over a bright photo. */}
+                <div className="absolute bottom-0 left-0 right-0 h-[110px] bg-gradient-to-t from-black/75 to-transparent pointer-events-none" />
 
-                  <div className="absolute bottom-3 right-3 bg-black/50 text-white text-[11px] px-2.5 py-1 rounded-full">
-                    {activeImg + 1} / {imgs.length}
+                <div className="absolute bottom-4 left-5 right-16">
+                  <p className="text-[#a9adfa] text-[11px] font-bold uppercase tracking-wider mb-1">
+                    {v.sortOrder > 0 ? `#${v.sortOrder} · ` : ""}
+                    {v.type}
+                  </p>
+                  <h2 className="text-white font-extrabold text-[18px] lg:text-[22px] leading-tight drop-shadow-lg">
+                    {v.name}
+                  </h2>
+                  <p className="text-white/60 text-[12px] mt-0.5">
+                    Rego: {v.rego}
+                  </p>
+                </div>
+
+                {v.available && (
+                  <div className="absolute top-4 left-4 bg-[#0f6e56] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Available
                   </div>
+                )}
 
-                  {v.available && (
-                    <div className="absolute top-3 left-3 bg-[#0f6e56] text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                      Available
-                    </div>
+                {/* The weekly rate still has to be on this screen — it is the
+                    number the visitor came for and the one the owner sets. */}
+                <div className="absolute top-4 right-4 bg-white/95 rounded-full px-3.5 py-1.5 shadow-lg">
+                  {weekly ? (
+                    <p className="text-[#1a1a2e] leading-none">
+                      <span className="font-extrabold text-[16px] text-[#534ab7]">
+                        {weekly}
+                      </span>
+                      <span className="text-[11px] text-[#666880] ml-1">
+                        / week
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] font-bold text-[#534ab7] leading-none">
+                      Ask us for the rate
+                    </p>
                   )}
                 </div>
 
                 {imgs.length > 1 && (
-                  <div className="flex gap-2 p-3 overflow-x-auto">
-                    {imgs.map((img, i) => (
+                  <>
+                    <div className="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] px-2.5 py-1 rounded-full">
+                      {activeImg + 1} / {imgs.length} photos
+                    </div>
+                    {activeImg > 0 && (
                       <button
-                        key={i}
-                        onClick={() => setActiveImg(i)}
-                        aria-label={`View photo ${i + 1}`}
-                        className={`relative flex-shrink-0 w-[72px] h-[52px] rounded-[8px] overflow-hidden border-2 transition-all ${
-                          activeImg === i
-                            ? "border-[#7f85f7]"
-                            : "border-transparent opacity-60 hover:opacity-100"
-                        }`}
+                        onClick={() => setActiveImg((i) => Math.max(i - 1, 0))}
+                        aria-label="Previous photo"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-all"
                       >
-                        <ImageWithFallback
-                          src={img}
-                          alt={`${v.name} view ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          fallbackIcon="Car"
-                          fallbackBg="#eeeeff"
-                          placeholderText=""
-                        />
+                        <ChevronLeft size={18} />
                       </button>
-                    ))}
-                  </div>
+                    )}
+                    {activeImg < imgs.length - 1 && (
+                      <button
+                        onClick={() =>
+                          setActiveImg((i) => Math.min(i + 1, imgs.length - 1))
+                        }
+                        aria-label="Next photo"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-all"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
 
-              {/* RIGHT — vehicle details */}
-              <div className="flex-1 flex flex-col">
-                <div className="flex-1 p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="bg-[#eeedfe] text-[#7f85f7] text-[12px] font-semibold px-3 py-1 rounded-full">
-                      {v.type}
-                    </span>
-                    <span className="bg-[#e1f5ee] text-[#0f6e56] text-[12px] font-semibold px-3 py-1 rounded-full">
-                      {v.year}
-                    </span>
-                  </div>
+              {/* B — thumbnail strip */}
+              {imgs.length > 1 && (
+                <div className="flex gap-2 px-4 py-3 overflow-x-auto bg-[#f8f8ff] border-b border-[#eeeeff]">
+                  {imgs.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImg(i)}
+                      aria-label={`View photo ${i + 1}`}
+                      className={`relative flex-shrink-0 w-[80px] h-[56px] rounded-[8px] overflow-hidden border-2 transition-all ${
+                        activeImg === i
+                          ? "border-[#7f85f7] opacity-100 scale-105"
+                          : "border-transparent opacity-50 hover:opacity-80"
+                      }`}
+                    >
+                      <ImageWithFallback
+                        src={img}
+                        alt={`${v.name} view ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        fallbackIcon="Car"
+                        fallbackBg="#eeeeff"
+                        placeholderText=""
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
 
-                  {/* Weekly rent leads — it is the number customers are here
-                      for, and the one the owner sets in the dashboard. */}
-                  <div className="bg-[#f8f8ff] border border-[#e8e8f5] rounded-[14px] px-4 py-3.5 mb-5">
-                    {weekly ? (
-                      <>
-                        <p className="text-[#1a1a2e]">
-                          <span className="font-extrabold text-[28px] text-[#7f85f7] leading-none">
-                            {weekly}
-                          </span>
-                          <span className="text-[13px] text-[#666880] ml-1.5">
-                            per week
-                          </span>
-                        </p>
-                        <p className="text-[11px] text-[#9496a8] mt-1.5">
-                          Paid weekly in advance · 4 week minimum
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="font-bold text-[15px] text-[#1a1a2e]">
-                          Ask us for the weekly rate
-                        </p>
-                        <p className="text-[11px] text-[#9496a8] mt-1">
-                          We will confirm the price for this car when you apply
-                          or give us a call.
-                        </p>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="space-y-3 mb-6">
-                    {[
-                      ["Make", v.make],
-                      ["Model", v.model],
-                      ["Year", String(v.year)],
-                      ["Type", v.type],
-                      ["Registration", v.rego],
-                      ...(bond ? [["Security bond", bond]] : []),
-                    ].map(([label, value]) => (
-                      <div
-                        key={label}
-                        className="flex items-center justify-between py-2.5 border-b border-[#f0f0f8]"
-                      >
-                        <span className="text-[12px] font-semibold text-[#9496a8] uppercase tracking-wider">
-                          {label}
-                        </span>
-                        <span className="text-[14px] font-medium text-[#1a1a2e]">
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-[#f8f8ff] rounded-[14px] p-4 mb-4">
-                    <p className="text-[11px] font-semibold text-[#9496a8] uppercase tracking-wider mb-3">
-                      Rental Terms
+              {/* C + D — colour note and swatches */}
+              {v.colours.length > 0 && (
+                <>
+                  <p className="text-[11px] text-[#9496a8] italic px-5 pt-4 pb-1">
+                    Vehicle colours may vary
+                  </p>
+                  <div className="px-5 pb-4">
+                    <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider mb-2">
+                      Available Colours
                     </p>
-                    <div className="space-y-2">
-                      {[
-                        ["Payment", "Weekly in advance"],
-                        ["Minimum term", "4 weeks"],
-                        ["Bond", "Refunded at the end"],
-                        ["Insurance excess", "$1,300 AUD"],
-                        ["Roadside assistance", "Included"],
-                        ["Maintenance", "Included"],
-                      ].map(([k, val]) => (
-                        <div key={k} className="flex items-center justify-between">
-                          <span className="text-[12px] text-[#666]">{k}</span>
-                          <span className="text-[12px] font-semibold text-[#1a1a2e]">
-                            {val}
-                          </span>
-                        </div>
+                    <div className="flex flex-wrap gap-2">
+                      {v.colours.map((colour) => (
+                        <span
+                          key={colour}
+                          className="text-[12px] font-medium text-[#444] bg-[#f7f7f7] border border-[#e8e8f0] rounded-full px-3 py-1 flex items-center gap-1.5"
+                        >
+                          <span
+                            className="w-3 h-3 rounded-full flex-shrink-0 border border-[#e0e0e0]"
+                            style={{ background: getColourHex(colour) }}
+                          />
+                          {colour}
+                        </span>
                       ))}
                     </div>
                   </div>
+                </>
+              )}
 
+              {/* E — specifications */}
+              <div className="mx-4 mt-4 mb-4 border border-[#e8e8f0] rounded-[14px] overflow-hidden">
+                <div className="bg-[#f8f8ff] px-5 py-3 border-b border-[#e8e8f0]">
+                  <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider">
+                    Vehicle Specifications
+                  </p>
                 </div>
 
-                <div className="p-5 border-t border-[#f0f0f8] flex flex-col gap-2.5 flex-shrink-0">
-                  <button
-                    onClick={() => setView("apply")}
-                    className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-colors"
-                  >
-                    Apply for this car
-                  </button>
-                  <a
-                    href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
-                    className="flex items-center justify-center gap-2 border-2 border-[#e8e8f0] text-[#1a1a2e] rounded-[10px] h-[46px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all"
-                  >
-                    <Phone size={15} />
-                    Call {SITE_PHONE}
-                  </a>
+                <div className="grid grid-cols-2">
+                  {specs.map(([label, value], i) => (
+                    <div
+                      key={label}
+                      className={`px-5 py-4 ${
+                        i % 2 === 0 ? "border-r border-[#e8e8f0]" : ""
+                      } ${i < specs.length - 2 ? "border-b border-[#e8e8f0]" : ""}`}
+                    >
+                      <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        {label}
+                      </p>
+                      <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">
+                        {value || "—"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* F — rental terms */}
+              <div className="mx-4 mb-6 bg-[#f8f8ff] rounded-[14px] p-5">
+                <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider mb-4">
+                  Rental Terms
+                </p>
+                <div className="grid grid-cols-2 gap-y-4">
+                  {[
+                    ["💰 Payment", "Weekly in advance"],
+                    ["📅 Minimum", "4 weeks"],
+                    // The real bond shows once the owner has set one.
+                    ["🔒 Bond", bond ? `${bond}, refunded` : "Refundable at end"],
+                    ["🛡️ Excess", "$1,300 AUD"],
+                    ["🚗 Roadside", "Included"],
+                    ["🔧 Service", "Included"],
+                  ].map(([k, val]) => (
+                    <div key={k}>
+                      <p className="text-[11px] text-[#9496a8]">{k}</p>
+                      <p className="text-[13px] font-semibold text-[#1a1a2e] mt-0.5">
+                        {val}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -416,6 +533,8 @@ export default function VehicleModal({
                       id="firstName"
                       value={form.firstName}
                       onChange={(e) => set("firstName", e.target.value)}
+                      onBlur={() => checkField("firstName")}
+                      autoComplete="given-name"
                       className={inp}
                       placeholder="John"
                     />
@@ -429,6 +548,8 @@ export default function VehicleModal({
                       id="lastName"
                       value={form.lastName}
                       onChange={(e) => set("lastName", e.target.value)}
+                      onBlur={() => checkField("lastName")}
+                      autoComplete="family-name"
                       className={inp}
                       placeholder="Smith"
                     />
@@ -436,7 +557,34 @@ export default function VehicleModal({
                   </div>
                 </div>
 
+                {/* Licence state drives which number format is accepted —
+                    Australia has no national format. */}
                 <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={lbl} htmlFor="licenceState">
+                      Licence Issued In *
+                    </label>
+                    <select
+                      id="licenceState"
+                      value={form.licenceState}
+                      onChange={(e) => {
+                        set("licenceState", e.target.value)
+                        // The number is checked against the new state's rule.
+                        setErrors((prev) => {
+                          const next = { ...prev }
+                          delete next.licenceNumber
+                          return next
+                        })
+                      }}
+                      className={`${inp} appearance-none`}
+                    >
+                      {LICENCE_RULES.map((r) => (
+                        <option key={r.code} value={r.code}>
+                          {r.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className={lbl} htmlFor="licenceNumber">
                       Driving Licence No. *
@@ -445,26 +593,41 @@ export default function VehicleModal({
                       id="licenceNumber"
                       value={form.licenceNumber}
                       onChange={(e) => set("licenceNumber", e.target.value)}
+                      onBlur={() => checkField("licenceNumber")}
                       className={inp}
-                      placeholder="123456789"
+                      placeholder={licencePlaceholder}
+                      inputMode={
+                        form.licenceState === "QLD" ||
+                        form.licenceState === "VIC" ||
+                        form.licenceState === "WA" ||
+                        form.licenceState === "ACT"
+                          ? "numeric"
+                          : "text"
+                      }
                     />
-                    {errors.licenceNumber && (
+                    {errors.licenceNumber ? (
                       <p className={err}>{errors.licenceNumber}</p>
+                    ) : (
+                      <p className="text-[10px] text-[#9496a8] mt-1">
+                        {licenceHint}
+                      </p>
                     )}
                   </div>
-                  <div>
-                    <label className={lbl} htmlFor="dob">
-                      Date of Birth *
-                    </label>
-                    <input
-                      id="dob"
-                      type="date"
-                      value={form.dob}
-                      onChange={(e) => set("dob", e.target.value)}
-                      className={inp}
-                    />
-                    {errors.dob && <p className={err}>{errors.dob}</p>}
-                  </div>
+                </div>
+
+                <div>
+                  <label className={lbl} htmlFor="dob">
+                    Date of Birth *
+                  </label>
+                  <input
+                    id="dob"
+                    type="date"
+                    value={form.dob}
+                    onChange={(e) => set("dob", e.target.value)}
+                    onBlur={() => checkField("dob")}
+                    className={inp}
+                  />
+                  {errors.dob && <p className={err}>{errors.dob}</p>}
                 </div>
 
                 <div>
@@ -475,6 +638,8 @@ export default function VehicleModal({
                     id="address"
                     value={form.address}
                     onChange={(e) => set("address", e.target.value)}
+                    onBlur={() => checkField("address")}
+                    autoComplete="street-address"
                     className={inp}
                     placeholder="123 Main St, Brisbane QLD 4000"
                   />
@@ -484,15 +649,18 @@ export default function VehicleModal({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl} htmlFor="phone">
-                      Phone *
+                      Mobile *
                     </label>
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel-national"
                       value={form.phone}
                       onChange={(e) => set("phone", e.target.value)}
+                      onBlur={() => checkField("phone")}
                       className={inp}
-                      placeholder="04XX XXX XXX"
+                      placeholder="0412 345 678"
                     />
                     {errors.phone && <p className={err}>{errors.phone}</p>}
                   </div>
@@ -503,8 +671,11 @@ export default function VehicleModal({
                     <input
                       id="email"
                       type="email"
+                      inputMode="email"
+                      autoComplete="email"
                       value={form.email}
                       onChange={(e) => set("email", e.target.value)}
+                      onBlur={() => checkField("email")}
                       className={inp}
                       placeholder="john@email.com"
                     />
@@ -516,6 +687,9 @@ export default function VehicleModal({
                     so no ref juggling is needed inside the map. */}
                 <div>
                   <span className={lbl}>Upload Driving Licence</span>
+                  <p className="text-[11px] text-[#9496a8] -mt-1 mb-2">
+                    JPG, PNG, WEBP, HEIC or PDF · up to 3MB each
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       {
@@ -535,16 +709,19 @@ export default function VehicleModal({
                         <input
                           id={id}
                           type="file"
-                          accept="image/*,.pdf"
+                          accept={UPLOAD_ACCEPT}
                           className="hidden"
                           onChange={(e) => {
                             const f = e.target.files?.[0] || null
-                            // Serverless request bodies are capped, so reject
-                            // oversized photos here rather than failing silently.
-                            if (f && f.size > MAX_UPLOAD_BYTES) {
+                            // Check the format and size here rather than
+                            // letting a bad file fail silently at the server:
+                            // serverless request bodies are capped, and a
+                            // .docx "photo" would just never arrive.
+                            const result = f ? validateUpload(f) : null
+                            if (result && !result.ok) {
                               setErrors((prev) => ({
                                 ...prev,
-                                [id]: "File must be under 3MB",
+                                [id]: result.error,
                               }))
                               e.target.value = ""
                               setter(null)
@@ -790,6 +967,26 @@ export default function VehicleModal({
             </div>
           )}
         </div>
+
+        {/* ── Sticky actions — details step only; the other steps carry their
+            own Back / Next pair at the end of the form. ── */}
+        {view === "details" && !submitted && (
+          <div className="flex-shrink-0 p-4 border-t border-[#f0f0f8] bg-white flex flex-col gap-2.5">
+            <button
+              onClick={() => setView("apply")}
+              className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-all duration-200"
+            >
+              🚗 Get on Rent
+            </button>
+            <a
+              href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
+              className="flex items-center justify-center gap-2 border-2 border-[#e8e8f0] text-[#1a1a2e] rounded-[10px] h-[46px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all duration-200"
+            >
+              <Phone size={15} />
+              Call {SITE_PHONE}
+            </a>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import {
   ensureSchema,
   seedAllProducts,
   seedAllVehicles,
+  backfillVehicleSpecs,
   getProducts,
   getVehicles,
 } from "@/lib/db"
@@ -31,11 +32,15 @@ async function run(force: boolean) {
     await ensureSchema()
     const products = await seedAllProducts(force)
     const vehicles = await seedAllVehicles(force)
+    // Cars seeded before the spec columns existed have empty specifications;
+    // this fills them in once without disturbing dashboard edits.
+    const specs = await backfillVehicleSpecs(force)
     return Response.json({
       ok: true,
       forced: force,
       products: { ...seedResult(products), total: (await getProducts()).length },
       vehicles: { ...seedResult(vehicles), total: (await getVehicles()).length },
+      vehicleSpecs: specs < 0 ? { skipped: true } : { filled: specs },
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Database setup failed"

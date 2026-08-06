@@ -140,11 +140,30 @@ export async function createVehiclesTable(): Promise<void> {
       bond        NUMERIC NOT NULL DEFAULT 0,
       available   BOOLEAN NOT NULL DEFAULT true,
       sort_order  INTEGER NOT NULL DEFAULT 0,
+      variant      TEXT,
+      fuel_type    TEXT,
+      engine       TEXT,
+      transmission TEXT,
+      seats        INTEGER NOT NULL DEFAULT 5,
+      colours      JSONB NOT NULL DEFAULT '[]'::jsonb,
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `
   await db`
     CREATE INDEX IF NOT EXISTS vehicles_sort_order_idx ON vehicles (sort_order)
+  `
+  // Migrations for fleets created before the specification columns existed.
+  // The live table predates them, so these run on the next /api/db/setup.
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS variant TEXT`
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS fuel_type TEXT`
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS engine TEXT`
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS transmission TEXT`
+  await db`
+    ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS seats INTEGER NOT NULL DEFAULT 5
+  `
+  await db`
+    ALTER TABLE vehicles
+    ADD COLUMN IF NOT EXISTS colours JSONB NOT NULL DEFAULT '[]'::jsonb
   `
 }
 
@@ -327,6 +346,13 @@ interface VehicleRow {
   bond: string | number
   available: boolean
   sort_order: number
+  variant: string | null
+  fuel_type: string | null
+  engine: string | null
+  transmission: string | null
+  seats: number | null
+  // JSONB — parsed by the driver, like `images`.
+  colours: unknown
   created_at: string | Date
 }
 
@@ -347,6 +373,14 @@ function toVehicle(r: VehicleRow): RentalVehicle {
     bond: Number(r.bond),
     available: r.available,
     sortOrder: Number(r.sort_order),
+    variant: r.variant ?? "",
+    fuelType: r.fuel_type ?? "",
+    engine: r.engine ?? "",
+    transmission: r.transmission ?? "",
+    // A car added before the column existed reads back null — 5 seats is the
+    // right answer for every car on this yard, and beats rendering "0 Seats".
+    seats: r.seats == null ? 5 : Number(r.seats),
+    colours: Array.isArray(r.colours) ? r.colours.map(String) : [],
     createdAt: r.created_at ? new Date(r.created_at).toISOString() : undefined,
   }
 }
@@ -380,10 +414,12 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
   // The driver serialises arrays to a Postgres array literal, which JSONB will
   // not accept — send JSON text and cast it, the same way writeSetting does.
   const images = JSON.stringify(input.images)
+  const colours = JSON.stringify(input.colours)
   const rows = (await db`
     INSERT INTO vehicles
       (id, name, year, make, model, type, rego, image, images, image_alt,
-       weekly_rate, bond, available, sort_order)
+       weekly_rate, bond, available, sort_order,
+       variant, fuel_type, engine, transmission, seats, colours)
     VALUES (
       ${id},
       ${input.name},
@@ -398,7 +434,13 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
       ${input.weeklyRate},
       ${input.bond},
       ${input.available},
-      ${input.sortOrder}
+      ${input.sortOrder},
+      ${input.variant || null},
+      ${input.fuelType || null},
+      ${input.engine || null},
+      ${input.transmission || null},
+      ${input.seats},
+      ${colours}::jsonb
     )
     RETURNING *
   `) as VehicleRow[]
@@ -411,6 +453,7 @@ export async function updateVehicle(
 ): Promise<RentalVehicle | null> {
   const db = sql()
   const images = JSON.stringify(input.images)
+  const colours = JSON.stringify(input.colours)
   const rows = (await db`
     UPDATE vehicles SET
       name        = ${input.name},
@@ -425,7 +468,13 @@ export async function updateVehicle(
       weekly_rate = ${input.weeklyRate},
       bond        = ${input.bond},
       available   = ${input.available},
-      sort_order  = ${input.sortOrder}
+      sort_order  = ${input.sortOrder},
+      variant      = ${input.variant || null},
+      fuel_type    = ${input.fuelType || null},
+      engine       = ${input.engine || null},
+      transmission = ${input.transmission || null},
+      seats        = ${input.seats},
+      colours      = ${colours}::jsonb
     WHERE id = ${id}
     RETURNING *
   `) as VehicleRow[]
@@ -452,14 +501,18 @@ export async function seedAllVehicles(force = false): Promise<number> {
   let inserted = 0
   for (const v of VEHICLE_SEED) {
     const images = JSON.stringify(v.images)
+    const colours = JSON.stringify(v.colours)
     const rows = (await db`
       INSERT INTO vehicles
         (id, name, year, make, model, type, rego, image, images, image_alt,
-         weekly_rate, bond, available, sort_order)
+         weekly_rate, bond, available, sort_order,
+         variant, fuel_type, engine, transmission, seats, colours)
       VALUES (
         ${v.id}, ${v.name}, ${v.year}, ${v.make}, ${v.model}, ${v.type},
         ${v.rego}, ${v.image}, ${images}::jsonb, ${v.imageAlt},
-        ${v.weeklyRate}, ${v.bond}, ${v.available}, ${v.sortOrder}
+        ${v.weeklyRate}, ${v.bond}, ${v.available}, ${v.sortOrder},
+        ${v.variant}, ${v.fuelType}, ${v.engine}, ${v.transmission},
+        ${v.seats}, ${colours}::jsonb
       )
       ON CONFLICT (id) DO NOTHING
       RETURNING id
@@ -468,4 +521,39 @@ export async function seedAllVehicles(force = false): Promise<number> {
   }
   await markSeedRun("vehicles")
   return inserted
+}
+
+/**
+ * Fill in the specifications (variant, fuel, engine, transmission, seats,
+ * colours) for the original 16 cars.
+ *
+ * The fleet seed has already run on the live database, so those rows exist with
+ * the spec columns empty and seedAllVehicles will never touch them again. This
+ * fills the blanks in — and only the blanks: a row whose variant the admin has
+ * already set is left alone, and the whole pass is marked done so it cannot
+ * come back and undo a spec they deliberately cleared. Returns rows filled, or
+ * -1 when it had already run.
+ */
+export async function backfillVehicleSpecs(force = false): Promise<number> {
+  if (!force && (await seedAlreadyRun("vehicle-specs"))) return -1
+  const db = sql()
+  let filled = 0
+  for (const v of VEHICLE_SEED) {
+    const colours = JSON.stringify(v.colours)
+    const rows = (await db`
+      UPDATE vehicles SET
+        variant      = ${v.variant},
+        fuel_type    = ${v.fuelType},
+        engine       = ${v.engine},
+        transmission = ${v.transmission},
+        seats        = ${v.seats},
+        colours      = ${colours}::jsonb
+      WHERE id = ${v.id}
+        AND (variant IS NULL OR variant = '')
+      RETURNING id
+    `) as { id: string }[]
+    filled += rows.length
+  }
+  await markSeedRun("vehicle-specs")
+  return filled
 }

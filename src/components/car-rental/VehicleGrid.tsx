@@ -6,6 +6,7 @@ import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import VehicleModal from "@/components/car-rental/VehicleModal"
 import { vehicleAlt, type RentalVehicle } from "@/lib/vehicles"
+import { getColourHex } from "@/lib/colourHex"
 
 // The fleet lives in the database and is managed from the dashboard's Car
 // Rental tab, so this fetches rather than importing a static list — a car added
@@ -153,6 +154,25 @@ export default function VehicleGrid({
                       {vehicle.type}
                       {vehicle.rego ? ` · ${vehicle.rego}` : ""}
                     </p>
+
+                    {/* Colour options at a glance — the modal names them. */}
+                    {vehicle.colours.length > 0 && (
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        {vehicle.colours.slice(0, 5).map((colour) => (
+                          <span
+                            key={colour}
+                            title={colour}
+                            className="w-4 h-4 rounded-full border border-[#e0e0e0] flex-shrink-0"
+                            style={{ background: getColourHex(colour) }}
+                          />
+                        ))}
+                        {vehicle.colours.length > 5 && (
+                          <span className="text-[10px] text-[#9496a8] self-center">
+                            +{vehicle.colours.length - 5}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Weekly rate is the headline number — it is what the
                         owner sets in the dashboard. 0 means "not published". */}

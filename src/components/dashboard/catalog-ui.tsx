@@ -62,6 +62,35 @@ export function Num({
   )
 }
 
+export function Select({
+  value,
+  options,
+  onChange,
+  w = "w-[180px]",
+}: {
+  value: string
+  options: string[]
+  onChange: (v: string) => void
+  w?: string
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${w} border border-[#e8e8f0] rounded-[8px] px-2.5 h-[38px] text-[13px] text-[#1a1a2e] bg-white focus:border-[#7f85f7] outline-none`}
+    >
+      {/* A blank stays selectable: a car whose spec has not been filled in yet
+          must not silently save as the first option in the list. */}
+      <option value="">—</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
     <div

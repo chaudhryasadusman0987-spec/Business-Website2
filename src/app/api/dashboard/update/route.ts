@@ -9,7 +9,7 @@ import {
 import { readCatalog, writeCatalog } from "@/lib/catalog-store"
 import { itPackageKey, type ITServiceOverviewEdit } from "@/lib/catalog"
 import type { ProductInput } from "@/lib/products"
-import type { VehicleInput } from "@/lib/vehicles"
+import { parseColours, type VehicleInput } from "@/lib/vehicles"
 import type { ITPackage } from "@/data/it-services"
 import { itServiceItems } from "@/data/it-services"
 
@@ -102,6 +102,17 @@ function coerceVehicle(v: Record<string, unknown>): VehicleInput {
     bond: num(v.bond),
     available: v.available !== false,
     sortOrder: Math.round(num(v.sortOrder)),
+    variant: String(v.variant ?? ""),
+    fuelType: String(v.fuelType ?? ""),
+    engine: String(v.engine ?? ""),
+    transmission: String(v.transmission ?? ""),
+    // Seats is a select in the dashboard, but a hand-rolled request could send
+    // anything — 5 is the fleet's norm and keeps "0 Seats" off the site.
+    seats: v.seats == null ? 5 : Math.round(num(v.seats)) || 5,
+    // Accepts either the parsed array or the raw comma-separated string.
+    colours: Array.isArray(v.colours)
+      ? v.colours.map((c) => String(c).trim()).filter(Boolean)
+      : parseColours(String(v.colours ?? "")),
   }
 }
 

@@ -29,8 +29,42 @@ export interface RentalVehicle {
   available: boolean
   /** Manual display order, lowest first. Ties break on createdAt. */
   sortOrder: number
+  /** Factory variant / trim code, e.g. "AVV50R Atara SL Sedan". */
+  variant: string
+  /** "Petrol", "Diesel", "Petrol / Electric Hybrid"… */
+  fuelType: string
+  /** Engine description, e.g. "2.5L 4 Cylinder". */
+  engine: string
+  /** "CVT Auto", "6 Speed Auto", "5 Speed Manual"… */
+  transmission: string
+  seats: number
+  /** Colours this car can be supplied in. Drawn as swatches — see colourHex. */
+  colours: string[]
   createdAt?: string
 }
+
+/** Dropdown options for the dashboard's specification fields. */
+export const FUEL_TYPES = [
+  "Petrol",
+  "Diesel",
+  "Petrol / Electric Hybrid",
+  "Plug-in Hybrid",
+  "Electric",
+  "LPG",
+]
+
+export const TRANSMISSIONS = [
+  "CVT Auto",
+  "4 Speed Auto",
+  "5 Speed Auto",
+  "6 Speed Auto",
+  "7 Speed Auto",
+  "8 Speed Auto",
+  "5 Speed Manual",
+  "6 Speed Manual",
+]
+
+export const SEAT_OPTIONS = [2, 4, 5, 7, 8]
 
 /** Shape the add/edit forms collect — `id` is assigned server-side on create. */
 export type VehicleInput = Omit<RentalVehicle, "id" | "createdAt">
@@ -50,7 +84,32 @@ export function blankVehicleInput(): VehicleInput {
     bond: 0,
     available: true,
     sortOrder: 0,
+    variant: "",
+    fuelType: "Petrol",
+    engine: "",
+    transmission: "",
+    seats: 5,
+    colours: [],
   }
+}
+
+/**
+ * Colours are typed into one comma-separated box in the dashboard — an admin
+ * adding a car should not have to manage a list widget. Blanks are dropped and
+ * duplicates collapse, so "White, , white" saves as one entry.
+ */
+export function parseColours(input: string): string[] {
+  const out: string[] = []
+  for (const part of input.split(",")) {
+    const s = part.trim()
+    if (s && !out.some((c) => c.toLowerCase() === s.toLowerCase())) out.push(s)
+  }
+  return out
+}
+
+/** The stored list rendered back into that same box. */
+export function formatColours(colours: string[]): string {
+  return colours.join(", ")
 }
 
 /**

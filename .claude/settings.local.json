@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell(Out-File *)",
       "PowerShell(npm run)",
-      "PowerShell(npm run *)"
+      "PowerShell(npm run *)",
+      "Bash(curl -s -m 120 http://localhost:3000/api/db/setup)",
+      "Bash(curl -s -m 60 \"http://localhost:3000/api/vehicles?light=1\")"
     ]
   }
 }
