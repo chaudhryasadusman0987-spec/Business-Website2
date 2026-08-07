@@ -28,6 +28,17 @@ export const SITE_GOOGLE_REVIEW_URL =
   "https://www.google.com/search?q=Pak+Oz+Solutions+Brisbane+review";
 
 // ============================================================
+//  BANK DETAILS — shown on the car rental payment step and repeated
+//  in both confirmation emails. Change here and every surface follows.
+// ============================================================
+export const BANK_NAME         = "Westpac";
+export const BANK_ACCOUNT_NAME = "Pak Oz Solutions Pty Ltd";
+export const BANK_BSB          = "034-076";
+export const BANK_ACCOUNT      = "841442";
+export const BANK_PAYID        = "0424948512";
+export const BANK_PAYID_TYPE   = "Australian Mobile Number";
+
+// ============================================================
 //  SECURITY SUB-BRAND — used ONLY under /services/security-solutions
 //  and in the security quote email. Everything else on the site keeps
 //  SITE_FULL ("Pak Oz Solutions"). SITE_COMPANY stays the legal entity.

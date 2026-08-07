@@ -9,7 +9,14 @@ import {
   validateLicence,
   validateMobile,
 } from "@/lib/rental-validation"
-import { SITE_PHONE, SITE_EMAIL } from "@/data/site"
+import {
+  SITE_PHONE,
+  SITE_EMAIL,
+  BANK_NAME,
+  BANK_BSB,
+  BANK_ACCOUNT,
+  BANK_PAYID,
+} from "@/data/site"
 
 // nodemailer + Buffer need the Node runtime (not edge).
 export const runtime = "nodejs"
@@ -42,6 +49,20 @@ function esc(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
+}
+
+/**
+ * Format an amount the browser claimed to have transferred. Anything missing or
+ * unparseable reads "TBC" rather than "$NaN" — the owner checks the bank
+ * account against the reference regardless of what this says.
+ */
+function money(raw: string): string {
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n <= 0) return "TBC"
+  return `$${n.toLocaleString("en-AU", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
 }
 
 function row(k: string, v: string): string {
@@ -114,16 +135,18 @@ export async function POST(req: Request) {
       console.error("Vehicle price lookup failed:", e)
     }
 
-    const paymentMethod =
-      get("paymentMethod") === "card"
-        ? "Credit / Debit Card"
-        : "Direct Deposit (Bank Transfer)"
+    // Direct deposit is the only method the rental flow offers. No card details
+    // are collected, so nothing here can leak them — a deliberate choice, since
+    // storing or forwarding a PAN or CVV would be a PCI-DSS breach. Route any
+    // future card payments through a processor such as Stripe instead.
+    const paymentMethod = "Direct Deposit / PayID"
 
-    // NOTE: cardNumber / cardExpiry / cardCvv / cardName arrive in the form data
-    // but are deliberately never read, logged, emailed or persisted here. The
-    // owner phones the applicant to take payment. Storing or forwarding raw card
-    // data (and CVV in particular) is a PCI-DSS breach — route real payments
-    // through a processor such as Stripe instead.
+    // What the customer says they transferred. Unverified by definition — the
+    // owner reconciles it against the bank account before releasing the car,
+    // which is what the ACTION banner in their email exists to prompt.
+    const weeklyRent = money(get("weeklyRent"))
+    const bondAmount = money(get("bondAmount"))
+    const totalAmount = money(get("totalAmount"))
 
     const attachments = (
       await Promise.all([
@@ -163,8 +186,35 @@ export async function POST(req: Request) {
             ${row("Licence No.", esc(licenceLabel))}
             ${row("Date of Birth", esc(dob))}
             ${row("Address", esc(address))}
-            ${row("Preferred Payment", esc(paymentMethod))}
           </table>
+
+          <div style="background:#1a1a2e;border-radius:12px;padding:20px;margin-top:20px">
+            <h3 style="color:#7f85f7;margin:0 0 12px;font-size:15px">💰 Payment Claimed</h3>
+            <table style="width:100%">
+              ${[
+                ["Vehicle", `${esc(vehicleName)} (${esc(vehicleRego)})`],
+                ["Weekly Rent", weeklyRent],
+                ["Bond (2 weeks)", bondAmount],
+                ["Total Transferred", totalAmount],
+                ["Reference", esc(vehicleRego)],
+                ["Payment Method", esc(paymentMethod)],
+              ]
+                .map(
+                  ([k, val]) => `
+                <tr>
+                  <td style="color:#9496a8;font-size:12px;padding:6px 0;width:40%">${k}</td>
+                  <td style="color:white;font-weight:bold;font-size:13px;padding:6px 0">${val}</td>
+                </tr>`
+                )
+                .join("")}
+            </table>
+            <div style="background:#f5a623;border-radius:8px;padding:12px;margin-top:12px">
+              <p style="margin:0;color:#1a1a2e;font-weight:bold;font-size:13px">
+                ⚠️ ACTION: Check ${BANK_NAME} account for transfer with reference
+                ${esc(vehicleRego)} before confirming rental to customer.
+              </p>
+            </div>
+          </div>
 
           <p style="color:#666;font-size:12px;margin-top:16px">
             ${
@@ -176,9 +226,9 @@ export async function POST(req: Request) {
 
           <div style="margin-top:20px;padding:14px;background:#f0f4ff;border-radius:8px">
             <p style="margin:0;color:#534ab7;font-size:13px">
-              <strong>Next steps:</strong> Call ${esc(firstName)} on ${esc(phoneLabel)},
-              confirm vehicle and weekly rate, take payment over the phone, and
-              arrange pickup in Brisbane.
+              <strong>Next steps:</strong> Confirm the transfer has landed, call
+              ${esc(firstName)} on ${esc(phoneLabel)} to confirm the vehicle and
+              weekly rate, and arrange pickup in Brisbane.
             </p>
           </div>
         </div>
@@ -235,11 +285,49 @@ export async function POST(req: Request) {
           <h3 style="color:#1a1a2e;font-size:15px;margin:20px 0 12px">Rental Terms Summary</h3>
           <table style="width:100%;border-collapse:collapse">${termRows}</table>
 
+          <div style="background:#1a1a2e;border-radius:12px;padding:20px;margin:20px 0">
+            <h3 style="color:white;margin:0 0 12px;font-size:15px">🏦 Payment Details</h3>
+            <table style="width:100%">
+              <tr>
+                <td style="color:#9496a8;font-size:12px;padding:6px 0;width:40%">Bank</td>
+                <td style="color:white;font-weight:bold;font-size:13px;padding:6px 0">${BANK_NAME}</td>
+              </tr>
+              <tr>
+                <td style="color:#9496a8;font-size:12px;padding:6px 0">BSB</td>
+                <td style="color:#7f85f7;font-weight:bold;font-size:16px;padding:6px 0">${BANK_BSB}</td>
+              </tr>
+              <tr>
+                <td style="color:#9496a8;font-size:12px;padding:6px 0">Account</td>
+                <td style="color:#7f85f7;font-weight:bold;font-size:16px;padding:6px 0">${BANK_ACCOUNT}</td>
+              </tr>
+              <tr>
+                <td style="color:#9496a8;font-size:12px;padding:6px 0">PayID</td>
+                <td style="color:#5dcaa5;font-weight:bold;font-size:16px;padding:6px 0">${BANK_PAYID}</td>
+              </tr>
+              <tr>
+                <td style="color:#f5a623;font-size:12px;padding:6px 0;font-weight:bold">Your Reference ⚠️</td>
+                <td style="color:#f5a623;font-weight:bold;font-size:18px;padding:6px 0">${esc(vehicleRego)}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background:#fff3cd;border-radius:8px;padding:14px;margin:16px 0">
+            <p style="margin:0;color:#856404;font-size:13px;line-height:1.6">
+              <strong>Weekly payments:</strong>
+              After your first payment your rent will be due every week in
+              advance. We will remind you before each payment is due.<br/><br/>
+              <strong>Bond refund:</strong>
+              Your security bond will be refunded in full within 5 business days
+              of returning the vehicle in good condition.
+            </p>
+          </div>
+
           <div style="margin-top:24px;padding:14px;background:#e1f5ee;border-radius:8px">
             <p style="margin:0;color:#085041;font-size:13px">
               <strong>What happens next:</strong><br/>
-              We will call you on ${esc(phoneClean)} to confirm the weekly rate, arrange
-              a vehicle inspection, take payment, and complete the rental agreement.
+              We verify your transfer, then call you on ${esc(phoneClean)} within
+              2 hours to arrange a vehicle inspection and complete the rental
+              agreement.
             </p>
           </div>
 
@@ -287,7 +375,8 @@ export async function POST(req: Request) {
           `Rental application — ${vehicleName} (${vehicleRego})` +
           `${weeklyLabel ? ` at ${weeklyLabel}` : ""}. ` +
           `Licence ${licenceLabel || "not supplied"}, DOB ${dob}. ` +
-          `Preferred payment: ${paymentMethod}.`,
+          `Payment: ${paymentMethod} — claims ${totalAmount} transferred ` +
+          `(rent ${weeklyRent} + bond ${bondAmount}), reference ${vehicleRego}.`,
         date: new Date().toISOString(),
         status: "New",
         page: "/services/car-rental",

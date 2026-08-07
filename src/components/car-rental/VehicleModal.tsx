@@ -21,7 +21,14 @@ import {
   validateUpload,
   type FieldResult,
 } from "@/lib/rental-validation"
-import { SITE_PHONE } from "@/data/site"
+import {
+  BANK_NAME,
+  BANK_ACCOUNT_NAME,
+  BANK_BSB,
+  BANK_ACCOUNT,
+  BANK_PAYID,
+  SITE_PHONE,
+} from "@/data/site"
 
 interface Props {
   vehicle: RentalVehicle | null
@@ -39,12 +46,6 @@ const EMPTY_FORM = {
   address: "",
   phone: "",
   email: "",
-  paymentMethod: "direct-deposit",
-  cardNumber: "",
-  cardExpiry: "",
-  cardCvv: "",
-  cardName: "",
-  authorise: false,
 }
 
 type FormState = typeof EMPTY_FORM
@@ -87,7 +88,10 @@ export default function VehicleModal({
   const [view, setView] = useState<View>(initialView)
   const [activeImg, setActiveImg] = useState(0)
   const [submitted, setSubmitted] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  // Direct-deposit step: the customer transfers first, then tells us they have.
+  const [payConfirmed, setPayConfirmed] = useState(false)
+  const [paySubmitting, setPaySubmitting] = useState(false)
+  const [payError, setPayError] = useState("")
   const [licenceFront, setLicenceFront] = useState<File | null>(null)
   const [licenceBack, setLicenceBack] = useState<File | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -102,6 +106,9 @@ export default function VehicleModal({
     setErrors({})
     setLicenceFront(null)
     setLicenceBack(null)
+    setPayConfirmed(false)
+    setPaySubmitting(false)
+    setPayError("")
   }, [vehicle?.id, initialView])
 
   // Lock body scroll while the modal is open.
@@ -127,9 +134,16 @@ export default function VehicleModal({
   // carousel renders its "photo coming soon" placeholder rather than nothing.
   const gallery = galleryImages(v)
   const imgs = gallery.length > 0 ? gallery : [""]
-  const weekly =
+  const weeklyLabel =
     v.weeklyRate > 0 ? `$${v.weeklyRate.toLocaleString("en-AU")}` : null
-  const bond = v.bond > 0 ? `$${v.bond.toLocaleString("en-AU")}` : null
+  const bondLabel = v.bond > 0 ? `$${v.bond.toLocaleString("en-AU")}` : null
+
+  // What the customer actually transfers up front. A vehicle with no published
+  // rate falls back to 0, which the payment step renders as "TBC" rather than
+  // asking anyone to deposit $0.00.
+  const weekly = v.weeklyRate || 0
+  const bond = weekly * 2
+  const totalFirst = weekly + bond
 
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
@@ -215,35 +229,43 @@ export default function VehicleModal({
     return Object.keys(e).length === 0
   }
 
-  const validatePayment = () => {
-    const e: Record<string, string> = {}
-    if (!form.cardNumber) e.cardNumber = "Required"
-    if (!form.cardExpiry) e.cardExpiry = "Required"
-    if (!form.cardCvv) e.cardCvv = "Required"
-    if (!form.cardName) e.cardName = "Required"
-    if (!form.authorise) e.authorise = "You must agree"
-    setErrors(e)
-    return Object.keys(e).length === 0
-  }
-
+  /**
+   * Direct deposit only — no card details are collected anywhere in this flow.
+   * The customer transfers first and this posts their claim, which the owner
+   * verifies against the bank account before releasing the vehicle.
+   */
   const handleSubmit = async () => {
-    if (!validatePayment()) return
-    setSubmitting(true)
+    if (!payConfirmed) {
+      setPayError("Please confirm you have made the transfer.")
+      return
+    }
+    setPaySubmitting(true)
+    setPayError("")
     try {
       const fd = new FormData()
       Object.entries(form).forEach(([k, val]) => fd.append(k, String(val)))
       fd.append("vehicleId", v.id)
       fd.append("vehicleName", v.name)
       fd.append("vehicleRego", v.rego)
+      fd.append("paymentMethod", "direct-deposit")
+      fd.append("weeklyRent", String(weekly))
+      fd.append("bondAmount", String(bond))
+      fd.append("totalAmount", String(totalFirst))
+      fd.append("paymentStatus", "transfer-claimed")
       if (licenceFront) fd.append("licenceFront", licenceFront)
       if (licenceBack) fd.append("licenceBack", licenceBack)
 
-      await fetch("/api/rental-application", { method: "POST", body: fd })
+      const res = await fetch("/api/rental-application", {
+        method: "POST",
+        body: fd,
+      })
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
       setSubmitted(true)
     } catch (e) {
       console.error(e)
+      setPayError(`Submission failed. Please call us on ${SITE_PHONE}`)
     } finally {
-      setSubmitting(false)
+      setPaySubmitting(false)
     }
   }
 
@@ -357,10 +379,10 @@ export default function VehicleModal({
                 {/* The weekly rate still has to be on this screen — it is the
                     number the visitor came for and the one the owner sets. */}
                 <div className="absolute top-4 right-4 bg-white/95 rounded-full px-3.5 py-1.5 shadow-lg">
-                  {weekly ? (
+                  {weeklyLabel ? (
                     <p className="text-[#1a1a2e] leading-none">
                       <span className="font-extrabold text-[16px] text-[#534ab7]">
-                        {weekly}
+                        {weeklyLabel}
                       </span>
                       <span className="text-[11px] text-[#666880] ml-1">
                         / week
@@ -495,7 +517,10 @@ export default function VehicleModal({
                     ["💰 Payment", "Weekly in advance"],
                     ["📅 Minimum", "4 weeks"],
                     // The real bond shows once the owner has set one.
-                    ["🔒 Bond", bond ? `${bond}, refunded` : "Refundable at end"],
+                    [
+                      "🔒 Bond",
+                      bondLabel ? `${bondLabel}, refunded` : "Refundable at end",
+                    ],
                     ["🛡️ Excess", "$1,300 AUD"],
                     ["🚗 Roadside", "Included"],
                     ["🔧 Service", "Included"],
@@ -788,182 +813,317 @@ export default function VehicleModal({
             </div>
           )}
 
-          {/* ═══ VIEW 3 — PAYMENT ═══ */}
+          {/* ═══ VIEW 3 — PAYMENT (direct deposit only) ═══ */}
           {view === "payment" && !submitted && (
-            <div className="view-in p-6 max-w-[640px] mx-auto">
+            <div className="view-in p-6 max-w-[600px] mx-auto">
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Payment Details
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-6">
-                Your card will be charged weekly for rent and once for the
-                security bond. We call you before processing.
+              <p className="text-[13px] text-[#9496a8] mb-5">
+                Transfer your first payment via bank transfer or PayID. We
+                confirm receipt and arrange pickup within 2 hours.
               </p>
 
-              <div className="bg-[#eeedfe] rounded-[12px] p-4 mb-5">
-                <p className="font-bold text-[13px] text-[#534ab7] mb-2">
-                  Vehicle: {v.name} ({v.rego})
+              {/* Payment breakdown */}
+              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[16px] p-5 mb-5">
+                <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider mb-3">
+                  Payment Breakdown
                 </p>
-                <ul className="text-[12px] text-[#534ab7] space-y-1">
-                  <li>• Weekly rent paid in advance automatically</li>
-                  <li>• Security bond held on card — refunded at end</li>
-                  <li>• We confirm pricing before first charge</li>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1a1a2e]">
+                        First Week Rent
+                      </p>
+                      <p className="text-[11px] text-[#9496a8]">
+                        Paid weekly in advance thereafter
+                      </p>
+                    </div>
+                    <p className="font-bold text-[16px] text-[#1a1a2e]">
+                      {weekly > 0 ? `$${weekly.toFixed(2)}` : "TBC"}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#1a1a2e]">
+                        Security Bond
+                        <span className="ml-2 bg-[#e1f5ee] text-[#0f6e56] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          REFUNDABLE
+                        </span>
+                      </p>
+                      <p className="text-[11px] text-[#9496a8]">
+                        2 weeks rent — returned at end of rental
+                      </p>
+                    </div>
+                    <p className="font-bold text-[16px] text-[#1a1a2e]">
+                      {bond > 0 ? `$${bond.toFixed(2)}` : "TBC"}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-[#e8e8f0] pt-3 mt-1 flex justify-between items-center">
+                    <p className="font-extrabold text-[16px] text-[#1a1a2e]">
+                      Total First Payment
+                    </p>
+                    <p className="font-extrabold text-[22px] text-[#7f85f7]">
+                      {totalFirst > 0
+                        ? `$${totalFirst.toFixed(2)}`
+                        : "Contact us"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank transfer details */}
+              <div className="bg-[#1a1a2e] rounded-[16px] p-5 mb-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-[18px]">🏦</span>
+                  <p className="font-bold text-white text-[15px]">
+                    Bank Transfer Details
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    ["Bank", BANK_NAME, "text-white"],
+                    ["Account Name", BANK_ACCOUNT_NAME, "text-white"],
+                    ["BSB", BANK_BSB, "text-[#7f85f7]"],
+                    ["Account Number", BANK_ACCOUNT, "text-[#7f85f7]"],
+                    ["Reference", v.rego, "text-[#5dcaa5]"],
+                  ].map(([label, value, colour]) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between py-2 border-b border-white/10 last:border-none"
+                    >
+                      <span className="text-[12px] text-[#9496a8]">{label}</span>
+                      <span className={`font-bold text-[14px] ${colour}`}>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 bg-white/5 rounded-[10px] p-3">
+                  <p className="text-[11px] text-[#f5a623] font-semibold flex items-center gap-1.5">
+                    ⚠️ Important — Use vehicle rego as reference
+                  </p>
+                  <p className="text-[11px] text-[#9496a8] mt-1">
+                    Always use <strong className="text-white">{v.rego}</strong>{" "}
+                    as your payment reference so we can match your transfer
+                    instantly.
+                  </p>
+                </div>
+              </div>
+
+              {/* PayID option */}
+              <div className="bg-[#eeedfe] rounded-[16px] p-5 mb-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[18px]">⚡</span>
+                  <p className="font-bold text-[#534ab7] text-[15px]">
+                    Pay Faster with PayID
+                  </p>
+                </div>
+                <p className="text-[13px] text-[#534ab7] mb-3">
+                  Use PayID for instant transfer — no BSB or account number
+                  needed.
+                </p>
+                <div className="bg-white rounded-[10px] p-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] text-[#9496a8]">PayID (Mobile)</p>
+                    <p className="font-extrabold text-[18px] text-[#7f85f7]">
+                      {BANK_PAYID}
+                    </p>
+                    <p className="text-[11px] text-[#9496a8] mt-0.5">
+                      Registered to: {BANK_ACCOUNT_NAME}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(BANK_PAYID)
+                    }}
+                    className="bg-[#7f85f7] text-white text-[11px] font-bold px-3 py-2 rounded-[8px] hover:bg-[#6b71f0] transition-all flex-shrink-0"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#9496a8] mt-2">
+                  ⚠️ Still use <strong>{v.rego}</strong> as reference in your
+                  PayID transfer description
+                </p>
+              </div>
+
+              {/* Important notes */}
+              <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[14px] p-4 mb-5">
+                <p className="font-bold text-[13px] text-[#7d5a00] mb-2">
+                  📋 Before you transfer:
+                </p>
+                <ul className="space-y-1.5">
+                  {[
+                    `Transfer the full amount of ${
+                      totalFirst > 0 ? `$${totalFirst.toFixed(2)}` : "as quoted"
+                    }`,
+                    `Use ${v.rego} as your reference`,
+                    "Submit this form after transferring",
+                    "We will confirm receipt by email",
+                    "We call you within 2 hours of confirmation to arrange pickup",
+                  ].map((note, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-[12px] text-[#7d5a00]"
+                    >
+                      <span className="flex-shrink-0 mt-0.5">•</span>
+                      {note}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className={lbl} htmlFor="paymentMethod">
-                    Payment Method *
-                  </label>
-                  <select
-                    id="paymentMethod"
-                    value={form.paymentMethod}
-                    onChange={(e) => set("paymentMethod", e.target.value)}
-                    className={`${inp} appearance-none`}
-                  >
-                    <option value="direct-deposit">
-                      Direct Deposit (Bank Transfer)
-                    </option>
-                    <option value="card">Credit / Debit Card</option>
-                  </select>
+              {/* Confirmation checkbox */}
+              <label className="flex items-start gap-3 cursor-pointer bg-[#f9f9ff] border border-[#e8e8f0] rounded-[12px] p-4 mb-4 hover:border-[#7f85f7] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={payConfirmed}
+                  onChange={(e) => {
+                    setPayConfirmed(e.target.checked)
+                    if (e.target.checked) setPayError("")
+                  }}
+                  className="mt-0.5 flex-shrink-0 accent-[#7f85f7] w-4 h-4"
+                />
+                <span className="text-[13px] text-[#444] leading-relaxed">
+                  I have transferred
+                  {totalFirst > 0
+                    ? ` $${totalFirst.toFixed(2)}`
+                    : " the agreed amount"}{" "}
+                  to the account above using <strong>{v.rego}</strong> as the
+                  reference, and I agree to the rental terms and conditions
+                  including weekly payments and bond conditions.
+                </span>
+              </label>
+
+              {payError && (
+                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4">
+                  <p className="text-red-600 text-[13px]">{payError}</p>
                 </div>
+              )}
 
-                <div>
-                  <label className={lbl} htmlFor="cardNumber">
-                    Card Number *
-                  </label>
-                  <input
-                    id="cardNumber"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={form.cardNumber}
-                    onChange={(e) => set("cardNumber", e.target.value)}
-                    className={inp}
-                    placeholder="XXXX XXXX XXXX XXXX"
-                    maxLength={19}
-                  />
-                  {errors.cardNumber && <p className={err}>{errors.cardNumber}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={lbl} htmlFor="cardExpiry">
-                      Expiry *
-                    </label>
-                    <input
-                      id="cardExpiry"
-                      autoComplete="off"
-                      value={form.cardExpiry}
-                      onChange={(e) => set("cardExpiry", e.target.value)}
-                      className={inp}
-                      placeholder="MM/YY"
-                      maxLength={5}
-                    />
-                    {errors.cardExpiry && <p className={err}>{errors.cardExpiry}</p>}
-                  </div>
-                  <div>
-                    <label className={lbl} htmlFor="cardCvv">
-                      CVV *
-                    </label>
-                    <input
-                      id="cardCvv"
-                      type="password"
-                      autoComplete="off"
-                      value={form.cardCvv}
-                      onChange={(e) => set("cardCvv", e.target.value)}
-                      className={inp}
-                      placeholder="123"
-                      maxLength={4}
-                    />
-                    {errors.cardCvv && <p className={err}>{errors.cardCvv}</p>}
-                  </div>
-                </div>
-
-                <div>
-                  <label className={lbl} htmlFor="cardName">
-                    Name on Card *
-                  </label>
-                  <input
-                    id="cardName"
-                    autoComplete="off"
-                    value={form.cardName}
-                    onChange={(e) => set("cardName", e.target.value)}
-                    className={inp}
-                    placeholder="JOHN SMITH"
-                  />
-                  {errors.cardName && <p className={err}>{errors.cardName}</p>}
-                </div>
-
-                <label className="flex items-start gap-3 cursor-pointer bg-[#f9f9ff] border border-[#e8e8f0] rounded-[10px] p-4 hover:border-[#7f85f7] transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={form.authorise}
-                    onChange={(e) => set("authorise", e.target.checked)}
-                    className="mt-0.5 flex-shrink-0 accent-[#7f85f7] w-4 h-4"
-                  />
-                  <span className="text-[12px] text-[#444] leading-relaxed">
-                    I authorise Pak Oz Rentals to charge this payment method
-                    weekly for rent and once for the security bond. I confirm I
-                    have read and agree to the rental terms.
-                  </span>
-                </label>
-                {errors.authorise && (
-                  <p className={`${err} -mt-2`}>{errors.authorise}</p>
-                )}
-              </div>
-
-              <div className="flex gap-3 mt-6">
+              {/* Buttons */}
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setView("apply")}
-                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all"
+                  disabled={paySubmitting}
+                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] disabled:opacity-40 transition-all"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
+                  disabled={!payConfirmed || paySubmitting}
                   onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all"
+                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
-                  {submitting ? "Submitting…" : "Submit application"}
+                  {paySubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "✅ I've Transferred — Submit"
+                  )}
                 </button>
               </div>
 
-              <p className="text-[11px] text-[#9496a8] text-center mt-4">
-                We call you before any payment is processed.
+              <p className="text-[11px] text-center text-[#9496a8] mt-4">
+                🔒 Your personal details are kept secure and never shared with
+                third parties.
               </p>
             </div>
           )}
 
           {/* ═══ SUCCESS ═══ */}
           {submitted && (
-            <div className="view-in p-10 text-center max-w-[500px] mx-auto">
-              <div className="w-16 h-16 rounded-full bg-[#e1f5ee] flex items-center justify-center mx-auto mb-5">
+            <div className="view-in p-8 text-center max-w-[480px] mx-auto">
+              <div className="w-16 h-16 rounded-full bg-[#e1f5ee] flex items-center justify-center mx-auto mb-4">
                 <Check size={32} className="text-[#0f6e56]" />
               </div>
-              <h3 className="font-bold text-[22px] text-[#1a1a2e] mb-3">
-                Application Received!
+
+              <h3 className="font-bold text-[22px] text-[#1a1a2e] mb-2">
+                Application Submitted! 🎉
               </h3>
-              <p className="text-[#555] text-[14px] leading-relaxed mb-4">
-                We have emailed your rental quote to{" "}
-                <strong>{form.email}</strong>. We will call you on{" "}
-                <strong>{form.phone}</strong> within 2 hours to confirm
-                availability and pricing.
+
+              <p className="text-[#555] text-[14px] leading-relaxed mb-5">
+                Thank you <strong>{form.firstName}</strong>. We have received
+                your application and transfer confirmation for{" "}
+                <strong>{v.name}</strong>.
               </p>
-              <div className="bg-[#f8f8ff] rounded-[14px] p-4 text-left text-[13px] text-[#444]">
-                <p className="font-semibold text-[#1a1a2e] mb-2">
-                  Vehicle requested:
+
+              {/* What happens next */}
+              <div className="bg-[#f8f8ff] rounded-[14px] p-4 text-left mb-4">
+                <p className="font-bold text-[13px] text-[#1a1a2e] mb-3">
+                  What happens next:
                 </p>
-                <p>{v.name}</p>
-                <p className="text-[#9496a8]">Rego: {v.rego}</p>
+                <div className="space-y-2.5">
+                  {[
+                    ["1", "We verify your bank transfer"],
+                    ["2", `Email confirmation sent to ${form.email}`],
+                    ["3", `We call you on ${form.phone} within 2 hours`],
+                    ["4", "Vehicle pickup arranged"],
+                  ].map(([num, text]) => (
+                    <div key={num} className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white bg-[#7f85f7]">
+                        {num}
+                      </div>
+                      <p className="text-[13px] text-[#444] leading-snug pt-0.5">
+                        {text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {/* Bank details reminder — in case they submitted before paying */}
+              <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[12px] p-4 text-left mb-5">
+                <p className="text-[12px] font-bold text-[#7d5a00] mb-2">
+                  ⚠️ If you haven&apos;t transferred yet:
+                </p>
+                <div className="space-y-1">
+                  {[
+                    ["BSB", BANK_BSB],
+                    ["Account", BANK_ACCOUNT],
+                    ["PayID", BANK_PAYID],
+                    ["Reference", v.rego],
+                    [
+                      "Amount",
+                      totalFirst > 0
+                        ? `$${totalFirst.toFixed(2)}`
+                        : "As quoted",
+                    ],
+                  ].map(([k, val]) => (
+                    <div key={k} className="flex justify-between text-[12px]">
+                      <span className="text-[#7d5a00]">{k}</span>
+                      <span className="font-bold text-[#7d5a00]">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={onClose}
-                className="mt-6 w-full bg-[#0d0d1a] text-white rounded-[10px] h-[46px] font-semibold text-[14px] hover:bg-[#7f85f7] transition-all"
+                className="w-full bg-[#0f6e56] text-white rounded-[10px] h-[46px] font-semibold text-[14px] hover:bg-[#085041] transition-all"
               >
                 Close
               </button>
+
+              <p className="text-[11px] text-[#9496a8] mt-3">
+                Questions? Call us:
+                <a
+                  href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
+                  className="text-[#7f85f7] font-semibold ml-1"
+                >
+                  {SITE_PHONE}
+                </a>
+              </p>
             </div>
           )}
         </div>
