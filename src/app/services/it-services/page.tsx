@@ -20,14 +20,17 @@ import ITFaq from "@/components/sections/ITFaq"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { itConsulting } from "@/data/it-services"
 import { getITEstimates } from "@/lib/it-services-server"
-import { SITE_PHONE } from "@/data/site"
+import { IT_BRAND, SITE_PHONE } from "@/data/site"
 
 // The estimate ranges come from the dashboard's saved overrides, so this page
 // must not be baked at build time — otherwise admin edits never appear.
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "IT & AI Services Brisbane",
+  // `absolute` because the root layout appends "| Pak Oz Solutions" to every
+  // title — without it the tab would read "… | Pak Oz Technologies | Pak Oz
+  // Solutions". The parent company still owns the footer and the About page.
+  title: { absolute: `IT & AI Services Brisbane | ${IT_BRAND}` },
   description:
     "Web development, app development, AI automation and IT consulting for " +
     "Brisbane businesses. Estimated pricing shown up front. Real price " +
@@ -132,7 +135,7 @@ export default async function ITServicesPage() {
             <AnimateIn animation="fade-up">
               <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(127,133,247,0.3)] bg-[rgba(127,133,247,0.12)] px-4 py-1.5 text-[11px] font-semibold text-[#a5a8ff]">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#7f85f7]" />
-                IT &amp; AI Services · Brisbane &amp; Southeast QLD
+                {IT_BRAND} · Brisbane &amp; Remote
               </span>
             </AnimateIn>
 

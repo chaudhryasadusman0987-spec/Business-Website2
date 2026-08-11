@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
-import { SITE_FULL, SITE_EMAIL, SITE_PHONE } from "@/data/site"
+import { IT_BRAND, SITE_FULL, SITE_EMAIL, SITE_PHONE } from "@/data/site"
 
 // IT & AI project brief endpoint.
 //
@@ -87,7 +87,7 @@ function buildAdminEmail(b: BriefBody, isConsulting: boolean, customerName: stri
       <h1 style="color:white;margin:0;font-size:22px">
         ${isConsulting ? "📅 New Consultation Request" : "📋 New Project Brief"}
       </h1>
-      <p style="color:#c5c8fd;margin:4px 0 0">${SITE_FULL} — IT &amp; AI Services</p>
+      <p style="color:#c5c8fd;margin:4px 0 0">${IT_BRAND}</p>
     </div>
     <div style="padding:28px">
 
@@ -161,7 +161,7 @@ function buildCustomerEmail(b: BriefBody, isConsulting: boolean): string {
       <h1 style="color:white;margin:0;font-size:22px">
         ${isConsulting ? "Consultation Request Received" : "Project Brief Received ✅"}
       </h1>
-      <p style="color:#c5c8fd;margin:4px 0 0">${SITE_FULL}</p>
+      <p style="color:#c5c8fd;margin:4px 0 0">${IT_BRAND}</p>
     </div>
     <div style="padding:28px">
       <p style="color:#1a1a2e;font-size:15px">Hi <strong>${esc(b.firstName)}</strong>,</p>
@@ -228,7 +228,7 @@ function buildCustomerEmail(b: BriefBody, isConsulting: boolean): string {
       </p>
     </div>
     <div style="background:#f8f8ff;padding:16px;text-align:center;font-size:11px;color:#9496a8">
-      ${SITE_FULL} · pakozsolutions.com.au
+      ${IT_BRAND} — part of ${SITE_FULL} · pakozsolutions.com.au
     </div>
   </div>`
 }

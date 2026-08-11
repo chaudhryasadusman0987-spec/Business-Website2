@@ -15,7 +15,7 @@ import {
 import DynamicIcon from "@/components/ui/DynamicIcon"
 import { itConsulting, itServices, type ITService } from "@/data/it-services"
 import { mergeITEstimates, normaliseOverrides } from "@/lib/catalog"
-import { SITE_FULL, SITE_PHONE } from "@/data/site"
+import { IT_BRAND, SITE_PHONE } from "@/data/site"
 
 // Single-page project brief. The customer describes what they want, we email
 // the brief to the admin and book a free consultation. Nothing here quotes a
@@ -195,7 +195,7 @@ function ITQuoteBrief() {
       <div className="bg-[#0d0d1a] py-12">
         <div className="max-w-[760px] mx-auto px-4 text-center">
           <p className="text-[#7f85f7] text-[11px] font-semibold uppercase tracking-widest mb-3">
-            {SITE_FULL} · IT &amp; AI Services
+            {IT_BRAND}
           </p>
           <h1 className="text-white font-bold text-[32px] lg:text-[40px] leading-tight mb-3">
             {isConsulting ? "Book a Free Consultation" : "Describe Your Project"}

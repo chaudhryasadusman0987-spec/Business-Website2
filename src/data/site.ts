@@ -45,3 +45,11 @@ export const BANK_PAYID_TYPE   = "Australian Mobile Number";
 // ============================================================
 export const SECURITY_BRAND   = "Pak Oz CCTV";
 export const SECURITY_TAGLINE = "Professional CCTV & Security Installation Brisbane";
+
+// ============================================================
+//  IT SUB-BRAND — used ONLY on the IT landing page, its project
+//  brief form and the emails that form sends. Navigation, the footer
+//  and the About page stay SITE_FULL ("Pak Oz Solutions"), which is
+//  the parent company. Mirrors SECURITY_BRAND above.
+// ============================================================
+export const IT_BRAND         = "Pak Oz Technologies";
