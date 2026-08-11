@@ -14,6 +14,7 @@ import {
   normaliseOverrides,
 } from "@/lib/catalog"
 import { SITE_FULL } from "@/data/site"
+import DynamicIcon from "@/components/ui/DynamicIcon"
 import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
 import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
 import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
@@ -751,7 +752,9 @@ export default function DashboardPage() {
               return (
                 <div className="bg-white rounded-[16px] p-6 border border-[#e8e8f0] mb-6">
                   <h3 className="font-bold text-[16px] mb-1 flex items-center gap-2">
-                    <span className="text-[20px]">{meta.icon}</span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-[#f4f4ff] text-[#7f85f7]">
+                      <DynamicIcon name={meta.iconName} size={16} />
+                    </span>
                     {meta.name} — Estimated Price Range
                   </h3>
                   <p className="text-[12px] text-[#9496a8] mb-4">

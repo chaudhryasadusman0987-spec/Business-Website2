@@ -53,7 +53,9 @@ const cards = [
     icon: <MonitorIcon />,
     title: "IT & AI Services",
     sub: "Web, app, AI automation & consulting",
-    price: "Estimates from $800",
+    // No figure here on purpose: IT prices are ranges the owner edits in the
+    // dashboard, so a hard-coded number would drift out of date.
+    price: "Estimate in 24 hours",
     priceColor: "text-[#7f85f7]",
     tag: "Project brief · Free consultation",
   },

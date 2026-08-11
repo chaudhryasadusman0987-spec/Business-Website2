@@ -3,7 +3,16 @@
 import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Check } from "lucide-react"
+import {
+  ArrowRight,
+  CalendarCheck,
+  Check,
+  ClipboardList,
+  Mail,
+  Phone,
+  Wallet,
+} from "lucide-react"
+import DynamicIcon from "@/components/ui/DynamicIcon"
 import { itConsulting, itServices, type ITService } from "@/data/it-services"
 import { mergeITEstimates, normaliseOverrides } from "@/lib/catalog"
 import { SITE_FULL, SITE_PHONE } from "@/data/site"
@@ -116,7 +125,7 @@ function ITQuoteBrief() {
             <Check size={32} className="text-[#7f85f7]" />
           </div>
           <h2 className="font-bold text-[24px] text-[#1a1a2e] mb-3">
-            {isConsulting ? "Consultation Booked! 🎉" : "Brief Received! 🎉"}
+            {isConsulting ? "Consultation booked" : "Brief received"}
           </h2>
           <p className="text-[#555] text-[14px] leading-relaxed mb-4">
             {isConsulting
@@ -124,24 +133,33 @@ function ITQuoteBrief() {
               : `Hi ${form.firstName}, your project brief for ${serviceName} has been sent to our team. We will review it and send you an estimated price range within 24 hours.`}
           </p>
 
-          <div className="bg-[#f8f8ff] rounded-[14px] p-4 text-left text-[13px] mb-6">
-            <p className="font-bold text-[#1a1a2e] mb-2">What happens next:</p>
-            <div className="space-y-2 text-[#555]">
-              {isConsulting ? (
-                <>
-                  <p>📧 Confirmation email sent to {form.email}</p>
-                  <p>📞 We call you within 24 hours</p>
-                  <p>💬 Free 30-min call to discuss your needs</p>
-                  <p>📋 We recommend the best solution for you</p>
-                </>
-              ) : (
-                <>
-                  <p>📧 Brief emailed to our team now</p>
-                  <p>💰 Estimated price range sent to {form.email} within 24 hours</p>
-                  <p>📞 Free consultation call to discuss details</p>
-                  <p>📋 Final price agreed before any work starts</p>
-                </>
-              )}
+          <div className="bg-[#f8f8ff] rounded-[14px] p-5 text-left text-[13px] mb-6">
+            <p className="font-bold text-[#1a1a2e] mb-3">What happens next</p>
+            <div className="space-y-3 text-[#555]">
+              {(isConsulting
+                ? [
+                    { Icon: Mail, text: `Confirmation email sent to ${form.email}` },
+                    { Icon: Phone, text: "We call you within 24 hours" },
+                    { Icon: CalendarCheck, text: "Free 30-minute call to discuss your needs" },
+                    { Icon: ClipboardList, text: "We recommend the best solution for you" },
+                  ]
+                : [
+                    { Icon: Mail, text: "Your brief is with our team now" },
+                    {
+                      Icon: Wallet,
+                      text: `Estimated price range sent to ${form.email} within 24 hours`,
+                    },
+                    { Icon: Phone, text: "Free consultation call to discuss the detail" },
+                    { Icon: ClipboardList, text: "Final price agreed before any work starts" },
+                  ]
+              ).map(({ Icon, text }) => (
+                <div key={text} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-[#eeedfe]">
+                    <Icon size={10} className="text-[#7f85f7]" />
+                  </span>
+                  <span className="leading-snug">{text}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -160,13 +178,13 @@ function ITQuoteBrief() {
     ...services.map((s) => ({
       id: s.id,
       name: s.name,
-      icon: s.icon,
+      iconName: s.iconName,
       price: s.estimatedDisplay,
     })),
     {
       id: "it-consulting",
       name: itConsulting.name,
-      icon: itConsulting.icon,
+      iconName: itConsulting.iconName,
       price: "Free call",
     },
   ]
@@ -206,11 +224,17 @@ function ITQuoteBrief() {
                   onClick={() => set("service", s.id)}
                   className={`p-4 rounded-[14px] border-2 text-left transition-all duration-200 ${
                     active
-                      ? "border-[#7f85f7] bg-[#eeedfe]"
-                      : "border-[#e8e8f0] hover:border-[#7f85f7] bg-white"
+                      ? "border-[#7f85f7] bg-[#eeedfe] shadow-[0_8px_24px_rgba(127,133,247,0.15)]"
+                      : "border-[#e8e8f0] hover:border-[#7f85f7] hover:-translate-y-0.5 bg-white"
                   }`}
                 >
-                  <span className="text-[24px] block mb-2">{s.icon}</span>
+                  <span
+                    className={`mb-3 flex h-10 w-10 items-center justify-center rounded-[11px] transition-colors duration-200 ${
+                      active ? "bg-[#7f85f7] text-white" : "bg-[#f4f4ff] text-[#7f85f7]"
+                    }`}
+                  >
+                    <DynamicIcon name={s.iconName} size={19} />
+                  </span>
                   <p
                     className={`font-bold text-[13px] leading-tight ${
                       active ? "text-[#534ab7]" : "text-[#1a1a2e]"
@@ -232,8 +256,10 @@ function ITQuoteBrief() {
 
           {/* Estimate notice */}
           {!isConsulting && (
-            <div className="mt-4 bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 flex items-start gap-2">
-              <span className="text-[16px] flex-shrink-0">⚠️</span>
+            <div className="mt-4 bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 flex items-start gap-2.5">
+              <span className="mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-[#f0c040]/30">
+                <Wallet size={10} className="text-[#7d5a00]" />
+              </span>
               <p className="text-[12px] text-[#7d5a00]">
                 <strong>Estimated range: {estimatedRange}</strong> — This is a
                 guide only. Your actual price depends on your specific
@@ -504,10 +530,12 @@ function ITQuoteBrief() {
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Sending...
             </>
-          ) : isConsulting ? (
-            "📅 Book Free Consultation"
           ) : (
-            "📋 Send My Project Brief"
+            <>
+              {isConsulting ? <CalendarCheck size={18} /> : <ClipboardList size={18} />}
+              {isConsulting ? "Book my free consultation" : "Send my project brief"}
+              <ArrowRight size={17} />
+            </>
           )}
         </button>
 

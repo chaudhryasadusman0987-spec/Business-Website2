@@ -291,7 +291,11 @@ export interface ITService {
   name: string
   tagline: string
   description: string
-  icon: string
+  /** Lucide icon name — rendered through DynamicIcon. */
+  iconName: string
+  /** Card photo. Same shots as the service cards on the home page. */
+  image: string
+  imageAlt: string
   estimatedFrom: number
   estimatedTo: number
   estimatedDisplay: string
@@ -308,7 +312,9 @@ export const itServices: ITService[] = [
     tagline: "Websites that convert visitors into customers",
     description:
       "Fast, modern websites built for performance, SEO and conversions. From landing pages to full business websites.",
-    icon: "🌐",
+    iconName: "Globe",
+    image: "/images/it-services/web-development.jpg",
+    imageAlt: "Web development team building a business website in Brisbane",
     estimatedFrom: 1500,
     estimatedTo: 8000,
     estimatedDisplay: "$1,500 – $8,000",
@@ -335,7 +341,9 @@ export const itServices: ITService[] = [
     tagline: "iOS and Android apps your customers will love",
     description:
       "Native and cross-platform mobile apps. From MVP to full product. We handle design, development and App Store submission.",
-    icon: "📱",
+    iconName: "Smartphone",
+    image: "/images/it-services/app-development.jpg",
+    imageAlt: "Mobile app development for iOS and Android",
     estimatedFrom: 5000,
     estimatedTo: 30000,
     estimatedDisplay: "$5,000 – $30,000",
@@ -362,7 +370,9 @@ export const itServices: ITService[] = [
     tagline: "Automate the repetitive. Focus on what matters.",
     description:
       "AI tools that actually save your staff time. Chat agents, document processing, workflow automation. Real tools for real businesses.",
-    icon: "🤖",
+    iconName: "Bot",
+    image: "/images/it-services/ai-automation.jpg",
+    imageAlt: "AI automation and custom chat agents for Australian businesses",
     estimatedFrom: 800,
     estimatedTo: 15000,
     estimatedDisplay: "$800 – $15,000",
@@ -391,7 +401,9 @@ export const itConsulting = {
   tagline: "Expert technology advice for your business",
   description:
     "Not sure what you need? Book a free 30-minute consultation. We map out your technology needs and recommend the best approach — no jargon, no upselling.",
-  icon: "💡",
+  iconName: "Lightbulb",
+  image: "/images/it-services/it-consulting.jpg",
+  imageAlt: "IT consultant advising a Brisbane business owner",
   features: [
     "Free 30-minute discovery call",
     "Technology needs assessment",
