@@ -269,23 +269,137 @@ export const itServiceItems: ITServiceItem[] = [
   },
 ]
 
+// ============================================================
+//  ESTIMATE-LED MODEL — the /services/it-services landing page and its
+//  quote form work from these three services plus the free consultation.
+//
+//  Prices here are ESTIMATES ONLY. They are a guide so a customer knows
+//  the rough order of magnitude; the real price is agreed in the free
+//  consultation. Every surface that shows a range must say so.
+//
+//  These values are the defaults. The dashboard's IT Services tab can
+//  override estimatedFrom / estimatedTo / estimatedDisplay / features /
+//  badge per service; overrides are stored as catalog overrides in KV and
+//  merged on top by mergeITEstimates() (src/lib/catalog.ts).
+//
+//  itServiceItems above stays as-is: it drives the per-service detail
+//  pages (/services/it-services/web-development etc.) and their packages.
+// ============================================================
+
+export interface ITService {
+  id: string
+  name: string
+  tagline: string
+  description: string
+  icon: string
+  estimatedFrom: number
+  estimatedTo: number
+  estimatedDisplay: string
+  badge?: string
+  features: string[]
+  deliverables: string[]
+  timeline: string
+}
+
+export const itServices: ITService[] = [
+  {
+    id: "web-development",
+    name: "Web Development",
+    tagline: "Websites that convert visitors into customers",
+    description:
+      "Fast, modern websites built for performance, SEO and conversions. From landing pages to full business websites.",
+    icon: "🌐",
+    estimatedFrom: 1500,
+    estimatedTo: 8000,
+    estimatedDisplay: "$1,500 – $8,000",
+    badge: "",
+    features: [
+      "Mobile responsive design",
+      "SEO optimised from day one",
+      "Contact forms with email alerts",
+      "Google Maps integration",
+      "Fast loading speed",
+      "3 months support included",
+    ],
+    deliverables: [
+      "Fully functional website",
+      "Source code ownership",
+      "Hosting setup guide",
+      "Basic SEO setup",
+    ],
+    timeline: "2 – 6 weeks",
+  },
+  {
+    id: "app-development",
+    name: "App Development",
+    tagline: "iOS and Android apps your customers will love",
+    description:
+      "Native and cross-platform mobile apps. From MVP to full product. We handle design, development and App Store submission.",
+    icon: "📱",
+    estimatedFrom: 5000,
+    estimatedTo: 30000,
+    estimatedDisplay: "$5,000 – $30,000",
+    badge: "",
+    features: [
+      "iOS and Android from one build",
+      "UI/UX design included",
+      "App Store submission",
+      "Push notifications",
+      "Backend API development",
+      "Regular progress demos",
+    ],
+    deliverables: [
+      "Published iOS app",
+      "Published Android app",
+      "Admin dashboard",
+      "Full source code",
+    ],
+    timeline: "8 – 20 weeks",
+  },
+  {
+    id: "ai-automation",
+    name: "AI Automation",
+    tagline: "Automate the repetitive. Focus on what matters.",
+    description:
+      "AI tools that actually save your staff time. Chat agents, document processing, workflow automation. Real tools for real businesses.",
+    icon: "🤖",
+    estimatedFrom: 800,
+    estimatedTo: 15000,
+    estimatedDisplay: "$800 – $15,000",
+    badge: "Popular",
+    features: [
+      "AI chat agent for your website",
+      "Document processing automation",
+      "CRM and email integration",
+      "Custom trained on your business",
+      "24/7 automated responses",
+      "Monthly performance reports",
+    ],
+    deliverables: [
+      "Deployed AI solution",
+      "Staff training session",
+      "Documentation",
+      "30 days post-launch support",
+    ],
+    timeline: "1 – 8 weeks",
+  },
+]
+
 export const itConsulting = {
+  id: "it-consulting",
   name: "IT Consulting",
-  icon: "Lightbulb",
-  iconColor: "#f57c00",
-  iconBg: "rgba(245,124,0,0.12)",
   tagline: "Expert technology advice for your business",
   description:
-    "Not sure where to start with technology? We audit your current setup and give you a clear roadmap forward.",
-  startingFrom: "From $150/hr",
+    "Not sure what you need? Book a free 30-minute consultation. We map out your technology needs and recommend the best approach — no jargon, no upselling.",
+  icon: "💡",
   features: [
-    "Technology audit and review",
-    "Digital transformation roadmap",
-    "Software selection advice",
-    "Cybersecurity assessment",
-    "Staff technology training",
-    "IT infrastructure review",
+    "Free 30-minute discovery call",
+    "Technology needs assessment",
+    "Plain English recommendations",
+    "No obligation whatsoever",
+    "Video call or in-person Brisbane",
   ],
+  callToAction: "Book Free Consultation",
 }
 
 export const itTechnologies = [
@@ -332,14 +446,3 @@ export const itProcess = [
       "Go live with confidence. Ongoing support available after every project.",
   },
 ]
-
-// Backwards-compat: the AI agent prompt (src/lib/agent-prompt.ts) imports this.
-// Derived from itServiceItems so there is still one source of truth.
-export const itServices = itServiceItems.map((s) => ({
-  id: s.id,
-  name: s.name,
-  description: s.description,
-  features: s.features.map((f) => f.title),
-  startingFrom: s.startingFrom,
-  iconName: s.icon,
-}))

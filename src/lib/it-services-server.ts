@@ -1,6 +1,11 @@
 import { readCatalog } from "@/lib/catalog-store"
-import { mergeITServices } from "@/lib/catalog"
-import { itServiceItems, type ITServiceItem } from "@/data/it-services"
+import { mergeITEstimates, mergeITServices } from "@/lib/catalog"
+import {
+  itServiceItems,
+  itServices,
+  type ITService,
+  type ITServiceItem,
+} from "@/data/it-services"
 
 // Server-side accessor for the IT services list with the admin dashboard's
 // saved overrides merged in.
@@ -15,6 +20,14 @@ import { itServiceItems, type ITServiceItem } from "@/data/it-services"
 
 export async function getITServices(): Promise<ITServiceItem[]> {
   return mergeITServices(itServiceItems, await readCatalog())
+}
+
+/**
+ * The three estimate-led services (web / app / AI) with the dashboard's saved
+ * ranges, features and badges merged in. Powers the IT services landing page.
+ */
+export async function getITEstimates(): Promise<ITService[]> {
+  return mergeITEstimates(itServices, await readCatalog())
 }
 
 /** One merged service by id. Ids come from the static data file, so a miss is a bug. */

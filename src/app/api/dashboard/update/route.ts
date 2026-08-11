@@ -7,11 +7,16 @@ import {
   deleteVehicle,
 } from "@/lib/db"
 import { readCatalog, writeCatalog } from "@/lib/catalog-store"
-import { itPackageKey, type ITServiceOverviewEdit } from "@/lib/catalog"
+import {
+  formatEstimateRange,
+  itPackageKey,
+  type ITServiceEstimateEdit,
+  type ITServiceOverviewEdit,
+} from "@/lib/catalog"
 import type { ProductInput } from "@/lib/products"
 import { parseColours, type VehicleInput } from "@/lib/vehicles"
 import type { ITPackage } from "@/data/it-services"
-import { itServiceItems } from "@/data/it-services"
+import { itServiceItems, itServices } from "@/data/it-services"
 
 // Dashboard save endpoint.
 //
@@ -227,6 +232,75 @@ async function handleItPackage(data: Record<string, unknown>) {
   }
 }
 
+// type === "it-service": the estimate range, features and badge shown on the
+// /services/it-services landing page and its brief form. Prices there are
+// guides, not quotes, so only the range is editable — there is no line-item
+// pricing to keep in step.
+async function handleItService(data: Record<string, unknown>) {
+  const serviceId = String(data.serviceId ?? "")
+  if (!serviceId) return fail("Missing serviceId", 400)
+  if (!itServices.some((s) => s.id === serviceId)) {
+    return fail(`Unknown service "${serviceId}"`, 404)
+  }
+
+  const edit: ITServiceEstimateEdit = {}
+
+  const money = (v: unknown) => {
+    const n = Number(v)
+    return Number.isFinite(n) && n >= 0 ? n : null
+  }
+
+  if (data.estimatedFrom !== undefined) {
+    const n = money(data.estimatedFrom)
+    if (n === null) return fail("estimatedFrom must be a positive number", 400)
+    edit.estimatedFrom = n
+  }
+  if (data.estimatedTo !== undefined) {
+    const n = money(data.estimatedTo)
+    if (n === null) return fail("estimatedTo must be a positive number", 400)
+    edit.estimatedTo = n
+  }
+  if (
+    edit.estimatedFrom !== undefined &&
+    edit.estimatedTo !== undefined &&
+    edit.estimatedFrom > edit.estimatedTo
+  ) {
+    return fail("The 'from' price cannot be higher than the 'to' price", 400)
+  }
+
+  // Trust the derived text only when it is absent — the dashboard sends it, but
+  // a range with no display string would render blank on the site.
+  if (typeof data.estimatedDisplay === "string" && data.estimatedDisplay.trim()) {
+    edit.estimatedDisplay = data.estimatedDisplay.trim()
+  } else if (edit.estimatedFrom !== undefined && edit.estimatedTo !== undefined) {
+    edit.estimatedDisplay = formatEstimateRange(edit.estimatedFrom, edit.estimatedTo)
+  }
+
+  // An empty badge is meaningful — it clears the badge — so store it as-is.
+  if (typeof data.badge === "string") edit.badge = data.badge
+  if (Array.isArray(data.features)) {
+    edit.features = data.features.map((f) => String(f).trim()).filter(Boolean)
+  }
+
+  try {
+    const current = await readCatalog()
+    const next = await writeCatalog({
+      ...current,
+      itServices: {
+        ...current.itServices,
+        estimates: {
+          ...current.itServices.estimates,
+          [serviceId]: { ...current.itServices.estimates[serviceId], ...edit },
+        },
+      },
+    })
+    return Response.json({ success: true, itServices: next.itServices })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not save"
+    return fail(message, 500)
+  }
+}
+
 export async function POST(req: Request) {
   let data: Record<string, unknown>
   try {
@@ -239,6 +313,7 @@ export async function POST(req: Request) {
 
   if (type === "product") return handleProduct(data)
   if (type === "vehicle") return handleVehicle(data)
+  if (type === "it-service") return handleItService(data)
   if (type === "it-service-overview") return handleItServiceOverview(data)
   if (type === "it-package") return handleItPackage(data)
 

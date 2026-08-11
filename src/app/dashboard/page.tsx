@@ -1,8 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { itServiceItems, type ITServiceItem } from "@/data/it-services"
-import { mergeITServices, normaliseOverrides } from "@/lib/catalog"
+import {
+  itServiceItems,
+  itServices,
+  type ITService,
+  type ITServiceItem,
+} from "@/data/it-services"
+import {
+  formatEstimateRange,
+  mergeITEstimates,
+  mergeITServices,
+  normaliseOverrides,
+} from "@/lib/catalog"
 import { SITE_FULL } from "@/data/site"
 import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
 import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
@@ -76,6 +86,14 @@ type OverviewEdit = {
   description: string
 }
 
+/** Estimate range shown on the IT services landing page + brief form. */
+type EstimateEdit = {
+  estimatedFrom: number
+  estimatedTo: number
+  badge: string
+  features: string[]
+}
+
 type SaveState = "saving" | "saved" | "error"
 
 /* ──────────────────── Initial edit state ──────────────────── */
@@ -113,8 +131,22 @@ function buildOverviewEdits(services: ITServiceItem[]): Record<string, OverviewE
   return out
 }
 
+function buildEstimateEdits(services: ITService[]): Record<string, EstimateEdit> {
+  const out: Record<string, EstimateEdit> = {}
+  services.forEach((svc) => {
+    out[svc.id] = {
+      estimatedFrom: svc.estimatedFrom,
+      estimatedTo: svc.estimatedTo,
+      badge: svc.badge ?? "",
+      features: [...svc.features],
+    }
+  })
+  return out
+}
+
 const initPkgEdits = () => buildPkgEdits(itServiceItems)
 const initOverviewEdits = () => buildOverviewEdits(itServiceItems)
+const initEstimateEdits = () => buildEstimateEdits(itServices)
 
 /* ───────────────────────── Helpers ───────────────────────── */
 
@@ -211,6 +243,8 @@ export default function DashboardPage() {
   const [pkgEdits, setPkgEdits] = useState<Record<string, PkgEdit>>(initPkgEdits)
   const [overviewEdits, setOverviewEdits] =
     useState<Record<string, OverviewEdit>>(initOverviewEdits)
+  const [estimateEdits, setEstimateEdits] =
+    useState<Record<string, EstimateEdit>>(initEstimateEdits)
   const [saveStatus, setSaveStatus] = useState<Record<string, SaveState>>({})
   const [itConfigLoading, setItConfigLoading] = useState(true)
 
@@ -259,9 +293,11 @@ export default function DashboardPage() {
     fetch("/api/catalog")
       .then((r) => r.json())
       .then((data) => {
-        const merged = mergeITServices(itServiceItems, normaliseOverrides(data))
+        const overrides = normaliseOverrides(data)
+        const merged = mergeITServices(itServiceItems, overrides)
         setPkgEdits(buildPkgEdits(merged))
         setOverviewEdits(buildOverviewEdits(merged))
+        setEstimateEdits(buildEstimateEdits(mergeITEstimates(itServices, overrides)))
       })
       .catch(() => {
         /* keep the data-file defaults */
@@ -699,7 +735,138 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {/* ── SECTION A — Service Overview ── */}
+            {/* ── SECTION A — Estimated Price Range ── */}
+            {(() => {
+              const est = estimateEdits[activeService.id]
+              const estKey = `estimate:${activeService.id}`
+              const meta = itServices.find((s) => s.id === activeService.id)
+              if (!est || !meta) return null
+              const display = formatEstimateRange(est.estimatedFrom, est.estimatedTo)
+              const invalid = est.estimatedFrom > est.estimatedTo
+              const patch = (p: Partial<EstimateEdit>) =>
+                setEstimateEdits((s) => ({
+                  ...s,
+                  [activeService.id]: { ...s[activeService.id], ...p },
+                }))
+              return (
+                <div className="bg-white rounded-[16px] p-6 border border-[#e8e8f0] mb-6">
+                  <h3 className="font-bold text-[16px] mb-1 flex items-center gap-2">
+                    <span className="text-[20px]">{meta.icon}</span>
+                    {meta.name} — Estimated Price Range
+                  </h3>
+                  <p className="text-[12px] text-[#9496a8] mb-4">
+                    Shown on the IT services page and the project brief form,
+                    always labelled as a guide. The real price is agreed in the
+                    consultation.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Estimated From ($)
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={est.estimatedFrom}
+                        onChange={(ev) => patch({ estimatedFrom: Number(ev.target.value) })}
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Estimated To ($)
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={est.estimatedTo}
+                        onChange={(ev) => patch({ estimatedTo: Number(ev.target.value) })}
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] font-bold text-[#7f85f7] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Display Text
+                      </label>
+                      <div className="w-full border border-dashed border-[#e8e8f0] rounded-[8px] px-3 h-[40px] flex items-center text-[14px] font-bold text-[#1a1a2e] bg-[#f9f9ff]">
+                        {display}
+                      </div>
+                      <span className="text-[10px] text-[#9496a8]">
+                        Generated from the two numbers
+                      </span>
+                    </div>
+                  </div>
+
+                  {invalid && (
+                    <p className="mt-3 text-[12px] text-[#c62828] flex items-center gap-1.5">
+                      <AlertCircle size={13} />
+                      The &quot;from&quot; price is higher than the &quot;to&quot; price.
+                    </p>
+                  )}
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Badge
+                      </label>
+                      <input
+                        type="text"
+                        value={est.badge}
+                        placeholder="e.g. Popular (leave blank for none)"
+                        onChange={(ev) => patch({ badge: ev.target.value })}
+                        className="w-full border border-[#e8e8f0] rounded-[8px] px-3 h-[40px] text-[14px] focus:border-[#7f85f7] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                        Typical Timeline
+                      </label>
+                      <div className="w-full border border-dashed border-[#e8e8f0] rounded-[8px] px-3 h-[40px] flex items-center text-[14px] text-[#666] bg-[#f9f9ff]">
+                        {meta.timeline}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-[11px] text-[#9496a8] uppercase tracking-wider mb-1.5">
+                      Features (one per line)
+                    </label>
+                    <textarea
+                      rows={6}
+                      value={est.features.join("\n")}
+                      onChange={(ev) => patch({ features: ev.target.value.split("\n") })}
+                      className="w-full border border-[#e8e8f0] rounded-[8px] px-3 py-2 text-[13px] leading-relaxed focus:border-[#7f85f7] outline-none resize-y"
+                    />
+                  </div>
+
+                  <StatusSaveBtn
+                    state={saveStatus[estKey]}
+                    idleLabel="Save Estimate"
+                    idleClass="bg-[#7f85f7] text-white hover:bg-[#6b71f0]"
+                    sizeClass="px-6 h-[38px] text-[13px]"
+                    iconSize={14}
+                    onClick={() => {
+                      if (invalid) return
+                      save(
+                        {
+                          type: "it-service",
+                          serviceId: activeService.id,
+                          estimatedFrom: est.estimatedFrom,
+                          estimatedTo: est.estimatedTo,
+                          estimatedDisplay: display,
+                          features: est.features.map((f) => f.trim()).filter((f) => f),
+                          badge: est.badge,
+                        },
+                        estKey
+                      )
+                    }}
+                  />
+                </div>
+              )
+            })()}
+
+            {/* ── SECTION B — Service Overview ── */}
             {(() => {
               const ov = overviewEdits[activeService.id]
               const ovKey = `overview:${activeService.id}`
@@ -784,7 +951,7 @@ export default function DashboardPage() {
               )
             })()}
 
-            {/* ── SECTION B — Packages & Pricing ── */}
+            {/* ── SECTION C — Packages & Pricing (detail pages) ── */}
             <h3 className="font-bold text-[16px] mb-4">Packages &amp; Pricing</h3>
 
             {activeService.packages.map((p) => {

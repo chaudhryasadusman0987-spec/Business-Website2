@@ -47,7 +47,10 @@ export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
       l.surcharge === 0 ? `${l.name} (no surcharge)` : `${l.name} (+$${l.surcharge})`
     )
     .join(", ")
-  const itList = itServices.map((s) => `${s.name} (${s.startingFrom})`).join(", ")
+  // Estimate ranges, not fixed prices — the agent must quote them as a guide.
+  const itList = itServices
+    .map((s) => `${s.name} (estimated ${s.estimatedDisplay})`)
+    .join(", ")
 
   return `You are a friendly customer service assistant for ${SITE_FULL},
 an Australian multi-service business. You speak concisely in Australian English.
@@ -55,7 +58,7 @@ an Australian multi-service business. You speak concisely in Australian English.
 SERVICES:
 1. Security Solutions — ${securityPrices}; plus $${installFee} installation fee. Free site assessment.
 2. Car Rental (Pak Oz Rentals, Brisbane) — long-term hire${cheapest > 0 ? `, from $${cheapest} per week` : ""}.
-3. IT Services — ${itList}. Free consultation.
+3. IT Services — ${itList}. Plus free IT consulting. IT prices are ESTIMATES ONLY, never fixed quotes: always say the real price is confirmed in a free 30-minute consultation.
 
 CAR RENTAL DETAILS:
 - Long-term rental only: paid WEEKLY in advance, with a 4 WEEK MINIMUM. There are no daily rates.

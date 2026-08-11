@@ -11,7 +11,7 @@
 // and weekly rates outright rather than patching a static list.
 
 import type { SecurityProduct } from "@/types"
-import type { ITPackage, ITServiceItem } from "@/data/it-services"
+import type { ITPackage, ITService, ITServiceItem } from "@/data/it-services"
 
 export type { SecurityProduct } from "@/types"
 
@@ -26,6 +26,15 @@ export type ITServiceOverviewEdit = Partial<
   Pick<ITServiceItem, "tagline" | "startingFrom" | "description">
 >
 
+/**
+ * The estimate fields the dashboard's "Estimated Price Range" card can edit.
+ * These drive the /services/it-services landing page and its quote form, which
+ * show a guide range rather than a fixed price.
+ */
+export type ITServiceEstimateEdit = Partial<
+  Pick<ITService, "estimatedFrom" | "estimatedTo" | "estimatedDisplay" | "features" | "badge">
+>
+
 export interface ITServicesOverride {
   /** Overview edits, keyed by service id (e.g. "web-development"). */
   services: Record<string, ITServiceOverviewEdit>
@@ -35,6 +44,8 @@ export interface ITServicesOverride {
    * pair keeps this correct if two services ever reuse one.
    */
   packages: Record<string, Partial<ITPackage>>
+  /** Estimate-range edits, keyed by service id. */
+  estimates: Record<string, ITServiceEstimateEdit>
 }
 
 export interface CatalogOverrides {
@@ -46,7 +57,7 @@ export interface CatalogOverrides {
 
 export const EMPTY_OVERRIDES: CatalogOverrides = {
   security: {},
-  itServices: { services: {}, packages: {} },
+  itServices: { services: {}, packages: {}, estimates: {} },
 }
 
 /** Composite key for one package override. */
@@ -87,6 +98,8 @@ export function normaliseOverrides(raw: unknown): CatalogOverrides {
     itServices: {
       services: asObject(it.services) as Record<string, ITServiceOverviewEdit>,
       packages: asObject(it.packages) as Record<string, Partial<ITPackage>>,
+      // Absent in documents written before the estimate model existed.
+      estimates: asObject(it.estimates) as Record<string, ITServiceEstimateEdit>,
     },
     updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : undefined,
   }
@@ -126,6 +139,32 @@ export function mergeITServices(
       ...o.packages[itPackageKey(svc.id, p.id)],
     })),
   }))
+}
+
+/** Display text for an estimate range, e.g. "$1,500 – $8,000". */
+export function formatEstimateRange(from: number, to: number): string {
+  const n = (v: number) => Math.round(v).toLocaleString("en-AU")
+  return `$${n(from)} – $${n(to)}`
+}
+
+/**
+ * Effective estimate-led service list: data-file defaults + admin edits.
+ *
+ * Used by the IT services landing page (server) and the quote form (client),
+ * which both show a guide range, never a fixed price.
+ */
+export function mergeITEstimates(base: ITService[], ov: CatalogOverrides): ITService[] {
+  const edits = ov.itServices.estimates
+  return base.map((svc) => {
+    const e = edits[svc.id]
+    if (!e) return svc
+    const merged = { ...svc, ...e }
+    // Keep the display text honest if only the numbers were saved.
+    if (!e.estimatedDisplay) {
+      merged.estimatedDisplay = formatEstimateRange(merged.estimatedFrom, merged.estimatedTo)
+    }
+    return merged
+  })
 }
 
 /** Stable-ish unique id for a newly added custom item. */

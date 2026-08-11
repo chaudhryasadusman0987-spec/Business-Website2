@@ -1,15 +1,19 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowRight, ArrowLeft } from "lucide-react"
 import { SITE_FULL } from "@/data/site"
 import SecurityQuoteForm from "@/components/quotes/SecurityQuoteForm"
-import ITQuoteForm from "@/components/quotes/ITQuoteForm"
 
 // Car rental is deliberately absent — it takes enquiries by phone/contact form
 // rather than an online quote.
+//
+// IT & AI is not quoted inline either: its prices are estimates, so it collects
+// a project brief and books a consultation at /services/it-services/quote. The
+// card below sends people there.
 const SERVICE_KEYS = ["security", "it-services"]
+const IT_BRIEF_URL = "/services/it-services/quote"
 
 /* Custom service SVGs — same shapes/colors as the navbar + hero cards */
 function CameraIcon() {
@@ -49,20 +53,32 @@ const cards = [
     icon: <MonitorIcon />,
     title: "IT & AI Services",
     sub: "Web, app, AI automation & consulting",
-    price: "From $1,500",
+    price: "Estimates from $800",
     priceColor: "text-[#7f85f7]",
-    tag: "5-step quote · Estimate in 2 minutes",
+    tag: "Project brief · Free consultation",
   },
 ]
 
 function QuotePicker() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [selectedService, setSelectedService] = useState<string | null>(null)
+
+  const pick = (key: string) => {
+    if (key === "it-services") {
+      router.push(IT_BRIEF_URL)
+      return
+    }
+    setSelectedService(key)
+  }
 
   useEffect(() => {
     const svc = searchParams.get("service")
     if (svc && SERVICE_KEYS.includes(svc)) {
-      setSelectedService(svc)
+      // ?service=it-services deep links keep working — they just land on the
+      // brief form instead of an inline wizard.
+      if (svc === "it-services") router.replace(IT_BRIEF_URL)
+      else setSelectedService(svc)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -81,7 +97,6 @@ function QuotePicker() {
           </button>
         </div>
         {selectedService === "security" && <SecurityQuoteForm />}
-        {selectedService === "it-services" && <ITQuoteForm />}
       </div>
     )
   }
@@ -111,7 +126,7 @@ function QuotePicker() {
           {cards.map((c) => (
             <div
               key={c.key}
-              onClick={() => setSelectedService(c.key)}
+              onClick={() => pick(c.key)}
               className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[24px] p-8 cursor-pointer flex-1 text-center hover:bg-[rgba(127,133,247,0.12)] hover:border-[rgba(127,133,247,0.4)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(127,133,247,0.2)] transition-all duration-300"
             >
               <div className={`w-16 h-16 rounded-[16px] mx-auto mb-5 flex items-center justify-center ${c.iconBg}`}>
