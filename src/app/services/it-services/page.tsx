@@ -3,6 +3,7 @@ import Link from "next/link"
 import {
   ArrowRight,
   Check,
+  ChevronRight,
   Clock,
   FileCheck,
   Headphones,
@@ -285,8 +286,12 @@ export default async function ITServicesPage() {
                 className="flex"
               >
                 <article className="group flex w-full flex-col overflow-hidden rounded-[22px] border border-[#e8e8f0] bg-white transition-all duration-500 hover:-translate-y-2 hover:border-[#c9ccfb] hover:shadow-[0_24px_60px_rgba(127,133,247,0.18)]">
-                  {/* photo */}
-                  <div className="relative h-[210px] overflow-hidden">
+                  {/* photo — doubles as the way into the service's own page */}
+                  <Link
+                    href={service.detailHref}
+                    aria-label={`${service.name} — packages and detail`}
+                    className="relative block h-[210px] overflow-hidden"
+                  >
                     <ImageWithFallback
                       src={service.image}
                       alt={service.imageAlt}
@@ -316,7 +321,7 @@ export default async function ITServicesPage() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* body */}
                   <div className="flex flex-1 flex-col p-6">
@@ -354,16 +359,28 @@ export default async function ITServicesPage() {
                       </p>
                     </div>
 
-                    <Link
-                      href={`/services/it-services/quote?service=${service.id}`}
-                      className="mt-5 inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#1a1a2e] text-[14px] font-semibold text-white transition-all duration-300 hover:bg-[#7f85f7]"
-                    >
-                      Describe my project
-                      <ArrowRight
-                        size={15}
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      />
-                    </Link>
+                    <div className="mt-5 flex flex-col gap-2.5">
+                      <Link
+                        href={`/services/it-services/quote?service=${service.id}`}
+                        className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#1a1a2e] text-[14px] font-semibold text-white transition-all duration-300 hover:bg-[#7f85f7]"
+                      >
+                        Describe my project
+                        <ArrowRight
+                          size={15}
+                          className="transition-transform duration-300 group-hover:translate-x-1"
+                        />
+                      </Link>
+                      {/* The service's own page: packages, process, tech stack.
+                          Without this the detail pages were only reachable from
+                          the home page. */}
+                      <Link
+                        href={service.detailHref}
+                        className="inline-flex h-[44px] w-full items-center justify-center gap-1.5 rounded-[12px] border border-[#e8e8f0] text-[13px] font-semibold text-[#1a1a2e] transition-all duration-300 hover:border-[#7f85f7] hover:bg-[#f8f8ff] hover:text-[#534ab7]"
+                      >
+                        See packages &amp; full detail
+                        <ChevronRight size={14} />
+                      </Link>
+                    </div>
                   </div>
                 </article>
               </AnimateIn>

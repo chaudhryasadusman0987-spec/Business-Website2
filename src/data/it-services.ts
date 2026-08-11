@@ -296,6 +296,8 @@ export interface ITService {
   /** Card photo. Same shots as the service cards on the home page. */
   image: string
   imageAlt: string
+  /** The service's own page — packages, process and technologies. */
+  detailHref: string
   estimatedFrom: number
   estimatedTo: number
   estimatedDisplay: string
@@ -315,6 +317,7 @@ export const itServices: ITService[] = [
     iconName: "Globe",
     image: "/images/it-services/web-development.jpg",
     imageAlt: "Web development team building a business website in Brisbane",
+    detailHref: "/services/it-services/web-development",
     estimatedFrom: 1500,
     estimatedTo: 8000,
     estimatedDisplay: "$1,500 – $8,000",
@@ -344,6 +347,7 @@ export const itServices: ITService[] = [
     iconName: "Smartphone",
     image: "/images/it-services/app-development.jpg",
     imageAlt: "Mobile app development for iOS and Android",
+    detailHref: "/services/it-services/app-development",
     estimatedFrom: 5000,
     estimatedTo: 30000,
     estimatedDisplay: "$5,000 – $30,000",
@@ -373,6 +377,7 @@ export const itServices: ITService[] = [
     iconName: "Bot",
     image: "/images/it-services/ai-automation.jpg",
     imageAlt: "AI automation and custom chat agents for Australian businesses",
+    detailHref: "/services/it-services/ai-automation",
     estimatedFrom: 800,
     estimatedTo: 15000,
     estimatedDisplay: "$800 – $15,000",
