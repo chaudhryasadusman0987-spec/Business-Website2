@@ -7,6 +7,7 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import Price from "@/components/ui/Price"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import type { ITServiceItem } from "@/data/it-services"
+import { IT_BRAND } from "@/data/site"
 
 interface Props {
   service: ITServiceItem
@@ -64,9 +65,18 @@ export default function ITServiceDetail({
               <span className="text-[#9496a8]">{service.name}</span>
             </nav>
 
-            <span className="inline-flex items-center gap-2 bg-[rgba(127,133,247,0.15)] border border-[rgba(127,133,247,0.3)] text-[#a5a8ff] text-[11px] rounded-full px-4 py-1.5">
-              {service.name}
-            </span>
+            {/* Sub-brand first, service second — same pill as the IT landing
+                page hero. The breadcrumb above stays "IT & AI Services"
+                because that's navigation, not branding. */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 bg-[rgba(127,133,247,0.15)] border border-[rgba(127,133,247,0.3)] text-[#a5a8ff] text-[11px] font-semibold rounded-full px-4 py-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7f85f7] animate-pulse" />
+                {IT_BRAND}
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-[#c9cbd8] text-[11px] rounded-full px-4 py-1.5">
+                {service.name}
+              </span>
+            </div>
 
             <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">
               <span className="block text-white">{headlineWhite}</span>
