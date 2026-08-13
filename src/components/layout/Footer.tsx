@@ -25,13 +25,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Col 1 — Brand */}
           <div>
+            {/* The logo carries the wordmark, so no text heading here — it
+                would print "Pak Oz Solutions" twice in the same column. */}
             <div className="mb-4">
               <BrandLogo size="sm" />
             </div>
-            <h2 className="text-[50px] font-bold text-white leading-none">
-              {SITE_FULL}
-            </h2>
-            <p className="text-brand-primary mt-3">{SITE_TAGLINE}</p>
+            <p className="text-brand-primary">{SITE_TAGLINE}</p>
             <p className="mt-4 text-[14px] leading-[24px]">
               Your trusted Australian multi-service partner for security,
               mobility, and technology.
