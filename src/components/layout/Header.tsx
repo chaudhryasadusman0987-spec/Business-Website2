@@ -93,8 +93,8 @@ export default function Header() {
                 mark rendering at roughly half its nominal height in the bar. */}
             {/* Full-bleed white band. 2px padding + a 61px logo keeps the band
                 itself exactly 65px, so it still meets the top and bottom of the
-                bar. Not rounded — a radius here would notch the bar's edges. */}
-            <div className="bg-white px-[5px] py-[2px] flex items-center">
+                bar. The 2px radius is small enough not to notch those edges. */}
+            <div className="bg-white rounded-[2px] px-[5px] py-[2px] flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
@@ -226,7 +226,7 @@ export default function Header() {
           >
             {/* Same white pill as the navbar — this panel is purple too */}
             {/* Matches the navbar band — this header is the same 65px tall */}
-            <div className="bg-white px-[5px] py-[2px] flex items-center">
+            <div className="bg-white rounded-[2px] px-[5px] py-[2px] flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
