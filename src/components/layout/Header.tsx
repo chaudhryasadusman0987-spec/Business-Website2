@@ -91,14 +91,14 @@ export default function Header() {
                 Uses the -trimmed variant: the full-bleed pak-oz-logo.png pads
                 its 500x500 canvas with ~45% transparent margin, which left the
                 mark rendering at roughly half its nominal height in the bar. */}
-            {/* Full-bleed white band: zero vertical padding, so the logo is
-                flush with the top and bottom of the 65px bar. Not rounded —
-                a radius here would notch the bar's own edges. */}
-            <div className="bg-white px-[5px] py-0 flex items-center">
+            {/* Full-bleed white band. 2px padding + a 61px logo keeps the band
+                itself exactly 65px, so it still meets the top and bottom of the
+                bar. Not rounded — a radius here would notch the bar's edges. */}
+            <div className="bg-white px-[5px] py-[2px] flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[65px] w-auto object-contain"
+                className="h-[61px] w-auto object-contain"
                 onError={(e) => {
                   // Hide the pill entirely and reveal the text lockup instead
                   const img = e.currentTarget
@@ -226,11 +226,11 @@ export default function Header() {
           >
             {/* Same white pill as the navbar — this panel is purple too */}
             {/* Matches the navbar band — this header is the same 65px tall */}
-            <div className="bg-white px-[5px] py-0 flex items-center">
+            <div className="bg-white px-[5px] py-[2px] flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[65px] w-auto object-contain"
+                className="h-[61px] w-auto object-contain"
                 onError={(e) => {
                   const img = e.currentTarget
                   img.style.display = "none"
