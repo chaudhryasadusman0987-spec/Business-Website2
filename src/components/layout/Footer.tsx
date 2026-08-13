@@ -24,6 +24,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Col 1 — Brand */}
           <div>
+            {/* Footer logo — brightness-0 + invert renders it white on the
+                dark footer. This is a server component, so no onError
+                handler: the asset ships with the repo. */}
+            <div className="mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/pak-oz-logo.png"
+                alt={SITE_FULL}
+                className="h-[50px] w-auto object-contain brightness-0 invert opacity-90"
+              />
+            </div>
             <h2 className="text-[50px] font-bold text-white leading-none">
               {SITE_FULL}
             </h2>

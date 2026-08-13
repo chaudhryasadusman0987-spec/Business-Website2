@@ -32,16 +32,26 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: SITE_FULL,
     locale: "en_AU",
+    images: [
+      {
+        // Square logo — social cards will letterbox it rather than crop.
+        url: "/images/pak-oz-logo.png",
+        width: 500,
+        height: 500,
+        alt: SITE_FULL,
+      },
+    ],
   },
   icons: {
+    // /icon.svg is the Markhor mark generated from app/icon.svg. It is listed
+    // ahead of the legacy raster icons so browsers that support SVG favicons
+    // (all current ones) pick up the new branding.
     icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    other: [{ rel: "mask-icon", url: "/favicon.svg", color: "#7f85f7" }],
+    other: [{ rel: "mask-icon", url: "/icon.svg", color: "#7f85f7" }],
   },
   manifest: "/site.webmanifest",
 }

@@ -82,11 +82,25 @@ export default function Header() {
       <header className="bg-[rgba(127,133,247,0.95)] backdrop-blur-md sticky top-0 z-50 w-full px-6 py-0 h-[65px] flex items-center">
         <div className="w-full flex items-center justify-between gap-6">
           {/* LEFT — logo */}
-          <Link
-            href="/"
-            className="text-white font-bold text-[20px] hover:opacity-80 transition-opacity shrink-0"
-          >
-            {SITE_FULL}
+          <Link href="/" className="flex items-center shrink-0 hover:opacity-80 transition-opacity">
+            {/* Show logo image if available */}
+            <img
+              src="/images/pak-oz-logo.png"
+              alt={SITE_FULL}
+              className="h-[44px] w-auto object-contain"
+              onError={(e) => {
+                // Fallback to text if image not found
+                const el = e.currentTarget
+                el.style.display = "none"
+                const fallback = el.nextElementSibling as HTMLElement | null
+                if (fallback) fallback.style.display = "flex"
+              }}
+            />
+            {/* Text fallback — hidden when image loads */}
+            <span className="items-center gap-1" style={{ display: "none" }}>
+              <span className="text-white font-bold text-[20px]">Pak Oz</span>
+              <span className="text-[#1a1a2e] font-bold text-[20px]">Solutions</span>
+            </span>
           </Link>
 
           {/* CENTER — nav links (desktop only) */}
@@ -191,9 +205,23 @@ export default function Header() {
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            className="text-white font-bold text-[18px] hover:opacity-80 transition-opacity"
+            className="flex items-center hover:opacity-80 transition-opacity"
           >
-            {SITE_FULL}
+            <img
+              src="/images/pak-oz-logo.png"
+              alt={SITE_FULL}
+              className="h-[40px] w-auto object-contain"
+              onError={(e) => {
+                const el = e.currentTarget
+                el.style.display = "none"
+                const fallback = el.nextElementSibling as HTMLElement | null
+                if (fallback) fallback.style.display = "flex"
+              }}
+            />
+            <span className="items-center gap-1" style={{ display: "none" }}>
+              <span className="text-white font-bold text-[18px]">Pak Oz</span>
+              <span className="text-[#1a1a2e] font-bold text-[18px]">Solutions</span>
+            </span>
           </Link>
           <button
             onClick={() => setOpen(false)}
