@@ -91,13 +91,14 @@ export default function Header() {
                 Uses the -trimmed variant: the full-bleed pak-oz-logo.png pads
                 its 500x500 canvas with ~45% transparent margin, which left the
                 mark rendering at roughly half its nominal height in the bar. */}
-            {/* Vertical padding stays tight: the pill has to live inside a
-                65px bar, so height goes to the artwork rather than the pill. */}
-            <div className="bg-white rounded-[12px] px-2.5 py-1 lg:px-3.5 lg:py-1 flex items-center shadow-sm">
+            {/* Full-bleed white band: zero vertical padding, so the logo is
+                flush with the top and bottom of the 65px bar. Not rounded —
+                a radius here would notch the bar's own edges. */}
+            <div className="bg-white px-[5px] py-0 flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[38px] lg:h-[46px] w-auto object-contain"
+                className="h-[65px] w-auto object-contain"
                 onError={(e) => {
                   // Hide the pill entirely and reveal the text lockup instead
                   const img = e.currentTarget
@@ -224,11 +225,12 @@ export default function Header() {
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             {/* Same white pill as the navbar — this panel is purple too */}
-            <div className="bg-white rounded-[12px] px-2.5 py-1 flex items-center shadow-sm">
+            {/* Matches the navbar band — this header is the same 65px tall */}
+            <div className="bg-white px-[5px] py-0 flex items-center">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[38px] w-auto object-contain"
+                className="h-[65px] w-auto object-contain"
                 onError={(e) => {
                   const img = e.currentTarget
                   img.style.display = "none"
