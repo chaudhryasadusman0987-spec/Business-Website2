@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { Phone, Mail, MapPin, ArrowRight, ChevronRight, Check } from "lucide-react"
+import BrandLogo from "@/components/ui/BrandLogo"
 import { SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
 
 const dotGrid = {
@@ -99,6 +100,9 @@ export default function ContactPage() {
             <ChevronRight size={12} />
             <span className="text-[#9496a8]">Contact</span>
           </nav>
+          <div className="flex justify-center mb-8">
+            <BrandLogo />
+          </div>
           <h1 className="text-white font-extrabold text-[40px] lg:text-[52px] leading-[1.1]">
             Get In Touch
           </h1>

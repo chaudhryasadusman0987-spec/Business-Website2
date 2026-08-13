@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { ChevronRight, Clock, ArrowRight } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import BrandLogo from "@/components/ui/BrandLogo"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { blogPosts, blogCategories } from "@/data/blog"
 
@@ -44,6 +45,10 @@ export default function BlogPage() {
             <ChevronRight size={12} />
             <span className="text-[#9496a8]">Blog</span>
           </nav>
+
+          <div className="mb-8 flex justify-center">
+            <BrandLogo />
+          </div>
 
           <h1 className="text-[40px] font-extrabold text-white lg:text-[56px]">
             Blog &amp; Insights

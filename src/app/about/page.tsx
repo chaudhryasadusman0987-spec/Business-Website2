@@ -4,6 +4,7 @@ import { ShieldCheck, Users, Zap, Heart, ChevronRight } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import BrandLogo from "@/components/ui/BrandLogo"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
 
@@ -86,16 +87,8 @@ export default function AboutPage() {
             <ChevronRight size={12} />
             <span className="text-[#9496a8]">About</span>
           </nav>
-          {/* Company logo. The hero sits on #0d0d1a and the logo's mark and
-              wordmark are near-black navy, so it is inverted to white here —
-              same treatment as the footer. */}
           <div className="flex justify-center mb-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/pak-oz-logo.png"
-              alt={SITE_FULL}
-              className="h-[80px] w-auto object-contain brightness-0 invert opacity-95"
-            />
+            <BrandLogo />
           </div>
           <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.1]">
             About Us
