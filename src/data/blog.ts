@@ -26,6 +26,8 @@ export const blogCategories = [
   "Business Tips",
 ] as const
 
+// author/authorRole are real people — keep them in sync with the team listed
+// on the about page (src/app/about/page.tsx).
 export const blogPosts: BlogPost[] = [
   {
     slug: "cctv-buying-guide-2025",
@@ -34,8 +36,8 @@ export const blogPosts: BlogPost[] = [
       "Resolution, storage, night vision and remote access — everything you need to know before installing security cameras this year.",
     category: "Security",
     categoryColor: "#f57c00",
-    author: "James D.",
-    authorRole: "Head of Security",
+    author: "Ehtsham",
+    authorRole: "Owner & Director",
     date: "May 28, 2025",
     readTime: "7 min read",
     image:
@@ -77,8 +79,8 @@ export const blogPosts: BlogPost[] = [
       "Flexible mobility is changing how Australians think about owning a car. Here's how the numbers really stack up.",
     category: "Car Rental",
     categoryColor: "#4caf50",
-    author: "Kevin L.",
-    authorRole: "Operations Manager",
+    author: "Tayyab Iftikhar",
+    authorRole: "Director & Operations",
     date: "May 12, 2025",
     readTime: "5 min read",
     image:
@@ -111,8 +113,8 @@ export const blogPosts: BlogPost[] = [
       "AI isn't just for tech giants. Here are five practical automations Australian small businesses are deploying today.",
     category: "IT & AI",
     categoryColor: "#7f85f7",
-    author: "Sarah M.",
-    authorRole: "Lead Developer",
+    author: "Asad",
+    authorRole: "IT & Digital",
     date: "April 30, 2025",
     readTime: "6 min read",
     image:
@@ -163,8 +165,8 @@ export const blogPosts: BlogPost[] = [
       "Should you pay for professional monitoring or watch your own alerts? We break down the trade-offs.",
     category: "Security",
     categoryColor: "#f57c00",
-    author: "James D.",
-    authorRole: "Head of Security",
+    author: "Ehtsham",
+    authorRole: "Owner & Director",
     date: "April 18, 2025",
     readTime: "4 min read",
     image:
@@ -196,8 +198,8 @@ export const blogPosts: BlogPost[] = [
       "A one-second delay can cut conversions by 7%. Here's how page speed quietly shapes your bottom line.",
     category: "IT & AI",
     categoryColor: "#7f85f7",
-    author: "Sarah M.",
-    authorRole: "Lead Developer",
+    author: "Asad",
+    authorRole: "IT & Digital",
     date: "April 2, 2025",
     readTime: "5 min read",
     image:
@@ -229,8 +231,8 @@ export const blogPosts: BlogPost[] = [
       "From compact runabouts to spacious vans — matching the vehicle to the job saves money and headaches.",
     category: "Business Tips",
     categoryColor: "#f5a623",
-    author: "Kevin L.",
-    authorRole: "Operations Manager",
+    author: "Tayyab Iftikhar",
+    authorRole: "Director & Operations",
     date: "March 20, 2025",
     readTime: "4 min read",
     image:
