@@ -25,8 +25,8 @@ export default function BrandLogo({
   const pill =
     size === "sm"
       ? "rounded-[14px] px-5 py-3"
-      : "rounded-[16px] px-5 py-3"
-  const img = size === "sm" ? "h-[60px]" : "h-[56px] lg:h-[64px]"
+      : "rounded-[18px] px-6 py-3.5"
+  const img = size === "sm" ? "h-[60px]" : "h-[64px] lg:h-[76px]"
 
   return (
     <span

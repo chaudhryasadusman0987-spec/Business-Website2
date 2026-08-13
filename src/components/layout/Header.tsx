@@ -91,11 +91,13 @@ export default function Header() {
                 Uses the -trimmed variant: the full-bleed pak-oz-logo.png pads
                 its 500x500 canvas with ~45% transparent margin, which left the
                 mark rendering at roughly half its nominal height in the bar. */}
-            <div className="bg-white rounded-[10px] px-2 py-1 lg:px-3 lg:py-1.5 flex items-center shadow-sm">
+            {/* Vertical padding stays tight: the pill has to live inside a
+                65px bar, so height goes to the artwork rather than the pill. */}
+            <div className="bg-white rounded-[12px] px-2.5 py-1 lg:px-3.5 lg:py-1 flex items-center shadow-sm">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[32px] lg:h-[40px] w-auto object-contain"
+                className="h-[38px] lg:h-[46px] w-auto object-contain"
                 onError={(e) => {
                   // Hide the pill entirely and reveal the text lockup instead
                   const img = e.currentTarget
@@ -222,11 +224,11 @@ export default function Header() {
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             {/* Same white pill as the navbar — this panel is purple too */}
-            <div className="bg-white rounded-[10px] px-2 py-1 flex items-center shadow-sm">
+            <div className="bg-white rounded-[12px] px-2.5 py-1 flex items-center shadow-sm">
               <img
                 src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
-                className="h-[32px] w-auto object-contain"
+                className="h-[38px] w-auto object-contain"
                 onError={(e) => {
                   const img = e.currentTarget
                   img.style.display = "none"
