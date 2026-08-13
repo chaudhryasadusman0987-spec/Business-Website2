@@ -87,10 +87,13 @@ export default function Header() {
             className="flex items-center gap-3 flex-shrink-0 hover:opacity-80 transition-opacity"
           >
             {/* White pill behind the logo. The artwork is dark navy + the same
-                purple as this navbar, so it needs a light backing to read. */}
+                purple as this navbar, so it needs a light backing to read.
+                Uses the -trimmed variant: the full-bleed pak-oz-logo.png pads
+                its 500x500 canvas with ~45% transparent margin, which left the
+                mark rendering at roughly half its nominal height in the bar. */}
             <div className="bg-white rounded-[10px] px-2 py-1 lg:px-3 lg:py-1.5 flex items-center shadow-sm">
               <img
-                src="/images/pak-oz-logo.png"
+                src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
                 className="h-[32px] lg:h-[40px] w-auto object-contain"
                 onError={(e) => {
@@ -221,7 +224,7 @@ export default function Header() {
             {/* Same white pill as the navbar — this panel is purple too */}
             <div className="bg-white rounded-[10px] px-2 py-1 flex items-center shadow-sm">
               <img
-                src="/images/pak-oz-logo.png"
+                src="/images/pak-oz-logo-trimmed.png"
                 alt={SITE_FULL}
                 className="h-[32px] w-auto object-contain"
                 onError={(e) => {
