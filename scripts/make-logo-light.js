@@ -1,6 +1,12 @@
 /**
  * Trims the transparent margin off the supplied light logo.
  *
+ * NOTE: this script can no longer be run as-is. Its source, pak-oz-logo.webp,
+ * was removed from the repo when the colour pak-oz-logo.png replaced it. The
+ * output (public/images/pak-oz-logo-light.webp) is still committed and is what
+ * the navbar renders, so nothing is broken — re-running this needs the original
+ * light artwork back. Kept for that reason.
+ *
  * The source (pak-oz-logo.webp) is a 1024x1024 canvas holding an 846x402
  * horizontal lockup — about 21% of the height is empty padding. Rendered at
  * h-[56px] straight from that canvas the artwork itself would come out ~22px
