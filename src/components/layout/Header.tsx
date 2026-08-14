@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, ChevronDown, Plus, Mail, Newspaper } from "lucide-react"
 import { navLinks } from "@/data/navigation"
-import { SITE_FULL } from "@/data/site"
+import { SITE_FULL, SITE_NAME, SITE_SUFFIX } from "@/data/site"
 
 /* Custom service SVGs — same shapes/colors as the hero cards */
 function CctvIcon() {
@@ -68,6 +68,56 @@ const centerLinks = [
   { label: "About", href: "/about" },
 ]
 
+/**
+ * The logo for the purple surfaces: the navbar and the mobile slide-out panel
+ * header, which share the same #7f85f7 background.
+ *
+ * Uses the light artwork directly, with no white chip behind it. That works
+ * here specifically because #7f85f7 is a mid-tone: the white ibex and kangaroo
+ * bodies read against it, and so does the dark navy wordmark. It does NOT hold
+ * up on the genuinely dark footer (#252525) or heroes (#0f0f18), where that
+ * navy wordmark disappears — those keep the BrandLogo lockup instead.
+ *
+ * Renders pak-oz-logo-light.webp, the trimmed build of the supplied file. The
+ * original 1024x1024 canvas is ~21% transparent padding, which would have made
+ * the artwork render at roughly half the height it was asked for.
+ *
+ * Height is capped at 52px inside the 65px bar. The wordmark is stacked three
+ * lines deep plus a tagline, so pushing it toward the full bar height leaves no
+ * breathing room and turns the tagline to mush.
+ */
+function NavLogo({ onClick }: { onClick?: () => void }) {
+  return (
+    <Link
+      href="/"
+      onClick={onClick}
+      className="flex flex-shrink-0 items-center transition-opacity hover:opacity-80"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/pak-oz-logo-light.webp"
+        alt={SITE_FULL}
+        className="h-[46px] w-auto object-contain lg:h-[52px]"
+        onError={(e) => {
+          const img = e.currentTarget
+          img.style.display = "none"
+          const fallback = img.nextElementSibling as HTMLElement | null
+          if (fallback) fallback.style.display = "flex"
+        }}
+      />
+      {/* Text fallback — only revealed if the artwork fails to load. */}
+      <span className="hidden flex-col leading-none">
+        <span className="text-[18px] font-extrabold uppercase tracking-[-0.01em] text-white">
+          {SITE_NAME}
+        </span>
+        <span className="mt-[3px] text-[9.5px] font-semibold uppercase tracking-[0.225em] text-white/70">
+          {SITE_SUFFIX}
+        </span>
+      </span>
+    </Link>
+  )
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
@@ -82,43 +132,7 @@ export default function Header() {
       <header className="bg-[rgba(127,133,247,0.95)] backdrop-blur-md sticky top-0 z-50 w-full px-6 py-0 h-[65px] flex items-center">
         <div className="w-full flex items-center justify-between gap-6">
           {/* LEFT — logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 flex-shrink-0 hover:opacity-80 transition-opacity"
-          >
-            {/* White pill behind the logo. The artwork is dark navy + the same
-                purple as this navbar, so it needs a light backing to read.
-                Uses the -trimmed variant: the full-bleed pak-oz-logo.png pads
-                its 500x500 canvas with ~45% transparent margin, which left the
-                mark rendering at roughly half its nominal height in the bar. */}
-            {/* White band, still exactly 65px so it meets the top and bottom of
-                the bar: 10px padding leaves 45px for the logo. Raising the logo
-                past 45px means growing the bar's h-[65px] as well. */}
-            <div className="bg-white rounded-[10px] p-[10px] flex items-center">
-              <img
-                src="/images/pak-oz-logo-trimmed.png"
-                alt={SITE_FULL}
-                className="h-[45px] w-auto object-contain"
-                onError={(e) => {
-                  // Hide the pill entirely and reveal the text lockup instead
-                  const img = e.currentTarget
-                  img.style.display = "none"
-                  const pill = img.parentElement
-                  if (pill) pill.style.display = "none"
-                  const text = img
-                    .closest("a")
-                    ?.querySelector(".logo-text") as HTMLElement | null
-                  if (text) text.style.display = "flex"
-                }}
-              />
-            </div>
-
-            {/* Text fallback — shows if image fails */}
-            <div className="logo-text hidden items-center gap-1">
-              <span className="text-white font-bold text-[20px] leading-none">Pak Oz</span>
-              <span className="text-[#c5c8fd] font-bold text-[20px] leading-none">Solutions</span>
-            </div>
-          </Link>
+          <NavLogo />
 
           {/* CENTER — nav links (desktop only) */}
           <nav className="hidden lg:flex items-center gap-1">
@@ -219,35 +233,7 @@ export default function Header() {
       >
         {/* Panel header — matches the navbar bar */}
         <div className="flex items-center justify-between px-6 h-[65px] border-b border-white/15 flex-shrink-0">
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className="flex items-center hover:opacity-80 transition-opacity"
-          >
-            {/* Same white pill as the navbar — this panel is purple too */}
-            {/* Matches the navbar band — this header is the same 65px tall */}
-            <div className="bg-white rounded-[10px] p-[10px] flex items-center">
-              <img
-                src="/images/pak-oz-logo-trimmed.png"
-                alt={SITE_FULL}
-                className="h-[45px] w-auto object-contain"
-                onError={(e) => {
-                  const img = e.currentTarget
-                  img.style.display = "none"
-                  const pill = img.parentElement
-                  if (pill) pill.style.display = "none"
-                  const text = img
-                    .closest("a")
-                    ?.querySelector(".logo-text") as HTMLElement | null
-                  if (text) text.style.display = "flex"
-                }}
-              />
-            </div>
-            <div className="logo-text hidden items-center gap-1">
-              <span className="text-white font-bold text-[18px] leading-none">Pak Oz</span>
-              <span className="text-[#c5c8fd] font-bold text-[18px] leading-none">Solutions</span>
-            </div>
-          </Link>
+          <NavLogo onClick={() => setOpen(false)} />
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"

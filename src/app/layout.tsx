@@ -10,7 +10,10 @@ import { SITE_FULL, SITE_DOMAIN } from "@/data/site"
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  // 800 backs `font-extrabold`, used by the navbar wordmark and every hero H1.
+  // Without it the browser synthesises a faux-bold from 700, which smears the
+  // letterforms at large sizes.
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 })
 
@@ -34,10 +37,16 @@ export const metadata: Metadata = {
     locale: "en_AU",
     images: [
       {
-        // Square logo — social cards will letterbox it rather than crop.
-        url: "/images/pak-oz-logo.png",
-        width: 500,
-        height: 500,
+        // Square mark — social cards will letterbox it rather than crop.
+        //
+        // Points at the mark, not the full lockup, because the light artwork
+        // has white animal bodies and a dark wordmark: social cards render on
+        // white or near-white, where the animals would vanish. The mark is
+        // navy + purple, so it reads there. Swap this for a proper 1200x630
+        // card once a colour lockup for light backgrounds exists again.
+        url: "/images/pak-oz-mark.png",
+        width: 512,
+        height: 512,
         alt: SITE_FULL,
       },
     ],
