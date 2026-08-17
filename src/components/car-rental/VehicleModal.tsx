@@ -29,6 +29,17 @@ import {
   BANK_PAYID,
   SITE_PHONE,
 } from "@/data/site"
+import { loadStripe } from "@stripe/stripe-js"
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js"
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
+)
 
 interface Props {
   vehicle: RentalVehicle | null
@@ -92,6 +103,12 @@ export default function VehicleModal({
   const [payConfirmed, setPayConfirmed] = useState(false)
   const [paySubmitting, setPaySubmitting] = useState(false)
   const [payError, setPayError] = useState("")
+  // Card payment: which method the customer picked, and the Stripe PaymentIntent
+  // for the card path once it has been created.
+  const [payMethod, setPayMethod] = useState<"card" | "deposit" | null>(null)
+  const [clientSecret, setClientSecret] = useState("")
+  const [stripeLoading, setStripeLoading] = useState(false)
+  const [stripeError, setStripeError] = useState("")
   const [licenceFront, setLicenceFront] = useState<File | null>(null)
   const [licenceBack, setLicenceBack] = useState<File | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -109,6 +126,9 @@ export default function VehicleModal({
     setPayConfirmed(false)
     setPaySubmitting(false)
     setPayError("")
+    setPayMethod(null)
+    setClientSecret("")
+    setStripeError("")
   }, [vehicle?.id, initialView])
 
   // Lock body scroll while the modal is open.
@@ -266,6 +286,40 @@ export default function VehicleModal({
       setPayError(`Submission failed. Please call us on ${SITE_PHONE}`)
     } finally {
       setPaySubmitting(false)
+    }
+  }
+
+  /** Creates the Stripe PaymentIntent for this vehicle/customer and switches
+   *  the payment view over to the card form once a client secret comes back. */
+  const handleSelectCard = async () => {
+    setStripeLoading(true)
+    setStripeError("")
+    try {
+      const res = await fetch("/api/rental-payment/create-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: v.id,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+        }),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setStripeError(data.error)
+        setPayMethod(null)
+        return
+      }
+      setClientSecret(data.clientSecret)
+      setPayMethod("card")
+    } catch {
+      setStripeError(
+        "Could not load card payment. Please try direct deposit instead."
+      )
+    } finally {
+      setStripeLoading(false)
     }
   }
 
@@ -813,9 +867,119 @@ export default function VehicleModal({
             </div>
           )}
 
-          {/* ═══ VIEW 3 — PAYMENT (direct deposit only) ═══ */}
-          {view === "payment" && !submitted && (
+          {/* ═══ VIEW 3a — PAYMENT METHOD SELECTOR ═══ */}
+          {view === "payment" && !submitted && !payMethod && (
             <div className="view-in p-6 max-w-[600px] mx-auto">
+              <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
+                Choose Payment Method
+              </h3>
+              <p className="text-[13px] text-[#9496a8] mb-6">
+                Select how you&apos;d like to pay your first week&apos;s rent plus
+                bond.
+              </p>
+
+              {stripeError && (
+                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4">
+                  <p className="text-red-600 text-[13px]">{stripeError}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <button
+                  type="button"
+                  onClick={handleSelectCard}
+                  disabled={stripeLoading}
+                  className="border-2 border-[#e8e8f0] rounded-[16px] p-5 text-left hover:border-[#7f85f7] transition-all duration-200 disabled:opacity-50"
+                >
+                  <div className="text-[28px] mb-2">💳</div>
+                  <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
+                    Pay by Card
+                  </p>
+                  <p className="text-[12px] text-[#9496a8] mb-3">
+                    Instant. Secure. Visa, Mastercard, Amex.
+                  </p>
+                  <div className="flex gap-1">
+                    {["VISA", "MC", "AMEX"].map((c) => (
+                      <span
+                        key={c}
+                        className="text-[9px] font-bold bg-[#f7f7f7] border border-[#e8e8f0] rounded-[3px] px-1.5 py-0.5 text-[#666]"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  {stripeLoading && (
+                    <p className="text-[11px] text-[#7f85f7] mt-2">Loading...</p>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("deposit")}
+                  className="border-2 border-[#e8e8f0] rounded-[16px] p-5 text-left hover:border-[#7f85f7] transition-all duration-200"
+                >
+                  <div className="text-[28px] mb-2">🏦</div>
+                  <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
+                    Bank Transfer
+                  </p>
+                  <p className="text-[12px] text-[#9496a8] mb-3">
+                    Direct deposit or PayID. We confirm receipt manually.
+                  </p>
+                  <span className="text-[11px] text-[#7f85f7] font-medium">
+                    View bank details →
+                  </span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setView("apply")}
+                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] transition-colors"
+              >
+                ← Back to details
+              </button>
+            </div>
+          )}
+
+          {/* ═══ VIEW 3b — PAYMENT (card, via Stripe) ═══ */}
+          {view === "payment" && !submitted && payMethod === "card" && clientSecret && (
+            <Elements
+              stripe={stripePromise}
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: "stripe",
+                  variables: {
+                    colorPrimary: "#7f85f7",
+                    borderRadius: "10px",
+                    fontFamily: "Poppins, sans-serif",
+                  },
+                },
+              }}
+            >
+              <StripeCardForm
+                vehicle={v}
+                form={form}
+                weekly={weekly}
+                bond={bond}
+                totalFirst={totalFirst}
+                onSuccess={() => setSubmitted(true)}
+                onBack={() => setPayMethod(null)}
+              />
+            </Elements>
+          )}
+
+          {/* ═══ VIEW 3c — PAYMENT (direct deposit) ═══ */}
+          {view === "payment" && !submitted && payMethod === "deposit" && (
+            <div className="view-in p-6 max-w-[600px] mx-auto">
+              <button
+                type="button"
+                onClick={() => setPayMethod(null)}
+                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] mb-4 flex items-center gap-1"
+              >
+                ← Choose different method
+              </button>
+
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Payment Details
               </h3>
@@ -1049,13 +1213,15 @@ export default function VehicleModal({
               </div>
 
               <h3 className="font-bold text-[22px] text-[#1a1a2e] mb-2">
-                Application Submitted! 🎉
+                {payMethod === "card"
+                  ? "Payment Successful! 🎉"
+                  : "Application Submitted! 🎉"}
               </h3>
 
               <p className="text-[#555] text-[14px] leading-relaxed mb-5">
                 Thank you <strong>{form.firstName}</strong>. We have received
-                your application and transfer confirmation for{" "}
-                <strong>{v.name}</strong>.
+                your {payMethod === "card" ? "payment" : "application and transfer confirmation"}{" "}
+                for <strong>{v.name}</strong>.
               </p>
 
               {/* What happens next */}
@@ -1065,7 +1231,12 @@ export default function VehicleModal({
                 </p>
                 <div className="space-y-2.5">
                   {[
-                    ["1", "We verify your bank transfer"],
+                    [
+                      "1",
+                      payMethod === "card"
+                        ? "Your card payment has been confirmed"
+                        : "We verify your bank transfer",
+                    ],
                     ["2", `Email confirmation sent to ${form.email}`],
                     ["3", `We call you on ${form.phone} within 2 hours`],
                     ["4", "Vehicle pickup arranged"],
@@ -1082,31 +1253,34 @@ export default function VehicleModal({
                 </div>
               </div>
 
-              {/* Bank details reminder — in case they submitted before paying */}
-              <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[12px] p-4 text-left mb-5">
-                <p className="text-[12px] font-bold text-[#7d5a00] mb-2">
-                  ⚠️ If you haven&apos;t transferred yet:
-                </p>
-                <div className="space-y-1">
-                  {[
-                    ["BSB", BANK_BSB],
-                    ["Account", BANK_ACCOUNT],
-                    ["PayID", BANK_PAYID],
-                    ["Reference", v.rego],
-                    [
-                      "Amount",
-                      totalFirst > 0
-                        ? `$${totalFirst.toFixed(2)}`
-                        : "As quoted",
-                    ],
-                  ].map(([k, val]) => (
-                    <div key={k} className="flex justify-between text-[12px]">
-                      <span className="text-[#7d5a00]">{k}</span>
-                      <span className="font-bold text-[#7d5a00]">{val}</span>
-                    </div>
-                  ))}
+              {/* Bank details reminder — only relevant if they still owe a
+                  transfer; a card payer has already paid in full. */}
+              {payMethod !== "card" && (
+                <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[12px] p-4 text-left mb-5">
+                  <p className="text-[12px] font-bold text-[#7d5a00] mb-2">
+                    ⚠️ If you haven&apos;t transferred yet:
+                  </p>
+                  <div className="space-y-1">
+                    {[
+                      ["BSB", BANK_BSB],
+                      ["Account", BANK_ACCOUNT],
+                      ["PayID", BANK_PAYID],
+                      ["Reference", v.rego],
+                      [
+                        "Amount",
+                        totalFirst > 0
+                          ? `$${totalFirst.toFixed(2)}`
+                          : "As quoted",
+                      ],
+                    ].map(([k, val]) => (
+                      <div key={k} className="flex justify-between text-[12px]">
+                        <span className="text-[#7d5a00]">{k}</span>
+                        <span className="font-bold text-[#7d5a00]">{val}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button
                 onClick={onClose}
@@ -1147,6 +1321,151 @@ export default function VehicleModal({
             </a>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function StripeCardForm({
+  vehicle,
+  form,
+  weekly,
+  bond,
+  totalFirst,
+  onSuccess,
+  onBack,
+}: {
+  vehicle: RentalVehicle
+  form: FormState
+  weekly: number
+  bond: number
+  totalFirst: number
+  onSuccess: () => void
+  onBack: () => void
+}) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState("")
+
+  const fmt = (n: number) => `$${n.toFixed(2)}`
+
+  const handlePay = async () => {
+    if (!stripe || !elements) return
+    setProcessing(true)
+    setError("")
+
+    const { error: submitError } = await elements.submit()
+    if (submitError) {
+      setError(submitError.message || "")
+      setProcessing(false)
+      return
+    }
+
+    const { error: confirmError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/services/car-rental?payment=success`,
+        payment_method_data: {
+          billing_details: {
+            name: `${form.firstName} ${form.lastName}`,
+            email: form.email,
+            phone: form.phone,
+          },
+        },
+      },
+      redirect: "if_required",
+    })
+
+    if (confirmError) {
+      setError(confirmError.message || "Payment failed. Please try again.")
+      setProcessing(false)
+    } else {
+      onSuccess()
+    }
+  }
+
+  return (
+    <div className="p-6 max-w-[600px] mx-auto">
+      <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
+        Secure Card Payment
+      </h3>
+      <p className="text-[13px] text-[#9496a8] mb-5">
+        Powered by Stripe — bank-grade encryption. We never see your card
+        details.
+      </p>
+
+      <div className="bg-[#f8f8ff] rounded-[14px] p-5 mb-5">
+        <p className="font-bold text-[14px] text-[#1a1a2e] mb-3">
+          {vehicle.name} ({vehicle.rego})
+        </p>
+        <div className="space-y-2">
+          <div className="flex justify-between text-[13px]">
+            <span className="text-[#666]">1 week rent</span>
+            <span className="font-semibold text-[#1a1a2e]">{fmt(weekly)}</span>
+          </div>
+          <div className="flex justify-between text-[13px]">
+            <span className="text-[#666]">
+              Security bond (2 weeks)
+              <span className="text-[#9496a8] text-[11px] ml-1">
+                refundable
+              </span>
+            </span>
+            <span className="font-semibold text-[#1a1a2e]">{fmt(bond)}</span>
+          </div>
+          <div className="border-t border-[#e8e8f0] pt-2 mt-2 flex justify-between">
+            <span className="font-bold text-[15px] text-[#1a1a2e]">
+              Total today
+            </span>
+            <span className="font-extrabold text-[18px] text-[#7f85f7]">
+              {fmt(totalFirst)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <PaymentElement options={{ layout: "tabs" }} />
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-[10px] p-4 mb-4">
+          <p className="text-red-600 text-[13px] font-medium">❌ {error}</p>
+        </div>
+      )}
+
+      <div className="flex items-start gap-2 mb-5 bg-[#f0faf5] rounded-[10px] p-3">
+        <span className="text-[16px]">🔒</span>
+        <p className="text-[11px] text-[#085041] leading-relaxed">
+          Processed securely by Stripe, PCI DSS Level 1 certified — the
+          highest payment security standard available.
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={processing}
+          className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] disabled:opacity-40 transition-all"
+        >
+          ← Back
+        </button>
+        <button
+          type="button"
+          onClick={handlePay}
+          disabled={processing || !stripe}
+          className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
+        >
+          {processing ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>🔒 Pay {fmt(totalFirst)} AUD</>
+          )}
+        </button>
       </div>
     </div>
   )

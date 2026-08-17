@@ -12,6 +12,8 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@stripe/react-stripe-js": "^6.8.1",
+    "@stripe/stripe-js": "^9.13.0",
     "@upstash/redis": "^1.38.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.17.0",
@@ -19,7 +21,8 @@
     "nodemailer": "^8.0.10",
     "react": "^18",
     "react-dom": "^18",
-    "react-hook-form": "^7.77.0"
+    "react-hook-form": "^7.77.0",
+    "stripe": "^22.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",
