@@ -2,6 +2,7 @@ import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
+import { insertActiveRental } from "@/lib/db"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
 
 export const runtime = "nodejs"
@@ -66,6 +67,19 @@ export async function POST(req: Request) {
                 )
                 .join("")}
             </table>
+            ${
+              meta.bondPaidOnline === "true"
+                ? `<div style="background:#e1f5ee;border-radius:8px;padding:12px;margin-top:12px">
+                    <p style="margin:0;color:#085041;font-size:13px;font-weight:bold">
+                      ✅ Bond paid online — no bond collection needed at pickup.
+                    </p>
+                  </div>`
+                : `<div style="background:#fff3cd;border-radius:8px;padding:12px;margin-top:12px">
+                    <p style="margin:0;color:#856404;font-size:13px;font-weight:bold">
+                      ⚠️ Bond NOT paid online — collect $${(Number(meta.weeklyRent) * 2).toFixed(2)} bond in person at vehicle pickup.
+                    </p>
+                  </div>`
+            }
             <div style="background:#e1f5ee;border-radius:8px;padding:14px;margin-top:16px">
               <p style="margin:0;color:#085041;font-weight:bold">
                 Next: Call ${meta.customerName} on ${meta.customerPhone} to arrange vehicle pickup.
@@ -110,11 +124,19 @@ export async function POST(req: Request) {
                   .join("")}
               </table>
             </div>
-            <div style="background:#fff3cd;border-radius:8px;padding:14px;margin:16px 0">
-              <p style="margin:0;color:#856404;font-size:13px">
-                <strong>Bond:</strong> Your $${meta.bondAmount} bond is refunded in full at the end of your rental, provided no damage occurs.
-              </p>
-            </div>
+            ${
+              meta.bondPaidOnline === "true"
+                ? `<div style="background:#e1f5ee;border-radius:8px;padding:14px;margin:16px 0">
+                    <p style="margin:0;color:#085041;font-size:13px">
+                      <strong>Bond:</strong> Your security bond has been paid and will be refunded in full at the end of your rental, provided no damage occurs.
+                    </p>
+                  </div>`
+                : `<div style="background:#fff3cd;border-radius:8px;padding:14px;margin:16px 0">
+                    <p style="margin:0;color:#856404;font-size:13px">
+                      <strong>Bond due at pickup:</strong> Please bring $${(Number(meta.weeklyRent) * 2).toFixed(2)} for the security bond when you collect your vehicle. This is fully refundable at the end of your rental.
+                    </p>
+                  </div>`
+            }
             <p style="color:#666;font-size:13px">
               Questions? Call us:<br/>
               <strong style="color:#7f85f7;font-size:16px">${SITE_PHONE}</strong>
@@ -141,6 +163,21 @@ export async function POST(req: Request) {
       })
     } catch (e) {
       console.error("Lead save:", e)
+    }
+
+    try {
+      await insertActiveRental({
+        id: pi.id,
+        vehicleId: meta.vehicleId || "",
+        vehicleName: meta.vehicleName || "",
+        vehicleRego: meta.vehicleRego || "",
+        customerName: meta.customerName || "",
+        customerEmail: meta.customerEmail || "",
+        customerPhone: meta.customerPhone || "",
+        weeklyRent: Number(meta.weeklyRent) || 0,
+      })
+    } catch (e) {
+      console.error("Active rental save error:", e)
     }
   }
 

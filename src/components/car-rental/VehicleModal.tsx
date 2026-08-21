@@ -106,6 +106,9 @@ export default function VehicleModal({
   // Card payment: which method the customer picked, and the Stripe PaymentIntent
   // for the card path once it has been created.
   const [payMethod, setPayMethod] = useState<"card" | "deposit" | null>(null)
+  // Optional: pay the 2-week bond online alongside the first week's rent.
+  // Unchecked by default — the bond is then collected in person at pickup.
+  const [includeBond, setIncludeBond] = useState(false)
   const [clientSecret, setClientSecret] = useState("")
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeError, setStripeError] = useState("")
@@ -127,6 +130,7 @@ export default function VehicleModal({
     setPaySubmitting(false)
     setPayError("")
     setPayMethod(null)
+    setIncludeBond(false)
     setClientSecret("")
     setStripeError("")
   }, [vehicle?.id, initialView])
@@ -163,7 +167,8 @@ export default function VehicleModal({
   // asking anyone to deposit $0.00.
   const weekly = v.weeklyRate || 0
   const bond = weekly * 2
-  const totalFirst = weekly + bond
+  // Rent-only by default. The bond is added only when the customer opts in.
+  const totalFirst = includeBond ? weekly + bond : weekly
 
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
@@ -269,7 +274,8 @@ export default function VehicleModal({
       fd.append("vehicleRego", v.rego)
       fd.append("paymentMethod", "direct-deposit")
       fd.append("weeklyRent", String(weekly))
-      fd.append("bondAmount", String(bond))
+      fd.append("bondAmount", includeBond ? String(bond) : "0")
+      fd.append("bondPaidOnline", String(includeBond))
       fd.append("totalAmount", String(totalFirst))
       fd.append("paymentStatus", "transfer-claimed")
       if (licenceFront) fd.append("licenceFront", licenceFront)
@@ -304,6 +310,7 @@ export default function VehicleModal({
           lastName: form.lastName,
           email: form.email,
           phone: form.phone,
+          includeBond,
         }),
       })
       const data = await res.json()
@@ -873,10 +880,51 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Choose Payment Method
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-6">
-                Select how you&apos;d like to pay your first week&apos;s rent plus
-                bond.
+              <p className="text-[13px] text-[#9496a8] mb-5">
+                Your first payment covers 1 week&apos;s rent. You can also add
+                the security bond now, or pay it in person when you pick up
+                the vehicle.
               </p>
+
+              {/* Bond toggle card */}
+              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[14px] p-4 mb-5">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeBond}
+                    onChange={(e) => setIncludeBond(e.target.checked)}
+                    className="mt-1 flex-shrink-0 accent-[#7f85f7] w-4 h-4"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-[14px] text-[#1a1a2e]">
+                      Also pay security bond now
+                      <span className="text-[#0f6e56] font-bold ml-2">
+                        +${bond.toFixed(2)}
+                      </span>
+                    </p>
+                    <p className="text-[12px] text-[#9496a8] mt-1 leading-relaxed">
+                      Optional. 2 weeks rent as a refundable bond. If you skip
+                      this now, we will collect the bond in person when you
+                      pick up the vehicle — no online payment required today.
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Live total preview */}
+              <div className="bg-[#eeedfe] rounded-[12px] p-4 mb-5 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold text-[#534ab7] uppercase tracking-wider">
+                    Paying today
+                  </p>
+                  <p className="text-[11px] text-[#7f85f7] mt-0.5">
+                    {includeBond ? "1 week rent + bond" : "1 week rent only"}
+                  </p>
+                </div>
+                <p className="font-extrabold text-[22px] text-[#534ab7]">
+                  ${totalFirst.toFixed(2)}
+                </p>
+              </div>
 
               {stripeError && (
                 <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4">
@@ -931,6 +979,15 @@ export default function VehicleModal({
                 </button>
               </div>
 
+              {!includeBond && (
+                <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 mb-4">
+                  <p className="text-[12px] text-[#7d5a00]">
+                    💡 Bond (${bond.toFixed(2)}) will be collected in person, in
+                    cash or card, when you pick up the vehicle.
+                  </p>
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={() => setView("apply")}
@@ -962,6 +1019,7 @@ export default function VehicleModal({
                 form={form}
                 weekly={weekly}
                 bond={bond}
+                includeBond={includeBond}
                 totalFirst={totalFirst}
                 onSuccess={() => setSubmitted(true)}
                 onBack={() => setPayMethod(null)}
@@ -1008,26 +1066,42 @@ export default function VehicleModal({
                     </p>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-[14px] font-medium text-[#1a1a2e]">
-                        Security Bond
-                        <span className="ml-2 bg-[#e1f5ee] text-[#0f6e56] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          REFUNDABLE
-                        </span>
-                      </p>
-                      <p className="text-[11px] text-[#9496a8]">
-                        2 weeks rent — returned at end of rental
+                  {includeBond ? (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-[14px] font-medium text-[#1a1a2e]">
+                          Security Bond
+                          <span className="ml-2 bg-[#e1f5ee] text-[#0f6e56] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            REFUNDABLE
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-[#9496a8]">
+                          2 weeks rent — included today
+                        </p>
+                      </div>
+                      <p className="font-bold text-[16px] text-[#1a1a2e]">
+                        {bond > 0 ? `$${bond.toFixed(2)}` : "TBC"}
                       </p>
                     </div>
-                    <p className="font-bold text-[16px] text-[#1a1a2e]">
-                      {bond > 0 ? `$${bond.toFixed(2)}` : "TBC"}
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="flex justify-between items-center opacity-60">
+                      <div>
+                        <p className="text-[13px] text-[#666] italic">
+                          Security Bond
+                        </p>
+                        <p className="text-[11px] text-[#9496a8]">
+                          To be collected at pickup
+                        </p>
+                      </div>
+                      <p className="text-[13px] text-[#666] italic">
+                        ${bond.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="border-t border-[#e8e8f0] pt-3 mt-1 flex justify-between items-center">
                     <p className="font-extrabold text-[16px] text-[#1a1a2e]">
-                      Total First Payment
+                      Total to Transfer Today
                     </p>
                     <p className="font-extrabold text-[22px] text-[#7f85f7]">
                       {totalFirst > 0
@@ -1331,6 +1405,7 @@ function StripeCardForm({
   form,
   weekly,
   bond,
+  includeBond,
   totalFirst,
   onSuccess,
   onBack,
@@ -1339,6 +1414,7 @@ function StripeCardForm({
   form: FormState
   weekly: number
   bond: number
+  includeBond: boolean
   totalFirst: number
   onSuccess: () => void
   onBack: () => void
@@ -1404,15 +1480,22 @@ function StripeCardForm({
             <span className="text-[#666]">1 week rent</span>
             <span className="font-semibold text-[#1a1a2e]">{fmt(weekly)}</span>
           </div>
-          <div className="flex justify-between text-[13px]">
-            <span className="text-[#666]">
-              Security bond (2 weeks)
-              <span className="text-[#9496a8] text-[11px] ml-1">
-                refundable
+          {includeBond ? (
+            <div className="flex justify-between text-[13px]">
+              <span className="text-[#666]">
+                Security bond (2 weeks)
+                <span className="text-[#9496a8] text-[11px] ml-1">
+                  refundable
+                </span>
               </span>
-            </span>
-            <span className="font-semibold text-[#1a1a2e]">{fmt(bond)}</span>
-          </div>
+              <span className="font-semibold text-[#1a1a2e]">{fmt(bond)}</span>
+            </div>
+          ) : (
+            <div className="flex justify-between text-[12px] text-[#9496a8] italic">
+              <span>Bond — pay at pickup</span>
+              <span>{fmt(bond)}</span>
+            </div>
+          )}
           <div className="border-t border-[#e8e8f0] pt-2 mt-2 flex justify-between">
             <span className="font-bold text-[15px] text-[#1a1a2e]">
               Total today

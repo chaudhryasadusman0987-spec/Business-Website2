@@ -167,11 +167,33 @@ export async function createVehiclesTable(): Promise<void> {
   `
 }
 
+/** Create the active_rentals table if absent. Idempotent. */
+export async function createActiveRentalsTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS active_rentals (
+      id                 TEXT PRIMARY KEY,
+      vehicle_id         TEXT NOT NULL,
+      vehicle_name       TEXT NOT NULL,
+      vehicle_rego       TEXT NOT NULL,
+      customer_name      TEXT NOT NULL,
+      customer_email     TEXT NOT NULL,
+      customer_phone     TEXT NOT NULL,
+      weekly_rent        NUMERIC NOT NULL,
+      last_payment_date  TIMESTAMPTZ NOT NULL,
+      next_due_date      TIMESTAMPTZ NOT NULL,
+      status             TEXT NOT NULL DEFAULT 'active',
+      reminder_sent_at   TIMESTAMPTZ,
+      created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+}
+
 /** Create the products + vehicles + settings tables if absent. Idempotent. */
 export async function ensureSchema(): Promise<void> {
   const db = sql()
   await createSettingsTable()
   await createVehiclesTable()
+  await createActiveRentalsTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -556,4 +578,101 @@ export async function backfillVehicleSpecs(force = false): Promise<number> {
   }
   await markSeedRun("vehicle-specs")
   return filled
+}
+
+/* ───────────────────── Active rentals (weekly rent reminders) ───────────────────── */
+
+export interface ActiveRentalInput {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  vehicleRego: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  weeklyRent: number
+}
+
+export interface ActiveRental {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  vehicleRego: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  weeklyRent: number
+  nextDueDate: string
+  reminderSentAt: string | null
+}
+
+interface ActiveRentalRow {
+  id: string
+  vehicle_id: string
+  vehicle_name: string
+  vehicle_rego: string
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  weekly_rent: string | number
+  next_due_date: string | Date
+  reminder_sent_at: string | Date | null
+}
+
+function toActiveRental(r: ActiveRentalRow): ActiveRental {
+  return {
+    id: r.id,
+    vehicleId: r.vehicle_id,
+    vehicleName: r.vehicle_name,
+    vehicleRego: r.vehicle_rego,
+    customerName: r.customer_name,
+    customerEmail: r.customer_email,
+    customerPhone: r.customer_phone,
+    weeklyRent: Number(r.weekly_rent),
+    nextDueDate: new Date(r.next_due_date).toISOString(),
+    reminderSentAt: r.reminder_sent_at ? new Date(r.reminder_sent_at).toISOString() : null,
+  }
+}
+
+/**
+ * Records a successful rent payment so the reminder cron knows when the next
+ * week's rent falls due. `id` is the Stripe PaymentIntent id — ON CONFLICT DO
+ * NOTHING makes the webhook's at-least-once delivery safe to insert twice.
+ */
+export async function insertActiveRental(input: ActiveRentalInput): Promise<void> {
+  await createActiveRentalsTable()
+  await sql()`
+    INSERT INTO active_rentals (
+      id, vehicle_id, vehicle_name, vehicle_rego,
+      customer_name, customer_email, customer_phone,
+      weekly_rent, last_payment_date, next_due_date, status
+    ) VALUES (
+      ${input.id}, ${input.vehicleId}, ${input.vehicleName}, ${input.vehicleRego},
+      ${input.customerName}, ${input.customerEmail}, ${input.customerPhone},
+      ${input.weeklyRent}, now(), now() + INTERVAL '7 days', 'active'
+    )
+    ON CONFLICT (id) DO NOTHING
+  `
+}
+
+/**
+ * Active rentals whose rent falls due within the next 24 hours and have not
+ * had a reminder sent in the last 6 days — so the same rental is not
+ * re-emailed every time the daily cron runs.
+ */
+export async function getRentalsDueForReminder(): Promise<ActiveRental[]> {
+  const rows = (await sql()`
+    SELECT * FROM active_rentals
+    WHERE status = 'active'
+      AND next_due_date <= now() + INTERVAL '1 day'
+      AND (reminder_sent_at IS NULL OR reminder_sent_at < now() - INTERVAL '6 days')
+  `) as ActiveRentalRow[]
+  return rows.map(toActiveRental)
+}
+
+/** Marks a reminder as sent so it is not re-sent on the next cron run. */
+export async function markReminderSent(id: string): Promise<void> {
+  await sql()`
+    UPDATE active_rentals SET reminder_sent_at = now() WHERE id = ${id}
+  `
 }

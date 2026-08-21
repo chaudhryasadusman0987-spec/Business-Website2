@@ -144,8 +144,11 @@ export async function POST(req: Request) {
     // What the customer says they transferred. Unverified by definition — the
     // owner reconciles it against the bank account before releasing the car,
     // which is what the ACTION banner in their email exists to prompt.
+    const bondPaidOnline = get("bondPaidOnline") === "true"
     const weeklyRent = money(get("weeklyRent"))
-    const bondAmount = money(get("bondAmount"))
+    const bondAmount = bondPaidOnline
+      ? money(get("bondAmount"))
+      : "Pay at pickup"
     const totalAmount = money(get("totalAmount"))
 
     const attachments = (
