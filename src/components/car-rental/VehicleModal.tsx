@@ -1167,7 +1167,7 @@ export default function VehicleModal({
                 </p>
                 <div className="bg-white rounded-[10px] p-3 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] text-[#9496a8]">PayID (Mobile)</p>
+                    <p className="text-[11px] text-[#9496a8]">PayID (ABN)</p>
                     <p className="font-extrabold text-[18px] text-[#7f85f7]">
                       {BANK_PAYID}
                     </p>
@@ -1338,7 +1338,7 @@ export default function VehicleModal({
                     {[
                       ["BSB", BANK_BSB],
                       ["Account", BANK_ACCOUNT],
-                      ["PayID", BANK_PAYID],
+                      ["PayID (ABN)", BANK_PAYID],
                       ["Reference", v.rego],
                       [
                         "Amount",

@@ -35,8 +35,8 @@ export const BANK_NAME         = "Westpac";
 export const BANK_ACCOUNT_NAME = "Pak Oz Solutions Pty Ltd";
 export const BANK_BSB          = "034-076";
 export const BANK_ACCOUNT      = "841442";
-export const BANK_PAYID        = "0424948512";
-export const BANK_PAYID_TYPE   = "Australian Mobile Number";
+export const BANK_PAYID        = "53700444695";
+export const BANK_PAYID_TYPE   = "ABN (Australian Business Number)";
 
 // ============================================================
 //  SECURITY SUB-BRAND — used ONLY under /services/security-solutions

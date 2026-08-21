@@ -64,7 +64,7 @@ export async function GET(req: Request) {
                     <td style="padding:4px 0;font-size:13px;font-weight:700;color:#1a1a2e">${BANK_ACCOUNT}</td>
                   </tr>
                   <tr>
-                    <td style="padding:4px 0;font-size:12px;color:#666">PayID</td>
+                    <td style="padding:4px 0;font-size:12px;color:#666">PayID (ABN)</td>
                     <td style="padding:4px 0;font-size:13px;font-weight:700;color:#1a1a2e">${BANK_PAYID}</td>
                   </tr>
                   <tr>

@@ -227,7 +227,7 @@ export async function POST(req: Request) {
                   ["Account Name", "Pak Oz Solutions Pty Ltd"],
                   ["BSB", "034-076"],
                   ["Account", "841442"],
-                  ["PayID", "0424948512"],
+                  ["PayID (ABN)", "53700444695"],
                   ["Amount", `$${meta.totalCharged} AUD`],
                   ["Reference", meta.vehicleRego],
                 ]

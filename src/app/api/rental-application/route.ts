@@ -304,7 +304,7 @@ export async function POST(req: Request) {
                 <td style="color:#7f85f7;font-weight:bold;font-size:16px;padding:6px 0">${BANK_ACCOUNT}</td>
               </tr>
               <tr>
-                <td style="color:#9496a8;font-size:12px;padding:6px 0">PayID</td>
+                <td style="color:#9496a8;font-size:12px;padding:6px 0">PayID (ABN)</td>
                 <td style="color:#5dcaa5;font-weight:bold;font-size:16px;padding:6px 0">${BANK_PAYID}</td>
               </tr>
               <tr>
