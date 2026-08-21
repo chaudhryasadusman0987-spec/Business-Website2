@@ -188,12 +188,41 @@ export async function createActiveRentalsTable(): Promise<void> {
   `
 }
 
+/** Create the security_packages table if absent. Idempotent. */
+export async function createPackagesTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS security_packages (
+      id                    TEXT PRIMARY KEY,
+      name                  TEXT NOT NULL,
+      brand                 TEXT NOT NULL,
+      solution_slug         TEXT NOT NULL,
+      description           TEXT,
+      image                 TEXT,
+      badge                 TEXT,
+      items                 JSONB NOT NULL,
+      calculated_subtotal   NUMERIC NOT NULL,
+      package_price         NUMERIC NOT NULL,
+      discount_percent      INTEGER NOT NULL DEFAULT 0,
+      install_fee_per_unit  NUMERIC NOT NULL DEFAULT 150,
+      total_units           INTEGER NOT NULL,
+      in_stock              BOOLEAN NOT NULL DEFAULT true,
+      created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  await sql()`
+    CREATE INDEX IF NOT EXISTS security_packages_solution_slug_idx
+    ON security_packages (solution_slug)
+  `
+}
+
 /** Create the products + vehicles + settings tables if absent. Idempotent. */
 export async function ensureSchema(): Promise<void> {
   const db = sql()
   await createSettingsTable()
   await createVehiclesTable()
   await createActiveRentalsTable()
+  await createPackagesTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -289,6 +318,14 @@ export async function getProducts(solutionSlug?: string): Promise<Product[]> {
       `
     : await db`SELECT * FROM products ORDER BY created_at ASC`) as ProductRow[]
   return rows.map(toProduct)
+}
+
+/** One product by id, or null. Used to price packages from live DB data. */
+export async function getProduct(id: string): Promise<Product | null> {
+  const rows = (await sql()`
+    SELECT * FROM products WHERE id = ${id}
+  `) as ProductRow[]
+  return rows[0] ? toProduct(rows[0]) : null
 }
 
 function newId(): string {
@@ -675,4 +712,149 @@ export async function markReminderSent(id: string): Promise<void> {
   await sql()`
     UPDATE active_rentals SET reminder_sent_at = now() WHERE id = ${id}
   `
+}
+
+/* ───────────────────── Security packages (bundle deals) ───────────────────── */
+
+export interface PackageItem {
+  productId: string
+  productName: string
+  quantity: number
+  unitPrice: number
+}
+
+export interface SecurityPackageInput {
+  id?: string
+  name: string
+  brand: string
+  solutionSlug: string
+  description: string
+  image: string
+  badge: string
+  items: PackageItem[]
+  calculatedSubtotal: number
+  packagePrice: number
+  discountPercent: number
+  installFeePerUnit: number
+  totalUnits: number
+  inStock: boolean
+}
+
+export interface SecurityPackage extends SecurityPackageInput {
+  id: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+interface SecurityPackageRow {
+  id: string
+  name: string
+  brand: string
+  solution_slug: string
+  description: string | null
+  image: string | null
+  badge: string | null
+  items: unknown
+  calculated_subtotal: string | number
+  package_price: string | number
+  discount_percent: number
+  install_fee_per_unit: string | number
+  total_units: number
+  in_stock: boolean
+  created_at: string | Date
+  updated_at: string | Date
+}
+
+function toSecurityPackage(r: SecurityPackageRow): SecurityPackage {
+  return {
+    id: r.id,
+    name: r.name,
+    brand: r.brand,
+    solutionSlug: r.solution_slug,
+    description: r.description ?? "",
+    image: r.image ?? "",
+    badge: r.badge ?? "",
+    items: (Array.isArray(r.items) ? r.items : []) as PackageItem[],
+    calculatedSubtotal: Number(r.calculated_subtotal),
+    packagePrice: Number(r.package_price),
+    discountPercent: Number(r.discount_percent),
+    installFeePerUnit: Number(r.install_fee_per_unit),
+    totalUnits: Number(r.total_units),
+    inStock: r.in_stock,
+    createdAt: r.created_at ? new Date(r.created_at).toISOString() : undefined,
+    updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : undefined,
+  }
+}
+
+/** All packages, optionally filtered to one solution slug. In-stock only when
+ *  filtering by slug (the public solution page never shows a sold-out bundle);
+ *  the dashboard list (no slug) shows everything so the owner can re-enable one. */
+export async function getPackages(slug?: string): Promise<SecurityPackage[]> {
+  const db = sql()
+  const rows = (slug
+    ? await db`
+        SELECT * FROM security_packages
+        WHERE solution_slug = ${slug} AND in_stock = true
+        ORDER BY created_at DESC
+      `
+    : await db`SELECT * FROM security_packages ORDER BY created_at DESC`) as SecurityPackageRow[]
+  return rows.map(toSecurityPackage)
+}
+
+/** One package by id, or null. Used by the quote wizard's ?package=xxx flow. */
+export async function getPackage(id: string): Promise<SecurityPackage | null> {
+  const rows = (await sql()`
+    SELECT * FROM security_packages WHERE id = ${id}
+  `) as SecurityPackageRow[]
+  return rows[0] ? toSecurityPackage(rows[0]) : null
+}
+
+function newPackageId(): string {
+  return `pkg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+/** Create or update a package (upsert on id, matching createVehicle/updateVehicle's
+ *  separate-id convention isn't used here since the dashboard form doesn't know the
+ *  id ahead of time for a new package — ON CONFLICT keeps create and edit as one call). */
+export async function upsertPackage(input: SecurityPackageInput): Promise<SecurityPackage> {
+  const db = sql()
+  const id = input.id || newPackageId()
+  const items = JSON.stringify(input.items)
+  const rows = (await db`
+    INSERT INTO security_packages (
+      id, name, brand, solution_slug, description, image, badge, items,
+      calculated_subtotal, package_price, discount_percent,
+      install_fee_per_unit, total_units, in_stock, updated_at
+    ) VALUES (
+      ${id}, ${input.name}, ${input.brand}, ${input.solutionSlug},
+      ${input.description || null}, ${input.image || null}, ${input.badge || null},
+      ${items}::jsonb,
+      ${input.calculatedSubtotal}, ${input.packagePrice}, ${input.discountPercent},
+      ${input.installFeePerUnit}, ${input.totalUnits}, ${input.inStock}, now()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      name                 = ${input.name},
+      brand                = ${input.brand},
+      solution_slug        = ${input.solutionSlug},
+      description          = ${input.description || null},
+      image                = ${input.image || null},
+      badge                = ${input.badge || null},
+      items                = ${items}::jsonb,
+      calculated_subtotal  = ${input.calculatedSubtotal},
+      package_price        = ${input.packagePrice},
+      discount_percent     = ${input.discountPercent},
+      install_fee_per_unit = ${input.installFeePerUnit},
+      total_units          = ${input.totalUnits},
+      in_stock             = ${input.inStock},
+      updated_at           = now()
+    RETURNING *
+  `) as SecurityPackageRow[]
+  return toSecurityPackage(rows[0])
+}
+
+export async function deletePackage(id: string): Promise<boolean> {
+  const rows = (await sql()`
+    DELETE FROM security_packages WHERE id = ${id} RETURNING id
+  `) as { id: string }[]
+  return rows.length > 0
 }

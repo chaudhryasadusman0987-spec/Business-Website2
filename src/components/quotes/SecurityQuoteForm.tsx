@@ -76,6 +76,24 @@ const propertyTypes = [
   { val: "strata", label: "Strata / Body Corp", sub: "Multi-unit buildings", Icon: Building2 },
 ]
 
+interface PkgItem {
+  productId: string
+  productName: string
+  quantity: number
+  unitPrice: number
+}
+
+interface DbPackage {
+  id: string
+  name: string
+  brand: string
+  solutionSlug: string
+  packagePrice: number
+  totalUnits: number
+  installFeePerUnit: number
+  items: PkgItem[]
+}
+
 const timings = [
   { val: "now", label: "ASAP", sub: "Within this week", Icon: Zap },
   { val: "2weeks", label: "Next 2 weeks", sub: "Planning ahead", Icon: CalendarDays },
@@ -87,6 +105,35 @@ function QuoteWizard() {
   const searchParams = useSearchParams()
   const preSolution = searchParams.get("solution")
   const preProduct = searchParams.get("product")
+  const prePackage = searchParams.get("package")
+
+  // Arriving from a package's "Get This Package" button — skip category and
+  // product picking entirely and quote the fixed package price instead.
+  const [pkg, setPkg] = useState<DbPackage | null>(null)
+  const [pkgLoading, setPkgLoading] = useState(Boolean(prePackage))
+  const [pkgError, setPkgError] = useState(false)
+  const isPackageMode = Boolean(prePackage) && !pkgError
+
+  useEffect(() => {
+    if (!prePackage) return
+    let cancelled = false
+    fetch(`/api/packages?id=${encodeURIComponent(prePackage)}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { package?: DbPackage | null }) => {
+        if (cancelled) return
+        if (data.package) setPkg(data.package)
+        else setPkgError(true)
+      })
+      .catch(() => {
+        if (!cancelled) setPkgError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setPkgLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [prePackage])
 
   // Live category discount set in the admin dashboard. When active (and a
   // product isn't already on its own sale price), it comes off every security
@@ -222,8 +269,24 @@ function QuoteWizard() {
     }))
 
   // Itemised, priced selection — the single source of truth for the summary,
-  // the running subtotal, and the email payload.
+  // the running subtotal, and the email payload. In package mode this comes
+  // from the fixed package, not from qtyById.
   const items = useMemo(() => {
+    if (isPackageMode) {
+      if (!pkg) return []
+      return pkg.items.map((it) => ({
+        id: it.productId,
+        name: it.productName,
+        description: "",
+        category: pkg.brand || nameOfSlug(pkg.solutionSlug),
+        qty: it.quantity,
+        unitPrice: it.unitPrice,
+        originalPrice: it.unitPrice,
+        isOnSale: false,
+        discountPercent: 0,
+        lineTotal: it.unitPrice * it.quantity,
+      }))
+    }
     return products
       .filter((p) => (qtyById[p.id] ?? 0) > 0)
       .map((p) => {
@@ -247,30 +310,37 @@ function QuoteWizard() {
           lineTotal: eff.price * qty,
         }
       })
-  }, [products, qtyById, secPromo])
+  }, [isPackageMode, pkg, products, qtyById, secPromo])
 
   // Total number of units across every selected product — 2 × Camera A plus
   // 1 × Camera B is 3 installs, not 2 line items.
   const totalQty = items.reduce((sum, i) => sum + i.qty, 0)
   const itemsSubtotal = items.reduce((sum, i) => sum + i.lineTotal, 0)
-  // Nothing selected → nothing to install → $0, never a standing $150.
-  const installFee = totalQty * INSTALL_FEE_PER_UNIT
-  const subtotal = itemsSubtotal + installFee
+  // A package's install cost is already folded into its packagePrice (see
+  // /api/packages) — charging it again here would double it up.
+  const installFee = isPackageMode ? 0 : totalQty * INSTALL_FEE_PER_UNIT
+  const subtotal = isPackageMode && pkg ? pkg.packagePrice : itemsSubtotal + installFee
   const gst = subtotal * gstRate
   const total = subtotal + gst
 
   const next = () => {
     if (step === 0 && !ptype) return setError("Please select a property type.")
-    if (step === 1 && selectedCats.length === 0)
-      return setError("Please select at least one category.")
-    if (step === 2 && items.length === 0)
-      return setError("Please add at least one product to your quote.")
+    if (step === 0 && isPackageMode && pkgLoading)
+      return setError("Loading package details, please wait…")
+    if (!isPackageMode) {
+      if (step === 1 && selectedCats.length === 0)
+        return setError("Please select at least one category.")
+      if (step === 2 && items.length === 0)
+        return setError("Please add at least one product to your quote.")
+    }
     if (step === 3 && !timing) return setError("Please select a timeframe.")
     setError(null)
+    if (isPackageMode && step === 0) return setStep(3)
     setStep((s) => s + 1)
   }
   const back = () => {
     setError(null)
+    if (isPackageMode && step === 3) return setStep(0)
     setStep((s) => s - 1)
   }
 
@@ -303,11 +373,15 @@ function QuoteWizard() {
           installFee,
           // Rate + unit count so the emailed quote can show the breakdown
           // ("6 units × $150 per unit") rather than a bare figure.
-          installPerUnit: INSTALL_FEE_PER_UNIT,
+          installPerUnit:
+            isPackageMode && pkg ? pkg.installFeePerUnit : INSTALL_FEE_PER_UNIT,
           totalQty,
           subtotal,
           gst: Math.round(gst),
           total: Math.round(total),
+          ...(isPackageMode && pkg
+            ? { packageId: pkg.id, packageName: pkg.name }
+            : {}),
         }),
       })
       if (!res.ok) throw new Error("Request failed")
@@ -385,25 +459,53 @@ function QuoteWizard() {
         </div>
       </div>
 
+      {/* Package banner — arrived via "Get This Package" */}
+      {isPackageMode && pkg && (
+        <div className="bg-[#F4FBF8] border border-[#0F6E56]/20 rounded-[12px] p-4 mb-6 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold text-[#0F6E56] uppercase tracking-wide">
+              Package selected
+            </p>
+            <p className="text-[14px] font-medium text-[#1a1a2e]">{pkg.name}</p>
+          </div>
+          <p className="text-[16px] font-semibold text-[#0F6E56] whitespace-nowrap">
+            {formatAUD(pkg.packagePrice)}
+          </p>
+        </div>
+      )}
+      {isPackageMode && pkgLoading && (
+        <div className="bg-gray-50 border border-gray-200 rounded-[12px] p-4 mb-6 text-[13px] text-gray-500">
+          Loading package details…
+        </div>
+      )}
+      {Boolean(prePackage) && pkgError && (
+        <div className="bg-[#FDECEC] border border-[#A32D2D]/20 rounded-[12px] p-4 mb-6 text-[13px] text-[#A32D2D]">
+          We couldn&apos;t find that package — continuing with the standard quote
+          builder instead.
+        </div>
+      )}
+
       {/* Progress bar */}
       <div className="flex gap-1.5 mb-7">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <span
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i < step
-                ? "bg-[#5DCAA5]"
-                : i === step
-                ? "bg-[#0F6E56]"
-                : "bg-gray-200"
-            }`}
-          />
-        ))}
+        {Array.from({ length: isPackageMode ? 3 : 5 }).map((_, i) => {
+          const pos = isPackageMode ? (step === 0 ? 0 : step === 3 ? 1 : 2) : step
+          return (
+            <span
+              key={i}
+              className={`h-1 flex-1 rounded-full transition-colors ${
+                i < pos ? "bg-[#5DCAA5]" : i === pos ? "bg-[#0F6E56]" : "bg-gray-200"
+              }`}
+            />
+          )
+        })}
       </div>
 
       {/* STEP 0 — property type */}
       {step === 0 && (
-        <Step label="Step 1 of 5" title="What type of property are you securing?">
+        <Step
+          label={isPackageMode ? "Step 1 of 3" : "Step 1 of 5"}
+          title="What type of property are you securing?"
+        >
           <div className="grid grid-cols-2 gap-2.5">
             {propertyTypes.map((p) => (
               <OptionCard
@@ -420,7 +522,7 @@ function QuoteWizard() {
       )}
 
       {/* STEP 1 — categories */}
-      {step === 1 && (
+      {step === 1 && !isPackageMode && (
         <Step label="Step 2 of 5" title="Which security solutions do you need?">
           {loading ? (
             <SkeletonGrid />
@@ -451,7 +553,7 @@ function QuoteWizard() {
       )}
 
       {/* STEP 2 — product selection */}
-      {step === 2 && (
+      {step === 2 && !isPackageMode && (
         <Step label="Step 3 of 5" title="Select your products">
           {loading ? (
             <SkeletonList />
@@ -575,7 +677,10 @@ function QuoteWizard() {
 
       {/* STEP 3 — timing */}
       {step === 3 && (
-        <Step label="Step 4 of 5" title="When are you looking to install?">
+        <Step
+          label={isPackageMode ? "Step 2 of 3" : "Step 4 of 5"}
+          title="When are you looking to install?"
+        >
           <div className="grid grid-cols-2 gap-2.5">
             {timings.map((t) => (
               <OptionCard
@@ -593,7 +698,10 @@ function QuoteWizard() {
 
       {/* STEP 4 — contact + summary */}
       {step === 4 && (
-        <Step label="Step 5 of 5" title="Your details & instant quote">
+        <Step
+          label={isPackageMode ? "Step 3 of 3" : "Step 5 of 5"}
+          title="Your details & instant quote"
+        >
           <div className="grid grid-cols-2 gap-2.5">
             <Field label="First name" value={form.fname} placeholder="John"
               onChange={(v) => setForm({ ...form, fname: v })} />
@@ -633,62 +741,87 @@ function QuoteWizard() {
             <h3 className="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-3">
               Quote summary
             </h3>
-            {items.length === 0 ? (
+            {isPackageMode && pkg ? (
+              <>
+                <div className="pb-2 border-b border-gray-200">
+                  <div className="text-[13px] font-medium text-[#1a1a2e] mb-1">
+                    {pkg.name}
+                  </div>
+                  {items.map((i) => (
+                    <div
+                      key={i.id}
+                      className="text-[12px] text-gray-500 py-0.5 flex justify-between"
+                    >
+                      <span>
+                        {i.name} × {i.qty}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Line
+                  muted
+                  left="Package price (incl. installation, ex. GST)"
+                  right={formatAUD(subtotal)}
+                />
+              </>
+            ) : items.length === 0 ? (
               <p className="text-[13px] text-gray-500 py-2">
                 No products selected. Go back to add products to your quote.
               </p>
             ) : (
-              items.map((i) => (
-                <div
-                  key={i.id}
-                  className="flex justify-between items-start py-1.5 border-b border-gray-200 last:border-0"
-                >
-                  <div className="pr-3">
-                    <div className="text-[13px] text-[#1a1a2e]">
-                      {i.name} <span className="text-gray-400">× {i.qty}</span>
+              <>
+                {items.map((i) => (
+                  <div
+                    key={i.id}
+                    className="flex justify-between items-start py-1.5 border-b border-gray-200 last:border-0"
+                  >
+                    <div className="pr-3">
+                      <div className="text-[13px] text-[#1a1a2e]">
+                        {i.name} <span className="text-gray-400">× {i.qty}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-500">
+                        {i.category} ·{" "}
+                        {i.isOnSale ? (
+                          <>
+                            <span className="text-[#c62828] font-medium">
+                              {formatAUD(i.unitPrice)}
+                            </span>{" "}
+                            <span className="line-through">
+                              {formatAUD(i.originalPrice)}
+                            </span>{" "}
+                            <span className="text-[#c62828] font-medium">ea</span>
+                          </>
+                        ) : (
+                          <>{formatAUD(i.unitPrice)} ea</>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-[11px] text-gray-500">
-                      {i.category} ·{" "}
-                      {i.isOnSale ? (
-                        <>
-                          <span className="text-[#c62828] font-medium">
-                            {formatAUD(i.unitPrice)}
-                          </span>{" "}
-                          <span className="line-through">
-                            {formatAUD(i.originalPrice)}
-                          </span>{" "}
-                          <span className="text-[#c62828] font-medium">ea</span>
-                        </>
-                      ) : (
-                        <>{formatAUD(i.unitPrice)} ea</>
-                      )}
+                    <span className="text-[13px] text-[#1a1a2e] whitespace-nowrap">
+                      {formatAUD(i.lineTotal)}
+                    </span>
+                  </div>
+                ))}
+                {/* Installation fee — hidden entirely until something is
+                    selected, so an empty quote never shows a $0 charge line. */}
+                {totalQty > 0 && (
+                  <div className="flex justify-between items-start py-1.5 border-b border-gray-200">
+                    <div className="pr-3">
+                      <div className="text-[13px] text-[#1a1a2e]">
+                        Installation &amp; labour
+                      </div>
+                      <div className="text-[11px] text-gray-500">
+                        {totalQty} camera{totalQty === 1 ? "" : "s"} ×{" "}
+                        {formatAUD(INSTALL_FEE_PER_UNIT)} per unit
+                      </div>
                     </div>
+                    <span className="text-[13px] text-[#1a1a2e] whitespace-nowrap">
+                      {formatAUD(installFee)}
+                    </span>
                   </div>
-                  <span className="text-[13px] text-[#1a1a2e] whitespace-nowrap">
-                    {formatAUD(i.lineTotal)}
-                  </span>
-                </div>
-              ))
+                )}
+                <Line muted left="Subtotal (ex. GST)" right={formatAUD(subtotal)} />
+              </>
             )}
-            {/* Installation fee — hidden entirely until something is selected,
-                so an empty quote never shows a $0 charge line. */}
-            {totalQty > 0 && (
-              <div className="flex justify-between items-start py-1.5 border-b border-gray-200">
-                <div className="pr-3">
-                  <div className="text-[13px] text-[#1a1a2e]">
-                    Installation &amp; labour
-                  </div>
-                  <div className="text-[11px] text-gray-500">
-                    {totalQty} camera{totalQty === 1 ? "" : "s"} ×{" "}
-                    {formatAUD(INSTALL_FEE_PER_UNIT)} per unit
-                  </div>
-                </div>
-                <span className="text-[13px] text-[#1a1a2e] whitespace-nowrap">
-                  {formatAUD(installFee)}
-                </span>
-              </div>
-            )}
-            <Line muted left="Subtotal (ex. GST)" right={formatAUD(subtotal)} />
             <Line muted left="GST (10%)" right={formatAUD(Math.round(gst))} />
             <div className="flex justify-between text-[16px] font-medium text-[#1a1a2e] pt-2.5">
               <span>Total (AUD)</span>

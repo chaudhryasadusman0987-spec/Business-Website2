@@ -18,6 +18,7 @@ import DynamicIcon from "@/components/ui/DynamicIcon"
 import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
 import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
 import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
+import PackagesDbTab from "@/components/dashboard/PackagesDbTab"
 import {
   buildTickerMessages,
   CATEGORY_LABELS,
@@ -48,6 +49,7 @@ import {
   Percent,
   Menu,
   X,
+  Package2,
 } from "lucide-react"
 
 /* ───────────────────────── Types ───────────────────────── */
@@ -477,6 +479,7 @@ export default function DashboardPage() {
     { id: "overview", label: "Overview", Icon: LayoutDashboard },
     { id: "security", label: "Security", Icon: ShieldCheck },
     { id: "products-db", label: "Products (DB)", Icon: Database },
+    { id: "packages", label: "Packages", Icon: Package2 },
     { id: "car-rental", label: "Car Rental", Icon: Car },
     { id: "it-services", label: "IT Services", Icon: Monitor },
     { id: "discounts", label: "Discounts", Icon: Percent },
@@ -704,6 +707,9 @@ export default function DashboardPage() {
 
         {/* ───────── PRODUCTS (DB) ───────── */}
         {tab === "products-db" && <ProductsDbTab />}
+
+        {/* ───────── PACKAGES ───────── */}
+        {tab === "packages" && <PackagesDbTab />}
 
         {/* ───────── CAR RENTAL ───────── */}
         {tab === "car-rental" && <VehiclesDbTab />}

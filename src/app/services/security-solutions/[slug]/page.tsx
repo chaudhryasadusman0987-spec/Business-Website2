@@ -6,6 +6,7 @@ import SectionTitle from "@/components/ui/SectionTitle"
 import DbProductsGrid from "@/components/sections/DbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import PackagesGrid from "@/components/sections/PackagesGrid"
 import { securitySolutions, installFee } from "@/data/security-solutions"
 import { SECURITY_BRAND } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
@@ -161,6 +162,8 @@ export default function SolutionDetailPage({
       {/* PRODUCTS GRID */}
       <section id="products" className="bg-[#fefefd] pt-[80px] pb-[120px]">
         <div className="max-w-[1170px] mx-auto px-4">
+          <PackagesGrid slug={solution.slug} />
+
           <SectionTitle
             title={`${solution.name} Products`}
             subtitle={`All prices per unit · Installation from ${formatAUD(
