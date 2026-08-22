@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import PackageImageCollage from "@/components/ui/PackageImageCollage"
 import { formatAUD } from "@/lib/formatters"
 
 interface PackageItem {
@@ -10,6 +11,11 @@ interface PackageItem {
   productName: string
   quantity: number
   unitPrice: number
+}
+
+interface DbProduct {
+  id: string
+  imageUrl: string
 }
 
 interface DbPackage {
@@ -34,6 +40,7 @@ interface DbPackage {
  */
 export default function PackagesGrid({ slug }: { slug: string }) {
   const [packages, setPackages] = useState<DbPackage[]>([])
+  const [allProducts, setAllProducts] = useState<DbProduct[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -44,6 +51,17 @@ export default function PackagesGrid({ slug }: { slug: string }) {
       })
       .catch(() => {
         /* section just stays hidden */
+      })
+    // Fetched separately from the solution's product grid (DbProductsGrid) so
+    // packages can collage images even when the section renders before that
+    // grid does — cheap, and this component already gates on `packages.length`.
+    fetch(`/api/products?slug=${encodeURIComponent(slug)}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setAllProducts(data.products || [])
+      })
+      .catch(() => {
+        /* collage just falls back to its empty state */
       })
     return () => {
       cancelled = true
@@ -74,8 +92,8 @@ export default function PackagesGrid({ slug }: { slug: string }) {
               </div>
             )}
 
-            {pkg.image && (
-              <div className="h-[180px] bg-[#f0f0ff] relative">
+            <div className="h-[180px] relative">
+              {pkg.image ? (
                 <ImageWithFallback
                   src={pkg.image}
                   alt={pkg.name}
@@ -83,8 +101,14 @@ export default function PackagesGrid({ slug }: { slug: string }) {
                   className="object-cover"
                   fallbackBg="#f0f0ff"
                 />
-              </div>
-            )}
+              ) : (
+                <PackageImageCollage
+                  items={pkg.items}
+                  allProducts={allProducts}
+                  className="w-full h-full"
+                />
+              )}
+            </div>
 
             <div className="p-6">
               {pkg.brand && (

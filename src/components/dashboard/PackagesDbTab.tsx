@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import PackageImageCollage from "@/components/ui/PackageImageCollage"
 
 interface DbProduct {
   id: string
@@ -276,17 +277,6 @@ export default function PackagesDbTab() {
           />
         </div>
 
-        <div className="mb-4">
-          <label className={lbl}>Package Image URL (optional)</label>
-          <input
-            type="text"
-            value={form.image}
-            onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-            className={inp}
-            placeholder="/images/products/hilook-4cam-kit.jpg"
-          />
-        </div>
-
         {/* ── PRODUCT SELECTOR ── */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
@@ -379,6 +369,46 @@ export default function PackagesDbTab() {
               ))
             )}
           </div>
+        </div>
+
+        {Object.keys(selectedItems).length > 0 && (
+          <div className="mb-4">
+            <label className={lbl}>
+              Auto-Generated Image Preview
+              <span className="normal-case text-[#c0c0c8] ml-1">
+                (used automatically if no manual image URL is set below)
+              </span>
+            </label>
+            <PackageImageCollage
+              items={Object.entries(selectedItems).map(([pid, qty]) => {
+                const prod = allProducts.find((p) => p.id === pid)
+                return {
+                  productId: pid,
+                  productName: prod?.name || "",
+                  quantity: qty,
+                  unitPrice: prod ? unitPriceOf(prod) : 0,
+                }
+              })}
+              allProducts={allProducts}
+              className="h-[160px] rounded-[12px]"
+            />
+          </div>
+        )}
+
+        <div className="mb-4">
+          <label className={lbl}>
+            Custom Package Image
+            <span className="normal-case text-[#c0c0c8] ml-1">
+              (optional — overrides the auto-generated collage above)
+            </span>
+          </label>
+          <input
+            type="text"
+            value={form.image}
+            onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+            className={inp}
+            placeholder="/images/products/hilook-4cam-kit.jpg"
+          />
         </div>
 
         {/* ── LIVE CALCULATION PREVIEW ── */}
