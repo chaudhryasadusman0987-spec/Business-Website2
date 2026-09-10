@@ -105,17 +105,35 @@ export default function VehicleModal({
   const [payError, setPayError] = useState("")
   // Card payment: which method the customer picked, and the Stripe PaymentIntent
   // for the card path once it has been created.
-  const [payMethod, setPayMethod] = useState<"card" | "deposit" | null>(null)
+  // "card-bond" = choosing a bond amount before paying; "card-pay" = the Stripe
+  // PaymentElement (setup + weekly subscription) is mounted.
+  const [payMethod, setPayMethod] = useState<
+    "card" | "card-bond" | "card-pay" | "deposit" | null
+  >(null)
   // Optional: pay the 2-week bond online alongside the first week's rent.
   // Unchecked by default — the bond is then collected in person at pickup.
   const [includeBond, setIncludeBond] = useState(false)
-  const [clientSecret, setClientSecret] = useState("")
-  const [stripeLoading, setStripeLoading] = useState(false)
-  const [stripeError, setStripeError] = useState("")
   const [licenceFront, setLicenceFront] = useState<File | null>(null)
   const [licenceBack, setLicenceBack] = useState<File | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // ── Price negotiation ("Want to negotiate this price?") ──
+  const [showOfferBox, setShowOfferBox] = useState(false)
+  const [offerAmount, setOfferAmount] = useState("")
+  const [offerSubmitting, setOfferSubmitting] = useState(false)
+  const [offerSent, setOfferSent] = useState(false)
+  // Set once a negotiation this browser previously sent for this vehicle has
+  // been approved by the owner — the approved rate then replaces the listed
+  // weekly rate everywhere in the flow.
+  const [approvedPrice, setApprovedPrice] = useState<number | null>(null)
+
+  // ── Weekly subscription (card / BECS direct debit) ──
+  const [bondWeeks, setBondWeeks] = useState<0 | 1 | 2>(0)
+  const [setupClientSecret, setSetupClientSecret] = useState("")
+  const [setupCustomerId, setSetupCustomerId] = useState("")
+  const [setupLoading, setSetupLoading] = useState(false)
+  const [setupError, setSetupError] = useState("")
 
   // Reset every field when a different vehicle is opened.
   useEffect(() => {
@@ -131,9 +149,42 @@ export default function VehicleModal({
     setPayError("")
     setPayMethod(null)
     setIncludeBond(false)
-    setClientSecret("")
-    setStripeError("")
+    setShowOfferBox(false)
+    setOfferAmount("")
+    setOfferSubmitting(false)
+    setOfferSent(false)
+    setApprovedPrice(null)
+    setBondWeeks(0)
+    setSetupClientSecret("")
+    setSetupCustomerId("")
+    setSetupLoading(false)
+    setSetupError("")
   }, [vehicle?.id, initialView])
+
+  // A customer who previously sent an offer for this vehicle from this browser
+  // may come back to find it approved — pick that up so the approved rate
+  // applies automatically rather than making them re-negotiate.
+  useEffect(() => {
+    if (!vehicle) return
+    let negId = ""
+    try {
+      negId = localStorage.getItem(`rental-offer:${vehicle.id}`) || ""
+    } catch {
+      /* localStorage unavailable — skip */
+    }
+    if (!negId) return
+    fetch(`/api/rental-payment/negotiate-price?id=${encodeURIComponent(negId)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const row = data.negotiations?.[0]
+        if (row?.status === "approved" && row.approvedPrice) {
+          setApprovedPrice(Number(row.approvedPrice))
+        }
+      })
+      .catch(() => {
+        /* keep listed price */
+      })
+  }, [vehicle])
 
   // Lock body scroll while the modal is open.
   useEffect(() => {
@@ -169,6 +220,12 @@ export default function VehicleModal({
   const bond = weekly * 2
   // Rent-only by default. The bond is added only when the customer opts in.
   const totalFirst = includeBond ? weekly + bond : weekly
+
+  // A negotiated rate approved by the owner replaces the listed rate for the
+  // card / direct-debit subscription flow.
+  const effectiveWeekly = approvedPrice ?? weekly
+  const bondAmountForWeeks = effectiveWeekly * bondWeeks
+  const cardTotalToday = effectiveWeekly + bondAmountForWeeks
 
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
@@ -295,38 +352,81 @@ export default function VehicleModal({
     }
   }
 
-  /** Creates the Stripe PaymentIntent for this vehicle/customer and switches
-   *  the payment view over to the card form once a client secret comes back. */
-  const handleSelectCard = async () => {
-    setStripeLoading(true)
-    setStripeError("")
+  /** Card / direct debit now sets up a weekly subscription rather than a
+   *  one-off charge — first step is picking a bond option. */
+  const handleSelectCard = () => {
+    setSetupError("")
+    setPayMethod("card-bond")
+  }
+
+  /** Creates the Stripe Customer + SetupIntent for the weekly subscription and
+   *  switches the payment view over to the card/BECS form. */
+  const handleContinueToCardPayment = async () => {
+    setSetupLoading(true)
+    setSetupError("")
     try {
-      const res = await fetch("/api/rental-payment/create-intent", {
+      const res = await fetch("/api/rental-payment/create-setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vehicleId: v.id,
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
           phone: form.phone,
-          includeBond,
         }),
       })
       const data = await res.json()
       if (data.error) {
-        setStripeError(data.error)
-        setPayMethod(null)
+        setSetupError(data.error)
         return
       }
-      setClientSecret(data.clientSecret)
-      setPayMethod("card")
+      setSetupClientSecret(data.clientSecret)
+      setSetupCustomerId(data.customerId)
+      setPayMethod("card-pay")
     } catch {
-      setStripeError(
+      setSetupError(
         "Could not load card payment. Please try direct deposit instead."
       )
     } finally {
-      setStripeLoading(false)
+      setSetupLoading(false)
+    }
+  }
+
+  /** Sends the customer's counter-offer to the owner for approval. */
+  const handleSendOffer = async () => {
+    const offered = Number(offerAmount)
+    if (!offered || offered <= 0) return
+    setOfferSubmitting(true)
+    try {
+      const res = await fetch("/api/rental-payment/negotiate-price", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: v.id,
+          vehicleName: v.name,
+          customerName:
+            [form.firstName, form.lastName].filter(Boolean).join(" ") ||
+            "Website Visitor",
+          customerEmail: form.email || "not provided",
+          customerPhone: form.phone || "not provided",
+          listedPrice: weekly,
+          offeredPrice: offered,
+        }),
+      })
+      const data = await res.json()
+      if (data.id) {
+        try {
+          localStorage.setItem(`rental-offer:${v.id}`, data.id)
+        } catch {
+          /* localStorage unavailable — offer was still sent */
+        }
+      }
+      setOfferSent(true)
+    } catch {
+      /* the owner still gets a call/text if the fetch itself failed to send */
+      setOfferSent(true)
+    } finally {
+      setOfferSubmitting(false)
     }
   }
 
@@ -510,6 +610,61 @@ export default function VehicleModal({
                       />
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Price negotiation — offer a different weekly rate for the owner to approve */}
+              {weekly > 0 && approvedPrice == null && (
+                <div className="px-5 pt-4">
+                  {!showOfferBox ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowOfferBox(true)}
+                      className="text-[12px] text-[#7f85f7] font-medium hover:underline"
+                    >
+                      💬 Want to negotiate this price?
+                    </button>
+                  ) : (
+                    <div className="bg-[#f8f8ff] rounded-[10px] p-3">
+                      <p className="text-[11px] text-[#666] mb-2">
+                        Enter your offer per week (AUD):
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          value={offerAmount}
+                          onChange={(e) => setOfferAmount(e.target.value)}
+                          placeholder={String(weekly)}
+                          disabled={offerSent}
+                          className="flex-1 border border-[#e8e8f0] rounded-[8px] px-3 h-[38px] text-[13px] disabled:opacity-60"
+                        />
+                        <button
+                          type="button"
+                          disabled={!offerAmount || offerSent || offerSubmitting}
+                          onClick={handleSendOffer}
+                          className="bg-[#7f85f7] text-white rounded-[8px] px-4 h-[38px] text-[12px] font-semibold disabled:opacity-50"
+                        >
+                          {offerSubmitting ? "Sending…" : "Send"}
+                        </button>
+                      </div>
+                      {offerSent && (
+                        <p className="text-[11px] text-[#0f6e56] mt-2">
+                          ✓ Offer sent! We&apos;ll text or call you shortly.
+                          Fill your details on the next step so we can reach
+                          you.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {approvedPrice != null && (
+                <div className="mx-5 mt-4 bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3">
+                  <p className="text-[13px] text-[#085041] font-semibold">
+                    ✅ Your offer of ${approvedPrice.toFixed(2)}/week was
+                    approved — this rate will apply when you book.
+                  </p>
                 </div>
               )}
 
@@ -886,6 +1041,16 @@ export default function VehicleModal({
                 the vehicle.
               </p>
 
+              {approvedPrice != null && (
+                <div className="bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3 mb-4">
+                  <p className="text-[13px] text-[#085041] font-semibold">
+                    ✅ Your negotiated price of ${approvedPrice.toFixed(2)}/week
+                    has been approved and will apply to your card / direct
+                    debit subscription below.
+                  </p>
+                </div>
+              )}
+
               {/* Bond toggle card */}
               <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[14px] p-4 mb-5">
                 <label className="flex items-start gap-3 cursor-pointer">
@@ -926,28 +1091,21 @@ export default function VehicleModal({
                 </p>
               </div>
 
-              {stripeError && (
-                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4">
-                  <p className="text-red-600 text-[13px]">{stripeError}</p>
-                </div>
-              )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <button
                   type="button"
                   onClick={handleSelectCard}
-                  disabled={stripeLoading}
                   className="border-2 border-[#e8e8f0] rounded-[16px] p-5 text-left hover:border-[#7f85f7] transition-all duration-200 disabled:opacity-50"
                 >
                   <div className="text-[28px] mb-2">💳</div>
                   <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
-                    Pay by Card
+                    Card / Direct Debit
                   </p>
                   <p className="text-[12px] text-[#9496a8] mb-3">
-                    Instant. Secure. Visa, Mastercard, Amex.
+                    Weekly auto-billed. Visa, Mastercard, Amex or BECS.
                   </p>
                   <div className="flex gap-1">
-                    {["VISA", "MC", "AMEX"].map((c) => (
+                    {["VISA", "MC", "AMEX", "BECS"].map((c) => (
                       <span
                         key={c}
                         className="text-[9px] font-bold bg-[#f7f7f7] border border-[#e8e8f0] rounded-[3px] px-1.5 py-0.5 text-[#666]"
@@ -956,9 +1114,6 @@ export default function VehicleModal({
                       </span>
                     ))}
                   </div>
-                  {stripeLoading && (
-                    <p className="text-[11px] text-[#7f85f7] mt-2">Loading...</p>
-                  )}
                 </button>
 
                 <button
@@ -998,34 +1153,134 @@ export default function VehicleModal({
             </div>
           )}
 
-          {/* ═══ VIEW 3b — PAYMENT (card, via Stripe) ═══ */}
-          {view === "payment" && !submitted && payMethod === "card" && clientSecret && (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: "stripe",
-                  variables: {
-                    colorPrimary: "#7f85f7",
-                    borderRadius: "10px",
-                    fontFamily: "Poppins, sans-serif",
-                  },
-                },
-              }}
-            >
-              <StripeCardForm
-                vehicle={v}
-                form={form}
-                weekly={weekly}
-                bond={bond}
-                includeBond={includeBond}
-                totalFirst={totalFirst}
-                onSuccess={() => setSubmitted(true)}
-                onBack={() => setPayMethod(null)}
-              />
-            </Elements>
+          {/* ═══ VIEW 3b — BOND SELECTOR (card / direct debit) ═══ */}
+          {view === "payment" && !submitted && payMethod === "card-bond" && (
+            <div className="view-in p-6 max-w-[600px] mx-auto">
+              <button
+                type="button"
+                onClick={() => setPayMethod(null)}
+                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] mb-4 flex items-center gap-1"
+              >
+                ← Choose different method
+              </button>
+
+              <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
+                Security Bond
+              </h3>
+              <p className="text-[13px] text-[#9496a8] mb-5">
+                Pay the bond online now, or skip it and pay in person at
+                pickup. After today, ${effectiveWeekly.toFixed(2)} is
+                auto-debited every week.
+              </p>
+
+              <div className="flex flex-col gap-2.5 mb-5">
+                {(
+                  [
+                    { val: 0 as const, label: "No bond", sub: "Pay bond in person at pickup" },
+                    { val: 1 as const, label: "1 week bond", sub: `$${effectiveWeekly.toFixed(2)}` },
+                    { val: 2 as const, label: "2 week bond", sub: `$${(effectiveWeekly * 2).toFixed(2)}` },
+                  ]
+                ).map((opt) => (
+                  <label
+                    key={opt.val}
+                    className={`flex items-center justify-between border-2 rounded-[10px] p-3 cursor-pointer transition-all ${
+                      bondWeeks === opt.val
+                        ? "border-[#7f85f7] bg-[#eeedfe]"
+                        : "border-[#e8e8f0]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        checked={bondWeeks === opt.val}
+                        onChange={() => setBondWeeks(opt.val)}
+                        className="accent-[#7f85f7]"
+                      />
+                      <span className="text-[13px] font-medium">{opt.label}</span>
+                    </div>
+                    <span className="text-[12px] text-[#666]">{opt.sub}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="bg-[#eeedfe] rounded-[10px] p-3 flex justify-between items-center mb-2">
+                <span className="text-[13px] text-[#534ab7]">Total charged today</span>
+                <span className="font-bold text-[16px] text-[#534ab7]">
+                  ${cardTotalToday.toFixed(2)}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#9496a8] mb-5">
+                After today, ${effectiveWeekly.toFixed(2)} is auto-debited
+                every week. Cancel anytime when you return the vehicle.
+              </p>
+
+              {setupError && (
+                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4">
+                  <p className="text-red-600 text-[13px]">{setupError}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPayMethod(null)}
+                  disabled={setupLoading}
+                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] disabled:opacity-40 transition-all"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleContinueToCardPayment}
+                  disabled={setupLoading}
+                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
+                >
+                  {setupLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Continue to Payment →"
+                  )}
+                </button>
+              </div>
+            </div>
           )}
+
+          {/* ═══ VIEW 3b2 — PAYMENT (card / BECS setup + weekly subscription) ═══ */}
+          {view === "payment" &&
+            !submitted &&
+            payMethod === "card-pay" &&
+            setupClientSecret && (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret: setupClientSecret,
+                  appearance: {
+                    theme: "stripe",
+                    variables: {
+                      colorPrimary: "#7f85f7",
+                      borderRadius: "10px",
+                      fontFamily: "Poppins, sans-serif",
+                    },
+                  },
+                }}
+              >
+                <StripeSetupForm
+                  vehicle={v}
+                  form={form}
+                  customerId={setupCustomerId}
+                  listedWeekly={weekly}
+                  effectiveWeekly={effectiveWeekly}
+                  bondWeeks={bondWeeks}
+                  bondAmount={bondAmountForWeeks}
+                  totalToday={cardTotalToday}
+                  onSuccess={() => setSubmitted(true)}
+                  onBack={() => setPayMethod("card-bond")}
+                />
+              </Elements>
+            )}
 
           {/* ═══ VIEW 3c — PAYMENT (direct deposit) ═══ */}
           {view === "payment" && !submitted && payMethod === "deposit" && (
@@ -1287,14 +1542,14 @@ export default function VehicleModal({
               </div>
 
               <h3 className="font-bold text-[22px] text-[#1a1a2e] mb-2">
-                {payMethod === "card"
+                {payMethod === "card-pay"
                   ? "Payment Successful! 🎉"
                   : "Application Submitted! 🎉"}
               </h3>
 
               <p className="text-[#555] text-[14px] leading-relaxed mb-5">
                 Thank you <strong>{form.firstName}</strong>. We have received
-                your {payMethod === "card" ? "payment" : "application and transfer confirmation"}{" "}
+                your {payMethod === "card-pay" ? "payment" : "application and transfer confirmation"}{" "}
                 for <strong>{v.name}</strong>.
               </p>
 
@@ -1307,7 +1562,7 @@ export default function VehicleModal({
                   {[
                     [
                       "1",
-                      payMethod === "card"
+                      payMethod === "card-pay"
                         ? "Your card payment has been confirmed"
                         : "We verify your bank transfer",
                     ],
@@ -1329,7 +1584,7 @@ export default function VehicleModal({
 
               {/* Bank details reminder — only relevant if they still owe a
                   transfer; a card payer has already paid in full. */}
-              {payMethod !== "card" && (
+              {payMethod !== "card-pay" && (
                 <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[12px] p-4 text-left mb-5">
                   <p className="text-[12px] font-bold text-[#7d5a00] mb-2">
                     ⚠️ If you haven&apos;t transferred yet:
@@ -1400,22 +1655,26 @@ export default function VehicleModal({
   )
 }
 
-function StripeCardForm({
+function StripeSetupForm({
   vehicle,
   form,
-  weekly,
-  bond,
-  includeBond,
-  totalFirst,
+  customerId,
+  listedWeekly,
+  effectiveWeekly,
+  bondWeeks,
+  bondAmount,
+  totalToday,
   onSuccess,
   onBack,
 }: {
   vehicle: RentalVehicle
   form: FormState
-  weekly: number
-  bond: number
-  includeBond: boolean
-  totalFirst: number
+  customerId: string
+  listedWeekly: number
+  effectiveWeekly: number
+  bondWeeks: number
+  bondAmount: number
+  totalToday: number
   onSuccess: () => void
   onBack: () => void
 }) {
@@ -1438,7 +1697,7 @@ function StripeCardForm({
       return
     }
 
-    const { error: confirmError } = await stripe.confirmPayment({
+    const { error: confirmError, setupIntent } = await stripe.confirmSetup({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/services/car-rental?payment=success`,
@@ -1454,21 +1713,62 @@ function StripeCardForm({
     })
 
     if (confirmError) {
-      setError(confirmError.message || "Payment failed. Please try again.")
+      setError(confirmError.message || "Payment setup failed. Please try again.")
       setProcessing(false)
-    } else {
+      return
+    }
+
+    const paymentMethodId =
+      typeof setupIntent?.payment_method === "string"
+        ? setupIntent.payment_method
+        : setupIntent?.payment_method?.id
+
+    if (!paymentMethodId) {
+      setError("Payment setup did not complete. Please try again.")
+      setProcessing(false)
+      return
+    }
+
+    try {
+      const res = await fetch("/api/rental-payment/start-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId,
+          paymentMethodId,
+          vehicleId: vehicle.id,
+          vehicleName: vehicle.name,
+          vehicleRego: vehicle.rego,
+          listedWeeklyRate: listedWeekly,
+          weeklyRate: effectiveWeekly,
+          bondWeeks,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+        }),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setError(data.error)
+        setProcessing(false)
+        return
+      }
       onSuccess()
+    } catch {
+      setError("Could not start your weekly rental. Please call us for help.")
+      setProcessing(false)
     }
   }
 
   return (
     <div className="p-6 max-w-[600px] mx-auto">
       <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
-        Secure Card Payment
+        Secure Payment Details
       </h3>
       <p className="text-[13px] text-[#9496a8] mb-5">
-        Powered by Stripe — bank-grade encryption. We never see your card
-        details.
+        Powered by Stripe — bank-grade encryption. We never see your card or
+        bank details.
       </p>
 
       <div className="bg-[#f8f8ff] rounded-[14px] p-5 mb-5">
@@ -1477,23 +1777,24 @@ function StripeCardForm({
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-[13px]">
-            <span className="text-[#666]">1 week rent</span>
-            <span className="font-semibold text-[#1a1a2e]">{fmt(weekly)}</span>
+            <span className="text-[#666]">1 week rent (today)</span>
+            <span className="font-semibold text-[#1a1a2e]">
+              {fmt(effectiveWeekly)}
+            </span>
           </div>
-          {includeBond ? (
+          {bondWeeks > 0 ? (
             <div className="flex justify-between text-[13px]">
               <span className="text-[#666]">
-                Security bond (2 weeks)
+                Security bond ({bondWeeks} week{bondWeeks > 1 ? "s" : ""})
                 <span className="text-[#9496a8] text-[11px] ml-1">
                   refundable
                 </span>
               </span>
-              <span className="font-semibold text-[#1a1a2e]">{fmt(bond)}</span>
+              <span className="font-semibold text-[#1a1a2e]">{fmt(bondAmount)}</span>
             </div>
           ) : (
             <div className="flex justify-between text-[12px] text-[#9496a8] italic">
               <span>Bond — pay at pickup</span>
-              <span>{fmt(bond)}</span>
             </div>
           )}
           <div className="border-t border-[#e8e8f0] pt-2 mt-2 flex justify-between">
@@ -1501,9 +1802,12 @@ function StripeCardForm({
               Total today
             </span>
             <span className="font-extrabold text-[18px] text-[#7f85f7]">
-              {fmt(totalFirst)}
+              {fmt(totalToday)}
             </span>
           </div>
+          <p className="text-[11px] text-[#9496a8]">
+            Then {fmt(effectiveWeekly)} auto-billed every week thereafter.
+          </p>
         </div>
       </div>
 
@@ -1546,7 +1850,7 @@ function StripeCardForm({
               Processing...
             </>
           ) : (
-            <>🔒 Pay {fmt(totalFirst)} AUD</>
+            <>🔒 Pay {fmt(totalToday)} AUD</>
           )}
         </button>
       </div>

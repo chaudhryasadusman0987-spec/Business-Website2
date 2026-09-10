@@ -188,6 +188,53 @@ export async function createActiveRentalsTable(): Promise<void> {
   `
 }
 
+/** Create the price_negotiations table if absent. Idempotent. */
+export async function createNegotiationsTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS price_negotiations (
+      id             TEXT PRIMARY KEY,
+      vehicle_id     TEXT NOT NULL,
+      vehicle_name   TEXT NOT NULL,
+      customer_name  TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      customer_phone TEXT NOT NULL,
+      listed_price   NUMERIC NOT NULL,
+      offered_price  NUMERIC NOT NULL,
+      status         TEXT NOT NULL DEFAULT 'pending',
+      approved_price NUMERIC,
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+      responded_at   TIMESTAMPTZ
+    )
+  `
+}
+
+/** Create the rental_agreements table if absent. Idempotent. */
+export async function createRentalAgreementsTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS rental_agreements (
+      id                        TEXT PRIMARY KEY,
+      vehicle_id                TEXT NOT NULL,
+      vehicle_name               TEXT NOT NULL,
+      vehicle_rego               TEXT NOT NULL,
+      customer_name              TEXT NOT NULL,
+      customer_email             TEXT NOT NULL,
+      customer_phone             TEXT NOT NULL,
+      listed_weekly_rate         NUMERIC NOT NULL,
+      agreed_weekly_rate         NUMERIC NOT NULL,
+      bond_weeks                 INTEGER NOT NULL DEFAULT 0,
+      bond_amount                NUMERIC NOT NULL DEFAULT 0,
+      payment_method              TEXT,
+      stripe_customer_id          TEXT,
+      stripe_subscription_id      TEXT,
+      stripe_payment_method_id    TEXT,
+      status                      TEXT NOT NULL DEFAULT 'active',
+      start_date                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+      return_date                 TIMESTAMPTZ,
+      created_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+}
+
 /** Create the security_packages table if absent. Idempotent. */
 export async function createPackagesTable(): Promise<void> {
   await sql()`
@@ -223,6 +270,8 @@ export async function ensureSchema(): Promise<void> {
   await createVehiclesTable()
   await createActiveRentalsTable()
   await createPackagesTable()
+  await createNegotiationsTable()
+  await createRentalAgreementsTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -857,4 +906,238 @@ export async function deletePackage(id: string): Promise<boolean> {
     DELETE FROM security_packages WHERE id = ${id} RETURNING id
   `) as { id: string }[]
   return rows.length > 0
+}
+
+/* ───────────────────── Price negotiations ───────────────────── */
+
+export interface PriceNegotiationInput {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  listedPrice: number
+  offeredPrice: number
+}
+
+export interface PriceNegotiation {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  listedPrice: number
+  offeredPrice: number
+  status: string
+  approvedPrice: number | null
+  createdAt: string
+  respondedAt: string | null
+}
+
+interface PriceNegotiationRow {
+  id: string
+  vehicle_id: string
+  vehicle_name: string
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  listed_price: string | number
+  offered_price: string | number
+  status: string
+  approved_price: string | number | null
+  created_at: string | Date
+  responded_at: string | Date | null
+}
+
+function toNegotiation(r: PriceNegotiationRow): PriceNegotiation {
+  return {
+    id: r.id,
+    vehicleId: r.vehicle_id,
+    vehicleName: r.vehicle_name,
+    customerName: r.customer_name,
+    customerEmail: r.customer_email,
+    customerPhone: r.customer_phone,
+    listedPrice: Number(r.listed_price),
+    offeredPrice: Number(r.offered_price),
+    status: r.status,
+    approvedPrice: r.approved_price == null ? null : Number(r.approved_price),
+    createdAt: r.created_at ? new Date(r.created_at).toISOString() : "",
+    respondedAt: r.responded_at ? new Date(r.responded_at).toISOString() : null,
+  }
+}
+
+export async function insertNegotiation(input: PriceNegotiationInput): Promise<void> {
+  await createNegotiationsTable()
+  await sql()`
+    INSERT INTO price_negotiations (
+      id, vehicle_id, vehicle_name, customer_name, customer_email,
+      customer_phone, listed_price, offered_price, status
+    ) VALUES (
+      ${input.id}, ${input.vehicleId}, ${input.vehicleName}, ${input.customerName},
+      ${input.customerEmail}, ${input.customerPhone}, ${input.listedPrice},
+      ${input.offeredPrice}, 'pending'
+    )
+  `
+}
+
+/** All negotiations (newest first), or one by id. */
+export async function getNegotiations(id?: string): Promise<PriceNegotiation[]> {
+  await createNegotiationsTable()
+  const rows = (id
+    ? await sql()`SELECT * FROM price_negotiations WHERE id = ${id}`
+    : await sql()`SELECT * FROM price_negotiations ORDER BY created_at DESC`) as PriceNegotiationRow[]
+  return rows.map(toNegotiation)
+}
+
+export async function updateNegotiationStatus(
+  id: string,
+  status: "approved" | "declined",
+  approvedPrice: number | null,
+): Promise<PriceNegotiation | null> {
+  await createNegotiationsTable()
+  const rows = (await sql()`
+    UPDATE price_negotiations
+    SET status = ${status}, approved_price = ${approvedPrice}, responded_at = now()
+    WHERE id = ${id}
+    RETURNING *
+  `) as PriceNegotiationRow[]
+  return rows[0] ? toNegotiation(rows[0]) : null
+}
+
+/* ───────────────────── Rental agreements (subscriptions) ───────────────────── */
+
+export interface RentalAgreementInput {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  vehicleRego: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  listedWeeklyRate: number
+  agreedWeeklyRate: number
+  bondWeeks: number
+  bondAmount: number
+  paymentMethod: string
+  stripeCustomerId: string
+  stripeSubscriptionId: string
+  stripePaymentMethodId: string
+}
+
+export interface RentalAgreement {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  vehicleRego: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  listedWeeklyRate: number
+  agreedWeeklyRate: number
+  bondWeeks: number
+  bondAmount: number
+  paymentMethod: string
+  stripeCustomerId: string | null
+  stripeSubscriptionId: string | null
+  stripePaymentMethodId: string | null
+  status: string
+  startDate: string
+  returnDate: string | null
+}
+
+interface RentalAgreementRow {
+  id: string
+  vehicle_id: string
+  vehicle_name: string
+  vehicle_rego: string
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  listed_weekly_rate: string | number
+  agreed_weekly_rate: string | number
+  bond_weeks: number
+  bond_amount: string | number
+  payment_method: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  stripe_payment_method_id: string | null
+  status: string
+  start_date: string | Date
+  return_date: string | Date | null
+}
+
+function toRentalAgreement(r: RentalAgreementRow): RentalAgreement {
+  return {
+    id: r.id,
+    vehicleId: r.vehicle_id,
+    vehicleName: r.vehicle_name,
+    vehicleRego: r.vehicle_rego,
+    customerName: r.customer_name,
+    customerEmail: r.customer_email,
+    customerPhone: r.customer_phone,
+    listedWeeklyRate: Number(r.listed_weekly_rate),
+    agreedWeeklyRate: Number(r.agreed_weekly_rate),
+    bondWeeks: Number(r.bond_weeks),
+    bondAmount: Number(r.bond_amount),
+    paymentMethod: r.payment_method ?? "",
+    stripeCustomerId: r.stripe_customer_id,
+    stripeSubscriptionId: r.stripe_subscription_id,
+    stripePaymentMethodId: r.stripe_payment_method_id,
+    status: r.status,
+    startDate: r.start_date ? new Date(r.start_date).toISOString() : "",
+    returnDate: r.return_date ? new Date(r.return_date).toISOString() : null,
+  }
+}
+
+export async function insertRentalAgreement(input: RentalAgreementInput): Promise<void> {
+  await createRentalAgreementsTable()
+  await sql()`
+    INSERT INTO rental_agreements (
+      id, vehicle_id, vehicle_name, vehicle_rego, customer_name,
+      customer_email, customer_phone, listed_weekly_rate, agreed_weekly_rate,
+      bond_weeks, bond_amount, payment_method, stripe_customer_id,
+      stripe_subscription_id, stripe_payment_method_id, status
+    ) VALUES (
+      ${input.id}, ${input.vehicleId}, ${input.vehicleName}, ${input.vehicleRego},
+      ${input.customerName}, ${input.customerEmail}, ${input.customerPhone},
+      ${input.listedWeeklyRate}, ${input.agreedWeeklyRate}, ${input.bondWeeks},
+      ${input.bondAmount}, ${input.paymentMethod}, ${input.stripeCustomerId},
+      ${input.stripeSubscriptionId}, ${input.stripePaymentMethodId}, 'active'
+    )
+  `
+}
+
+/** Agreements, optionally filtered by status (e.g. "active"). Newest first. */
+export async function getRentalAgreements(status?: string): Promise<RentalAgreement[]> {
+  await createRentalAgreementsTable()
+  const rows = (status
+    ? await sql()`
+        SELECT * FROM rental_agreements WHERE status = ${status} ORDER BY start_date DESC
+      `
+    : await sql()`SELECT * FROM rental_agreements ORDER BY start_date DESC`) as RentalAgreementRow[]
+  return rows.map(toRentalAgreement)
+}
+
+export async function getRentalAgreement(id: string): Promise<RentalAgreement | null> {
+  await createRentalAgreementsTable()
+  const rows = (await sql()`
+    SELECT * FROM rental_agreements WHERE id = ${id}
+  `) as RentalAgreementRow[]
+  return rows[0] ? toRentalAgreement(rows[0]) : null
+}
+
+export async function markRentalAgreementReturned(
+  id: string,
+  returnDate: string,
+): Promise<RentalAgreement | null> {
+  await createRentalAgreementsTable()
+  const rows = (await sql()`
+    UPDATE rental_agreements
+    SET status = 'returned', return_date = ${returnDate}
+    WHERE id = ${id}
+    RETURNING *
+  `) as RentalAgreementRow[]
+  return rows[0] ? toRentalAgreement(rows[0]) : null
 }

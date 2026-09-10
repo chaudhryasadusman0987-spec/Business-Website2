@@ -19,6 +19,8 @@ import SecurityProductsView from "@/components/dashboard/SecurityProductsView"
 import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
 import ProductsDbTab from "@/components/dashboard/ProductsDbTab"
 import PackagesDbTab from "@/components/dashboard/PackagesDbTab"
+import OffersDbTab from "@/components/dashboard/OffersDbTab"
+import ActiveRentalsDbTab from "@/components/dashboard/ActiveRentalsDbTab"
 import {
   buildTickerMessages,
   CATEGORY_LABELS,
@@ -50,6 +52,8 @@ import {
   Menu,
   X,
   Package2,
+  Tag,
+  Undo2,
 } from "lucide-react"
 
 /* ───────────────────────── Types ───────────────────────── */
@@ -481,6 +485,8 @@ export default function DashboardPage() {
     { id: "products-db", label: "Products (DB)", Icon: Database },
     { id: "packages", label: "Packages", Icon: Package2 },
     { id: "car-rental", label: "Car Rental", Icon: Car },
+    { id: "offers", label: "Offers", Icon: Tag },
+    { id: "active-rentals", label: "Active Rentals", Icon: Undo2 },
     { id: "it-services", label: "IT Services", Icon: Monitor },
     { id: "discounts", label: "Discounts", Icon: Percent },
     { id: "leads", label: "Leads", Icon: Users },
@@ -713,6 +719,12 @@ export default function DashboardPage() {
 
         {/* ───────── CAR RENTAL ───────── */}
         {tab === "car-rental" && <VehiclesDbTab />}
+
+        {/* ───────── OFFERS ───────── */}
+        {tab === "offers" && <OffersDbTab />}
+
+        {/* ───────── ACTIVE RENTALS ───────── */}
+        {tab === "active-rentals" && <ActiveRentalsDbTab />}
 
         {/* ───────── IT SERVICES ───────── */}
         {tab === "it-services" && (
