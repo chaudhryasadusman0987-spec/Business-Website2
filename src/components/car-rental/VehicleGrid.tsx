@@ -21,7 +21,7 @@ import { getColourHex } from "@/lib/colourHex"
 // card browses the photos, "Get on Rent" skips straight to the application.
 interface OpenState {
   vehicle: RentalVehicle
-  view: "details" | "apply"
+  view: "details" | "apply" | "offer"
 }
 
 export default function VehicleGrid({
@@ -57,7 +57,7 @@ export default function VehicleGrid({
   // Open immediately with the light record so the modal paints at once, then
   // swap in the full one (galleries included) when it lands.
   const openVehicle = useCallback(
-    (vehicle: RentalVehicle, view: "details" | "apply") => {
+    (vehicle: RentalVehicle, view: "details" | "apply" | "offer") => {
       setOpen({ vehicle, view })
       fetch(`/api/vehicles?id=${encodeURIComponent(vehicle.id)}`, {
         cache: "no-store",
@@ -191,6 +191,21 @@ export default function VehicleGrid({
                           Ask us for the weekly rate
                         </p>
                       )}
+                      {/* Deliberately a real button, not a small text link — the
+                          negotiation option needs to be impossible to miss. */}
+                      {vehicle.weeklyRate > 0 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openVehicle(vehicle, "offer")
+                          }}
+                          className="flex items-center gap-1.5 mt-2 text-[12px] font-semibold text-[#7f85f7] hover:text-[#6b71f0] transition-colors"
+                        >
+                          <span className="text-[14px]">💬</span>
+                          Make an offer
+                        </button>
+                      )}
                     </div>
 
                     <div className="mt-auto pt-4 border-t border-[#f0f0f8] flex flex-col gap-2.5">
@@ -223,7 +238,8 @@ export default function VehicleGrid({
       {open && (
         <VehicleModal
           vehicle={open.vehicle}
-          initialView={open.view}
+          initialView={open.view === "offer" ? "details" : open.view}
+          openToOffer={open.view === "offer"}
           onClose={() => setOpen(null)}
         />
       )}

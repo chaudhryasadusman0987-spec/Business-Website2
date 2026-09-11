@@ -107,6 +107,14 @@ export default function ActiveRentalsDbTab() {
         Vehicles on a weekly Stripe subscription. Mark a vehicle returned to
         cancel its billing and remove the saved payment method.
       </p>
+      <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 mb-6">
+        <p className="text-[12px] text-[#7d5a00]">
+          ⚠️ This is the only place a rental subscription gets cancelled —
+          there is no cancel option on the customer-facing site. Marking a
+          vehicle returned cancels weekly billing and removes the customer&apos;s
+          saved card/bank details.
+        </p>
+      </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 mb-4 flex items-center gap-2">

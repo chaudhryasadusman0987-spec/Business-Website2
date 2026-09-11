@@ -46,6 +46,9 @@ interface Props {
   onClose: () => void
   /** Step to open on. "Get on Rent" jumps straight past the photo gallery. */
   initialView?: "details" | "apply"
+  /** Opens straight into the negotiation form on the Details step — set when
+   *  the visitor clicked "Make an offer" on the vehicle card. */
+  openToOffer?: boolean
 }
 
 const EMPTY_FORM = {
@@ -95,6 +98,7 @@ export default function VehicleModal({
   vehicle,
   onClose,
   initialView = "details",
+  openToOffer = false,
 }: Props) {
   const [view, setView] = useState<View>(initialView)
   const [activeImg, setActiveImg] = useState(0)
@@ -121,6 +125,9 @@ export default function VehicleModal({
   // ── Price negotiation ("Want to negotiate this price?") ──
   const [showOfferBox, setShowOfferBox] = useState(false)
   const [offerAmount, setOfferAmount] = useState("")
+  const [offerName, setOfferName] = useState("")
+  const [offerPhone, setOfferPhone] = useState("")
+  const [offerEmail, setOfferEmail] = useState("")
   const [offerSubmitting, setOfferSubmitting] = useState(false)
   const [offerSent, setOfferSent] = useState(false)
   // Set once a negotiation this browser previously sent for this vehicle has
@@ -151,6 +158,9 @@ export default function VehicleModal({
     setIncludeBond(false)
     setShowOfferBox(false)
     setOfferAmount("")
+    setOfferName("")
+    setOfferPhone("")
+    setOfferEmail("")
     setOfferSubmitting(false)
     setOfferSent(false)
     setApprovedPrice(null)
@@ -160,6 +170,13 @@ export default function VehicleModal({
     setSetupLoading(false)
     setSetupError("")
   }, [vehicle?.id, initialView])
+
+  // "Make an offer" on the vehicle card opens straight into the negotiation
+  // form — this must run after the reset effect above (same render pass,
+  // declared later) so it isn't immediately reset back to closed.
+  useEffect(() => {
+    if (openToOffer) setShowOfferBox(true)
+  }, [openToOffer, vehicle?.id])
 
   // A customer who previously sent an offer for this vehicle from this browser
   // may come back to find it approved — pick that up so the approved rate
@@ -395,7 +412,7 @@ export default function VehicleModal({
   /** Sends the customer's counter-offer to the owner for approval. */
   const handleSendOffer = async () => {
     const offered = Number(offerAmount)
-    if (!offered || offered <= 0) return
+    if (!offered || offered <= 0 || !offerName.trim() || !offerPhone.trim()) return
     setOfferSubmitting(true)
     try {
       const res = await fetch("/api/rental-payment/negotiate-price", {
@@ -404,11 +421,9 @@ export default function VehicleModal({
         body: JSON.stringify({
           vehicleId: v.id,
           vehicleName: v.name,
-          customerName:
-            [form.firstName, form.lastName].filter(Boolean).join(" ") ||
-            "Website Visitor",
-          customerEmail: form.email || "not provided",
-          customerPhone: form.phone || "not provided",
+          customerName: offerName.trim() || "Website Visitor",
+          customerEmail: offerEmail.trim() || "not provided",
+          customerPhone: offerPhone.trim() || "not provided",
           listedPrice: weekly,
           offeredPrice: offered,
         }),
@@ -613,46 +628,98 @@ export default function VehicleModal({
                 </div>
               )}
 
-              {/* Price negotiation — offer a different weekly rate for the owner to approve */}
+              {/* Price negotiation — offer a different weekly rate for the owner to approve.
+                  Deliberately prominent: a full card, not a small text link, so it can't be missed. */}
               {weekly > 0 && approvedPrice == null && (
-                <div className="px-5 pt-4">
+                <div className="mx-5 mt-4">
                   {!showOfferBox ? (
                     <button
                       type="button"
                       onClick={() => setShowOfferBox(true)}
-                      className="text-[12px] text-[#7f85f7] font-medium hover:underline"
+                      className="w-full flex items-center justify-center gap-2 bg-[#eeedfe] border-2 border-[#d6d8f5] text-[#534ab7] rounded-[12px] h-[52px] font-bold text-[14px] hover:bg-[#e0deff] hover:border-[#7f85f7] transition-all"
                     >
-                      💬 Want to negotiate this price?
+                      <span className="text-[18px]">💬</span>
+                      Think ${weekly.toLocaleString("en-AU")}/week is high?
+                      Make an offer
                     </button>
                   ) : (
-                    <div className="bg-[#f8f8ff] rounded-[10px] p-3">
-                      <p className="text-[11px] text-[#666] mb-2">
-                        Enter your offer per week (AUD):
+                    <div className="bg-[#f8f8ff] border-2 border-[#7f85f7] rounded-[14px] p-4">
+                      <p className="text-[14px] font-bold text-[#1a1a2e] mb-1">
+                        Name your weekly price
                       </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={offerAmount}
-                          onChange={(e) => setOfferAmount(e.target.value)}
-                          placeholder={String(weekly)}
-                          disabled={offerSent}
-                          className="flex-1 border border-[#e8e8f0] rounded-[8px] px-3 h-[38px] text-[13px] disabled:opacity-60"
-                        />
-                        <button
-                          type="button"
-                          disabled={!offerAmount || offerSent || offerSubmitting}
-                          onClick={handleSendOffer}
-                          className="bg-[#7f85f7] text-white rounded-[8px] px-4 h-[38px] text-[12px] font-semibold disabled:opacity-50"
-                        >
-                          {offerSubmitting ? "Sending…" : "Send"}
-                        </button>
-                      </div>
-                      {offerSent && (
-                        <p className="text-[11px] text-[#0f6e56] mt-2">
-                          ✓ Offer sent! We&apos;ll text or call you shortly.
-                          Fill your details on the next step so we can reach
-                          you.
-                        </p>
+                      <p className="text-[11px] text-[#666] mb-3">
+                        We&apos;ll review it and reply within a few hours — by
+                        phone, text or email.
+                      </p>
+
+                      {!offerSent ? (
+                        <div className="flex flex-col gap-2.5">
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9496a8] text-[14px]">
+                                $
+                              </span>
+                              <input
+                                type="number"
+                                value={offerAmount}
+                                onChange={(e) => setOfferAmount(e.target.value)}
+                                placeholder={String(weekly - 10)}
+                                className="w-full border border-[#e0deff] rounded-[8px] pl-7 pr-3 h-[42px] text-[14px] font-semibold outline-none focus:border-[#7f85f7]"
+                              />
+                            </div>
+                            <span className="flex items-center text-[13px] text-[#9496a8]">
+                              / week
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            value={offerName}
+                            onChange={(e) => setOfferName(e.target.value)}
+                            placeholder="Your name"
+                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                          />
+                          <input
+                            type="tel"
+                            value={offerPhone}
+                            onChange={(e) => setOfferPhone(e.target.value)}
+                            placeholder="Your phone number"
+                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                          />
+                          <input
+                            type="email"
+                            value={offerEmail}
+                            onChange={(e) => setOfferEmail(e.target.value)}
+                            placeholder="Your email (optional)"
+                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                          />
+                          <button
+                            type="button"
+                            disabled={
+                              !offerAmount ||
+                              !offerName.trim() ||
+                              !offerPhone.trim() ||
+                              offerSubmitting
+                            }
+                            onClick={handleSendOffer}
+                            className="w-full bg-[#7f85f7] text-white rounded-[8px] h-[44px] font-semibold text-[14px] hover:bg-[#6b71f0] disabled:opacity-40 transition-all"
+                          >
+                            {offerSubmitting ? "Sending…" : "Send My Offer"}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="bg-[#e1f5ee] rounded-[10px] p-3 flex items-start gap-2">
+                          <span className="text-[16px]">✅</span>
+                          <div>
+                            <p className="text-[13px] font-semibold text-[#085041]">
+                              Offer sent!
+                            </p>
+                            <p className="text-[11px] text-[#085041] mt-0.5">
+                              We&apos;ll call or text you at {offerPhone} soon.
+                              You can also proceed with the listed price now
+                              if you&apos;d rather not wait.
+                            </p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
