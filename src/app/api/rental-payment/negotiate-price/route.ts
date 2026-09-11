@@ -107,26 +107,43 @@ export async function PATCH(req: Request) {
   }
 
   if (row) {
+    // Approving at a different price than the customer asked for is a
+    // counter-offer, not a straight approval — say so, rather than telling
+    // them "your price was approved" when it wasn't the price they offered.
+    const isCounter =
+      status === "approved" &&
+      row.approvedPrice != null &&
+      Number(row.approvedPrice) !== Number(row.offeredPrice)
+
     try {
       await sendEmail(
         row.customerEmail,
         status === "approved"
-          ? `Your price offer was approved! — Pak Oz Rentals`
+          ? isCounter
+            ? `We've countered your offer — Pak Oz Rentals`
+            : `Your price offer was approved! — Pak Oz Rentals`
           : `About your price offer — Pak Oz Rentals`,
         `<div style="font-family:Arial;max-width:600px;margin:0 auto">
-          <div style="background:${status === "approved" ? "#0f6e56" : "#c62828"};padding:20px;text-align:center">
+          <div style="background:${status === "approved" ? (isCounter ? "#f5a623" : "#0f6e56") : "#c62828"};padding:20px;text-align:center">
             <h1 style="color:white;margin:0;font-size:20px">
-              ${status === "approved" ? "✅ Offer Approved!" : "Offer Update"}
+              ${status === "approved" ? (isCounter ? "💬 Counter-Offer" : "✅ Offer Approved!") : "Offer Update"}
             </h1>
           </div>
           <div style="padding:24px">
             <p>Hi ${row.customerName.split(" ")[0]},</p>
             ${
               status === "approved"
-                ? `<p>Good news — we've approved your price of
-                    <strong>$${row.approvedPrice}/week</strong> for the ${row.vehicleName}.</p>
-                  <p>Go back to the vehicle on our website and complete your
-                    booking — the approved price will apply automatically.</p>`
+                ? isCounter
+                  ? `<p>You offered <strong>$${row.offeredPrice}/week</strong> for the
+                      ${row.vehicleName} — we can't quite match that, but we can do
+                      <strong>$${row.approvedPrice}/week</strong>.</p>
+                    <p>Go back to the vehicle on our website and complete your
+                      booking to accept this price, or call us on
+                      <strong>${SITE_PHONE}</strong> if you'd like to discuss further.</p>`
+                  : `<p>Good news — we've approved your price of
+                      <strong>$${row.approvedPrice}/week</strong> for the ${row.vehicleName}.</p>
+                    <p>Go back to the vehicle on our website and complete your
+                      booking — the approved price will apply automatically.</p>`
                 : `<p>We're unable to match $${row.offeredPrice}/week for the
                     ${row.vehicleName} at this time. Our best price is
                     $${row.listedPrice}/week.</p>

@@ -134,6 +134,9 @@ export default function VehicleModal({
   // been approved by the owner — the approved rate then replaces the listed
   // weekly rate everywhere in the flow.
   const [approvedPrice, setApprovedPrice] = useState<number | null>(null)
+  // Set alongside approvedPrice when the owner approved at a different price
+  // than the customer asked for — a counter-offer, not a straight approval.
+  const [counteredFrom, setCounteredFrom] = useState<number | null>(null)
 
   // ── Weekly subscription (card / BECS direct debit) ──
   const [bondWeeks, setBondWeeks] = useState<0 | 1 | 2>(0)
@@ -164,6 +167,7 @@ export default function VehicleModal({
     setOfferSubmitting(false)
     setOfferSent(false)
     setApprovedPrice(null)
+    setCounteredFrom(null)
     setBondWeeks(0)
     setSetupClientSecret("")
     setSetupCustomerId("")
@@ -196,6 +200,9 @@ export default function VehicleModal({
         const row = data.negotiations?.[0]
         if (row?.status === "approved" && row.approvedPrice) {
           setApprovedPrice(Number(row.approvedPrice))
+          if (Number(row.approvedPrice) !== Number(row.offeredPrice)) {
+            setCounteredFrom(Number(row.offeredPrice))
+          }
         }
       })
       .catch(() => {
@@ -726,11 +733,21 @@ export default function VehicleModal({
                 </div>
               )}
 
-              {approvedPrice != null && (
+              {approvedPrice != null && counteredFrom == null && (
                 <div className="mx-5 mt-4 bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3">
                   <p className="text-[13px] text-[#085041] font-semibold">
                     ✅ Your offer of ${approvedPrice.toFixed(2)}/week was
                     approved — this rate will apply when you book.
+                  </p>
+                </div>
+              )}
+
+              {approvedPrice != null && counteredFrom != null && (
+                <div className="mx-5 mt-4 bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3">
+                  <p className="text-[13px] text-[#7d5a00] font-semibold">
+                    💬 Counter-offer: you asked for ${counteredFrom.toFixed(2)}
+                    /week — we can do ${approvedPrice.toFixed(2)}/week. This
+                    rate will apply if you book now.
                   </p>
                 </div>
               )}
@@ -1108,12 +1125,23 @@ export default function VehicleModal({
                 the vehicle.
               </p>
 
-              {approvedPrice != null && (
+              {approvedPrice != null && counteredFrom == null && (
                 <div className="bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3 mb-4">
                   <p className="text-[13px] text-[#085041] font-semibold">
                     ✅ Your negotiated price of ${approvedPrice.toFixed(2)}/week
                     has been approved and will apply to your card / direct
                     debit subscription below.
+                  </p>
+                </div>
+              )}
+
+              {approvedPrice != null && counteredFrom != null && (
+                <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 mb-4">
+                  <p className="text-[13px] text-[#7d5a00] font-semibold">
+                    💬 Counter-offer: you asked for ${counteredFrom.toFixed(2)}
+                    /week — we can do ${approvedPrice.toFixed(2)}/week. This
+                    rate will apply to your card / direct debit subscription
+                    below.
                   </p>
                 </div>
               )}

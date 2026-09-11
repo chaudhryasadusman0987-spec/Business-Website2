@@ -185,7 +185,9 @@ export default function OffersDbTab() {
                   <td className="px-5 py-4 whitespace-nowrap text-[13px] text-[#666]">
                     ${r.listedPrice} → ${r.offeredPrice}
                     {r.status === "approved" && r.approvedPrice != null
-                      ? ` (approved $${r.approvedPrice})`
+                      ? r.approvedPrice !== r.offeredPrice
+                        ? ` (countered at $${r.approvedPrice})`
+                        : ` (approved $${r.approvedPrice})`
                       : ""}
                   </td>
                   <td className="px-5 py-4">
