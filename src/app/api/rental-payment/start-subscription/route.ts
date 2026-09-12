@@ -72,7 +72,10 @@ export async function POST(req: Request) {
       },
     })
 
-    // One-time bond charge if the customer opted in.
+    // One-time bond charge if the customer opted in. Metadata mirrors
+    // create-intent/route.ts's shape (plus paymentType/bondWeeks/subscriptionId)
+    // so the webhook can render a correct confirmation email for it — without
+    // this, payment_intent.succeeded fires with empty metadata for this PI.
     if (bondWeeksNum > 0 && bondAmount > 0) {
       await stripe.paymentIntents.create({
         amount: Math.round(bondAmount * 100),
@@ -82,6 +85,21 @@ export async function POST(req: Request) {
         off_session: true,
         confirm: true,
         description: `Security bond (${bondWeeksNum} week${bondWeeksNum > 1 ? "s" : ""}) — ${vehicleName} (${vehicleRego})`,
+        metadata: {
+          paymentType: "bond",
+          vehicleId,
+          vehicleName,
+          vehicleRego,
+          customerName: `${firstName} ${lastName}`,
+          customerEmail: email,
+          customerPhone: phone,
+          weeklyRent: String(weeklyRate),
+          bondAmount: String(bondAmount),
+          bondWeeks: String(bondWeeksNum),
+          totalCharged: String(bondAmount),
+          bondPaidOnline: "true",
+          subscriptionId: subscription.id,
+        },
       })
     }
 
@@ -105,7 +123,10 @@ export async function POST(req: Request) {
         stripePaymentMethodId: paymentMethodId,
       })
     } catch (e) {
-      console.error("Agreement save error:", e)
+      console.error(
+        "CRITICAL: rental_agreements insert failed — this rental will NOT appear in Active Rentals:",
+        e
+      )
     }
 
     try {
