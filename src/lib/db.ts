@@ -1140,6 +1140,7 @@ export async function insertRentalAgreement(input: RentalAgreementInput): Promis
       ${input.bondAmount}, ${input.paymentMethod}, ${input.stripeCustomerId},
       ${input.stripeSubscriptionId}, ${input.stripePaymentMethodId}, 'active'
     )
+    ON CONFLICT (id) DO NOTHING
   `
 }
 

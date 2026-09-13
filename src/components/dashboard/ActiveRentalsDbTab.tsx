@@ -166,10 +166,18 @@ export default function ActiveRentalsDbTab() {
                         ${r.agreedWeeklyRate}/wk
                       </td>
                       <td className="px-5 py-4 text-[13px] text-[#666]">
-                        {r.bondWeeks > 0 ? `$${r.bondAmount} (${r.bondWeeks}wk)` : "In person"}
+                        {r.bondAmount > 0
+                          ? `$${r.bondAmount}${r.bondWeeks > 0 ? ` (${r.bondWeeks}wk)` : ""}`
+                          : "In person"}
                       </td>
                       <td className="px-5 py-4 text-[13px] text-[#666]">
-                        {r.paymentMethod === "au_becs_debit" ? "Direct debit" : "Card"}
+                        {r.paymentMethod === "au_becs_debit"
+                          ? "Direct debit"
+                          : r.paymentMethod === "bank-transfer"
+                            ? "Bank transfer"
+                            : r.paymentMethod === "lease-agreement"
+                              ? "Lease agreement"
+                              : "Card"}
                       </td>
                       <td className="px-5 py-4 text-[12px] text-[#9496a8] whitespace-nowrap">
                         {new Date(r.startDate).toLocaleDateString("en-AU")}

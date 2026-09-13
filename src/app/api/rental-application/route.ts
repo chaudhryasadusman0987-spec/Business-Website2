@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { sendEmail, type EmailAttachment } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
-import { getVehicle } from "@/lib/db"
+import { getVehicle, insertRentalAgreement } from "@/lib/db"
 import {
   MAX_UPLOAD_BYTES,
   licenceStateName,
@@ -365,6 +365,35 @@ export async function POST(req: Request) {
       } catch (e) {
         console.error("Customer email failed:", e)
       }
+    }
+
+    // Bank transfer is the only method this flow offers, and it never touches
+    // Stripe — so unlike the card/BECS flow (start-subscription.ts), nothing
+    // else records this as an active rental. Without this, a bank-transfer
+    // booking never appears in the dashboard's "Active Rentals" tab.
+    try {
+      const vehicleId = get("vehicleId")
+      if (vehicleId) {
+        await insertRentalAgreement({
+          id: `bank-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+          vehicleId,
+          vehicleName,
+          vehicleRego,
+          customerName: `${firstName} ${lastName}`.trim(),
+          customerEmail: email,
+          customerPhone: phoneClean,
+          listedWeeklyRate: Number(get("weeklyRent")) || 0,
+          agreedWeeklyRate: Number(get("weeklyRent")) || 0,
+          bondWeeks: bondPaidOnline ? 2 : 0,
+          bondAmount: bondPaidOnline ? Number(get("bondAmount")) || 0 : 0,
+          paymentMethod: "bank-transfer",
+          stripeCustomerId: "",
+          stripeSubscriptionId: "",
+          stripePaymentMethodId: "",
+        })
+      }
+    } catch (e) {
+      console.error("Active rental record failed:", e)
     }
 
     try {

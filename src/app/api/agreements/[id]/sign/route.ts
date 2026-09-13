@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getLeaseAgreement, signLeaseAgreement } from "@/lib/db"
+import { getLeaseAgreement, signLeaseAgreement, insertRentalAgreement } from "@/lib/db"
 import { sendEmail, type EmailAttachment } from "@/lib/mailer"
 import { SITE_EMAIL } from "@/data/site"
 import { generateLeaseAgreementPdf } from "@/lib/generateLeaseAgreement"
@@ -61,6 +61,32 @@ export async function POST(
       signatureImageBytes: new Uint8Array(sigBytes),
       signedAt: signedAtLabel,
     })
+
+    // Signing here has no relation to the Stripe subscription flow, so
+    // nothing else records this as an active rental — without this, a vehicle
+    // booked through the Agreements tool never appears in the dashboard's
+    // "Active Rentals" tab.
+    try {
+      await insertRentalAgreement({
+        id: `lease-${agreement.id}`,
+        vehicleId: agreement.vehicleId,
+        vehicleName: `${agreement.make} ${agreement.model}`.trim() || agreement.rego,
+        vehicleRego: agreement.rego,
+        customerName: agreement.renterName,
+        customerEmail: agreement.renterEmail,
+        customerPhone: agreement.renterPhone,
+        listedWeeklyRate: agreement.weeklyRent,
+        agreedWeeklyRate: agreement.weeklyRent,
+        bondWeeks: 0,
+        bondAmount: agreement.securityDeposit,
+        paymentMethod: "lease-agreement",
+        stripeCustomerId: "",
+        stripeSubscriptionId: "",
+        stripePaymentMethodId: "",
+      })
+    } catch (e) {
+      console.error("Active rental record failed:", e)
+    }
 
     const attachments: EmailAttachment[] = [
       {
