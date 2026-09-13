@@ -235,6 +235,39 @@ export async function createRentalAgreementsTable(): Promise<void> {
   `
 }
 
+/** Create the lease_agreements table if absent. Idempotent. */
+export async function createLeaseAgreementsTable(): Promise<void> {
+  await sql()`
+    CREATE TABLE IF NOT EXISTS lease_agreements (
+      id                    TEXT PRIMARY KEY,
+      renter_name           TEXT NOT NULL,
+      renter_address        TEXT,
+      renter_dob            TEXT,
+      licence_number        TEXT,
+      licence_state         TEXT,
+      renter_phone          TEXT,
+      renter_email          TEXT NOT NULL,
+      vehicle_id            TEXT,
+      rego                  TEXT NOT NULL,
+      make                  TEXT,
+      model                 TEXT,
+      year                  TEXT,
+      vin                   TEXT,
+      odometer_start        TEXT,
+      weekly_rent           NUMERIC NOT NULL,
+      security_deposit      NUMERIC DEFAULT 0,
+      insurance_access_fee  NUMERIC DEFAULT 0,
+      start_date            TEXT,
+      start_time            TEXT,
+      status                TEXT DEFAULT 'pending_signature',
+      signature_data        TEXT,
+      signed_at             TIMESTAMPTZ,
+      signed_ip             TEXT,
+      created_at            TIMESTAMPTZ DEFAULT NOW()
+    )
+  `
+}
+
 /** Create the security_packages table if absent. Idempotent. */
 export async function createPackagesTable(): Promise<void> {
   await sql()`
@@ -272,6 +305,7 @@ export async function ensureSchema(): Promise<void> {
   await createPackagesTable()
   await createNegotiationsTable()
   await createRentalAgreementsTable()
+  await createLeaseAgreementsTable()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -1140,4 +1174,177 @@ export async function markRentalAgreementReturned(
     RETURNING *
   `) as RentalAgreementRow[]
   return rows[0] ? toRentalAgreement(rows[0]) : null
+}
+
+/* ───────────────────── Lease agreements (signed PDF workflow) ───────────────────── */
+
+export interface LeaseAgreementInput {
+  renterName: string
+  renterAddress: string
+  renterDob: string
+  licenceNumber: string
+  licenceState: string
+  renterPhone: string
+  renterEmail: string
+  vehicleId: string
+  rego: string
+  make: string
+  model: string
+  year: string
+  vin: string
+  odometerStart: string
+  weeklyRent: number
+  securityDeposit: number
+  insuranceAccessFee: number
+  startDate: string
+  startTime: string
+}
+
+export interface LeaseAgreement {
+  id: string
+  renterName: string
+  renterAddress: string
+  renterDob: string
+  licenceNumber: string
+  licenceState: string
+  renterPhone: string
+  renterEmail: string
+  vehicleId: string
+  rego: string
+  make: string
+  model: string
+  year: string
+  vin: string
+  odometerStart: string
+  weeklyRent: number
+  securityDeposit: number
+  insuranceAccessFee: number
+  startDate: string
+  startTime: string
+  status: string
+  signatureData: string | null
+  signedAt: string | null
+  signedIp: string | null
+  createdAt: string
+}
+
+interface LeaseAgreementRow {
+  id: string
+  renter_name: string
+  renter_address: string | null
+  renter_dob: string | null
+  licence_number: string | null
+  licence_state: string | null
+  renter_phone: string | null
+  renter_email: string
+  vehicle_id: string | null
+  rego: string
+  make: string | null
+  model: string | null
+  year: string | null
+  vin: string | null
+  odometer_start: string | null
+  weekly_rent: string | number
+  security_deposit: string | number | null
+  insurance_access_fee: string | number | null
+  start_date: string | null
+  start_time: string | null
+  status: string
+  signature_data: string | null
+  signed_at: string | Date | null
+  signed_ip: string | null
+  created_at: string | Date
+}
+
+function toLeaseAgreement(r: LeaseAgreementRow): LeaseAgreement {
+  return {
+    id: r.id,
+    renterName: r.renter_name,
+    renterAddress: r.renter_address ?? "",
+    renterDob: r.renter_dob ?? "",
+    licenceNumber: r.licence_number ?? "",
+    licenceState: r.licence_state ?? "",
+    renterPhone: r.renter_phone ?? "",
+    renterEmail: r.renter_email,
+    vehicleId: r.vehicle_id ?? "",
+    rego: r.rego,
+    make: r.make ?? "",
+    model: r.model ?? "",
+    year: r.year ?? "",
+    vin: r.vin ?? "",
+    odometerStart: r.odometer_start ?? "",
+    weeklyRent: Number(r.weekly_rent),
+    securityDeposit: Number(r.security_deposit ?? 0),
+    insuranceAccessFee: Number(r.insurance_access_fee ?? 0),
+    startDate: r.start_date ?? "",
+    startTime: r.start_time ?? "",
+    status: r.status,
+    signatureData: r.signature_data,
+    signedAt: r.signed_at ? new Date(r.signed_at).toISOString() : null,
+    signedIp: r.signed_ip,
+    createdAt: r.created_at ? new Date(r.created_at).toISOString() : "",
+  }
+}
+
+function newLeaseAgreementId(): string {
+  return `agr-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+export async function createLeaseAgreement(
+  input: LeaseAgreementInput,
+): Promise<LeaseAgreement> {
+  await createLeaseAgreementsTable()
+  const id = newLeaseAgreementId()
+  const rows = (await sql()`
+    INSERT INTO lease_agreements (
+      id, renter_name, renter_address, renter_dob, licence_number,
+      licence_state, renter_phone, renter_email, vehicle_id, rego,
+      make, model, year, vin, odometer_start, weekly_rent,
+      security_deposit, insurance_access_fee, start_date, start_time, status
+    ) VALUES (
+      ${id}, ${input.renterName}, ${input.renterAddress || null},
+      ${input.renterDob || null}, ${input.licenceNumber || null},
+      ${input.licenceState || null}, ${input.renterPhone || null},
+      ${input.renterEmail}, ${input.vehicleId || null}, ${input.rego},
+      ${input.make || null}, ${input.model || null}, ${input.year || null},
+      ${input.vin || null}, ${input.odometerStart || null}, ${input.weeklyRent},
+      ${input.securityDeposit || 0}, ${input.insuranceAccessFee || 0},
+      ${input.startDate || null}, ${input.startTime || null}, 'pending_signature'
+    )
+    RETURNING *
+  `) as LeaseAgreementRow[]
+  return toLeaseAgreement(rows[0])
+}
+
+/** All lease agreements, newest first. */
+export async function getLeaseAgreements(): Promise<LeaseAgreement[]> {
+  await createLeaseAgreementsTable()
+  const rows = (await sql()`
+    SELECT * FROM lease_agreements ORDER BY created_at DESC
+  `) as LeaseAgreementRow[]
+  return rows.map(toLeaseAgreement)
+}
+
+export async function getLeaseAgreement(id: string): Promise<LeaseAgreement | null> {
+  await createLeaseAgreementsTable()
+  const rows = (await sql()`
+    SELECT * FROM lease_agreements WHERE id = ${id}
+  `) as LeaseAgreementRow[]
+  return rows[0] ? toLeaseAgreement(rows[0]) : null
+}
+
+export async function signLeaseAgreement(
+  id: string,
+  signatureDataUrl: string,
+  signedIp: string | null,
+): Promise<LeaseAgreement | null> {
+  await createLeaseAgreementsTable()
+  const rows = (await sql()`
+    UPDATE lease_agreements
+    SET status = 'signed', signature_data = ${signatureDataUrl},
+        signed_at = now(), signed_ip = ${signedIp}
+    WHERE id = ${id}
+    RETURNING *
+  `) as LeaseAgreementRow[]
+  return rows[0] ? toLeaseAgreement(rows[0]) : null
 }

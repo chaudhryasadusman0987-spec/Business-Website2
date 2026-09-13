@@ -121,6 +121,9 @@ export default function VehicleModal({
   const [licenceBack, setLicenceBack] = useState<File | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  // Required before the customer can move from the application to payment —
+  // the full lease agreement is signed later via the emailed signing link.
+  const [termsAgreed, setTermsAgreed] = useState(false)
 
   // ── Price negotiation ("Want to negotiate this price?") ──
   const [showOfferBox, setShowOfferBox] = useState(false)
@@ -168,6 +171,7 @@ export default function VehicleModal({
     setOfferSent(false)
     setApprovedPrice(null)
     setCounteredFrom(null)
+    setTermsAgreed(false)
     setBondWeeks(0)
     setSetupClientSecret("")
     setSetupCustomerId("")
@@ -1089,7 +1093,58 @@ export default function VehicleModal({
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              {/* Condensed terms + required acknowledgement before the customer
+                  can move on to payment. The full lease agreement is signed
+                  separately, via the link emailed once the admin generates it. */}
+              <div className="bg-[#f8f8ff] rounded-[14px] p-4 mt-6 mb-4 max-h-[180px] overflow-y-auto text-[12px] text-[#555] leading-relaxed">
+                <p className="font-semibold text-[#1a1a2e] mb-1">
+                  Key Rental Terms
+                </p>
+                <p>
+                  • Minimum rental: 4 weeks, then week-to-week with 1
+                  week&apos;s notice
+                </p>
+                <p>
+                  • Early return before 4 weeks: 50% of remaining rent up to
+                  the 4-week mark still payable
+                </p>
+                <p>
+                  • Includes servicing, insurance (subject to excess),
+                  roadside assistance, unlimited km, full tank
+                </p>
+                <p>
+                  • Fines, tolls and unauthorised driver use are not
+                  included
+                </p>
+                <p>• Drivers must be 21–75 with a valid licence</p>
+                <p>
+                  • Vehicle must stay within 100km of Brisbane without
+                  written permission
+                </p>
+                <a
+                  href="/rental-terms"
+                  target="_blank"
+                  className="text-[#7f85f7] font-medium"
+                >
+                  Read full terms →
+                </a>
+              </div>
+
+              <label className="flex items-start gap-3 cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={termsAgreed}
+                  onChange={(e) => setTermsAgreed(e.target.checked)}
+                  className="mt-1 accent-[#7f85f7] w-4 h-4"
+                />
+                <span className="text-[12px] text-[#444]">
+                  I have read and agree to the Pak Oz Rentals terms above and
+                  understand a full lease agreement will be provided for
+                  signature.
+                </span>
+              </label>
+
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setView("details")}
@@ -1099,13 +1154,14 @@ export default function VehicleModal({
                 </button>
                 <button
                   type="button"
+                  disabled={!termsAgreed}
                   onClick={() => {
                     if (validateApply()) {
                       setErrors({})
                       setView("payment")
                     }
                   }}
-                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-all"
+                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all"
                 >
                   Next: Payment →
                 </button>
