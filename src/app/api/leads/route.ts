@@ -15,17 +15,20 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as Partial<Lead>
 
+    // Public endpoint: id, date and status are set here, never by the caller,
+    // and text is capped so nobody can bloat the shared leads list.
+    const text = (v: unknown, max = 500) => String(v ?? "").slice(0, max)
     const lead: Lead = {
-      id: body.id ?? Date.now().toString(),
-      name: body.name ?? "",
-      phone: body.phone ?? "",
-      email: body.email ?? "",
-      service: body.service ?? "unknown",
-      message: body.message ?? "",
-      date: body.date ?? new Date().toISOString(),
-      status: body.status ?? "New",
-      page: body.page ?? "",
-      source: body.source ?? "ai_chat",
+      id: `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`,
+      name: text(body.name, 120),
+      phone: text(body.phone, 40),
+      email: text(body.email, 200),
+      service: text(body.service || "unknown", 60),
+      message: text(body.message, 2000),
+      date: new Date().toISOString(),
+      status: "New",
+      page: text(body.page, 200),
+      source: "ai_chat",
     }
 
     await appendLead(lead)

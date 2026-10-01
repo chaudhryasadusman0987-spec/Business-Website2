@@ -2,8 +2,9 @@ import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
-import { insertRentalAgreement } from "@/lib/db"
+import { getNegotiations, getVehicle, insertRentalAgreement } from "@/lib/db"
 import { SITE_EMAIL } from "@/data/site"
+import { escapeHtml as esc } from "@/lib/html"
 
 export const runtime = "nodejs"
 
@@ -22,10 +23,7 @@ export async function POST(req: Request) {
       customerId,
       paymentMethodId,
       vehicleId,
-      vehicleName,
-      vehicleRego,
-      listedWeeklyRate,
-      weeklyRate,
+      negotiationId,
       bondWeeks,
       firstName,
       lastName,
@@ -33,8 +31,32 @@ export async function POST(req: Request) {
       phone,
     } = await req.json()
 
-    if (!customerId || !paymentMethodId || !weeklyRate) {
+    if (!customerId || !paymentMethodId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // Price from the database, never from the browser (same rule as
+    // create-intent). The only way below the listed rate is an offer the
+    // owner approved for this exact vehicle.
+    const vehicle = vehicleId ? await getVehicle(String(vehicleId)) : null
+    if (!vehicle) {
+      return NextResponse.json({ error: "Vehicle not found" }, { status: 400 })
+    }
+    const vehicleName = vehicle.name
+    const vehicleRego = vehicle.rego
+    const listedWeeklyRate = vehicle.weeklyRate || 0
+    let weeklyRate = listedWeeklyRate
+    if (negotiationId) {
+      const [offer] = await getNegotiations(String(negotiationId))
+      if (offer?.status === "approved" && offer.vehicleId === vehicle.id && offer.approvedPrice) {
+        weeklyRate = Number(offer.approvedPrice)
+      }
+    }
+    if (Math.round(weeklyRate * 100) < 50) {
+      return NextResponse.json(
+        { error: "Weekly rate not set yet — please contact us for pricing." },
+        { status: 400 },
+      )
     }
 
     // Attach + set as default payment method for the customer.
@@ -63,7 +85,7 @@ export async function POST(req: Request) {
       items: [{ price: price.id }],
       default_payment_method: paymentMethodId,
       metadata: {
-        vehicleId,
+        vehicleId: vehicle.id,
         vehicleName,
         vehicleRego,
         customerName: `${firstName} ${lastName}`,
@@ -87,7 +109,7 @@ export async function POST(req: Request) {
         description: `Security bond (${bondWeeksNum} week${bondWeeksNum > 1 ? "s" : ""}) — ${vehicleName} (${vehicleRego})`,
         metadata: {
           paymentType: "bond",
-          vehicleId,
+          vehicleId: vehicle.id,
           vehicleName,
           vehicleRego,
           customerName: `${firstName} ${lastName}`,
@@ -107,13 +129,13 @@ export async function POST(req: Request) {
     try {
       await insertRentalAgreement({
         id: agreementId,
-        vehicleId: vehicleId || "",
+        vehicleId: vehicle.id,
         vehicleName: vehicleName || "",
         vehicleRego: vehicleRego || "",
         customerName: `${firstName} ${lastName}`,
         customerEmail: email || "",
         customerPhone: phone || "",
-        listedWeeklyRate: Number(listedWeeklyRate) || Number(weeklyRate),
+        listedWeeklyRate: listedWeeklyRate || weeklyRate,
         agreedWeeklyRate: Number(weeklyRate),
         bondWeeks: bondWeeksNum,
         bondAmount,
@@ -138,7 +160,7 @@ export async function POST(req: Request) {
             <h1 style="color:white;margin:0;font-size:20px">✅ Weekly Rental Started</h1>
           </div>
           <div style="padding:24px">
-            <p><strong>Customer:</strong> ${firstName} ${lastName} (${phone})</p>
+            <p><strong>Customer:</strong> ${esc(firstName)} ${esc(lastName)} (${esc(phone)})</p>
             <p><strong>Vehicle:</strong> ${vehicleName} (${vehicleRego})</p>
             <p><strong>Weekly rent:</strong> $${weeklyRate} (auto-charged every week)</p>
             <p><strong>Payment method:</strong> ${paymentMethod.type === "au_becs_debit" ? "Direct debit (BECS)" : "Card"}</p>

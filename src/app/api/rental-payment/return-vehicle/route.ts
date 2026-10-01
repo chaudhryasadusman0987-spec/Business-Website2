@@ -1,6 +1,7 @@
 import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
+import { escapeHtml as esc } from "@/lib/html"
 import { getRentalAgreement, markRentalAgreementReturned } from "@/lib/db"
 
 export const runtime = "nodejs"
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
             <h1 style="color:white;margin:0;font-size:20px">Thanks for renting with us!</h1>
           </div>
           <div style="padding:24px">
-            <p>Hi ${agreement.customerName.split(" ")[0]},</p>
+            <p>Hi ${esc(agreement.customerName.split(" ")[0])},</p>
             <p>We've confirmed the return of ${agreement.vehicleName}
               (${agreement.vehicleRego}). Your weekly billing has been
               cancelled and your card/bank details removed from our system.</p>

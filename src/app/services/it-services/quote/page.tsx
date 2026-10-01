@@ -276,8 +276,8 @@ function ITQuoteBrief() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className={lbl}>First Name *</label>
-              <input
+              <label htmlFor="brief-firstName" className={lbl}>First Name *</label>
+              <input id="brief-firstName"
                 value={form.firstName}
                 onChange={(e) => set("firstName", e.target.value)}
                 className={inp}
@@ -285,8 +285,8 @@ function ITQuoteBrief() {
               />
             </div>
             <div>
-              <label className={lbl}>Last Name</label>
-              <input
+              <label htmlFor="brief-lastName" className={lbl}>Last Name</label>
+              <input id="brief-lastName"
                 value={form.lastName}
                 onChange={(e) => set("lastName", e.target.value)}
                 className={inp}
@@ -296,8 +296,8 @@ function ITQuoteBrief() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className={lbl}>Email *</label>
-              <input
+              <label htmlFor="brief-email" className={lbl}>Email *</label>
+              <input id="brief-email"
                 type="email"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
@@ -306,8 +306,8 @@ function ITQuoteBrief() {
               />
             </div>
             <div>
-              <label className={lbl}>Phone *</label>
-              <input
+              <label htmlFor="brief-phone" className={lbl}>Phone *</label>
+              <input id="brief-phone"
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
                 className={inp}
@@ -316,8 +316,8 @@ function ITQuoteBrief() {
             </div>
           </div>
           <div>
-            <label className={lbl}>Company / Business Name</label>
-            <input
+            <label htmlFor="brief-company" className={lbl}>Company / Business Name</label>
+            <input id="brief-company"
               value={form.company}
               onChange={(e) => set("company", e.target.value)}
               className={inp}
@@ -339,8 +339,8 @@ function ITQuoteBrief() {
 
             <div className="space-y-4">
               <div>
-                <label className={lbl}>Project Title</label>
-                <input
+                <label htmlFor="brief-projectTitle" className={lbl}>Project Title</label>
+                <input id="brief-projectTitle"
                   value={form.projectTitle}
                   onChange={(e) => set("projectTitle", e.target.value)}
                   className={inp}
@@ -349,8 +349,8 @@ function ITQuoteBrief() {
               </div>
 
               <div>
-                <label className={lbl}>Describe what you need *</label>
-                <textarea
+                <label htmlFor="brief-projectDescription" className={lbl}>Describe what you need *</label>
+                <textarea id="brief-projectDescription"
                   value={form.projectDescription}
                   onChange={(e) => set("projectDescription", e.target.value)}
                   className={ta}
@@ -366,8 +366,8 @@ function ITQuoteBrief() {
               </div>
 
               <div>
-                <label className={lbl}>Who is your target audience?</label>
-                <input
+                <label htmlFor="brief-targetAudience" className={lbl}>Who is your target audience?</label>
+                <input id="brief-targetAudience"
                   value={form.targetAudience}
                   onChange={(e) => set("targetAudience", e.target.value)}
                   className={inp}
@@ -376,8 +376,8 @@ function ITQuoteBrief() {
               </div>
 
               <div>
-                <label className={lbl}>Key features you must have</label>
-                <textarea
+                <label htmlFor="brief-keyFeatures" className={lbl}>Key features you must have</label>
+                <textarea id="brief-keyFeatures"
                   value={form.keyFeatures}
                   onChange={(e) => set("keyFeatures", e.target.value)}
                   className={ta}
@@ -393,8 +393,8 @@ function ITQuoteBrief() {
               </div>
 
               <div>
-                <label className={lbl}>Do you have an existing website or app?</label>
-                <input
+                <label htmlFor="brief-existingWebsite" className={lbl}>Do you have an existing website or app?</label>
+                <input id="brief-existingWebsite"
                   value={form.existingWebsite}
                   onChange={(e) => set("existingWebsite", e.target.value)}
                   className={inp}
@@ -412,8 +412,8 @@ function ITQuoteBrief() {
               Tell us about your business
             </p>
             <div>
-              <label className={lbl}>What would you like help with? *</label>
-              <textarea
+              <label htmlFor="brief-projectDescription-2" className={lbl}>What would you like help with? *</label>
+              <textarea id="brief-projectDescription-2"
                 value={form.projectDescription}
                 onChange={(e) => set("projectDescription", e.target.value)}
                 className={ta}
@@ -433,8 +433,8 @@ function ITQuoteBrief() {
           {!isConsulting && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className={lbl}>Your budget range</label>
-                <select
+                <label htmlFor="brief-budgetRange" className={lbl}>Your budget range</label>
+                <select id="brief-budgetRange"
                   value={form.budgetRange}
                   onChange={(e) => set("budgetRange", e.target.value)}
                   className={sel}
@@ -450,8 +450,8 @@ function ITQuoteBrief() {
                 </select>
               </div>
               <div>
-                <label className={lbl}>When do you need it?</label>
-                <select
+                <label htmlFor="brief-timeline" className={lbl}>When do you need it?</label>
+                <select id="brief-timeline"
                   value={form.timeline}
                   onChange={(e) => set("timeline", e.target.value)}
                   className={sel}
@@ -469,8 +469,8 @@ function ITQuoteBrief() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={lbl}>Consultation preference</label>
-              <select
+              <label htmlFor="brief-consultationPreference" className={lbl}>Consultation preference</label>
+              <select id="brief-consultationPreference"
                 value={form.consultationPreference}
                 onChange={(e) => set("consultationPreference", e.target.value)}
                 className={sel}
@@ -481,8 +481,8 @@ function ITQuoteBrief() {
               </select>
             </div>
             <div>
-              <label className={lbl}>Preferred time</label>
-              <input
+              <label htmlFor="brief-preferredTime" className={lbl}>Preferred time</label>
+              <input id="brief-preferredTime"
                 value={form.preferredTime}
                 onChange={(e) => set("preferredTime", e.target.value)}
                 className={inp}
@@ -494,8 +494,8 @@ function ITQuoteBrief() {
 
         {/* How did you hear */}
         <div className="bg-white rounded-[20px] p-6 mb-6 border border-[#e8e8f0]">
-          <label className={lbl}>How did you hear about us?</label>
-          <select
+          <label htmlFor="brief-hearAboutUs" className={lbl}>How did you hear about us?</label>
+          <select id="brief-hearAboutUs"
             value={form.hearAboutUs}
             onChange={(e) => set("hearAboutUs", e.target.value)}
             className={sel}

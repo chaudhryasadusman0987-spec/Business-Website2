@@ -11,6 +11,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
+    // Every character here is billed by Gemini — reject pasted essays.
+    if (messages.some((m) => typeof m?.content !== "string" || m.content.length > 2000)) {
+      return NextResponse.json({ error: "Message too long" }, { status: 400 })
+    }
+
     if (messages.length > 40) {
       return NextResponse.json({
         reply: "This chat session has ended. Please call us or email us directly.",

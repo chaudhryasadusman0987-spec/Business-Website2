@@ -94,7 +94,7 @@ export default function ContactPage() {
         />
         <div className="relative z-10 max-w-[1170px] mx-auto px-4">
           <nav className="flex items-center justify-center gap-2 text-[12px] text-[#666880] mb-6">
-            <Link href="/" className="hover:text-[#7f85f7] transition-colors">
+            <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />
@@ -134,33 +134,33 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="flex flex-col">
-                    <span className={LABEL}>First name *</span>
-                    <input className={INPUT} placeholder="John" {...register("fname", { required: true })} />
+                    <label htmlFor="contact-fname" className={LABEL}>First name *</label>
+                    <input id="contact-fname" className={INPUT} placeholder="John" {...register("fname", { required: true })} />
                     {errors.fname && <p className="text-[#a32d2d] text-[12px] mt-1">First name required</p>}
                   </div>
                   <div className="flex flex-col">
-                    <span className={LABEL}>Last name *</span>
-                    <input className={INPUT} placeholder="Smith" {...register("lname", { required: true })} />
+                    <label htmlFor="contact-lname" className={LABEL}>Last name *</label>
+                    <input id="contact-lname" className={INPUT} placeholder="Smith" {...register("lname", { required: true })} />
                     {errors.lname && <p className="text-[#a32d2d] text-[12px] mt-1">Last name required</p>}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="flex flex-col">
-                    <span className={LABEL}>Email *</span>
-                    <input className={INPUT} placeholder="john@company.com" {...register("email", { required: true, validate: (v) => v.includes("@") })} />
+                    <label htmlFor="contact-email" className={LABEL}>Email *</label>
+                    <input id="contact-email" className={INPUT} placeholder="john@company.com" {...register("email", { required: true, validate: (v) => v.includes("@") })} />
                     {errors.email && <p className="text-[#a32d2d] text-[12px] mt-1">Valid email required</p>}
                   </div>
                   <div className="flex flex-col">
-                    <span className={LABEL}>Phone *</span>
-                    <input className={INPUT} placeholder="04XX XXX XXX" {...register("phone", { required: true })} />
+                    <label htmlFor="contact-phone" className={LABEL}>Phone *</label>
+                    <input id="contact-phone" className={INPUT} placeholder="04XX XXX XXX" {...register("phone", { required: true })} />
                     {errors.phone && <p className="text-[#a32d2d] text-[12px] mt-1">Phone number required</p>}
                   </div>
                 </div>
 
                 <div className="flex flex-col mb-4">
-                  <span className={LABEL}>Service</span>
-                  <select className={`${INPUT} cursor-pointer`} defaultValue="" {...register("service")}>
+                  <label htmlFor="contact-service" className={LABEL}>Service</label>
+                  <select id="contact-service" className={`${INPUT} cursor-pointer`} defaultValue="" {...register("service")}>
                     <option value="">Select a service...</option>
                     {SERVICES.map((s) => (
                       <option key={s}>{s}</option>
@@ -169,8 +169,8 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex flex-col mb-2">
-                  <span className={LABEL}>Message *</span>
-                  <textarea
+                  <label htmlFor="contact-message" className={LABEL}>Message *</label>
+                  <textarea id="contact-message"
                     rows={5}
                     className="w-full border border-[#e8e8f0] rounded-[10px] px-4 py-3 text-[14px] text-[#1a1a2e] outline-none transition-colors focus:border-[#7f85f7] bg-white resize-y"
                     placeholder="How can we help you?"

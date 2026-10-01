@@ -35,11 +35,11 @@ export default function Footer() {
               Your trusted Australian multi-service partner for security,
               mobility, and technology.
             </p>
-            <ul className="mt-5 space-y-2 text-[14px]">
+            <ul className="mt-5 space-y-1 text-[14px]">
               <li>
                 <Link
                   href="/about"
-                  className="text-[#999] hover:text-white transition-colors"
+                  className="inline-block py-1 text-[#999] hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -47,7 +47,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/blog"
-                  className="text-[#999] hover:text-white transition-colors"
+                  className="inline-block py-1 text-[#999] hover:text-white transition-colors"
                 >
                   Blog
                 </Link>
@@ -55,7 +55,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/testimonials"
-                  className="text-[#999] hover:text-white transition-colors"
+                  className="inline-block py-1 text-[#999] hover:text-white transition-colors"
                 >
                   Testimonials
                 </Link>
@@ -66,12 +66,12 @@ export default function Footer() {
           {/* Col 2 — Services */}
           <div>
             <h3 className="text-white font-bold mb-4">Services</h3>
-            <ul className="space-y-2 text-[14px]">
+            <ul className="space-y-1 text-[14px]">
               {services.map((s) => (
                 <li key={s.id}>
                   <Link
                     href={s.href}
-                    className="text-[#999] hover:text-white transition-colors"
+                    className="inline-block py-1 text-[#999] hover:text-white transition-colors"
                   >
                     {s.name}
                   </Link>
@@ -83,11 +83,11 @@ export default function Footer() {
           {/* Col 3 — Contact */}
           <div>
             <h3 className="text-white font-bold mb-4">Contact</h3>
-            <ul className="space-y-2 text-[14px]">
+            <ul className="space-y-1 text-[14px]">
               <li>
                 <a
                   href={`tel:${SITE_PHONE.replace(/\s+/g, "")}`}
-                  className="hover:text-white transition-colors"
+                  className="inline-block py-1 hover:text-white transition-colors"
                 >
                   {SITE_PHONE}
                 </a>
@@ -95,7 +95,7 @@ export default function Footer() {
               <li>
                 <a
                   href={`mailto:${SITE_EMAIL}`}
-                  className="hover:text-white transition-colors"
+                  className="inline-block py-1 hover:text-white transition-colors"
                 >
                   {SITE_EMAIL}
                 </a>
@@ -104,7 +104,7 @@ export default function Footer() {
               <li>
                 <a
                   href={SITE_DOMAIN}
-                  className="hover:text-white transition-colors"
+                  className="inline-block py-1 hover:text-white transition-colors"
                 >
                   {SITE_DOMAIN.replace(/^https?:\/\//, "")}
                 </a>

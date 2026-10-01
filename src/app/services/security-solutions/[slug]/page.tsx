@@ -83,13 +83,13 @@ export default function SolutionDetailPage({
           {/* Left col — text */}
           <div className="flex-1">
             <nav className="text-[12px] text-[#666880] mb-4 flex items-center gap-2">
-              <Link href="/" className="hover:text-[#7f85f7] transition-colors">
+              <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
                 Home
               </Link>
               <ChevronRight size={12} />
               <Link
                 href="/services/security-solutions"
-                className="hover:text-[#7f85f7] transition-colors"
+                className="inline-block py-1 hover:text-[#7f85f7] transition-colors"
               >
                 Security Solutions
               </Link>

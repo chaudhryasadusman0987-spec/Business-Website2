@@ -37,9 +37,11 @@ import {
   useElements,
 } from "@stripe/react-stripe-js"
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
-)
+// Stripe.js is fetched only once someone reaches the payment step, and never
+// with an empty key — loadStripe("") throws on every car-rental page load.
+const STRIPE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+let stripePromise: ReturnType<typeof loadStripe> | null = null
+const getStripe = () => (STRIPE_KEY ? (stripePromise ??= loadStripe(STRIPE_KEY)) : null)
 
 interface Props {
   vehicle: RentalVehicle | null
@@ -49,6 +51,15 @@ interface Props {
   /** Opens straight into the negotiation form on the Details step — set when
    *  the visitor clicked "Make an offer" on the vehicle card. */
   openToOffer?: boolean
+}
+
+/** Id of the price offer this browser made on a vehicle, if any. */
+function readOfferId(vehicleId: string): string {
+  try {
+    return localStorage.getItem(`rental-offer:${vehicleId}`) || ""
+  } catch {
+    return "" // localStorage unavailable
+  }
 }
 
 const EMPTY_FORM = {
@@ -191,12 +202,7 @@ export default function VehicleModal({
   // applies automatically rather than making them re-negotiate.
   useEffect(() => {
     if (!vehicle) return
-    let negId = ""
-    try {
-      negId = localStorage.getItem(`rental-offer:${vehicle.id}`) || ""
-    } catch {
-      /* localStorage unavailable — skip */
-    }
+    const negId = readOfferId(vehicle.id)
     if (!negId) return
     fetch(`/api/rental-payment/negotiate-price?id=${encodeURIComponent(negId)}`)
       .then((r) => r.json())
@@ -1405,7 +1411,7 @@ export default function VehicleModal({
             payMethod === "card-pay" &&
             setupClientSecret && (
               <Elements
-                stripe={stripePromise}
+                stripe={getStripe()}
                 options={{
                   clientSecret: setupClientSecret,
                   appearance: {
@@ -1422,7 +1428,6 @@ export default function VehicleModal({
                   vehicle={v}
                   form={form}
                   customerId={setupCustomerId}
-                  listedWeekly={weekly}
                   effectiveWeekly={effectiveWeekly}
                   bondWeeks={bondWeeks}
                   bondAmount={bondAmountForWeeks}
@@ -1810,7 +1815,6 @@ function StripeSetupForm({
   vehicle,
   form,
   customerId,
-  listedWeekly,
   effectiveWeekly,
   bondWeeks,
   bondAmount,
@@ -1821,7 +1825,6 @@ function StripeSetupForm({
   vehicle: RentalVehicle
   form: FormState
   customerId: string
-  listedWeekly: number
   effectiveWeekly: number
   bondWeeks: number
   bondAmount: number
@@ -1888,10 +1891,9 @@ function StripeSetupForm({
           customerId,
           paymentMethodId,
           vehicleId: vehicle.id,
-          vehicleName: vehicle.name,
-          vehicleRego: vehicle.rego,
-          listedWeeklyRate: listedWeekly,
-          weeklyRate: effectiveWeekly,
+          // The server prices the rental itself; an approved offer is
+          // looked up by id rather than trusting a rate sent from here.
+          negotiationId: readOfferId(vehicle.id),
           bondWeeks,
           firstName: form.firstName,
           lastName: form.lastName,

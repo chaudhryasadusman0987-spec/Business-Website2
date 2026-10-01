@@ -37,6 +37,7 @@ to `e2e/screenshots/` (gitignored).
 | `BASE_URL`      | `http://localhost:3000`                   | server under test                |
 | `PW_EXECUTABLE` | system Edge path                          | any Chromium-based browser binary |
 | `OUTDIR`        | `e2e/screenshots`                         | screenshot output directory      |
+| `ADMIN_PASSWORD` | —  (required)                            | dashboard password, used to log in before seeding |
 
 On non-Windows machines (or if Edge isn't installed) set `PW_EXECUTABLE` to a
 Chrome/Chromium binary, e.g.

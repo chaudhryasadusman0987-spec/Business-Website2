@@ -83,13 +83,22 @@ export default function RentalAdminPage() {
   const [showPw, setShowPw] = useState(false)
   const [tab, setTab] = useState("overview")
 
+  // The session lives in an httpOnly cookie, so ask the server who we are.
+  // The main admin login also covers this page.
   useEffect(() => {
-    if (localStorage.getItem("rental_admin_auth") === "true") setAuthed(true)
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => (d.role === "rental" || d.role === "admin") && setAuthed(true))
+      .catch(() => {})
   }, [])
 
-  const login = () => {
-    if (pw === process.env.NEXT_PUBLIC_RENTAL_DASHBOARD_PASSWORD) {
-      localStorage.setItem("rental_admin_auth", "true")
+  const login = async () => {
+    const res = await fetch("/api/admin/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "rental", password: pw }),
+    }).catch(() => null)
+    if (res?.ok) {
       setAuthed(true)
       setPwError(false)
     } else {
@@ -99,7 +108,7 @@ export default function RentalAdminPage() {
   }
 
   const logout = () => {
-    localStorage.removeItem("rental_admin_auth")
+    fetch("/api/admin/session", { method: "DELETE" }).catch(() => {})
     setAuthed(false)
   }
 

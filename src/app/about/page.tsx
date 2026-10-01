@@ -81,7 +81,7 @@ export default function AboutPage() {
         />
         <div className="relative z-10 max-w-[1170px] mx-auto px-4">
           <nav className="flex items-center justify-center gap-2 text-[12px] text-[#666880] mb-6">
-            <Link href="/" className="hover:text-[#7f85f7] transition-colors">
+            <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />

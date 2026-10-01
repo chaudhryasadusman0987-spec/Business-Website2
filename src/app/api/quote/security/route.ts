@@ -3,6 +3,7 @@ import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { formatAUD } from "@/lib/formatters"
 import { SECURITY_BRAND, SITE_PHONE, SITE_EMAIL } from "@/data/site"
+import { escapeHtml as esc } from "@/lib/html"
 
 interface QuoteItem {
   name: string
@@ -59,20 +60,20 @@ function buildEmail(body: QuoteBody): string {
       (i, idx) => `
       <tr style="background:${idx % 2 === 0 ? "#fff" : "#f9fffe"}">
         <td style="padding:12px;border-bottom:1px solid #e0f0ea">
-          <strong style="font-size:14px;color:#1a1a2e">${i.name}</strong>
+          <strong style="font-size:14px;color:#1a1a2e">${esc(i.name)}</strong>
           ${
             i.description
-              ? `<br/><span style="font-size:12px;color:#666;margin-top:3px;display:block">${i.description}</span>`
+              ? `<br/><span style="font-size:12px;color:#666;margin-top:3px;display:block">${esc(i.description)}</span>`
               : ""
           }
           ${
             i.discountPercent > 0
-              ? `<span style="background:#e1f5ee;color:#0f6e56;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:99px;margin-top:4px;display:inline-block">${i.discountPercent}% OFF</span>`
+              ? `<span style="background:#e1f5ee;color:#0f6e56;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:99px;margin-top:4px;display:inline-block">${esc(i.discountPercent)}% OFF</span>`
               : ""
           }
         </td>
-        <td style="padding:12px;border-bottom:1px solid #e0f0ea;font-size:13px;color:#666">${i.category}</td>
-        <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:center;font-size:14px;font-weight:600;color:#1a1a2e">${i.qty}</td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;font-size:13px;color:#666">${esc(i.category)}</td>
+        <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:center;font-size:14px;font-weight:600;color:#1a1a2e">${esc(i.qty)}</td>
         <td style="padding:12px;border-bottom:1px solid #e0f0ea;text-align:right;font-size:13px;color:#666">
           ${
             i.discountPercent > 0
@@ -109,10 +110,10 @@ function buildEmail(body: QuoteBody): string {
       <p style="margin:4px 0 0;font-size:13px;opacity:.85">Security Solutions Quote</p>
     </div>
     <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px">
-      <p>Hi ${body.fname}, thank you for your quote request.</p>
+      <p>Hi ${esc(body.fname)}, thank you for your quote request.</p>
       <p style="font-size:13px;color:#555">
-        Property type: <strong>${body.propertyType ?? "—"}</strong><br/>
-        Preferred timing: <strong>${body.timing ?? "—"}</strong>
+        Property type: <strong>${esc(body.propertyType ?? "—")}</strong><br/>
+        Preferred timing: <strong>${esc(body.timing ?? "—")}</strong>
       </p>
       <table style="width:100%;border-collapse:collapse;margin:20px 0">
         <thead>

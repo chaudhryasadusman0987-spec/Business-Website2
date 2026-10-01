@@ -51,13 +51,13 @@ export default function ITServiceDetail({
           {/* LEFT */}
           <div className="flex-1">
             <nav className="flex items-center gap-2 text-[12px] text-[#666880] mb-4">
-              <Link href="/" className="hover:text-[#7f85f7] transition-colors">
+              <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
                 Home
               </Link>
               <ChevronRight size={12} />
               <Link
                 href="/services/it-services"
-                className="hover:text-[#7f85f7] transition-colors"
+                className="inline-block py-1 hover:text-[#7f85f7] transition-colors"
               >
                 IT &amp; AI Services
               </Link>

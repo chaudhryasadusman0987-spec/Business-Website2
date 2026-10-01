@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { SITE_FULL, SITE_PHONE, SITE_EMAIL } from "@/data/site"
+import { escapeHtml as esc } from "@/lib/html"
 
 interface ContactBody {
   name: string
@@ -34,13 +35,13 @@ function buildEmail(body: ContactBody): string {
       <p style="margin:4px 0 0;font-size:13px;opacity:.85">Thanks for getting in touch</p>
     </div>
     <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px">
-      <p>Hi ${body.name}, thank you for contacting us. Here is a copy of your enquiry:</p>
+      <p>Hi ${esc(body.name)}, thank you for contacting us. Here is a copy of your enquiry:</p>
       <p style="font-size:13px;color:#555;margin:12px 0">
-        ${body.service ? `Service: <strong>${body.service}</strong><br/>` : ""}
-        Phone: <strong>${body.phone}</strong>
+        ${body.service ? `Service: <strong>${esc(body.service)}</strong><br/>` : ""}
+        Phone: <strong>${esc(body.phone)}</strong>
       </p>
       <p style="font-size:13px;color:#555;margin:12px 0">
-        <strong>Your message</strong><br/>${body.message}
+        <strong>Your message</strong><br/>${esc(body.message)}
       </p>
       <p style="background:#eeedfe;color:#534ab7;padding:10px;border-radius:6px;font-size:13px;text-align:center">
         We will be in touch within 1 business day.
@@ -59,11 +60,11 @@ function buildOwnerEmail(body: ContactBody): string {
     </div>
     <div style="border:1px solid #eee;border-top:none;padding:24px;border-radius:0 0 8px 8px;font-size:14px">
       <table style="width:100%;border-collapse:collapse">
-        <tr><td style="padding:6px 0;color:#888;width:120px">Name</td><td style="padding:6px 0"><strong>${body.name}</strong></td></tr>
-        <tr><td style="padding:6px 0;color:#888">Email</td><td style="padding:6px 0"><a href="mailto:${body.email}">${body.email}</a></td></tr>
-        <tr><td style="padding:6px 0;color:#888">Phone</td><td style="padding:6px 0"><a href="tel:${body.phone}">${body.phone}</a></td></tr>
-        <tr><td style="padding:6px 0;color:#888">Service</td><td style="padding:6px 0">${body.service || "—"}</td></tr>
-        <tr><td style="padding:6px 0;color:#888;vertical-align:top">Message</td><td style="padding:6px 0;white-space:pre-wrap">${body.message}</td></tr>
+        <tr><td style="padding:6px 0;color:#888;width:120px">Name</td><td style="padding:6px 0"><strong>${esc(body.name)}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:#888">Email</td><td style="padding:6px 0"><a href="mailto:${esc(body.email)}">${esc(body.email)}</a></td></tr>
+        <tr><td style="padding:6px 0;color:#888">Phone</td><td style="padding:6px 0"><a href="tel:${esc(body.phone)}">${esc(body.phone)}</a></td></tr>
+        <tr><td style="padding:6px 0;color:#888">Service</td><td style="padding:6px 0">${esc(body.service || "—")}</td></tr>
+        <tr><td style="padding:6px 0;color:#888;vertical-align:top">Message</td><td style="padding:6px 0;white-space:pre-wrap">${esc(body.message)}</td></tr>
         <tr><td style="padding:6px 0;color:#888">Received</td><td style="padding:6px 0">${new Date().toLocaleString("en-AU")}</td></tr>
       </table>
     </div>

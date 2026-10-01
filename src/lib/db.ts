@@ -1288,7 +1288,9 @@ function toLeaseAgreement(r: LeaseAgreementRow): LeaseAgreement {
 }
 
 function newLeaseAgreementId(): string {
-  return `agr-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+  // This id is the whole secret in the emailed /sign-agreement link, and the
+  // agreement holds licence, DOB and address — so it must be unguessable.
+  return `agr-${crypto.randomUUID()}`
 }
 
 export async function createLeaseAgreement(

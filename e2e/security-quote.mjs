@@ -65,10 +65,25 @@ function check(label, cond, detail = "") {
 }
 
 // --- Seed a temporary on-sale product via the dashboard API -----------------
-async function dashboard(payload) {
-  const res = await fetch(`${BASE}/api/dashboard/update`, {
+// Admin APIs need a session cookie; log in once with ADMIN_PASSWORD.
+let adminCookie = null
+async function login() {
+  const password = process.env.ADMIN_PASSWORD
+  if (!password) throw new Error("Set ADMIN_PASSWORD to the dashboard password")
+  const res = await fetch(`${BASE}/api/admin/session`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role: "admin", password }),
+  })
+  if (!res.ok) throw new Error(`Admin login failed (${res.status})`)
+  adminCookie = res.headers.getSetCookie()[0].split(";")[0]
+}
+
+async function dashboard(payload) {
+  if (!adminCookie) await login()
+  const res = await fetch(`${BASE}/api/dashboard/update`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: adminCookie },
     body: JSON.stringify(payload),
   })
   return res.json()

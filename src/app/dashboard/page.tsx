@@ -264,8 +264,12 @@ export default function DashboardPage() {
   const [promo, setPromo] = useState<PromoConfig>(DEFAULT_PROMO)
   const [promoSaved, setPromoSaved] = useState(false)
 
+  // The session lives in an httpOnly cookie, so ask the server who we are.
   useEffect(() => {
-    if (localStorage.getItem("dash_auth") === "true") setAuthed(true)
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => d.role === "admin" && setAuthed(true))
+      .catch(() => {})
   }, [])
 
   const loadLeads = () => {
@@ -282,8 +286,8 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    loadLeads()
-  }, [])
+    if (authed) loadLeads()
+  }, [authed])
 
   useEffect(() => {
     fetch("/api/promo")
@@ -333,9 +337,13 @@ export default function DashboardPage() {
   const setPromoCat = (cat: PromoCategory, patch: Partial<{ percent: number; active: boolean }>) =>
     setPromo((p) => ({ ...p, [cat]: { ...p[cat], ...patch } }))
 
-  const login = () => {
-    if (pw === process.env.NEXT_PUBLIC_DASHBOARD_PASSWORD) {
-      localStorage.setItem("dash_auth", "true")
+  const login = async () => {
+    const res = await fetch("/api/admin/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "admin", password: pw }),
+    }).catch(() => null)
+    if (res?.ok) {
       setAuthed(true)
       setPwError(false)
     } else {
@@ -345,7 +353,7 @@ export default function DashboardPage() {
   }
 
   const logout = () => {
-    localStorage.removeItem("dash_auth")
+    fetch("/api/admin/session", { method: "DELETE" }).catch(() => {})
     setAuthed(false)
   }
 

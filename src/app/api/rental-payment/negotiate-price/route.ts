@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
+import { escapeHtml as esc } from "@/lib/html"
 import { getNegotiations, insertNegotiation, updateNegotiationStatus } from "@/lib/db"
 
 export const runtime = "nodejs"
 
 function newNegotiationId(): string {
-  return `neg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+  // Customers read their offer back by this id alone, so keep it unguessable.
+  return `neg-${crypto.randomUUID()}`
 }
 
 export async function POST(req: Request) {
@@ -52,18 +54,18 @@ export async function POST(req: Request) {
           <h1 style="color:white;margin:0;font-size:20px">💬 New Price Offer</h1>
         </div>
         <div style="padding:24px">
-          <p><strong>Vehicle:</strong> ${vehicleName}</p>
-          <p><strong>Customer:</strong> ${customerName || "Website Visitor"}</p>
-          <p><strong>Phone:</strong> ${customerPhone || "not provided"}</p>
-          <p><strong>Email:</strong> ${customerEmail || "not provided"}</p>
+          <p><strong>Vehicle:</strong> ${esc(vehicleName)}</p>
+          <p><strong>Customer:</strong> ${esc(customerName || "Website Visitor")}</p>
+          <p><strong>Phone:</strong> ${esc(customerPhone || "not provided")}</p>
+          <p><strong>Email:</strong> ${esc(customerEmail || "not provided")}</p>
           <div style="background:#f8f8f8;border-radius:10px;padding:16px;margin:16px 0">
             <p style="margin:0;font-size:13px;color:#666">Listed price</p>
             <p style="margin:2px 0 10px;font-size:18px;text-decoration:line-through;color:#999">
-              $${listedPrice}/week
+              $${esc(listedPrice)}/week
             </p>
             <p style="margin:0;font-size:13px;color:#666">Customer offered</p>
             <p style="margin:2px 0;font-size:24px;font-weight:bold;color:#0f6e56">
-              $${offeredPrice}/week
+              $${esc(offeredPrice)}/week
             </p>
           </div>
           <p style="color:#666;font-size:13px">
@@ -130,23 +132,23 @@ export async function PATCH(req: Request) {
             </h1>
           </div>
           <div style="padding:24px">
-            <p>Hi ${row.customerName.split(" ")[0]},</p>
+            <p>Hi ${esc(row.customerName.split(" ")[0])},</p>
             ${
               status === "approved"
                 ? isCounter
-                  ? `<p>You offered <strong>$${row.offeredPrice}/week</strong> for the
-                      ${row.vehicleName} — we can't quite match that, but we can do
-                      <strong>$${row.approvedPrice}/week</strong>.</p>
+                  ? `<p>You offered <strong>$${esc(row.offeredPrice)}/week</strong> for the
+                      ${esc(row.vehicleName)} — we can't quite match that, but we can do
+                      <strong>$${esc(row.approvedPrice)}/week</strong>.</p>
                     <p>Go back to the vehicle on our website and complete your
                       booking to accept this price, or call us on
                       <strong>${SITE_PHONE}</strong> if you'd like to discuss further.</p>`
                   : `<p>Good news — we've approved your price of
-                      <strong>$${row.approvedPrice}/week</strong> for the ${row.vehicleName}.</p>
+                      <strong>$${esc(row.approvedPrice)}/week</strong> for the ${esc(row.vehicleName)}.</p>
                     <p>Go back to the vehicle on our website and complete your
                       booking — the approved price will apply automatically.</p>`
-                : `<p>We're unable to match $${row.offeredPrice}/week for the
-                    ${row.vehicleName} at this time. Our best price is
-                    $${row.listedPrice}/week.</p>
+                : `<p>We're unable to match $${esc(row.offeredPrice)}/week for the
+                    ${esc(row.vehicleName)} at this time. Our best price is
+                    $${esc(row.listedPrice)}/week.</p>
                   <p>Feel free to make another offer or call us to discuss:
                     <strong>${SITE_PHONE}</strong></p>`
             }

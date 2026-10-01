@@ -17,6 +17,7 @@ import type { ProductInput } from "@/lib/products"
 import { parseColours, type VehicleInput } from "@/lib/vehicles"
 import type { ITPackage } from "@/data/it-services"
 import { itServiceItems, itServices } from "@/data/it-services"
+import { roleFromRequest } from "@/lib/admin-auth"
 
 // Dashboard save endpoint.
 //
@@ -310,6 +311,12 @@ export async function POST(req: Request) {
   }
 
   const type = String(data?.type ?? "")
+
+  // middleware.ts has already required a login; the rental login may only
+  // manage the fleet, not products or IT services.
+  if (type !== "vehicle" && (await roleFromRequest(req)) !== "admin") {
+    return fail("Not allowed for this login", 403)
+  }
 
   if (type === "product") return handleProduct(data)
   if (type === "vehicle") return handleVehicle(data)

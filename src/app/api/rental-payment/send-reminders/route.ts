@@ -16,7 +16,8 @@ export const runtime = "nodejs"
 // that next week's rent is due and how to pay it (bank transfer or a call).
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // An unset CRON_SECRET must not turn "Bearer undefined" into a valid key.
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { insertActiveRental } from "@/lib/db"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
+import { escapeHtml as esc } from "@/lib/html"
 
 export const runtime = "nodejs"
 
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
                   ([k, v]) => `
                 <tr>
                   <td style="padding:8px;background:#f8f8f8;font-size:12px;font-weight:bold;color:#666;width:35%;border-bottom:1px solid #eee">${k}</td>
-                  <td style="padding:8px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #eee">${v}</td>
+                  <td style="padding:8px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #eee">${esc(v)}</td>
                 </tr>`
                 )
                 .join("")}
@@ -109,8 +110,8 @@ export async function POST(req: Request) {
               <p style="margin:0;color:#085041;font-weight:bold">
                 ${
                   isBondCharge
-                    ? `Bond secured for ${meta.customerName} — no further action needed for pickup arrangements.`
-                    : `Next: Call ${meta.customerName} on ${meta.customerPhone} to arrange vehicle pickup.`
+                    ? `Bond secured for ${esc(meta.customerName)} — no further action needed for pickup arrangements.`
+                    : `Next: Call ${esc(meta.customerName)} on ${esc(meta.customerPhone)} to arrange vehicle pickup.`
                 }
               </p>
             </div>
@@ -233,9 +234,9 @@ export async function POST(req: Request) {
             <h1 style="color:white;margin:0">❌ Payment Failed</h1>
           </div>
           <div style="padding:24px">
-            <p><strong>Customer:</strong> ${meta.customerName}</p>
-            <p><strong>Email:</strong> ${meta.customerEmail}</p>
-            <p><strong>Phone:</strong> ${meta.customerPhone}</p>
+            <p><strong>Customer:</strong> ${esc(meta.customerName)}</p>
+            <p><strong>Email:</strong> ${esc(meta.customerEmail)}</p>
+            <p><strong>Phone:</strong> ${esc(meta.customerPhone)}</p>
             <p><strong>Vehicle:</strong> ${meta.vehicleName} (${meta.vehicleRego})</p>
             <p><strong>Amount:</strong> $${meta.totalCharged}</p>
             <p><strong>Reason:</strong> ${reason}</p>
