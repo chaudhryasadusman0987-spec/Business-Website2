@@ -9,6 +9,7 @@ import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About Us",
   description:
     `Learn about ${SITE_FULL} — Australian-owned multi-service business. ` +

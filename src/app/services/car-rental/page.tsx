@@ -15,6 +15,7 @@ import { getVehicles } from "@/lib/db"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/car-rental" },
   title: "Long-Term Car Rental Brisbane",
   description:
     "Pak Oz Rentals — long-term car rental in Brisbane. Weekly payment, " +

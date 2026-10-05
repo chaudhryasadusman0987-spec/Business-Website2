@@ -5,6 +5,7 @@ import { ChevronRight, Clock, ArrowRight } from "lucide-react"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { blogPosts, getPostBySlug, getRelatedPosts } from "@/data/blog"
+import { SITE_DOMAIN } from "@/data/site"
 
 export function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }))
@@ -20,6 +21,13 @@ export function generateMetadata({
   return {
     title: post.title,
     description: post.excerpt,
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      images: [{ url: post.image, alt: post.title }],
+    },
   }
 }
 
@@ -33,8 +41,27 @@ export default function BlogPostPage({
 
   const related = getRelatedPosts(post)
 
+  const publishedDate = new Date(post.date)
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    image: post.image,
+    author: { "@type": "Person", name: post.author },
+    publisher: { "@id": `${SITE_DOMAIN}/#business` },
+    mainEntityOfPage: `${SITE_DOMAIN}/blog/${post.slug}`,
+    ...(isNaN(publishedDate.getTime())
+      ? {}
+      : { datePublished: publishedDate.toISOString() }),
+  }
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0d0d1a] py-20">
         <div

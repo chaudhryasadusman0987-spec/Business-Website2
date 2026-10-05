@@ -54,6 +54,7 @@ export function generateMetadata({
     description:
       metaDescriptions[params.slug] ??
       `${solution.description} — ${SECURITY_BRAND}, Brisbane.`,
+    alternates: { canonical: `/services/security-solutions/${solution.slug}` },
   }
 }
 

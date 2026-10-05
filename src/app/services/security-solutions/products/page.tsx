@@ -5,6 +5,7 @@ import { installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/security-solutions/products" },
   title: "All Security Products",
   description:
     "Browse every security product we supply and install across Australia — " +

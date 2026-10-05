@@ -7,6 +7,7 @@ import VehicleGrid from "@/components/car-rental/VehicleGrid"
 // dashboard's Car Rental tab — so this page never drifts from the main one.
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/car-rental/vehicles" },
   title: "Vehicle Fleet | Long-Term Car Rental Brisbane",
   description:
     "The full Pak Oz Rentals fleet in Brisbane — weekly hire with a four-week " +

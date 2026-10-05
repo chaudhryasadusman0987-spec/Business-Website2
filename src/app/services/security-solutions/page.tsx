@@ -24,6 +24,7 @@ const serviceSuburbs = [
 // `absolute` bypasses the root layout's `%s | Pak Oz Solutions` template so the
 // security section carries the CCTV sub-brand in the tab title instead.
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/security-solutions" },
   title: { absolute: `Security Solutions | ${SECURITY_BRAND}` },
   description:
     `${SECURITY_BRAND} — Professional CCTV and security camera installation ` +

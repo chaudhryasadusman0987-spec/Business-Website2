@@ -28,6 +28,7 @@ import { IT_BRAND, SITE_PHONE } from "@/data/site"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/it-services" },
   // `absolute` because the root layout appends "| Pak Oz Solutions" to every
   // title — without it the tab would read "… | Pak Oz Technologies | Pak Oz
   // Solutions". The parent company still owns the footer and the About page.

@@ -6,7 +6,14 @@ import Footer from "@/components/layout/Footer"
 import NewsTicker from "@/components/layout/NewsTicker"
 import PromoProvider from "@/components/providers/PromoProvider"
 import AIChatBubble from "@/components/ui/AIChatBubble"
-import { SITE_FULL, SITE_DOMAIN } from "@/data/site"
+import {
+  SITE_FULL,
+  SITE_DOMAIN,
+  SITE_EMAIL,
+  SITE_PHONE,
+  SITE_TAGLINE,
+  SITE_COMPANY,
+} from "@/data/site"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -62,7 +69,59 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
     other: [{ rel: "mask-icon", url: "/icon.svg", color: "#7f85f7" }],
   },
+  twitter: {
+    card: "summary",
+    images: ["/images/pak-oz-mark.png"],
+  },
   manifest: "/site.webmanifest",
+}
+
+// LocalBusiness structured data — lets Google show the business name, phone,
+// hours and service area in search results and the knowledge panel.
+const localBusinessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${SITE_DOMAIN}/#business`,
+  name: SITE_FULL,
+  legalName: SITE_COMPANY,
+  slogan: SITE_TAGLINE,
+  url: SITE_DOMAIN,
+  logo: `${SITE_DOMAIN}/images/pak-oz-mark.png`,
+  image: `${SITE_DOMAIN}/images/pak-oz-mark.png`,
+  telephone: SITE_PHONE,
+  email: SITE_EMAIL,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Brisbane",
+    addressRegion: "QLD",
+    addressCountry: "AU",
+  },
+  areaServed: [
+    { "@type": "City", name: "Brisbane" },
+    { "@type": "AdministrativeArea", name: "South East Queensland" },
+  ],
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "08:00",
+      closes: "18:00",
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: "Saturday",
+      opens: "09:00",
+      closes: "15:00",
+    },
+  ],
+  knowsAbout: [
+    "CCTV installation",
+    "Security systems",
+    "Access control",
+    "Long-term car rental",
+    "Web development",
+    "AI automation",
+  ],
 }
 
 export default function RootLayout({
@@ -79,6 +138,10 @@ export default function RootLayout({
         <noscript>
           <style>{`.anim-fade-up,.anim-fade-in,.anim-slide-left,.anim-slide-right,.anim-scale{opacity:1!important;transform:none!important}.animate-expand-line{width:100%!important}`}</style>
         </noscript>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+        />
       </head>
       <body>
         <PromoProvider>

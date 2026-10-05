@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog & Insights",
   description: `News, guides and tips from ${SITE_FULL} on security, car rental, IT and AI automation across Australia.`,
 }

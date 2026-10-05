@@ -1,5 +1,6 @@
 export const metadata = {
-  title: "Rental Terms & Conditions | Pak Oz Rentals",
+  alternates: { canonical: "/rental-terms" },
+  title: "Car Rental Terms & Conditions",
   description:
     "Full terms and conditions for Pak Oz Rentals vehicle hire in Brisbane.",
 }

@@ -8,7 +8,11 @@ export const dynamic = "force-dynamic"
 
 export async function generateMetadata(): Promise<Metadata> {
   const service = await getITService("ai-automation")
-  return { title: "AI Automation", description: service.description }
+  return {
+    title: "AI Automation",
+    description: service.description,
+    alternates: { canonical: "/services/it-services/ai-automation" },
+  }
 }
 
 // EXTRA SECTION — "See AI in action" (between packages and process)

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact",
   description:
     `Contact ${SITE_FULL}. Free quotes on security, car rental and IT ` +

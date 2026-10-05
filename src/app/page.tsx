@@ -5,11 +5,15 @@ import AboutStrip from "@/components/sections/AboutStrip"
 import WhyChooseUs from "@/components/sections/WhyChooseUs"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import { SITE_TAGLINE } from "@/data/site"
+import { SITE_FULL } from "@/data/site"
 
 export const metadata: Metadata = {
-  title: "Better Solutions, Better Living",
-  description: SITE_TAGLINE,
+  alternates: { canonical: "/" },
+  title: {
+    absolute: `${SITE_FULL} | CCTV & Security, Car Rental, IT Services Brisbane`,
+  },
+  description:
+    "Brisbane CCTV and security installation, long-term car rental and IT & AI services under one roof. Licensed and insured. Get a free quote today.",
 }
 
 export default function Home() {

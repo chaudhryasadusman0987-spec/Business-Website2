@@ -8,7 +8,11 @@ export const dynamic = "force-dynamic"
 
 export async function generateMetadata(): Promise<Metadata> {
   const service = await getITService("web-development")
-  return { title: "Web Development", description: service.description }
+  return {
+    title: "Web Development",
+    description: service.description,
+    alternates: { canonical: "/services/it-services/web-development" },
+  }
 }
 
 export default async function WebDevelopmentPage() {
