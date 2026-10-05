@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -107,6 +108,21 @@ export default async function ITServicesPage() {
 
   return (
     <main>
+      <JsonLd
+        data={serviceJsonLd({
+          name: "IT & AI Services",
+          serviceType: "IT services",
+          description:
+            "Web development, app development, AI automation and IT consulting for Brisbane businesses.",
+          path: "/services/it-services",
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          ["Home", "/"],
+          ["IT & AI Services", "/services/it-services"],
+        ])}
+      />
       {/* ───────────────────── HERO ───────────────────── */}
       <section className="relative overflow-hidden bg-[#0d0d1a]">
         {/* grid + glows */}

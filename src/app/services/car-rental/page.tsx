@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import Image from "next/image"
 import Link from "next/link"
 import { Phone } from "lucide-react"
@@ -59,6 +60,21 @@ export default async function CarRentalPage() {
 
   return (
     <>
+      <JsonLd
+        data={serviceJsonLd({
+          name: "Long-Term Car Rental",
+          serviceType: "Car rental",
+          description:
+            "Long-term car rental in Brisbane with weekly payments, a 4 week minimum, and road assistance and maintenance included.",
+          path: "/services/car-rental",
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          ["Home", "/"],
+          ["Car Rental", "/services/car-rental"],
+        ])}
+      />
       {/* SECTION 1 — Hero */}
       <section className="bg-[#0d0d1a] relative overflow-hidden">
         {/* Single soft glow behind the copy — no pattern fill, the photo carries

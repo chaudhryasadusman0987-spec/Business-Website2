@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ChevronRight } from "lucide-react"
@@ -70,6 +71,21 @@ export default function SolutionDetailPage({
 
   return (
     <>
+      <JsonLd
+        data={serviceJsonLd({
+          name: solution.name,
+          serviceType: "Security system installation",
+          description: solution.description,
+          path: `/services/security-solutions/${solution.slug}`,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          ["Home", "/"],
+          ["Security Solutions", "/services/security-solutions"],
+          [solution.name, `/services/security-solutions/${solution.slug}`],
+        ])}
+      />
       {/* HERO STRIP */}
       <section className="bg-[#0d0d1a] py-20 relative overflow-hidden">
         <div

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import SectionTitle from "@/components/ui/SectionTitle"
 import AnimateIn from "@/components/ui/AnimateIn"
 import SecuritySolutionsHero from "@/components/sections/SecuritySolutionsHero"
@@ -6,7 +7,9 @@ import SolutionCard from "@/components/sections/SolutionCard"
 import HowItWorks from "@/components/sections/HowItWorks"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
+import Link from "next/link"
 import { securitySolutions } from "@/data/security-solutions"
+import { serviceAreas } from "@/data/service-areas"
 import { SECURITY_BRAND, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
 
 // Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
@@ -35,6 +38,21 @@ export const metadata: Metadata = {
 export default function SecuritySolutionsPage() {
   return (
     <>
+      <JsonLd
+        data={serviceJsonLd({
+          name: "CCTV & Security Installation",
+          serviceType: "Security system installation",
+          description:
+            "CCTV, alarm, access control, smoke alarm and intercom installation for homes and businesses.",
+          path: "/services/security-solutions",
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          ["Home", "/"],
+          ["Security Solutions", "/services/security-solutions"],
+        ])}
+      />
       <SecuritySolutionsHero />
 
       {/* Solutions grid */}
@@ -68,6 +86,17 @@ export default function SecuritySolutionsPage() {
           <h2 className="font-bold text-[24px] text-[#1a1a2e] text-center mb-8">
             Areas We Service
           </h2>
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
+            {serviceAreas.map((a) => (
+              <Link
+                key={a.slug}
+                href={`/services/security-solutions/areas/${a.slug}`}
+                className="bg-[#7f85f7] text-white font-semibold rounded-full px-5 py-2 text-[14px] hover:bg-[#6a70e6] transition-all"
+              >
+                CCTV Installation {a.headline}
+              </Link>
+            ))}
+          </div>
           <div className="flex flex-wrap justify-center gap-3">
             {serviceSuburbs.map((suburb) => (
               <span

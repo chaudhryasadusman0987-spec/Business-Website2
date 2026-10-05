@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 import { SITE_DOMAIN } from "@/data/site"
 import { securitySolutions } from "@/data/security-solutions"
 import { blogPosts } from "@/data/blog"
+import { serviceAreas } from "@/data/service-areas"
 
 // Admin, agreement-signing and noindex quote pages are deliberately left out —
 // see robots.ts for the matching disallow list.
@@ -36,6 +37,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_DOMAIN}/services/security-solutions/${s.slug}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+    ...serviceAreas.map((a) => ({
+      url: `${SITE_DOMAIN}/services/security-solutions/areas/${a.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
     ...blogPosts.map((p) => {

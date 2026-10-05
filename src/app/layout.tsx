@@ -42,21 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: SITE_FULL,
     locale: "en_AU",
-    images: [
-      {
-        // Square mark — social cards will letterbox it rather than crop.
-        //
-        // Points at the mark, not the full lockup, because the light artwork
-        // has white animal bodies and a dark wordmark: social cards render on
-        // white or near-white, where the animals would vanish. The mark is
-        // navy + purple, so it reads there. Swap this for a proper 1200x630
-        // card once a colour lockup for light backgrounds exists again.
-        url: "/images/pak-oz-mark.png",
-        width: 512,
-        height: 512,
-        alt: SITE_FULL,
-      },
-    ],
+    // The share image comes from app/opengraph-image.tsx (1200x630).
   },
   icons: {
     // /icon.svg is the Markhor mark generated from app/icon.svg. It is listed
@@ -70,8 +56,7 @@ export const metadata: Metadata = {
     other: [{ rel: "mask-icon", url: "/icon.svg", color: "#7f85f7" }],
   },
   twitter: {
-    card: "summary",
-    images: ["/images/pak-oz-mark.png"],
+    card: "summary_large_image",
   },
   manifest: "/site.webmanifest",
 }
