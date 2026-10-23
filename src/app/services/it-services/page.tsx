@@ -19,6 +19,7 @@ import CountUp from "@/components/ui/CountUp"
 import DynamicIcon from "@/components/ui/DynamicIcon"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import ITFaq from "@/components/sections/ITFaq"
+import PortfolioSection from "@/components/sections/PortfolioSection"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { itConsulting } from "@/data/it-services"
 import { getITEstimates } from "@/lib/it-services-server"
@@ -485,6 +486,9 @@ export default async function ITServicesPage() {
           </div>
         </div>
       </section>
+
+      {/* ─────────────── OUR WORK ─────────────── */}
+      <PortfolioSection />
 
       {/* ─────────────── IT CONSULTING ─────────────── */}
       <section className="relative overflow-hidden bg-[#0d0d1a] py-[90px]">
