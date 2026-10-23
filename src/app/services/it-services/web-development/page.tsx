@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import ITServiceDetail from "@/components/sections/ITServiceDetail"
+import PortfolioSection from "@/components/sections/PortfolioSection"
 import { getITService } from "@/lib/it-services-server"
 
 // Dashboard edits are merged in per request, so prices/copy update without a
@@ -23,6 +24,7 @@ export default async function WebDevelopmentPage() {
       headlineWhite="Websites That"
       headlinePurple="Convert."
       packagesTitle="Web Packages"
+      extra={<PortfolioSection limit={4} compact viewAllHref="/services/it-services#our-work" />}
     />
   )
 }
