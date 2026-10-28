@@ -3,6 +3,7 @@
  * in /public/images/portfolio/ for the "Our Work" cards.
  *
  *   npm run capture:portfolio
+ *   npm run capture:portfolio -- pak-oz-sports   (just that project)
  *
  * Reads the project list from src/data/portfolio.ts, so a new project only
  * needs adding there.
@@ -22,7 +23,11 @@ async function main() {
   const context = await browser.newContext({ viewport: VIEWPORT })
   let failed = 0
 
-  for (const project of portfolio) {
+  // Optional slugs to recapture just those, e.g. `npm run capture:portfolio -- pak-oz-sports`
+  const only = process.argv.slice(2)
+  const projects = only.length ? portfolio.filter((p) => only.includes(p.slug)) : portfolio
+
+  for (const project of projects) {
     const page = await context.newPage()
     const out = path.join(OUT_DIR, project.image)
     try {
