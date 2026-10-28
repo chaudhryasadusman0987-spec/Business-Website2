@@ -87,4 +87,21 @@ export const portfolio: PortfolioProject[] = [
     image: "/images/portfolio/accident-solutions.webp",
     imageAlt: "Homepage of the Accident Solutions Australia website for accident claims, towing and repairs",
   },
+  {
+    slug: "dune-falcon",
+    name: "Dune Falcon Dubai",
+    url: "https://dunefalcon.vercel.app/",
+    industry: "Tourism & Desert Safaris",
+    location: "Dubai, UAE",
+    description: "Booking website for a desert safari and city tour operator.",
+    built: [
+      "Safari package pages with AED pricing",
+      "Online booking form with add-ons",
+      "Booking cancellation form",
+      "Hour-by-hour evening itinerary",
+      "WhatsApp and email contact",
+    ],
+    image: "/images/portfolio/dune-falcon.webp",
+    imageAlt: "Homepage of the Dune Falcon Dubai website for desert safaris and city tours",
+  },
 ]
