@@ -1,6 +1,7 @@
 import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { getVehicle } from "@/lib/db"
+import { RENTAL_STATEMENT_SUFFIX } from "@/lib/stripe-server"
 
 export const runtime = "nodejs"
 
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
         reference: vehicle.rego,
       },
       receipt_email: email,
-      statement_descriptor_suffix: "PAKOZ RENTALS",
+      statement_descriptor_suffix: RENTAL_STATEMENT_SUFFIX,
     })
 
     return NextResponse.json({

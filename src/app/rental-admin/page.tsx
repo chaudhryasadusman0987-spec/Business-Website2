@@ -17,12 +17,14 @@ import {
   Calendar,
   TrendingUp,
   FileSignature,
+  ShieldAlert,
 } from "lucide-react"
 import { SITE_FULL } from "@/data/site"
 import VehiclesDbTab from "@/components/dashboard/VehiclesDbTab"
 import OffersDbTab from "@/components/dashboard/OffersDbTab"
 import ActiveRentalsDbTab from "@/components/dashboard/ActiveRentalsDbTab"
 import AgreementsTab from "@/components/dashboard/AgreementsTab"
+import DisputesTab from "@/components/dashboard/DisputesTab"
 
 // Standalone rental admin dashboard — a separate URL and password from the
 // main /dashboard so Ehtsham gets one link covering only car rental, with no
@@ -163,6 +165,7 @@ export default function RentalAdminPage() {
     { id: "active", label: "Active Rentals", Icon: Users },
     { id: "offers", label: "Price Offers", Icon: DollarSign },
     { id: "agreements", label: "Agreements", Icon: FileSignature },
+    { id: "disputes", label: "Disputes", Icon: ShieldAlert },
     { id: "leads", label: "Leads", Icon: MessageSquare },
   ]
 
@@ -209,6 +212,7 @@ export default function RentalAdminPage() {
         {tab === "active" && <ActiveRentalsDbTab />}
         {tab === "offers" && <OffersDbTab />}
         {tab === "agreements" && <AgreementsTab />}
+        {tab === "disputes" && <DisputesTab />}
         {tab === "leads" && <RentalLeadsTab />}
       </main>
     </div>

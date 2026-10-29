@@ -24,6 +24,14 @@ const PROTECTED: { path: RegExp; methods: string[]; roles: AdminRole[] }[] = [
   { path: /^\/api\/rental-payment\/agreements$/, methods: ["GET"], roles: BOTH },
   { path: /^\/api\/rental-payment\/return-vehicle$/, methods: ["POST"], roles: BOTH },
   { path: /^\/api\/rental-payment\/negotiate-price$/, methods: ["PATCH"], roles: BOTH },
+  // Chargeback protection — rental detail, trusted renters, checklists,
+  // stored licence/evidence files and disputes.
+  { path: /^\/api\/rental-payment\/agreements\/[\w-]+$/, methods: ["GET"], roles: BOTH },
+  { path: /^\/api\/rental-payment\/trusted$/, methods: ["GET", "POST", "DELETE"], roles: BOTH },
+  { path: /^\/api\/rental-evidence(\/photo)?$/, methods: ["POST"], roles: BOTH },
+  { path: /^\/api\/rental-files\/[\w-]+$/, methods: ["GET"], roles: BOTH },
+  { path: /^\/api\/disputes$/, methods: ["GET"], roles: BOTH },
+  { path: /^\/api\/disputes\/[\w-]+\/(build|submit)$/, methods: ["POST"], roles: BOTH },
 ]
 
 // [max requests, window in ms] per IP. In-memory, so it is per server
@@ -32,7 +40,7 @@ const LIMITS: { path: RegExp; max: number; windowMs: number }[] = [
   { path: /^\/api\/admin\/session$/, max: 8, windowMs: 15 * 60_000 },
   { path: /^\/api\/chat$/, max: 20, windowMs: 60_000 },
   {
-    path: /^\/api\/(contact|leads|quote\/[\w-]+|rental-application|rental-payment\/(negotiate-price|create-intent|create-setup|start-subscription)|agreements\/[\w-]+\/sign)$/,
+    path: /^\/api\/(contact|leads|quote\/[\w-]+|rental-application|rental-payment\/(negotiate-price|create-intent|create-setup|start-subscription|accept-terms|licence)|agreements\/[\w-]+\/sign)$/,
     max: 6,
     windowMs: 60_000,
   },
