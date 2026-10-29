@@ -1199,6 +1199,19 @@ export async function insertRentalAgreement(input: RentalAgreementInput): Promis
   `
 }
 
+/**
+ * Vehicle ids currently out on rent — any active rental agreement (card/BECS
+ * subscription, bank transfer or signed lease). Unpaid pending applications
+ * don't count; "Return" in /rental-admin frees the car.
+ */
+export async function getRentedVehicleIds(): Promise<Set<string>> {
+  await createRentalAgreementsTable()
+  const rows = (await sql()`
+    SELECT DISTINCT vehicle_id FROM rental_agreements WHERE status = 'active'
+  `) as { vehicle_id: string }[]
+  return new Set(rows.map((r) => r.vehicle_id))
+}
+
 /** Agreements, optionally filtered by status (e.g. "active"). Newest first. */
 export async function getRentalAgreements(status?: string): Promise<RentalAgreement[]> {
   await createRentalAgreementsTable()
