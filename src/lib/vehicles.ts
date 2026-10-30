@@ -16,6 +16,10 @@ export interface RentalVehicle {
   model: string
   /** Body style — "Hatchback", "SUV", "Ute"… */
   type: string
+  /**
+   * Internal only — used to match the owner's fleet list and on admin screens.
+   * Never sent to the public site: /api/vehicles strips it (see toPublicVehicle).
+   */
   rego: string
   /** Main photo on the listing card. An https URL or an inline data URL. */
   image: string
@@ -26,7 +30,8 @@ export interface RentalVehicle {
   weeklyRate: number
   /** Security bond in AUD, refunded at the end. 0 hides the row. */
   bond: number
-  available: boolean
+  /** Whether the car is listed, and whether it can be booked — see VehicleStatus. */
+  status: VehicleStatus
   /** Manual display order, lowest first. Ties break on createdAt. */
   sortOrder: number
   /** Factory variant / trim code, e.g. "AVV50R Atara SL Sedan". */
@@ -43,9 +48,67 @@ export interface RentalVehicle {
   createdAt?: string
 }
 
+/**
+ * available   — listed and bookable at the weekly rate.
+ * coming_soon — listed with a "Coming soon" badge; no price, no booking.
+ * hidden      — kept in the database (sold, written off) but off the site.
+ */
+export type VehicleStatus = "available" | "coming_soon" | "hidden"
+
+export const VEHICLE_STATUSES: { value: VehicleStatus; label: string }[] = [
+  { value: "available", label: "Available" },
+  { value: "coming_soon", label: "Coming soon" },
+  { value: "hidden", label: "Hidden" },
+]
+
+export function parseVehicleStatus(x: unknown): VehicleStatus {
+  return x === "coming_soon" || x === "hidden" ? x : "available"
+}
+
+/** Shown on the public site (available or coming soon). */
+export function isListed(v: Pick<RentalVehicle, "status">): boolean {
+  return v.status !== "hidden"
+}
+
+/** Can be rented / offered on right now. */
+export function isBookable(v: Pick<RentalVehicle, "status">): boolean {
+  return v.status === "available"
+}
+
+/**
+ * The record the public site gets: rego blanked, and no price on a car that
+ * is not bookable yet.
+ */
+export function toPublicVehicle(v: RentalVehicle): RentalVehicle {
+  return {
+    ...v,
+    rego: "",
+    weeklyRate: isBookable(v) ? v.weeklyRate : 0,
+    bond: isBookable(v) ? v.bond : 0,
+  }
+}
+
+/**
+ * Bank-transfer reference for a car. Customers used to be told to quote the
+ * rego, but the rego is internal now, so this is derived from the vehicle id
+ * instead — stable, short, and the admin email prints it next to the rego.
+ */
+export function paymentReference(v: Pick<RentalVehicle, "id">): string {
+  const tail = v.id.split("-").pop() ?? v.id
+  return `POZ${tail.replace(/[^a-z0-9]/gi, "").toUpperCase()}`
+}
+
+/** "Sedan · Petrol · 5 seats" — the one-line spec on each listing card. */
+export function vehicleSpecLine(v: RentalVehicle): string {
+  return [v.type, v.fuelType, v.seats > 0 ? `${v.seats} seats` : ""]
+    .filter(Boolean)
+    .join(" · ")
+}
+
 /** Dropdown options for the dashboard's specification fields. */
 export const FUEL_TYPES = [
   "Petrol",
+  "Hybrid",
   "Diesel",
   "Petrol / Electric Hybrid",
   "Plug-in Hybrid",
@@ -82,7 +145,7 @@ export function blankVehicleInput(): VehicleInput {
     imageAlt: "",
     weeklyRate: 0,
     bond: 0,
-    available: true,
+    status: "available",
     sortOrder: 0,
     variant: "",
     fuelType: "Petrol",

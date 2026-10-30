@@ -1,16 +1,28 @@
-import Stripe from "stripe"
 import { NextResponse } from "next/server"
-import { sendEmail } from "@/lib/mailer"
+import { sendRentalEmail } from "@/lib/rental-mail"
 import { escapeHtml as esc } from "@/lib/html"
-import { getRentalAgreement, markRentalAgreementReturned } from "@/lib/db"
+import {
+  getRentalAgreement,
+  getRentalEvidence,
+  getRentalFile,
+  markRentalAgreementReturned,
+  upsertRentalEvidence,
+} from "@/lib/db"
+import { parseChecklist } from "@/lib/rental-checklist"
+import { generateReturnConfirmationPdf } from "@/lib/rental-evidence-pdf"
+import { stripeClient } from "@/lib/stripe-server"
 
 export const runtime = "nodejs"
 
+// Admin-only (middleware). Records the return checklist, ends weekly billing,
+// and emails the customer a PDF return confirmation — which doubles as
+// dispute evidence of when the rental ended and what was still owed.
 export async function POST(req: Request) {
   try {
-    const { agreementId, returnDate, lastPaymentAmount, lastPaymentDate } = await req.json()
+    const body = await req.json()
+    const { agreementId, lastPaymentAmount, lastPaymentDate } = body
 
-    if (!agreementId || !returnDate) {
+    if (!agreementId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
@@ -19,10 +31,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Agreement not found" }, { status: 404 })
     }
 
-    // Constructed per-request — see create-intent/route.ts for why.
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-      apiVersion: "2026-07-29.dahlia",
-    })
+    // Validate the checklist before touching Stripe, so a missing signature
+    // doesn't leave billing cancelled with no return record.
+    const parsed = await parseChecklist(agreement.id, "return", body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
+    const returnRecord = await upsertRentalEvidence(parsed.value)
+    const returnDate = returnRecord.recordedAt
+
+    const stripe = stripeClient()
 
     if (agreement.stripeSubscriptionId) {
       try {
@@ -59,19 +75,38 @@ export async function POST(req: Request) {
       console.error("Agreement return save error:", e)
     }
 
+    let emailed = false
     try {
-      await sendEmail(
+      const pickupRecord = (await getRentalEvidence(agreement.id)).find((e) => e.kind === "pickup") ?? null
+      const signature = returnRecord.signatureFileId
+        ? await getRentalFile(returnRecord.signatureFileId)
+        : null
+      const pdf = await generateReturnConfirmationPdf({
+        rental: agreement,
+        returnRecord,
+        pickupRecord,
+        signature,
+        daysUsed,
+        refundAmount,
+      })
+      const owed = returnRecord.amountOwed ?? 0
+
+      await sendRentalEmail(
+        agreement.id,
+        "return_confirmation",
         agreement.customerEmail,
-        `Vehicle returned — thank you! — Pak Oz Rentals`,
+        `Vehicle returned — confirmation — Pak Oz Rentals`,
         `<div style="font-family:Arial;max-width:600px;margin:0 auto">
           <div style="background:#0f6e56;padding:20px;text-align:center">
             <h1 style="color:white;margin:0;font-size:20px">Thanks for renting with us!</h1>
           </div>
           <div style="padding:24px">
             <p>Hi ${esc(agreement.customerName.split(" ")[0])},</p>
-            <p>We've confirmed the return of ${agreement.vehicleName}
-              (${agreement.vehicleRego}). Your weekly billing has been
-              cancelled and your card/bank details removed from our system.</p>
+            <p>We've confirmed the return of ${esc(agreement.vehicleName)}
+              (${esc(agreement.vehicleRego)}) on
+              ${esc(returned.toLocaleString("en-AU", { timeZone: "Australia/Brisbane" }))}.
+              Your weekly billing has been cancelled and your card/bank details
+              removed from our system. Your return confirmation is attached.</p>
             <div style="background:#f8f8f8;border-radius:10px;padding:16px;margin:16px 0">
               <p style="margin:0;font-size:13px;color:#666">Days used this week</p>
               <p style="margin:2px 0;font-size:16px;font-weight:bold">${daysUsed} of 7 days</p>
@@ -87,16 +122,32 @@ export async function POST(req: Request) {
                     </p>`
                   : ""
               }
+              ${
+                owed > 0
+                  ? `<p style="margin:10px 0 0;font-size:13px;color:#666">Amount still owed</p>
+                    <p style="margin:2px 0;font-size:20px;font-weight:bold;color:#c62828">
+                      $${owed.toFixed(2)}
+                    </p>`
+                  : ""
+              }
             </div>
             <p>Thanks again, and we hope to see you again soon!</p>
           </div>
-        </div>`
+        </div>`,
+        [
+          {
+            filename: `Pak-Oz-Rentals-Return-${agreement.vehicleRego}.pdf`,
+            content: Buffer.from(pdf),
+            contentType: "application/pdf",
+          },
+        ],
       )
+      emailed = true
     } catch (e) {
       console.error("Return email error:", e)
     }
 
-    return NextResponse.json({ success: true, daysUsed, owedForDaysUsed, refundAmount })
+    return NextResponse.json({ success: true, daysUsed, owedForDaysUsed, refundAmount, emailed })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error"
     console.error("Return vehicle error:", message)

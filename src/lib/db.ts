@@ -2,7 +2,7 @@ import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import { securitySolutions } from "@/data/security-solutions"
 import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
 import type { Product, ProductInput } from "@/lib/products"
-import type { RentalVehicle, VehicleInput } from "@/lib/vehicles"
+import { parseVehicleStatus, type RentalVehicle, type VehicleInput } from "@/lib/vehicles"
 
 // Database layer. Server-only (imports @neondatabase/serverless) — only import
 // from route handlers, never from client components. Connects via DATABASE_URL
@@ -146,6 +146,7 @@ export async function createVehiclesTable(): Promise<void> {
       transmission TEXT,
       seats        INTEGER NOT NULL DEFAULT 5,
       colours      JSONB NOT NULL DEFAULT '[]'::jsonb,
+      status       TEXT,
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `
@@ -164,6 +165,15 @@ export async function createVehiclesTable(): Promise<void> {
   await db`
     ALTER TABLE vehicles
     ADD COLUMN IF NOT EXISTS colours JSONB NOT NULL DEFAULT '[]'::jsonb
+  `
+  // status ('available' | 'coming_soon' | 'hidden') replaced the old
+  // show-on-site boolean. `available` is still written, as "bookable", so
+  // anything reading the old column never offers a car that isn't.
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS status TEXT`
+  await db`
+    UPDATE vehicles
+    SET status = CASE WHEN available THEN 'available' ELSE 'hidden' END
+    WHERE status IS NULL
   `
 }
 
@@ -306,6 +316,7 @@ export async function ensureSchema(): Promise<void> {
   await createNegotiationsTable()
   await createRentalAgreementsTable()
   await createLeaseAgreementsTable()
+  await ensureRentalProtectionSchema()
   await db`
     CREATE TABLE IF NOT EXISTS products (
       id             TEXT PRIMARY KEY,
@@ -487,6 +498,7 @@ interface VehicleRow {
   weekly_rate: string | number
   bond: string | number
   available: boolean
+  status: string | null
   sort_order: number
   variant: string | null
   fuel_type: string | null
@@ -513,7 +525,10 @@ function toVehicle(r: VehicleRow): RentalVehicle {
     // NUMERIC comes back as a string from the driver.
     weeklyRate: Number(r.weekly_rate),
     bond: Number(r.bond),
-    available: r.available,
+    // Rows not yet migrated fall back to the old boolean.
+    status: r.status
+      ? parseVehicleStatus(r.status)
+      : r.available ? "available" : "hidden",
     sortOrder: Number(r.sort_order),
     variant: r.variant ?? "",
     fuelType: r.fuel_type ?? "",
@@ -538,6 +553,18 @@ export async function getVehicles(): Promise<RentalVehicle[]> {
   return rows.map(toVehicle)
 }
 
+/**
+ * Hero numbers for the car rental pages. onYard: every listed car, coming soon
+ * included. available: bookable cars not currently out on rent.
+ */
+export async function getFleetCounts(): Promise<{ onYard: number; available: number }> {
+  const [vehicles, rented] = await Promise.all([getVehicles(), getRentedVehicleIds()])
+  return {
+    onYard: vehicles.filter((v) => v.status !== "hidden").length,
+    available: vehicles.filter((v) => v.status === "available" && !rented.has(v.id)).length,
+  }
+}
+
 /** One vehicle by id, or null. */
 export async function getVehicle(id: string): Promise<RentalVehicle | null> {
   const rows = (await sql()`
@@ -560,7 +587,7 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
   const rows = (await db`
     INSERT INTO vehicles
       (id, name, year, make, model, type, rego, image, images, image_alt,
-       weekly_rate, bond, available, sort_order,
+       weekly_rate, bond, available, status, sort_order,
        variant, fuel_type, engine, transmission, seats, colours)
     VALUES (
       ${id},
@@ -575,7 +602,8 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
       ${input.imageAlt || null},
       ${input.weeklyRate},
       ${input.bond},
-      ${input.available},
+      ${input.status === "available"},
+      ${input.status},
       ${input.sortOrder},
       ${input.variant || null},
       ${input.fuelType || null},
@@ -609,7 +637,8 @@ export async function updateVehicle(
       image_alt   = ${input.imageAlt || null},
       weekly_rate = ${input.weeklyRate},
       bond        = ${input.bond},
-      available   = ${input.available},
+      available   = ${input.status === "available"},
+      status      = ${input.status},
       sort_order  = ${input.sortOrder},
       variant      = ${input.variant || null},
       fuel_type    = ${input.fuelType || null},
@@ -647,12 +676,13 @@ export async function seedAllVehicles(force = false): Promise<number> {
     const rows = (await db`
       INSERT INTO vehicles
         (id, name, year, make, model, type, rego, image, images, image_alt,
-         weekly_rate, bond, available, sort_order,
+         weekly_rate, bond, available, status, sort_order,
          variant, fuel_type, engine, transmission, seats, colours)
       VALUES (
         ${v.id}, ${v.name}, ${v.year}, ${v.make}, ${v.model}, ${v.type},
         ${v.rego}, ${v.image}, ${images}::jsonb, ${v.imageAlt},
-        ${v.weeklyRate}, ${v.bond}, ${v.available}, ${v.sortOrder},
+        ${v.weeklyRate}, ${v.bond}, ${v.status === "available"}, ${v.status},
+        ${v.sortOrder},
         ${v.variant}, ${v.fuelType}, ${v.engine}, ${v.transmission},
         ${v.seats}, ${colours}::jsonb
       )
@@ -1079,6 +1109,25 @@ export interface RentalAgreement {
   status: string
   startDate: string
   returnDate: string | null
+  // Chargeback-protection evidence. Null on rentals created before it existed
+  // and on the bank-transfer / lease flows, which never touch Stripe.
+  customerAddress: string | null
+  licenceNumber: string | null
+  licenceState: string | null
+  setupIntentId: string | null
+  threeDsResult: string | null
+  threeDsVersion: string | null
+  threeDsFlow: string | null
+  termsVersion: string | null
+  termsText: string | null
+  termsAcceptedAt: string | null
+  termsIp: string | null
+  termsUserAgent: string | null
+  termsTypedName: string | null
+  cardholderName: string | null
+  nameCheck: string | null
+  cardBrand: string | null
+  cardLast4: string | null
 }
 
 interface RentalAgreementRow {
@@ -1100,6 +1149,24 @@ interface RentalAgreementRow {
   status: string
   start_date: string | Date
   return_date: string | Date | null
+  // Absent entirely until ensureRentalProtectionSchema() has run.
+  customer_address?: string | null
+  licence_number?: string | null
+  licence_state?: string | null
+  setup_intent_id?: string | null
+  three_ds_result?: string | null
+  three_ds_version?: string | null
+  three_ds_flow?: string | null
+  terms_version?: string | null
+  terms_text?: string | null
+  terms_accepted_at?: string | Date | null
+  terms_ip?: string | null
+  terms_user_agent?: string | null
+  terms_typed_name?: string | null
+  cardholder_name?: string | null
+  name_check?: string | null
+  card_brand?: string | null
+  card_last4?: string | null
 }
 
 function toRentalAgreement(r: RentalAgreementRow): RentalAgreement {
@@ -1122,6 +1189,23 @@ function toRentalAgreement(r: RentalAgreementRow): RentalAgreement {
     status: r.status,
     startDate: r.start_date ? new Date(r.start_date).toISOString() : "",
     returnDate: r.return_date ? new Date(r.return_date).toISOString() : null,
+    customerAddress: r.customer_address ?? null,
+    licenceNumber: r.licence_number ?? null,
+    licenceState: r.licence_state ?? null,
+    setupIntentId: r.setup_intent_id ?? null,
+    threeDsResult: r.three_ds_result ?? null,
+    threeDsVersion: r.three_ds_version ?? null,
+    threeDsFlow: r.three_ds_flow ?? null,
+    termsVersion: r.terms_version ?? null,
+    termsText: r.terms_text ?? null,
+    termsAcceptedAt: r.terms_accepted_at ? new Date(r.terms_accepted_at).toISOString() : null,
+    termsIp: r.terms_ip ?? null,
+    termsUserAgent: r.terms_user_agent ?? null,
+    termsTypedName: r.terms_typed_name ?? null,
+    cardholderName: r.cardholder_name ?? null,
+    nameCheck: r.name_check ?? null,
+    cardBrand: r.card_brand ?? null,
+    cardLast4: r.card_last4 ?? null,
   }
 }
 
@@ -1142,6 +1226,19 @@ export async function insertRentalAgreement(input: RentalAgreementInput): Promis
     )
     ON CONFLICT (id) DO NOTHING
   `
+}
+
+/**
+ * Vehicle ids currently out on rent — any active rental agreement (card/BECS
+ * subscription, bank transfer or signed lease). Unpaid pending applications
+ * don't count; "Return" in /rental-admin frees the car.
+ */
+export async function getRentedVehicleIds(): Promise<Set<string>> {
+  await createRentalAgreementsTable()
+  const rows = (await sql()`
+    SELECT DISTINCT vehicle_id FROM rental_agreements WHERE status = 'active'
+  `) as { vehicle_id: string }[]
+  return new Set(rows.map((r) => r.vehicle_id))
 }
 
 /** Agreements, optionally filtered by status (e.g. "active"). Newest first. */
@@ -1350,4 +1447,661 @@ export async function signLeaseAgreement(
     RETURNING *
   `) as LeaseAgreementRow[]
   return rows[0] ? toLeaseAgreement(rows[0]) : null
+}
+
+/* ───────────────────── Chargeback protection ───────────────────── */
+//
+// Evidence gathered across the card / BECS rental flow so a chargeback can be
+// fought: the pending application (with licence images), the customer's
+// acceptance of the weekly charge, the 3D Secure outcome, handover and return
+// checklists, emails sent, and the disputes themselves.
+
+let protectionSchema: Promise<void> | null = null
+
+/**
+ * New tables plus the extra rental_agreements columns. Memoised per server
+ * instance — the ALTERs are idempotent but each one is an HTTP round trip, so
+ * they should not run on every query. Also run by /api/db/setup.
+ */
+export function ensureRentalProtectionSchema(): Promise<void> {
+  protectionSchema ??= migrateRentalProtection().catch((e) => {
+    protectionSchema = null // let the next request retry
+    throw e
+  })
+  return protectionSchema
+}
+
+async function migrateRentalProtection(): Promise<void> {
+  const db = sql()
+  await createRentalAgreementsTable()
+  for (const col of [
+    "customer_address TEXT",
+    "licence_number TEXT",
+    "licence_state TEXT",
+    "setup_intent_id TEXT",
+    "three_ds_result TEXT",
+    "three_ds_version TEXT",
+    "three_ds_flow TEXT",
+    "terms_version TEXT",
+    "terms_text TEXT",
+    "terms_accepted_at TIMESTAMPTZ",
+    "terms_ip TEXT",
+    "terms_user_agent TEXT",
+    "terms_typed_name TEXT",
+    "cardholder_name TEXT",
+    "name_check TEXT",
+    "card_brand TEXT",
+    "card_last4 TEXT",
+    "reminder_period_end BIGINT",
+    "created_at TIMESTAMPTZ NOT NULL DEFAULT now()",
+  ]) {
+    // Column definitions are the fixed literals above, never user input.
+    await db.query(`ALTER TABLE rental_agreements ADD COLUMN IF NOT EXISTS ${col}`)
+  }
+  await db`
+    CREATE INDEX IF NOT EXISTS rental_agreements_customer_idx
+    ON rental_agreements (stripe_customer_id)
+  `
+  await db`
+    CREATE TABLE IF NOT EXISTS trusted_renters (
+      email      TEXT PRIMARY KEY,
+      note       TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  // Licence images, checklist photos, signatures and built evidence packs.
+  // Stored in Postgres (base64) rather than public blob storage: these are
+  // identity documents, and are only ever served through an admin-only route.
+  await db`
+    CREATE TABLE IF NOT EXISTS rental_files (
+      id           TEXT PRIMARY KEY,
+      rental_id    TEXT NOT NULL,
+      kind         TEXT NOT NULL,
+      filename     TEXT NOT NULL,
+      content_type TEXT NOT NULL,
+      size_bytes   INTEGER NOT NULL,
+      data         TEXT NOT NULL,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  await db`CREATE INDEX IF NOT EXISTS rental_files_rental_idx ON rental_files (rental_id)`
+  await db`
+    CREATE TABLE IF NOT EXISTS rental_evidence (
+      id                TEXT PRIMARY KEY,
+      rental_id         TEXT NOT NULL,
+      kind              TEXT NOT NULL,
+      recorded_at       TIMESTAMPTZ NOT NULL,
+      odometer          INTEGER,
+      fuel              TEXT,
+      photo_ids         JSONB NOT NULL DEFAULT '[]'::jsonb,
+      signature_file_id TEXT,
+      signed_name       TEXT,
+      amount_owed       NUMERIC,
+      notes             TEXT,
+      created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE (rental_id, kind)
+    )
+  `
+  await db`
+    CREATE TABLE IF NOT EXISTS disputes (
+      id                    TEXT PRIMARY KEY,
+      rental_id             TEXT,
+      charge_id             TEXT,
+      customer_name         TEXT,
+      amount                NUMERIC NOT NULL,
+      currency              TEXT NOT NULL DEFAULT 'aud',
+      reason                TEXT,
+      status                TEXT NOT NULL,
+      due_by                TIMESTAMPTZ,
+      evidence_status       TEXT NOT NULL DEFAULT 'none',
+      evidence_pack_file_id TEXT,
+      evidence_summary      JSONB,
+      evidence_built_at     TIMESTAMPTZ,
+      evidence_submitted_at TIMESTAMPTZ,
+      created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  await db`
+    CREATE TABLE IF NOT EXISTS rental_email_log (
+      id         TEXT PRIMARY KEY,
+      rental_id  TEXT NOT NULL,
+      kind       TEXT NOT NULL,
+      recipient  TEXT NOT NULL,
+      subject    TEXT NOT NULL,
+      sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `
+  await db`CREATE INDEX IF NOT EXISTS rental_email_log_rental_idx ON rental_email_log (rental_id)`
+}
+
+function shortId(prefix: string): string {
+  return `${prefix}-${crypto.randomUUID()}`
+}
+
+/* ── Pending application → active rental ── */
+
+export interface PendingRentalInput extends RentalAgreementInput {
+  customerAddress: string
+  licenceNumber: string
+  licenceState: string
+  setupIntentId: string
+}
+
+/**
+ * The card / BECS application before any money moves. `id` doubles as the
+ * customer's only credential for uploading their licence and accepting the
+ * terms, so it must come from newRentalId() (unguessable).
+ */
+export async function createPendingRental(input: PendingRentalInput): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    INSERT INTO rental_agreements (
+      id, vehicle_id, vehicle_name, vehicle_rego, customer_name,
+      customer_email, customer_phone, listed_weekly_rate, agreed_weekly_rate,
+      bond_weeks, bond_amount, payment_method, stripe_customer_id,
+      stripe_subscription_id, stripe_payment_method_id, status,
+      customer_address, licence_number, licence_state, setup_intent_id
+    ) VALUES (
+      ${input.id}, ${input.vehicleId}, ${input.vehicleName}, ${input.vehicleRego},
+      ${input.customerName}, ${input.customerEmail}, ${input.customerPhone},
+      ${input.listedWeeklyRate}, ${input.agreedWeeklyRate}, ${input.bondWeeks},
+      ${input.bondAmount}, ${input.paymentMethod}, ${input.stripeCustomerId},
+      '', '', 'pending_payment',
+      ${input.customerAddress}, ${input.licenceNumber}, ${input.licenceState},
+      ${input.setupIntentId}
+    )
+  `
+}
+
+export function newRentalId(): string {
+  return shortId("rent")
+}
+
+export async function recordTermsAcceptance(
+  id: string,
+  t: { version: string; text: string; ip: string | null; userAgent: string; typedName: string },
+): Promise<boolean> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    UPDATE rental_agreements
+    SET terms_version = ${t.version}, terms_text = ${t.text},
+        terms_accepted_at = now(), terms_ip = ${t.ip},
+        terms_user_agent = ${t.userAgent}, terms_typed_name = ${t.typedName}
+    WHERE id = ${id} AND status = 'pending_payment'
+    RETURNING id
+  `) as { id: string }[]
+  return rows.length > 0
+}
+
+export interface RentalActivation {
+  paymentMethod: string
+  stripeSubscriptionId: string
+  stripePaymentMethodId: string
+  threeDsResult: string | null
+  threeDsVersion: string | null
+  threeDsFlow: string | null
+  cardholderName: string | null
+  nameCheck: string
+  cardBrand: string | null
+  cardLast4: string | null
+}
+
+export async function activatePendingRental(id: string, a: RentalActivation): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    UPDATE rental_agreements
+    SET status = 'active', start_date = now(),
+        payment_method = ${a.paymentMethod},
+        stripe_subscription_id = ${a.stripeSubscriptionId},
+        stripe_payment_method_id = ${a.stripePaymentMethodId},
+        three_ds_result = ${a.threeDsResult}, three_ds_version = ${a.threeDsVersion},
+        three_ds_flow = ${a.threeDsFlow}, cardholder_name = ${a.cardholderName},
+        name_check = ${a.nameCheck}, card_brand = ${a.cardBrand}, card_last4 = ${a.cardLast4}
+    WHERE id = ${id}
+  `
+}
+
+/**
+ * Applications abandoned before payment still hold licence images. Drop them
+ * after a week rather than keeping identity documents for people who never
+ * rented.
+ */
+export async function purgeAbandonedApplications(): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    DELETE FROM rental_files WHERE rental_id IN (
+      SELECT id FROM rental_agreements
+      WHERE status = 'pending_payment' AND created_at < now() - INTERVAL '7 days'
+    )
+  `
+  await sql()`
+    DELETE FROM rental_agreements
+    WHERE status = 'pending_payment' AND created_at < now() - INTERVAL '7 days'
+  `
+}
+
+export async function getRentalByStripeCustomer(
+  customerId: string,
+): Promise<RentalAgreement | null> {
+  await ensureRentalProtectionSchema()
+  // Pending rows are included on purpose: the first weekly charge succeeds
+  // (and its webhook fires) moments before start-subscription activates the
+  // rental. Each application gets its own Stripe customer, so this is unique.
+  const rows = (await sql()`
+    SELECT * FROM rental_agreements
+    WHERE stripe_customer_id = ${customerId}
+    ORDER BY start_date DESC LIMIT 1
+  `) as RentalAgreementRow[]
+  return rows[0] ? toRentalAgreement(rows[0]) : null
+}
+
+/** Active Stripe-billed rentals with the billing period their last reminder covered. */
+export async function getStripeRentalsForReminder(): Promise<
+  (RentalAgreement & { reminderPeriodEnd: number | null })[]
+> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT * FROM rental_agreements
+    WHERE status = 'active' AND stripe_subscription_id <> ''
+  `) as (RentalAgreementRow & { reminder_period_end: string | number | null })[]
+  return rows.map((r) => ({
+    ...toRentalAgreement(r),
+    reminderPeriodEnd: r.reminder_period_end == null ? null : Number(r.reminder_period_end),
+  }))
+}
+
+export async function markRentalReminderPeriod(id: string, periodEnd: number): Promise<void> {
+  await sql()`
+    UPDATE rental_agreements SET reminder_period_end = ${periodEnd} WHERE id = ${id}
+  `
+}
+
+/* ── Trusted renters (the only people offered BECS direct debit) ── */
+
+export interface TrustedRenter {
+  email: string
+  note: string
+  createdAt: string
+}
+
+export async function getTrustedRenters(): Promise<TrustedRenter[]> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT * FROM trusted_renters ORDER BY created_at DESC
+  `) as { email: string; note: string | null; created_at: string | Date }[]
+  return rows.map((r) => ({
+    email: r.email,
+    note: r.note ?? "",
+    createdAt: new Date(r.created_at).toISOString(),
+  }))
+}
+
+export async function isTrustedRenter(email: string): Promise<boolean> {
+  if (!email) return false
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT 1 FROM trusted_renters WHERE email = ${email.trim().toLowerCase()}
+  `) as unknown[]
+  return rows.length > 0
+}
+
+export async function addTrustedRenter(email: string, note: string): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    INSERT INTO trusted_renters (email, note) VALUES (${email.trim().toLowerCase()}, ${note})
+    ON CONFLICT (email) DO UPDATE SET note = ${note}
+  `
+}
+
+export async function removeTrustedRenter(email: string): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`DELETE FROM trusted_renters WHERE email = ${email.trim().toLowerCase()}`
+}
+
+/* ── Files ── */
+
+export interface RentalFileMeta {
+  id: string
+  rentalId: string
+  kind: string
+  filename: string
+  contentType: string
+  sizeBytes: number
+  createdAt: string
+}
+
+export interface RentalFile extends RentalFileMeta {
+  data: Buffer
+}
+
+interface RentalFileRow {
+  id: string
+  rental_id: string
+  kind: string
+  filename: string
+  content_type: string
+  size_bytes: number
+  created_at: string | Date
+  data?: string
+}
+
+function toFileMeta(r: RentalFileRow): RentalFileMeta {
+  return {
+    id: r.id,
+    rentalId: r.rental_id,
+    kind: r.kind,
+    filename: r.filename,
+    contentType: r.content_type,
+    sizeBytes: Number(r.size_bytes),
+    createdAt: new Date(r.created_at).toISOString(),
+  }
+}
+
+export interface RentalFileInput {
+  rentalId: string
+  kind: string
+  filename: string
+  contentType: string
+  data: Buffer
+}
+
+export async function insertRentalFile(input: RentalFileInput): Promise<string> {
+  await ensureRentalProtectionSchema()
+  const id = shortId("file")
+  await sql()`
+    INSERT INTO rental_files (id, rental_id, kind, filename, content_type, size_bytes, data)
+    VALUES (
+      ${id}, ${input.rentalId}, ${input.kind}, ${input.filename},
+      ${input.contentType}, ${input.data.length}, ${input.data.toString("base64")}
+    )
+  `
+  return id
+}
+
+/** Replaces any earlier file of the same kind (e.g. a re-uploaded licence front). */
+export async function replaceRentalFile(input: RentalFileInput): Promise<string> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    DELETE FROM rental_files WHERE rental_id = ${input.rentalId} AND kind = ${input.kind}
+  `
+  return insertRentalFile(input)
+}
+
+export async function listRentalFiles(rentalId: string): Promise<RentalFileMeta[]> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT id, rental_id, kind, filename, content_type, size_bytes, created_at
+    FROM rental_files WHERE rental_id = ${rentalId} ORDER BY created_at
+  `) as RentalFileRow[]
+  return rows.map(toFileMeta)
+}
+
+export async function getRentalFile(id: string): Promise<RentalFile | null> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`SELECT * FROM rental_files WHERE id = ${id}`) as RentalFileRow[]
+  const r = rows[0]
+  return r ? { ...toFileMeta(r), data: Buffer.from(r.data ?? "", "base64") } : null
+}
+
+/* ── Handover / return checklists ── */
+
+export interface RentalEvidenceInput {
+  rentalId: string
+  kind: "pickup" | "return"
+  recordedAt: string
+  odometer: number | null
+  fuel: string
+  photoIds: string[]
+  signatureFileId: string | null
+  signedName: string
+  amountOwed: number | null
+  notes: string
+}
+
+export interface RentalEvidence extends RentalEvidenceInput {
+  id: string
+  createdAt: string
+}
+
+interface RentalEvidenceRow {
+  id: string
+  rental_id: string
+  kind: "pickup" | "return"
+  recorded_at: string | Date
+  odometer: number | null
+  fuel: string | null
+  photo_ids: string[]
+  signature_file_id: string | null
+  signed_name: string | null
+  amount_owed: string | number | null
+  notes: string | null
+  created_at: string | Date
+}
+
+function toEvidence(r: RentalEvidenceRow): RentalEvidence {
+  return {
+    id: r.id,
+    rentalId: r.rental_id,
+    kind: r.kind,
+    recordedAt: new Date(r.recorded_at).toISOString(),
+    odometer: r.odometer == null ? null : Number(r.odometer),
+    fuel: r.fuel ?? "",
+    photoIds: Array.isArray(r.photo_ids) ? r.photo_ids : [],
+    signatureFileId: r.signature_file_id,
+    signedName: r.signed_name ?? "",
+    amountOwed: r.amount_owed == null ? null : Number(r.amount_owed),
+    notes: r.notes ?? "",
+    createdAt: new Date(r.created_at).toISOString(),
+  }
+}
+
+/** One pickup and one return record per rental; re-saving overwrites it. */
+export async function upsertRentalEvidence(input: RentalEvidenceInput): Promise<RentalEvidence> {
+  await ensureRentalProtectionSchema()
+  const photos = JSON.stringify(input.photoIds)
+  const rows = (await sql()`
+    INSERT INTO rental_evidence (
+      id, rental_id, kind, recorded_at, odometer, fuel, photo_ids,
+      signature_file_id, signed_name, amount_owed, notes
+    ) VALUES (
+      ${shortId("ev")}, ${input.rentalId}, ${input.kind}, ${input.recordedAt},
+      ${input.odometer}, ${input.fuel}, ${photos}::jsonb, ${input.signatureFileId},
+      ${input.signedName}, ${input.amountOwed}, ${input.notes}
+    )
+    ON CONFLICT (rental_id, kind) DO UPDATE SET
+      recorded_at = EXCLUDED.recorded_at, odometer = EXCLUDED.odometer,
+      fuel = EXCLUDED.fuel, photo_ids = EXCLUDED.photo_ids,
+      signature_file_id = EXCLUDED.signature_file_id,
+      signed_name = EXCLUDED.signed_name, amount_owed = EXCLUDED.amount_owed,
+      notes = EXCLUDED.notes
+    RETURNING *
+  `) as RentalEvidenceRow[]
+  return toEvidence(rows[0])
+}
+
+export async function getRentalEvidence(rentalId: string): Promise<RentalEvidence[]> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT * FROM rental_evidence WHERE rental_id = ${rentalId} ORDER BY recorded_at
+  `) as RentalEvidenceRow[]
+  return rows.map(toEvidence)
+}
+
+/* ── Email log (what the customer was told, and when) ── */
+
+export interface RentalEmailLogEntry {
+  kind: string
+  recipient: string
+  subject: string
+  sentAt: string
+}
+
+export async function logRentalEmail(
+  rentalId: string,
+  kind: string,
+  recipient: string,
+  subject: string,
+): Promise<void> {
+  await ensureRentalProtectionSchema()
+  await sql()`
+    INSERT INTO rental_email_log (id, rental_id, kind, recipient, subject)
+    VALUES (${shortId("mail")}, ${rentalId}, ${kind}, ${recipient}, ${subject})
+  `
+}
+
+export async function getRentalEmailLog(rentalId: string): Promise<RentalEmailLogEntry[]> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`
+    SELECT * FROM rental_email_log WHERE rental_id = ${rentalId} ORDER BY sent_at
+  `) as { kind: string; recipient: string; subject: string; sent_at: string | Date }[]
+  return rows.map((r) => ({
+    kind: r.kind,
+    recipient: r.recipient,
+    subject: r.subject,
+    sentAt: new Date(r.sent_at).toISOString(),
+  }))
+}
+
+/** The signed lease (Agreements tab) for this renter + vehicle, if one exists. */
+export async function findSignedLease(email: string, rego: string): Promise<LeaseAgreement | null> {
+  await createLeaseAgreementsTable()
+  const rows = (await sql()`
+    SELECT * FROM lease_agreements
+    WHERE lower(renter_email) = ${email.trim().toLowerCase()}
+      AND upper(rego) = ${rego.trim().toUpperCase()}
+      AND status = 'signed'
+    ORDER BY signed_at DESC LIMIT 1
+  `) as LeaseAgreementRow[]
+  return rows[0] ? toLeaseAgreement(rows[0]) : null
+}
+
+/* ── Disputes ── */
+
+export interface Dispute {
+  id: string
+  rentalId: string | null
+  chargeId: string | null
+  customerName: string
+  amount: number
+  currency: string
+  reason: string
+  status: string
+  dueBy: string | null
+  evidenceStatus: "none" | "draft" | "submitted"
+  evidencePackFileId: string | null
+  evidenceSummary: unknown
+  evidenceBuiltAt: string | null
+  evidenceSubmittedAt: string | null
+  createdAt: string
+}
+
+interface DisputeRow {
+  id: string
+  rental_id: string | null
+  charge_id: string | null
+  customer_name: string | null
+  amount: string | number
+  currency: string
+  reason: string | null
+  status: string
+  due_by: string | Date | null
+  evidence_status: Dispute["evidenceStatus"]
+  evidence_pack_file_id: string | null
+  evidence_summary: unknown
+  evidence_built_at: string | Date | null
+  evidence_submitted_at: string | Date | null
+  created_at: string | Date
+}
+
+const iso = (v: string | Date | null) => (v ? new Date(v).toISOString() : null)
+
+function toDispute(r: DisputeRow): Dispute {
+  return {
+    id: r.id,
+    rentalId: r.rental_id,
+    chargeId: r.charge_id,
+    customerName: r.customer_name ?? "",
+    amount: Number(r.amount),
+    currency: r.currency,
+    reason: r.reason ?? "",
+    status: r.status,
+    dueBy: iso(r.due_by),
+    evidenceStatus: r.evidence_status,
+    evidencePackFileId: r.evidence_pack_file_id,
+    evidenceSummary: r.evidence_summary,
+    evidenceBuiltAt: iso(r.evidence_built_at),
+    evidenceSubmittedAt: iso(r.evidence_submitted_at),
+    createdAt: iso(r.created_at) ?? "",
+  }
+}
+
+/** Insert on dispute.created; later events only refresh the Stripe-owned fields. */
+export async function upsertDispute(d: {
+  id: string
+  rentalId: string | null
+  chargeId: string | null
+  customerName: string
+  amount: number
+  currency: string
+  reason: string
+  status: string
+  dueBy: string | null
+}): Promise<{ created: boolean }> {
+  await ensureRentalProtectionSchema()
+  // xmax = 0 only on a freshly inserted row — lets the webhook email the owner
+  // once even though Stripe may deliver dispute.created more than once.
+  const rows = (await sql()`
+    INSERT INTO disputes (
+      id, rental_id, charge_id, customer_name, amount, currency, reason, status, due_by
+    ) VALUES (
+      ${d.id}, ${d.rentalId}, ${d.chargeId}, ${d.customerName}, ${d.amount},
+      ${d.currency}, ${d.reason}, ${d.status}, ${d.dueBy}
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      amount = EXCLUDED.amount, reason = EXCLUDED.reason,
+      status = EXCLUDED.status, due_by = EXCLUDED.due_by, updated_at = now()
+    RETURNING (xmax = 0) AS created
+  `) as { created: boolean }[]
+  return { created: Boolean(rows[0]?.created) }
+}
+
+const CLOSED_DISPUTE_STATUSES = ["won", "lost", "warning_closed", "prevented"]
+
+export async function getDisputes(includeClosed = false): Promise<Dispute[]> {
+  await ensureRentalProtectionSchema()
+  const rows = (includeClosed
+    ? await sql()`SELECT * FROM disputes ORDER BY due_by ASC NULLS LAST`
+    : await sql()`
+        SELECT * FROM disputes WHERE NOT (status = ANY(${CLOSED_DISPUTE_STATUSES}))
+        ORDER BY due_by ASC NULLS LAST
+      `) as DisputeRow[]
+  return rows.map(toDispute)
+}
+
+export async function getDispute(id: string): Promise<Dispute | null> {
+  await ensureRentalProtectionSchema()
+  const rows = (await sql()`SELECT * FROM disputes WHERE id = ${id}`) as DisputeRow[]
+  return rows[0] ? toDispute(rows[0]) : null
+}
+
+export async function markDisputeEvidenceDraft(
+  id: string,
+  packFileId: string,
+  summary: unknown,
+): Promise<void> {
+  await sql()`
+    UPDATE disputes SET evidence_status = 'draft', evidence_pack_file_id = ${packFileId},
+      evidence_summary = ${JSON.stringify(summary)}::jsonb,
+      evidence_built_at = now(), updated_at = now()
+    WHERE id = ${id}
+  `
+}
+
+export async function markDisputeEvidenceSubmitted(id: string, status: string): Promise<void> {
+  await sql()`
+    UPDATE disputes SET evidence_status = 'submitted', status = ${status},
+      evidence_submitted_at = now(), updated_at = now()
+    WHERE id = ${id}
+  `
 }

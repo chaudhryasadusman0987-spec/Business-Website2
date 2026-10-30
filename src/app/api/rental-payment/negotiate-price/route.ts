@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
 import { escapeHtml as esc } from "@/lib/html"
-import { getNegotiations, insertNegotiation, updateNegotiationStatus } from "@/lib/db"
+import { getNegotiations, getVehicle, insertNegotiation, updateNegotiationStatus } from "@/lib/db"
+import { isBookable } from "@/lib/vehicles"
 
 export const runtime = "nodejs"
 
@@ -25,6 +26,12 @@ export async function POST(req: Request) {
 
   if (!vehicleId || !vehicleName || !offeredPrice) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+  }
+
+  // Offers only on cars that can actually be rented — not coming soon or hidden.
+  const vehicle = await getVehicle(String(vehicleId)).catch(() => null)
+  if (!vehicle || !isBookable(vehicle)) {
+    return NextResponse.json({ error: "This car can't be booked yet." }, { status: 400 })
   }
 
   const id = newNegotiationId()

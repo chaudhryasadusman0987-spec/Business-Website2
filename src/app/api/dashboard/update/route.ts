@@ -14,7 +14,7 @@ import {
   type ITServiceOverviewEdit,
 } from "@/lib/catalog"
 import type { ProductInput } from "@/lib/products"
-import { parseColours, type VehicleInput } from "@/lib/vehicles"
+import { parseColours, parseVehicleStatus, type VehicleInput } from "@/lib/vehicles"
 import type { ITPackage } from "@/data/it-services"
 import { itServiceItems, itServices } from "@/data/it-services"
 import { roleFromRequest } from "@/lib/admin-auth"
@@ -106,7 +106,7 @@ function coerceVehicle(v: Record<string, unknown>): VehicleInput {
     imageAlt: String(v.imageAlt ?? ""),
     weeklyRate: num(v.weeklyRate),
     bond: num(v.bond),
-    available: v.available !== false,
+    status: parseVehicleStatus(v.status),
     sortOrder: Math.round(num(v.sortOrder)),
     variant: String(v.variant ?? ""),
     fuelType: String(v.fuelType ?? ""),

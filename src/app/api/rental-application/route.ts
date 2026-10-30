@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { sendEmail, type EmailAttachment } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
 import { getVehicle, insertRentalAgreement } from "@/lib/db"
+import { isBookable, paymentReference } from "@/lib/vehicles"
 import {
   MAX_UPLOAD_BYTES,
   licenceStateName,
@@ -114,7 +115,11 @@ export async function POST(req: Request) {
       ? `${normalised(licenceNo, (v) => validateLicence(v, licenceState))} (${licenceStateName(licenceState)})`
       : ""
     const vehicleName = get("vehicleName")
-    const vehicleRego = get("vehicleRego")
+    // The rego is internal — never taken from (or shown to) the customer. It is
+    // read from the database below and only goes to the owner. The customer
+    // quotes the vehicle's payment reference instead.
+    let vehicleRego = ""
+    const paymentRef = get("vehicleId") ? paymentReference({ id: get("vehicleId") }) : "your full name"
 
     // Price the quote from the database rather than from the submitted form —
     // the browser could send anything, and the owner sets the weekly rate in
@@ -124,6 +129,13 @@ export async function POST(req: Request) {
     try {
       const vehicle = get("vehicleId") ? await getVehicle(get("vehicleId")) : null
       if (vehicle) {
+        if (!isBookable(vehicle)) {
+          return NextResponse.json(
+            { error: "This car can't be booked yet — register your interest on the contact page." },
+            { status: 400 },
+          )
+        }
+        vehicleRego = vehicle.rego
         if (vehicle.weeklyRate > 0) {
           weeklyLabel = `$${vehicle.weeklyRate.toLocaleString("en-AU")} per week`
         }
@@ -199,7 +211,7 @@ export async function POST(req: Request) {
                 ["Weekly Rent", weeklyRent],
                 ["Bond (2 weeks)", bondAmount],
                 ["Total Transferred", totalAmount],
-                ["Reference", esc(vehicleRego)],
+                ["Reference", esc(paymentRef)],
                 ["Payment Method", esc(paymentMethod)],
               ]
                 .map(
@@ -214,7 +226,7 @@ export async function POST(req: Request) {
             <div style="background:#f5a623;border-radius:8px;padding:12px;margin-top:12px">
               <p style="margin:0;color:#1a1a2e;font-weight:bold;font-size:13px">
                 ⚠️ ACTION: Check ${BANK_NAME} account for transfer with reference
-                ${esc(vehicleRego)} before confirming rental to customer.
+                ${esc(paymentRef)} before confirming rental to customer.
               </p>
             </div>
           </div>
@@ -273,7 +285,6 @@ export async function POST(req: Request) {
               Vehicle Requested
             </p>
             <p style="font-weight:700;font-size:16px;color:#1a1a2e;margin:0">${esc(vehicleName)}</p>
-            <p style="font-size:12px;color:#9496a8;margin:4px 0 0">Rego: ${esc(vehicleRego)}</p>
             ${
               weeklyLabel
                 ? `<p style="font-weight:700;font-size:15px;color:#7f85f7;margin:10px 0 0">${esc(weeklyLabel)}${
@@ -309,7 +320,7 @@ export async function POST(req: Request) {
               </tr>
               <tr>
                 <td style="color:#f5a623;font-size:12px;padding:6px 0;font-weight:bold">Your Reference ⚠️</td>
-                <td style="color:#f5a623;font-weight:bold;font-size:18px;padding:6px 0">${esc(vehicleRego)}</td>
+                <td style="color:#f5a623;font-weight:bold;font-size:18px;padding:6px 0">${esc(paymentRef)}</td>
               </tr>
             </table>
           </div>
@@ -408,7 +419,7 @@ export async function POST(req: Request) {
           `${weeklyLabel ? ` at ${weeklyLabel}` : ""}. ` +
           `Licence ${licenceLabel || "not supplied"}, DOB ${dob}. ` +
           `Payment: ${paymentMethod} — claims ${totalAmount} transferred ` +
-          `(rent ${weeklyRent} + bond ${bondAmount}), reference ${vehicleRego}.`,
+          `(rent ${weeklyRent} + bond ${bondAmount}), reference ${paymentRef}.`,
         date: new Date().toISOString(),
         status: "New",
         page: "/services/car-rental",

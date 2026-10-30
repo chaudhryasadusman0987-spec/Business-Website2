@@ -57,7 +57,7 @@ export default function VehiclesPage() {
       {/* FLEET GRID — the same DB-backed list the main page shows */}
       <VehicleGrid
         title="Every car on the yard"
-        intro="Open a car for its photos, rego and weekly rate, or go straight to the application."
+        intro="Open a car for its photos, specs and weekly rate, or go straight to the application."
       />
 
       {/* BOND INFO BOX — continues the grid's background so the strip reads as

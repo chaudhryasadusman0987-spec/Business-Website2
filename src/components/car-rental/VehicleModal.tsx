@@ -5,6 +5,8 @@ import { X, ChevronLeft, ChevronRight, Check, Upload, Phone } from "lucide-react
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import {
   galleryImages,
+  isBookable,
+  paymentReference,
   vehicleAlt,
   type RentalVehicle,
 } from "@/lib/vehicles"
@@ -29,6 +31,8 @@ import {
   BANK_PAYID,
   SITE_PHONE,
 } from "@/data/site"
+import { RENTAL_KEY_TERMS } from "@/lib/rental-terms"
+import { compressImage } from "@/lib/compressImage"
 import { loadStripe } from "@stripe/stripe-js"
 import {
   Elements,
@@ -74,6 +78,18 @@ const EMPTY_FORM = {
 }
 
 type FormState = typeof EMPTY_FORM
+
+/** What /api/rental-payment/create-setup returns for the card / BECS checkout. */
+interface CheckoutInfo {
+  rentalId: string
+  setupIntentId: string
+  becsAllowed: boolean
+  weeklyRate: number
+  bondWeeks: number
+  bondAmount: number
+  consentSentence: string
+  termsVersion: string
+}
 
 const STEPS = ["details", "apply", "payment"] as const
 type View = (typeof STEPS)[number]
@@ -155,7 +171,7 @@ export default function VehicleModal({
   // ── Weekly subscription (card / BECS direct debit) ──
   const [bondWeeks, setBondWeeks] = useState<0 | 1 | 2>(0)
   const [setupClientSecret, setSetupClientSecret] = useState("")
-  const [setupCustomerId, setSetupCustomerId] = useState("")
+  const [checkout, setCheckout] = useState<CheckoutInfo | null>(null)
   const [setupLoading, setSetupLoading] = useState(false)
   const [setupError, setSetupError] = useState("")
 
@@ -185,7 +201,7 @@ export default function VehicleModal({
     setTermsAgreed(false)
     setBondWeeks(0)
     setSetupClientSecret("")
-    setSetupCustomerId("")
+    setCheckout(null)
     setSetupLoading(false)
     setSetupError("")
   }, [vehicle?.id, initialView])
@@ -264,13 +280,16 @@ export default function VehicleModal({
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
   // in yet still lines up with the rest.
+  // Bank-transfer reference. Not the rego — that is internal and never sent
+  // to the browser.
+  const payRef = paymentReference(v)
+
   const specs: [string, string][] = [
     ["VARIANT", v.variant],
     ["FUEL TYPE", v.fuelType],
     ["ENGINE", v.engine],
     ["TRANSMISSION", v.transmission],
     ["SEATS", v.seats > 0 ? `${v.seats} Seats` : ""],
-    ["REGISTRATION", v.rego],
     ["YEAR", String(v.year)],
     ["TYPE", v.type],
   ]
@@ -334,11 +353,13 @@ export default function VehicleModal({
       else e[field] = result.error
     }
 
-    // Licence photos are optional — the owner can chase them — but a file
-    // rejected on selection must not be silently dropped by this rebuild of
-    // the error map.
+    // Both sides of the licence are required: they are the identity evidence
+    // a bank asks for when a renter disputes a charge. Keep any error from
+    // file selection rather than replacing it with "required".
     if (errors.licenceFront) e.licenceFront = errors.licenceFront
+    else if (!licenceFront) e.licenceFront = "Upload the front of your licence"
     if (errors.licenceBack) e.licenceBack = errors.licenceBack
+    else if (!licenceBack) e.licenceBack = "Upload the back of your licence"
 
     if (Object.keys(tidied).length) setForm((f) => ({ ...f, ...tidied }))
     setErrors(e)
@@ -362,7 +383,6 @@ export default function VehicleModal({
       Object.entries(form).forEach(([k, val]) => fd.append(k, String(val)))
       fd.append("vehicleId", v.id)
       fd.append("vehicleName", v.name)
-      fd.append("vehicleRego", v.rego)
       fd.append("paymentMethod", "direct-deposit")
       fd.append("weeklyRent", String(weekly))
       fd.append("bondAmount", includeBond ? String(bond) : "0")
@@ -393,8 +413,8 @@ export default function VehicleModal({
     setPayMethod("card-bond")
   }
 
-  /** Creates the Stripe Customer + SetupIntent for the weekly subscription and
-   *  switches the payment view over to the card/BECS form. */
+  /** Records the application (priced server-side), uploads both sides of the
+   *  licence against it, then switches to the card/BECS form. */
   const handleContinueToCardPayment = async () => {
     setSetupLoading(true)
     setSetupError("")
@@ -403,10 +423,12 @@ export default function VehicleModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone,
+          ...form,
+          vehicleId: v.id,
+          // The server prices the rental itself; an approved offer is
+          // looked up by id rather than trusting a rate sent from here.
+          negotiationId: readOfferId(v.id),
+          bondWeeks,
         }),
       })
       const data = await res.json()
@@ -414,8 +436,35 @@ export default function VehicleModal({
         setSetupError(data.error)
         return
       }
+
+      for (const [side, file] of [
+        ["front", licenceFront],
+        ["back", licenceBack],
+      ] as const) {
+        if (!file) throw new Error("licence")
+        const fd = new FormData()
+        fd.append("rentalId", data.rentalId)
+        fd.append("side", side)
+        fd.append("file", await compressImage(file))
+        const up = await fetch("/api/rental-payment/licence", { method: "POST", body: fd })
+        if (!up.ok) {
+          const upData = await up.json().catch(() => ({}))
+          setSetupError(upData.error || `Could not upload the ${side} of your licence.`)
+          return
+        }
+      }
+
       setSetupClientSecret(data.clientSecret)
-      setSetupCustomerId(data.customerId)
+      setCheckout({
+        rentalId: data.rentalId,
+        setupIntentId: data.setupIntentId,
+        becsAllowed: Boolean(data.becsAllowed),
+        weeklyRate: Number(data.weeklyRate),
+        bondWeeks: Number(data.bondWeeks),
+        bondAmount: Number(data.bondAmount),
+        consentSentence: data.consentSentence,
+        termsVersion: data.termsVersion,
+      })
       setPayMethod("card-pay")
     } catch {
       setSetupError(
@@ -557,12 +606,9 @@ export default function VehicleModal({
                   <h2 className="text-white font-extrabold text-[18px] lg:text-[22px] leading-tight drop-shadow-lg">
                     {v.name}
                   </h2>
-                  <p className="text-white/60 text-[12px] mt-0.5">
-                    Rego: {v.rego}
-                  </p>
                 </div>
 
-                {v.available && (
+                {isBookable(v) && (
                   <div className="absolute top-4 left-4 bg-[#0f6e56] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     Available
@@ -1021,7 +1067,7 @@ export default function VehicleModal({
                 {/* Licence upload — a <label htmlFor> opens the hidden file input,
                     so no ref juggling is needed inside the map. */}
                 <div>
-                  <span className={lbl}>Upload Driving Licence</span>
+                  <span className={lbl}>Upload Driving Licence *</span>
                   <p className="text-[11px] text-[#9496a8] -mt-1 mb-2">
                     JPG, PNG, WEBP, HEIC or PDF · up to 3MB each
                   </p>
@@ -1106,27 +1152,9 @@ export default function VehicleModal({
                 <p className="font-semibold text-[#1a1a2e] mb-1">
                   Key Rental Terms
                 </p>
-                <p>
-                  • Minimum rental: 4 weeks, then week-to-week with 1
-                  week&apos;s notice
-                </p>
-                <p>
-                  • Early return before 4 weeks: 50% of remaining rent up to
-                  the 4-week mark still payable
-                </p>
-                <p>
-                  • Includes servicing, insurance (subject to excess),
-                  roadside assistance, unlimited km, full tank
-                </p>
-                <p>
-                  • Fines, tolls and unauthorised driver use are not
-                  included
-                </p>
-                <p>• Drivers must be 21–75 with a valid licence</p>
-                <p>
-                  • Vehicle must stay within 100km of Brisbane without
-                  written permission
-                </p>
+                {RENTAL_KEY_TERMS.map((t) => (
+                  <p key={t}>• {t}</p>
+                ))}
                 <a
                   href="/rental-terms"
                   target="_blank"
@@ -1259,10 +1287,11 @@ export default function VehicleModal({
                     Card / Direct Debit
                   </p>
                   <p className="text-[12px] text-[#9496a8] mb-3">
-                    Weekly auto-billed. Visa, Mastercard, Amex or BECS.
+                    Weekly auto-billed. Visa, Mastercard or Amex. Direct
+                    debit for approved repeat renters.
                   </p>
                   <div className="flex gap-1">
-                    {["VISA", "MC", "AMEX", "BECS"].map((c) => (
+                    {["VISA", "MC", "AMEX"].map((c) => (
                       <span
                         key={c}
                         className="text-[9px] font-bold bg-[#f7f7f7] border border-[#e8e8f0] rounded-[3px] px-1.5 py-0.5 text-[#666]"
@@ -1369,6 +1398,8 @@ export default function VehicleModal({
               <p className="text-[11px] text-[#9496a8] mb-5">
                 After today, ${effectiveWeekly.toFixed(2)} is auto-debited
                 every week. Cancel anytime when you return the vehicle.
+                Paying by bank direct debit (approved renters only) requires
+                at least a 1 week bond.
               </p>
 
               {setupError && (
@@ -1409,7 +1440,8 @@ export default function VehicleModal({
           {view === "payment" &&
             !submitted &&
             payMethod === "card-pay" &&
-            setupClientSecret && (
+            setupClientSecret &&
+            checkout && (
               <Elements
                 stripe={getStripe()}
                 options={{
@@ -1427,11 +1459,7 @@ export default function VehicleModal({
                 <StripeSetupForm
                   vehicle={v}
                   form={form}
-                  customerId={setupCustomerId}
-                  effectiveWeekly={effectiveWeekly}
-                  bondWeeks={bondWeeks}
-                  bondAmount={bondAmountForWeeks}
-                  totalToday={cardTotalToday}
+                  checkout={checkout}
                   onSuccess={() => setSubmitted(true)}
                   onBack={() => setPayMethod("card-bond")}
                 />
@@ -1538,7 +1566,7 @@ export default function VehicleModal({
                     ["Account Name", BANK_ACCOUNT_NAME, "text-white"],
                     ["BSB", BANK_BSB, "text-[#7f85f7]"],
                     ["Account Number", BANK_ACCOUNT, "text-[#7f85f7]"],
-                    ["Reference", v.rego, "text-[#5dcaa5]"],
+                    ["Reference", payRef, "text-[#5dcaa5]"],
                   ].map(([label, value, colour]) => (
                     <div
                       key={label}
@@ -1554,10 +1582,10 @@ export default function VehicleModal({
 
                 <div className="mt-4 bg-white/5 rounded-[10px] p-3">
                   <p className="text-[11px] text-[#f5a623] font-semibold flex items-center gap-1.5">
-                    ⚠️ Important — Use vehicle rego as reference
+                    ⚠️ Important — Use this payment reference
                   </p>
                   <p className="text-[11px] text-[#9496a8] mt-1">
-                    Always use <strong className="text-white">{v.rego}</strong>{" "}
+                    Always use <strong className="text-white">{payRef}</strong>{" "}
                     as your payment reference so we can match your transfer
                     instantly.
                   </p>
@@ -1597,7 +1625,7 @@ export default function VehicleModal({
                   </button>
                 </div>
                 <p className="text-[11px] text-[#9496a8] mt-2">
-                  ⚠️ Still use <strong>{v.rego}</strong> as reference in your
+                  ⚠️ Still use <strong>{payRef}</strong> as reference in your
                   PayID transfer description
                 </p>
               </div>
@@ -1612,7 +1640,7 @@ export default function VehicleModal({
                     `Transfer the full amount of ${
                       totalFirst > 0 ? `$${totalFirst.toFixed(2)}` : "as quoted"
                     }`,
-                    `Use ${v.rego} as your reference`,
+                    `Use ${payRef} as your reference`,
                     "Submit this form after transferring",
                     "We will confirm receipt by email",
                     "We call you within 2 hours of confirmation to arrange pickup",
@@ -1644,7 +1672,7 @@ export default function VehicleModal({
                   {totalFirst > 0
                     ? ` $${totalFirst.toFixed(2)}`
                     : " the agreed amount"}{" "}
-                  to the account above using <strong>{v.rego}</strong> as the
+                  to the account above using <strong>{payRef}</strong> as the
                   reference, and I agree to the rental terms and conditions
                   including weekly payments and bond conditions.
                 </span>
@@ -1750,7 +1778,7 @@ export default function VehicleModal({
                       ["BSB", BANK_BSB],
                       ["Account", BANK_ACCOUNT],
                       ["PayID (ABN)", BANK_PAYID],
-                      ["Reference", v.rego],
+                      ["Reference", payRef],
                       [
                         "Amount",
                         totalFirst > 0
@@ -1814,21 +1842,13 @@ export default function VehicleModal({
 function StripeSetupForm({
   vehicle,
   form,
-  customerId,
-  effectiveWeekly,
-  bondWeeks,
-  bondAmount,
-  totalToday,
+  checkout,
   onSuccess,
   onBack,
 }: {
   vehicle: RentalVehicle
   form: FormState
-  customerId: string
-  effectiveWeekly: number
-  bondWeeks: number
-  bondAmount: number
-  totalToday: number
+  checkout: CheckoutInfo
   onSuccess: () => void
   onBack: () => void
 }) {
@@ -1836,13 +1856,39 @@ function StripeSetupForm({
   const elements = useElements()
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState("")
+  // Which tab of the PaymentElement is selected — the cardholder name field
+  // and the BECS bond rule depend on it.
+  const [methodType, setMethodType] = useState("card")
+  const [cardholderName, setCardholderName] = useState("")
+  const [consent, setConsent] = useState(false)
+  const [typedName, setTypedName] = useState("")
 
   const fmt = (n: number) => `$${n.toFixed(2)}`
+  const { weeklyRate, bondWeeks, bondAmount } = checkout
+  const totalToday = weeklyRate + bondAmount
+  const isBecs = methodType === "au_becs_debit"
+  const becsNeedsBond = isBecs && bondWeeks < 1
 
   const handlePay = async () => {
     if (!stripe || !elements) return
-    setProcessing(true)
     setError("")
+    if (becsNeedsBond) {
+      setError("Direct debit needs a bond of at least 1 week — go back and choose one, or pay by card.")
+      return
+    }
+    if (!isBecs && cardholderName.trim().length < 3) {
+      setError("Enter the name exactly as it appears on your card.")
+      return
+    }
+    if (!consent) {
+      setError("Please tick the box to agree to the weekly charges.")
+      return
+    }
+    if (!typedName.trim().includes(" ")) {
+      setError("Please type your full name (first and last) to sign.")
+      return
+    }
+    setProcessing(true)
 
     const { error: submitError } = await elements.submit()
     if (submitError) {
@@ -1851,17 +1897,50 @@ function StripeSetupForm({
       return
     }
 
+    // Record the agreement before any card or bank details are confirmed.
+    try {
+      const res = await fetch("/api/rental-payment/accept-terms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rentalId: checkout.rentalId,
+          typedName,
+          agreed: consent,
+          termsVersion: checkout.termsVersion,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || "Could not record your agreement. Please try again.")
+        setProcessing(false)
+        return
+      }
+    } catch {
+      setError("Could not record your agreement. Please try again.")
+      setProcessing(false)
+      return
+    }
+
+    // 3D Secure is requested on every card (see create-setup), so Stripe.js
+    // opens the bank's verification step here before the setup completes.
+    // The cardholder name is sent as typed — not copied from the application
+    // — so the server can compare it with the licence name. BECS collects
+    // the account holder's name in the PaymentElement itself.
     const { error: confirmError, setupIntent } = await stripe.confirmSetup({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/services/car-rental?payment=success`,
-        payment_method_data: {
-          billing_details: {
-            name: `${form.firstName} ${form.lastName}`,
-            email: form.email,
-            phone: form.phone,
-          },
-        },
+        ...(isBecs
+          ? {}
+          : {
+              payment_method_data: {
+                billing_details: {
+                  name: cardholderName.trim(),
+                  email: form.email,
+                  phone: form.phone,
+                },
+              },
+            }),
       },
       redirect: "if_required",
     })
@@ -1871,14 +1950,8 @@ function StripeSetupForm({
       setProcessing(false)
       return
     }
-
-    const paymentMethodId =
-      typeof setupIntent?.payment_method === "string"
-        ? setupIntent.payment_method
-        : setupIntent?.payment_method?.id
-
-    if (!paymentMethodId) {
-      setError("Payment setup did not complete. Please try again.")
+    if (setupIntent?.status !== "succeeded" && setupIntent?.status !== "processing") {
+      setError("Your bank didn't confirm the card. Please try again.")
       setProcessing(false)
       return
     }
@@ -1888,17 +1961,8 @@ function StripeSetupForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerId,
-          paymentMethodId,
-          vehicleId: vehicle.id,
-          // The server prices the rental itself; an approved offer is
-          // looked up by id rather than trusting a rate sent from here.
-          negotiationId: readOfferId(vehicle.id),
-          bondWeeks,
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone,
+          rentalId: checkout.rentalId,
+          setupIntentId: checkout.setupIntentId,
         }),
       })
       const data = await res.json()
@@ -1914,6 +1978,9 @@ function StripeSetupForm({
     }
   }
 
+  const inp =
+    "w-full border border-[#e8e8f0] rounded-[10px] h-[46px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors"
+
   return (
     <div className="p-6 max-w-[600px] mx-auto">
       <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
@@ -1921,27 +1988,23 @@ function StripeSetupForm({
       </h3>
       <p className="text-[13px] text-[#9496a8] mb-5">
         Powered by Stripe — bank-grade encryption. We never see your card or
-        bank details.
+        bank details. Your bank will ask you to confirm the card.
       </p>
 
       <div className="bg-[#f8f8ff] rounded-[14px] p-5 mb-5">
         <p className="font-bold text-[14px] text-[#1a1a2e] mb-3">
-          {vehicle.name} ({vehicle.rego})
+          {vehicle.name}
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-[13px]">
             <span className="text-[#666]">1 week rent (today)</span>
-            <span className="font-semibold text-[#1a1a2e]">
-              {fmt(effectiveWeekly)}
-            </span>
+            <span className="font-semibold text-[#1a1a2e]">{fmt(weeklyRate)}</span>
           </div>
           {bondWeeks > 0 ? (
             <div className="flex justify-between text-[13px]">
               <span className="text-[#666]">
                 Security bond ({bondWeeks} week{bondWeeks > 1 ? "s" : ""})
-                <span className="text-[#9496a8] text-[11px] ml-1">
-                  refundable
-                </span>
+                <span className="text-[#9496a8] text-[11px] ml-1">refundable</span>
               </span>
               <span className="font-semibold text-[#1a1a2e]">{fmt(bondAmount)}</span>
             </div>
@@ -1951,21 +2014,82 @@ function StripeSetupForm({
             </div>
           )}
           <div className="border-t border-[#e8e8f0] pt-2 mt-2 flex justify-between">
-            <span className="font-bold text-[15px] text-[#1a1a2e]">
-              Total today
-            </span>
-            <span className="font-extrabold text-[18px] text-[#7f85f7]">
-              {fmt(totalToday)}
-            </span>
+            <span className="font-bold text-[15px] text-[#1a1a2e]">Total today</span>
+            <span className="font-extrabold text-[18px] text-[#7f85f7]">{fmt(totalToday)}</span>
           </div>
           <p className="text-[11px] text-[#9496a8]">
-            Then {fmt(effectiveWeekly)} auto-billed every week thereafter.
+            Then {fmt(weeklyRate)} auto-billed every week thereafter. Shows on
+            your statement as PAKOZ RENTAL.
           </p>
         </div>
       </div>
 
+      {!isBecs && (
+        <div className="mb-3">
+          <label
+            htmlFor="cardholderName"
+            className="block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mb-1.5"
+          >
+            Name on card *
+          </label>
+          <input
+            id="cardholderName"
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value)}
+            autoComplete="cc-name"
+            className={inp}
+            placeholder="As printed on the card"
+          />
+        </div>
+      )}
+
       <div className="mb-4">
-        <PaymentElement options={{ layout: "tabs" }} />
+        <PaymentElement
+          options={{ layout: "tabs" }}
+          onChange={(e) => setMethodType(e.value.type)}
+        />
+      </div>
+
+      {becsNeedsBond && (
+        <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[10px] p-3 mb-4">
+          <p className="text-[12px] text-[#7d5a00]">
+            Direct debit requires a refundable bond of at least 1 week. Go back
+            and choose a bond, or pay by card.
+          </p>
+        </div>
+      )}
+
+      {/* Proof of agreement: exact weekly amount and billing day, ticked and
+          signed with a typed name before any payment details are confirmed. */}
+      <div className="border-2 border-[#e8e8f0] rounded-[14px] p-4 mb-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-1 flex-shrink-0 accent-[#7f85f7] w-4 h-4"
+          />
+          <span className="text-[13px] text-[#1a1a2e] font-medium leading-relaxed">
+            {checkout.consentSentence}{" "}
+            <a href="/rental-terms" target="_blank" className="text-[#7f85f7] underline">
+              Read the rental terms
+            </a>
+          </span>
+        </label>
+        <label
+          htmlFor="typedName"
+          className="block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mt-4 mb-1.5"
+        >
+          Type your full name to sign *
+        </label>
+        <input
+          id="typedName"
+          value={typedName}
+          onChange={(e) => setTypedName(e.target.value)}
+          autoComplete="name"
+          className={inp}
+          placeholder={`${form.firstName} ${form.lastName}`.trim() || "Full name"}
+        />
       </div>
 
       {error && (
@@ -1994,7 +2118,7 @@ function StripeSetupForm({
         <button
           type="button"
           onClick={handlePay}
-          disabled={processing || !stripe}
+          disabled={processing || !stripe || !consent || becsNeedsBond}
           className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
         >
           {processing ? (

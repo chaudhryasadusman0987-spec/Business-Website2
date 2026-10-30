@@ -17,6 +17,8 @@ import {
   parseColours,
   FUEL_TYPES,
   TRANSMISSIONS,
+  VEHICLE_STATUSES,
+  parseVehicleStatus,
   SEAT_OPTIONS,
   type RentalVehicle,
   type VehicleInput,
@@ -24,7 +26,7 @@ import {
 import { getColourHex } from "@/lib/colourHex"
 import ImageInput from "./ImageInput"
 import GalleryInput from "./GalleryInput"
-import { Labeled, Text, Num, Select, Toggle, IconBtn } from "./catalog-ui"
+import { Labeled, Text, Num, Select, IconBtn } from "./catalog-ui"
 
 // Postgres-backed car rental fleet manager. Reads from /api/vehicles?all=1 ;
 // all writes go through /api/dashboard/update (type: "vehicle"). The public car
@@ -61,7 +63,7 @@ function toInput(v: RentalVehicle): VehicleInput {
     imageAlt: v.imageAlt,
     weeklyRate: v.weeklyRate,
     bond: v.bond,
-    available: v.available,
+    status: v.status,
     sortOrder: v.sortOrder,
     variant: v.variant,
     fuelType: v.fuelType,
@@ -189,7 +191,9 @@ export default function VehiclesDbTab() {
           {rows.length} vehicles
         </span>
         <span className="bg-white border border-[#e8e8f0] rounded-full px-4 py-1.5 text-[13px] font-medium text-[#1a1a2e]">
-          {rows.filter((r) => r.available).length} shown on site
+          {rows.filter((r) => r.status === "available").length} available ·{" "}
+          {rows.filter((r) => r.status === "coming_soon").length} coming soon ·{" "}
+          {rows.filter((r) => r.status === "hidden").length} hidden
         </span>
         {missingRate > 0 && (
           <span className="bg-[rgba(245,124,0,0.12)] border border-[#f0a868] rounded-full px-4 py-1.5 text-[13px] font-medium text-[#b45a00]">
@@ -264,7 +268,7 @@ export default function VehiclesDbTab() {
             <div
               key={row.id}
               className={`bg-white rounded-[16px] border p-5 ${
-                row.available ? "border-[#e8e8f0]" : "border-[#f0d0d0]"
+                row.status !== "hidden" ? "border-[#e8e8f0]" : "border-[#f0d0d0]"
               }`}
             >
               <div className="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-[#f0f0f8]">
@@ -320,10 +324,10 @@ export default function VehiclesDbTab() {
                   Unsaved changes — click Save to publish them to the site.
                 </p>
               )}
-              {!row.available && (
+              {row.status === "hidden" && (
                 <p className="text-[11px] text-[#c0392b] mt-2 flex items-center gap-1">
                   <AlertCircle size={12} /> Hidden — this car is not shown to
-                  customers. Switch &ldquo;Show on site&rdquo; back on to
+                  customers. Set &ldquo;Status&rdquo; back to Available to
                   restore it.
                 </p>
               )}
@@ -438,11 +442,20 @@ function VehicleFields({
             w="w-[260px]"
           />
         </Labeled>
-        <Labeled label="Show on site">
-          <Toggle
-            on={v.available}
-            onClick={() => onChange({ available: !v.available })}
-          />
+        <Labeled label="Status">
+          {/* Not the shared Select: that one offers a blank, and a car must
+              always have a status. Coming soon = listed, no price, no booking. */}
+          <select
+            value={v.status}
+            onChange={(e) => onChange({ status: parseVehicleStatus(e.target.value) })}
+            className="w-[150px] border border-[#e8e8f0] rounded-[8px] px-2.5 h-[38px] text-[13px] text-[#1a1a2e] bg-white focus:border-[#7f85f7] outline-none"
+          >
+            {VEHICLE_STATUSES.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
         </Labeled>
       </div>
 

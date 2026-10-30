@@ -1,11 +1,17 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import VehicleModal from "@/components/car-rental/VehicleModal"
-import { vehicleAlt, type RentalVehicle } from "@/lib/vehicles"
+import {
+  isBookable,
+  vehicleAlt,
+  vehicleSpecLine,
+  type RentalVehicle,
+} from "@/lib/vehicles"
 import { getColourHex } from "@/lib/colourHex"
 
 // The fleet lives in the database and is managed from the dashboard's Car
@@ -26,7 +32,7 @@ interface OpenState {
 
 export default function VehicleGrid({
   title = "The fleet",
-  intro = "Every car below is on the yard right now. Open one for the photos and the rego, or go straight to the application.",
+  intro = "Every car below is on the yard right now. Open one for the photos and the specs, or go straight to the application.",
 }: {
   title?: string
   intro?: string
@@ -112,7 +118,11 @@ export default function VehicleGrid({
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {vehicles.map((vehicle, i) => (
+            {vehicles.map((vehicle, i) => {
+              // Coming-soon cars are listed but cannot be opened, priced or
+              // booked — the card points at the contact page instead.
+              const bookable = isBookable(vehicle)
+              return (
               // Stagger across each row of four, then restart — the whole grid
               // reveals in waves instead of one long queue.
               <AnimateIn
@@ -122,17 +132,25 @@ export default function VehicleGrid({
                 className="flex"
               >
                 <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openVehicle(vehicle, "details")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      openVehicle(vehicle, "details")
-                    }
-                  }}
-                  aria-label={`${vehicle.name} — view details`}
-                  className="group w-full flex flex-col bg-white rounded-[16px] overflow-hidden border border-[#e8e8f0] cursor-pointer hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-[#d6d8f5] transition-all duration-300"
+                  {...(bookable
+                    ? {
+                        role: "button",
+                        tabIndex: 0,
+                        onClick: () => openVehicle(vehicle, "details"),
+                        onKeyDown: (e: React.KeyboardEvent) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault()
+                            openVehicle(vehicle, "details")
+                          }
+                        },
+                        "aria-label": `${vehicle.name} — view details`,
+                      }
+                    : {})}
+                  className={`group w-full flex flex-col bg-white rounded-[16px] overflow-hidden border border-[#e8e8f0] transition-all duration-300 ${
+                    bookable
+                      ? "cursor-pointer hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-[#d6d8f5]"
+                      : ""
+                  }`}
                 >
                   <div className="h-[160px] relative bg-[#f0f0ff] overflow-hidden">
                     <ImageWithFallback
@@ -144,6 +162,11 @@ export default function VehicleGrid({
                       fallbackBg="#f0f0ff"
                       placeholderText="Photo coming soon"
                     />
+                    {!bookable && (
+                      <span className="absolute top-3 left-3 bg-[#1a1a2e] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow">
+                        Coming soon
+                      </span>
+                    )}
                   </div>
 
                   <div className="p-4 flex flex-col flex-1">
@@ -151,8 +174,7 @@ export default function VehicleGrid({
                       {vehicle.name}
                     </h3>
                     <p className="text-[11px] text-[#9496a8] mt-1">
-                      {vehicle.type}
-                      {vehicle.rego ? ` · ${vehicle.rego}` : ""}
+                      {vehicleSpecLine(vehicle)}
                     </p>
 
                     {/* Colour options at a glance — the modal names them. */}
@@ -176,6 +198,7 @@ export default function VehicleGrid({
 
                     {/* Weekly rate is the headline number — it is what the
                         owner sets in the dashboard. 0 means "not published". */}
+                    {bookable && (
                     <div className="mt-3">
                       {vehicle.weeklyRate > 0 ? (
                         <p className="text-[#1a1a2e]">
@@ -207,7 +230,9 @@ export default function VehicleGrid({
                         </button>
                       )}
                     </div>
+                    )}
 
+                    {bookable ? (
                     <div className="mt-auto pt-4 border-t border-[#f0f0f8] flex flex-col gap-2.5">
                       <button
                         type="button"
@@ -227,10 +252,29 @@ export default function VehicleGrid({
                         />
                       </span>
                     </div>
+                    ) : (
+                    <div className="mt-auto pt-4 border-t border-[#f0f0f8] flex flex-col gap-2.5">
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full bg-[#e8e8f0] text-[#9496a8] rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider cursor-not-allowed"
+                      >
+                        Get on Rent
+                      </button>
+                      <Link
+                        href="/contact"
+                        className="text-[12px] text-[#7f85f7] font-semibold flex items-center justify-center gap-1.5 hover:text-[#6b71f0]"
+                      >
+                        Register interest
+                        <ArrowRight size={13} />
+                      </Link>
+                    </div>
+                    )}
                   </div>
                 </div>
               </AnimateIn>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

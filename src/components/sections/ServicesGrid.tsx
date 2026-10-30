@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import AnimateIn from "@/components/ui/AnimateIn"
+import FleetCountBadge from "@/components/car-rental/FleetCountBadge"
 import { services } from "@/data/services"
 
 const icons: Record<string, LucideIcon> = {
@@ -66,6 +67,7 @@ export default function ServicesGrid() {
                   <p className="text-sm text-gray-500 group-hover:text-white/80 mt-2 transition-all duration-500">
                     {service.description}
                   </p>
+                  {service.id === "car-rental" && <FleetCountBadge />}
                   <Link
                     href={service.href}
                     className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[38px] leading-[38px] rounded-[5px] text-[15px] group-hover:bg-white group-hover:text-brand-dark transition-all duration-500"

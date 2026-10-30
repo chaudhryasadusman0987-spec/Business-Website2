@@ -6,7 +6,7 @@ import { Phone } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import { SITE_PHONE } from "@/data/site"
-import { getVehicles } from "@/lib/db"
+import { getFleetCounts } from "@/lib/db"
 
 // The fleet is dashboard-managed, so the hero counts have to be read at request
 // time — a car added in the dashboard should change "N cars on the yard" on the
@@ -25,12 +25,16 @@ export const metadata: Metadata = {
 
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
 
-/** Cars visible to customers. 0 when the database is unreachable. */
-async function availableCount(): Promise<number> {
+/**
+ * onYard: every listed car, coming soon included. available: bookable cars not
+ * currently on rent. Null when the database is unreachable, so the page falls
+ * back to wording without numbers rather than claiming "0 cars".
+ */
+async function fleetCounts(): Promise<{ onYard: number; available: number } | null> {
   try {
-    return (await getVehicles()).filter((v) => v.available).length
+    return await getFleetCounts()
   } catch {
-    return 0
+    return null
   }
 }
 
@@ -46,7 +50,14 @@ const terms = [
 ]
 
 export default async function CarRentalPage() {
-  const count = await availableCount()
+  const fleet = await fleetCounts()
+  const count = fleet?.onYard ?? 0
+  const allBooked = !!fleet && fleet.onYard > 0 && fleet.available === 0
+  const badge = !fleet || fleet.onYard === 0
+    ? "Available now"
+    : allBooked
+      ? "All booked – join the waitlist"
+      : `${fleet.available} available now`
 
   const heroStats = [
     // Falls back to the terms when the count is unknown, so the row never
@@ -163,13 +174,19 @@ export default async function CarRentalPage() {
               </div>
 
               <div className="absolute -bottom-5 left-5 right-5 sm:right-auto sm:w-[290px] bg-white rounded-[14px] p-4 shadow-xl flex items-center gap-3.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#0f6e56] flex-shrink-0" />
+                <span
+                  className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${allBooked ? "bg-[#f0ad4e]" : "bg-[#0f6e56]"}`}
+                />
                 <div>
-                  <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">
-                    {count > 0 ? `All ${count} available now` : "Available now"}
-                  </p>
+                  <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">{badge}</p>
                   <p className="text-[12px] text-[#9496a8] mt-0.5">
-                    Pick up in Brisbane — usually same week
+                    {allBooked ? (
+                      <a href={tel} className="hover:text-[#7f85f7]">
+                        Call {SITE_PHONE} to be next in line
+                      </a>
+                    ) : (
+                      "Pick up in Brisbane — usually same week"
+                    )}
                   </p>
                 </div>
               </div>

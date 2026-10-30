@@ -2,7 +2,12 @@ import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
-import { insertActiveRental } from "@/lib/db"
+import {
+  getRentalByStripeCustomer,
+  insertActiveRental,
+  logRentalEmail,
+  upsertDispute,
+} from "@/lib/db"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
 import { escapeHtml as esc } from "@/lib/html"
 
@@ -30,6 +35,27 @@ export async function POST(req: Request) {
     const message = err instanceof Error ? err.message : "Unknown error"
     console.error("Webhook sig failed:", message)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
+  }
+
+  if (event.type === "charge.succeeded") {
+    await sendRentalReceipt(stripe, event.data.object)
+    return NextResponse.json({ received: true })
+  }
+
+  if (
+    event.type === "charge.dispute.created" ||
+    event.type === "charge.dispute.updated" ||
+    event.type === "charge.dispute.closed"
+  ) {
+    try {
+      await recordDispute(stripe, event.data.object, event.type === "charge.dispute.created")
+    } catch (e) {
+      // 500 so Stripe retries — a dispute that never reaches the table has
+      // a deadline nobody is watching.
+      console.error("Dispute webhook error:", e)
+      return NextResponse.json({ error: "Dispute not recorded" }, { status: 500 })
+    }
+    return NextResponse.json({ received: true })
   }
 
   const meta = (event.data.object as Stripe.PaymentIntent).metadata || {}
@@ -184,6 +210,14 @@ export async function POST(req: Request) {
           </div>
         </div>`
       )
+      if (meta.rentalId) {
+        await logRentalEmail(
+          meta.rentalId,
+          isBondCharge ? "bond_confirmation" : "payment_confirmation",
+          meta.customerEmail,
+          isBondCharge ? "✅ Bond Payment Confirmed — Pak Oz Rentals" : "✅ Payment Confirmed — Pak Oz Rentals",
+        ).catch((e) => console.error("Email log:", e))
+      }
     } catch (e) {
       console.error("Customer email:", e)
     }
@@ -205,8 +239,11 @@ export async function POST(req: Request) {
       console.error("Lead save:", e)
     }
 
+    // active_rentals drives the bank-transfer reminder email ("pay to BSB…").
+    // A bond belongs to a Stripe subscription that bills itself and gets its
+    // own pre-charge reminder, so it must not land in that table.
     try {
-      await insertActiveRental({
+      if (!isBondCharge) await insertActiveRental({
         id: pi.id,
         vehicleId: meta.vehicleId || "",
         vehicleName: meta.vehicleName || "",
@@ -294,4 +331,101 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ received: true })
+}
+
+/**
+ * Every successful rental charge (weekly invoice or bond) gets a Stripe
+ * receipt. Setting receipt_email on a charge after the fact makes Stripe send
+ * the receipt immediately — the weekly invoice charges are created by the
+ * subscription, so this is the only place to set it on them.
+ */
+async function sendRentalReceipt(stripe: Stripe, charge: Stripe.Charge) {
+  try {
+    const customerId = typeof charge.customer === "string" ? charge.customer : charge.customer?.id
+    if (!customerId) return
+    const rental = await getRentalByStripeCustomer(customerId)
+    if (!rental || !rental.customerEmail) return
+    if (!charge.receipt_email) {
+      await stripe.charges.update(charge.id, { receipt_email: rental.customerEmail })
+    }
+    await logRentalEmail(
+      rental.id,
+      "stripe_receipt",
+      charge.receipt_email || rental.customerEmail,
+      `Stripe receipt — $${(charge.amount / 100).toFixed(2)} ${charge.currency.toUpperCase()} (${charge.id})`,
+    )
+  } catch (e) {
+    console.error("Receipt email error:", e)
+  }
+}
+
+async function recordDispute(stripe: Stripe, dispute: Stripe.Dispute, isCreated: boolean) {
+  const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge.id
+  const charge = await stripe.charges.retrieve(chargeId)
+  const customerId = typeof charge.customer === "string" ? charge.customer : charge.customer?.id
+  const rental = customerId ? await getRentalByStripeCustomer(customerId) : null
+  const customerName = rental?.customerName || charge.billing_details?.name || "Unknown customer"
+  const dueBy = dispute.evidence_details?.due_by
+    ? new Date(dispute.evidence_details.due_by * 1000).toISOString()
+    : null
+  const amount = dispute.amount / 100
+
+  const { created } = await upsertDispute({
+    id: dispute.id,
+    rentalId: rental?.id ?? null,
+    chargeId,
+    customerName,
+    amount,
+    currency: dispute.currency,
+    reason: dispute.reason,
+    status: dispute.status,
+    dueBy,
+  })
+
+  // Stripe can deliver dispute.created more than once; email on first insert only.
+  if (!isCreated || !created) return
+  const deadline = dueBy
+    ? new Date(dueBy).toLocaleString("en-AU", {
+        timeZone: "Australia/Brisbane",
+        dateStyle: "full",
+        timeStyle: "short",
+      }) + " (Brisbane)"
+    : "Not given by Stripe — check the Stripe dashboard"
+  try {
+    await sendEmail(
+      SITE_EMAIL,
+      `⚠️ CHARGEBACK — $${amount.toFixed(2)} — ${customerName} — respond by ${dueBy ? new Date(dueBy).toLocaleDateString("en-AU", { timeZone: "Australia/Brisbane" }) : "ASAP"}`,
+      `<div style="font-family:Arial;max-width:600px;margin:0 auto">
+        <div style="background:#c62828;padding:20px;text-align:center">
+          <h1 style="color:white;margin:0;font-size:20px">⚠️ New Chargeback / Dispute</h1>
+        </div>
+        <div style="padding:24px">
+          <table style="width:100%;border-collapse:collapse">
+            ${[
+              ["Customer", customerName],
+              ["Amount", `$${amount.toFixed(2)} ${dispute.currency.toUpperCase()}`],
+              ["Reason", dispute.reason.replace(/_/g, " ")],
+              ["Evidence deadline", deadline],
+              ["Vehicle", rental ? `${rental.vehicleName} (${rental.vehicleRego})` : "Not linked to a rental"],
+              ["Dispute ID", dispute.id],
+            ]
+              .map(
+                ([k, v]) => `<tr>
+                  <td style="padding:8px;background:#f8f8f8;font-size:12px;font-weight:bold;color:#666;width:35%;border-bottom:1px solid #eee">${k}</td>
+                  <td style="padding:8px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #eee">${esc(v)}</td>
+                </tr>`,
+              )
+              .join("")}
+          </table>
+          <p style="margin-top:16px;font-size:13px;color:#444">
+            Open <strong>/rental-admin → Disputes</strong>, click <strong>Build evidence pack</strong>,
+            review the draft, then <strong>Submit to bank</strong> before the deadline.
+            Missing the deadline loses the dispute automatically.
+          </p>
+        </div>
+      </div>`,
+    )
+  } catch (e) {
+    console.error("Dispute alert email error:", e)
+  }
 }
