@@ -145,7 +145,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v1-rear.jpg",
     ],
     imageAlt: "2013 Toyota Prius Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v2", sortOrder: 2,
@@ -166,7 +166,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v2-rear.jpg",
     ],
     imageAlt: "2016 Ford Kuga SUV",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v3", sortOrder: 3,
@@ -187,7 +187,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v3-rear.jpg",
     ],
     imageAlt: "2008 Suzuki Swift Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v4", sortOrder: 4,
@@ -208,7 +208,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v4-rear.jpg",
     ],
     imageAlt: "2010 Honda Jazz Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v5", sortOrder: 5,
@@ -229,7 +229,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v5-rear.jpg",
     ],
     imageAlt: "2004 Toyota Prius Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v6", sortOrder: 6,
@@ -250,7 +250,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v6-rear.jpg",
     ],
     imageAlt: "2013 Nissan Pulsar Sedan",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v7", sortOrder: 7,
@@ -271,7 +271,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v7-rear.jpg",
     ],
     imageAlt: "2007 Toyota Yaris Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v8", sortOrder: 8,
@@ -292,7 +292,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v8-rear.jpg",
     ],
     imageAlt: "2007 Toyota Prius Hybrid",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v9", sortOrder: 9,
@@ -313,7 +313,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v9-rear.jpg",
     ],
     imageAlt: "2016 Toyota Camry Hybrid",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v10", sortOrder: 10,
@@ -334,7 +334,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v10-rear.jpg",
     ],
     imageAlt: "2013 Toyota Camry Sedan",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v11", sortOrder: 11,
@@ -355,7 +355,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v11-rear.jpg",
     ],
     imageAlt: "2016 Toyota Camry Hybrid",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v12", sortOrder: 12,
@@ -376,7 +376,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v12-rear.jpg",
     ],
     imageAlt: "2007 Toyota Yaris Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v13", sortOrder: 13,
@@ -397,7 +397,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v13-rear.jpg",
     ],
     imageAlt: "2007 Honda Jazz Hatchback",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v14", sortOrder: 14,
@@ -418,7 +418,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v14-rear.jpg",
     ],
     imageAlt: "2015 Toyota Camry Hybrid",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v15", sortOrder: 15,
@@ -439,7 +439,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v15-rear.jpg",
     ],
     imageAlt: "2008 Hyundai Getz",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
   {
     id: "v16", sortOrder: 16,
@@ -460,7 +460,7 @@ export const seedVehicles: RentalVehicle[] = [
       "/images/vehicles/v16-rear.jpg",
     ],
     imageAlt: "2017 Toyota HiLux Ute",
-    weeklyRate: 0, bond: 0, available: true
+    weeklyRate: 0, bond: 0, status: "available"
   },
 ]
 

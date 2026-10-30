@@ -58,7 +58,7 @@ interface Negotiation {
 }
 
 interface VehicleRow {
-  available: boolean
+  status: string
 }
 
 function leadName(l: Lead): string {
@@ -272,7 +272,7 @@ function OverviewTab() {
       setActiveCount(agreements.length)
       setWeeklyRevenue(agreements.reduce((sum, a) => sum + (Number(a.agreedWeeklyRate) || 0), 0))
       setPendingOffers(negotiations.filter((n) => n.status === "pending").length)
-      setAvailableVehicles(vehicles.filter((v) => v.available).length)
+      setAvailableVehicles(vehicles.filter((v) => v.status === "available").length)
       setLoading(false)
     })
   }, [])

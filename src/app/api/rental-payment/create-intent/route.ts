@@ -1,6 +1,7 @@
 import Stripe from "stripe"
 import { NextResponse } from "next/server"
 import { getVehicle } from "@/lib/db"
+import { isBookable } from "@/lib/vehicles"
 import { RENTAL_STATEMENT_SUFFIX } from "@/lib/stripe-server"
 
 export const runtime = "nodejs"
@@ -23,6 +24,9 @@ export async function POST(req: Request) {
     const vehicle = vehicleId ? await getVehicle(vehicleId) : null
     if (!vehicle) {
       return NextResponse.json({ error: "Vehicle not found" }, { status: 400 })
+    }
+    if (!isBookable(vehicle)) {
+      return NextResponse.json({ error: "This car can't be booked yet." }, { status: 400 })
     }
 
     const weekly = vehicle.weeklyRate || 0

@@ -5,6 +5,8 @@ import { X, ChevronLeft, ChevronRight, Check, Upload, Phone } from "lucide-react
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import {
   galleryImages,
+  isBookable,
+  paymentReference,
   vehicleAlt,
   type RentalVehicle,
 } from "@/lib/vehicles"
@@ -278,13 +280,16 @@ export default function VehicleModal({
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
   // in yet still lines up with the rest.
+  // Bank-transfer reference. Not the rego — that is internal and never sent
+  // to the browser.
+  const payRef = paymentReference(v)
+
   const specs: [string, string][] = [
     ["VARIANT", v.variant],
     ["FUEL TYPE", v.fuelType],
     ["ENGINE", v.engine],
     ["TRANSMISSION", v.transmission],
     ["SEATS", v.seats > 0 ? `${v.seats} Seats` : ""],
-    ["REGISTRATION", v.rego],
     ["YEAR", String(v.year)],
     ["TYPE", v.type],
   ]
@@ -378,7 +383,6 @@ export default function VehicleModal({
       Object.entries(form).forEach(([k, val]) => fd.append(k, String(val)))
       fd.append("vehicleId", v.id)
       fd.append("vehicleName", v.name)
-      fd.append("vehicleRego", v.rego)
       fd.append("paymentMethod", "direct-deposit")
       fd.append("weeklyRent", String(weekly))
       fd.append("bondAmount", includeBond ? String(bond) : "0")
@@ -602,12 +606,9 @@ export default function VehicleModal({
                   <h2 className="text-white font-extrabold text-[18px] lg:text-[22px] leading-tight drop-shadow-lg">
                     {v.name}
                   </h2>
-                  <p className="text-white/60 text-[12px] mt-0.5">
-                    Rego: {v.rego}
-                  </p>
                 </div>
 
-                {v.available && (
+                {isBookable(v) && (
                   <div className="absolute top-4 left-4 bg-[#0f6e56] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     Available
@@ -1565,7 +1566,7 @@ export default function VehicleModal({
                     ["Account Name", BANK_ACCOUNT_NAME, "text-white"],
                     ["BSB", BANK_BSB, "text-[#7f85f7]"],
                     ["Account Number", BANK_ACCOUNT, "text-[#7f85f7]"],
-                    ["Reference", v.rego, "text-[#5dcaa5]"],
+                    ["Reference", payRef, "text-[#5dcaa5]"],
                   ].map(([label, value, colour]) => (
                     <div
                       key={label}
@@ -1581,10 +1582,10 @@ export default function VehicleModal({
 
                 <div className="mt-4 bg-white/5 rounded-[10px] p-3">
                   <p className="text-[11px] text-[#f5a623] font-semibold flex items-center gap-1.5">
-                    ⚠️ Important — Use vehicle rego as reference
+                    ⚠️ Important — Use this payment reference
                   </p>
                   <p className="text-[11px] text-[#9496a8] mt-1">
-                    Always use <strong className="text-white">{v.rego}</strong>{" "}
+                    Always use <strong className="text-white">{payRef}</strong>{" "}
                     as your payment reference so we can match your transfer
                     instantly.
                   </p>
@@ -1624,7 +1625,7 @@ export default function VehicleModal({
                   </button>
                 </div>
                 <p className="text-[11px] text-[#9496a8] mt-2">
-                  ⚠️ Still use <strong>{v.rego}</strong> as reference in your
+                  ⚠️ Still use <strong>{payRef}</strong> as reference in your
                   PayID transfer description
                 </p>
               </div>
@@ -1639,7 +1640,7 @@ export default function VehicleModal({
                     `Transfer the full amount of ${
                       totalFirst > 0 ? `$${totalFirst.toFixed(2)}` : "as quoted"
                     }`,
-                    `Use ${v.rego} as your reference`,
+                    `Use ${payRef} as your reference`,
                     "Submit this form after transferring",
                     "We will confirm receipt by email",
                     "We call you within 2 hours of confirmation to arrange pickup",
@@ -1671,7 +1672,7 @@ export default function VehicleModal({
                   {totalFirst > 0
                     ? ` $${totalFirst.toFixed(2)}`
                     : " the agreed amount"}{" "}
-                  to the account above using <strong>{v.rego}</strong> as the
+                  to the account above using <strong>{payRef}</strong> as the
                   reference, and I agree to the rental terms and conditions
                   including weekly payments and bond conditions.
                 </span>
@@ -1777,7 +1778,7 @@ export default function VehicleModal({
                       ["BSB", BANK_BSB],
                       ["Account", BANK_ACCOUNT],
                       ["PayID (ABN)", BANK_PAYID],
-                      ["Reference", v.rego],
+                      ["Reference", payRef],
                       [
                         "Amount",
                         totalFirst > 0
@@ -1992,7 +1993,7 @@ function StripeSetupForm({
 
       <div className="bg-[#f8f8ff] rounded-[14px] p-5 mb-5">
         <p className="font-bold text-[14px] text-[#1a1a2e] mb-3">
-          {vehicle.name} ({vehicle.rego})
+          {vehicle.name}
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-[13px]">

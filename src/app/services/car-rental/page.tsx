@@ -6,7 +6,7 @@ import { Phone } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import { SITE_PHONE } from "@/data/site"
-import { getRentedVehicleIds, getVehicles } from "@/lib/db"
+import { getFleetCounts } from "@/lib/db"
 
 // The fleet is dashboard-managed, so the hero counts have to be read at request
 // time — a car added in the dashboard should change "N cars on the yard" on the
@@ -26,15 +26,13 @@ export const metadata: Metadata = {
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
 
 /**
- * onYard: cars visible to customers. free: those not currently on rent.
- * Both null when the database is unreachable, so the page falls back to
- * wording without numbers rather than claiming "0 cars".
+ * onYard: every listed car, coming soon included. available: bookable cars not
+ * currently on rent. Null when the database is unreachable, so the page falls
+ * back to wording without numbers rather than claiming "0 cars".
  */
-async function fleetCounts(): Promise<{ onYard: number; free: number } | null> {
+async function fleetCounts(): Promise<{ onYard: number; available: number } | null> {
   try {
-    const [vehicles, rented] = await Promise.all([getVehicles(), getRentedVehicleIds()])
-    const visible = vehicles.filter((v) => v.available)
-    return { onYard: visible.length, free: visible.filter((v) => !rented.has(v.id)).length }
+    return await getFleetCounts()
   } catch {
     return null
   }
@@ -54,12 +52,12 @@ const terms = [
 export default async function CarRentalPage() {
   const fleet = await fleetCounts()
   const count = fleet?.onYard ?? 0
-  const allBooked = !!fleet && fleet.onYard > 0 && fleet.free === 0
+  const allBooked = !!fleet && fleet.onYard > 0 && fleet.available === 0
   const badge = !fleet || fleet.onYard === 0
     ? "Available now"
     : allBooked
       ? "All booked – join the waitlist"
-      : `${fleet.free} available now`
+      : `${fleet.available} available now`
 
   const heroStats = [
     // Falls back to the terms when the count is unknown, so the row never

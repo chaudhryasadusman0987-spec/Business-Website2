@@ -2,7 +2,7 @@ import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import { securitySolutions } from "@/data/security-solutions"
 import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
 import type { Product, ProductInput } from "@/lib/products"
-import type { RentalVehicle, VehicleInput } from "@/lib/vehicles"
+import { parseVehicleStatus, type RentalVehicle, type VehicleInput } from "@/lib/vehicles"
 
 // Database layer. Server-only (imports @neondatabase/serverless) — only import
 // from route handlers, never from client components. Connects via DATABASE_URL
@@ -146,6 +146,7 @@ export async function createVehiclesTable(): Promise<void> {
       transmission TEXT,
       seats        INTEGER NOT NULL DEFAULT 5,
       colours      JSONB NOT NULL DEFAULT '[]'::jsonb,
+      status       TEXT,
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `
@@ -164,6 +165,15 @@ export async function createVehiclesTable(): Promise<void> {
   await db`
     ALTER TABLE vehicles
     ADD COLUMN IF NOT EXISTS colours JSONB NOT NULL DEFAULT '[]'::jsonb
+  `
+  // status ('available' | 'coming_soon' | 'hidden') replaced the old
+  // show-on-site boolean. `available` is still written, as "bookable", so
+  // anything reading the old column never offers a car that isn't.
+  await db`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS status TEXT`
+  await db`
+    UPDATE vehicles
+    SET status = CASE WHEN available THEN 'available' ELSE 'hidden' END
+    WHERE status IS NULL
   `
 }
 
@@ -488,6 +498,7 @@ interface VehicleRow {
   weekly_rate: string | number
   bond: string | number
   available: boolean
+  status: string | null
   sort_order: number
   variant: string | null
   fuel_type: string | null
@@ -514,7 +525,10 @@ function toVehicle(r: VehicleRow): RentalVehicle {
     // NUMERIC comes back as a string from the driver.
     weeklyRate: Number(r.weekly_rate),
     bond: Number(r.bond),
-    available: r.available,
+    // Rows not yet migrated fall back to the old boolean.
+    status: r.status
+      ? parseVehicleStatus(r.status)
+      : r.available ? "available" : "hidden",
     sortOrder: Number(r.sort_order),
     variant: r.variant ?? "",
     fuelType: r.fuel_type ?? "",
@@ -539,6 +553,18 @@ export async function getVehicles(): Promise<RentalVehicle[]> {
   return rows.map(toVehicle)
 }
 
+/**
+ * Hero numbers for the car rental pages. onYard: every listed car, coming soon
+ * included. available: bookable cars not currently out on rent.
+ */
+export async function getFleetCounts(): Promise<{ onYard: number; available: number }> {
+  const [vehicles, rented] = await Promise.all([getVehicles(), getRentedVehicleIds()])
+  return {
+    onYard: vehicles.filter((v) => v.status !== "hidden").length,
+    available: vehicles.filter((v) => v.status === "available" && !rented.has(v.id)).length,
+  }
+}
+
 /** One vehicle by id, or null. */
 export async function getVehicle(id: string): Promise<RentalVehicle | null> {
   const rows = (await sql()`
@@ -561,7 +587,7 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
   const rows = (await db`
     INSERT INTO vehicles
       (id, name, year, make, model, type, rego, image, images, image_alt,
-       weekly_rate, bond, available, sort_order,
+       weekly_rate, bond, available, status, sort_order,
        variant, fuel_type, engine, transmission, seats, colours)
     VALUES (
       ${id},
@@ -576,7 +602,8 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
       ${input.imageAlt || null},
       ${input.weeklyRate},
       ${input.bond},
-      ${input.available},
+      ${input.status === "available"},
+      ${input.status},
       ${input.sortOrder},
       ${input.variant || null},
       ${input.fuelType || null},
@@ -610,7 +637,8 @@ export async function updateVehicle(
       image_alt   = ${input.imageAlt || null},
       weekly_rate = ${input.weeklyRate},
       bond        = ${input.bond},
-      available   = ${input.available},
+      available   = ${input.status === "available"},
+      status      = ${input.status},
       sort_order  = ${input.sortOrder},
       variant      = ${input.variant || null},
       fuel_type    = ${input.fuelType || null},
@@ -648,12 +676,13 @@ export async function seedAllVehicles(force = false): Promise<number> {
     const rows = (await db`
       INSERT INTO vehicles
         (id, name, year, make, model, type, rego, image, images, image_alt,
-         weekly_rate, bond, available, sort_order,
+         weekly_rate, bond, available, status, sort_order,
          variant, fuel_type, engine, transmission, seats, colours)
       VALUES (
         ${v.id}, ${v.name}, ${v.year}, ${v.make}, ${v.model}, ${v.type},
         ${v.rego}, ${v.image}, ${images}::jsonb, ${v.imageAlt},
-        ${v.weeklyRate}, ${v.bond}, ${v.available}, ${v.sortOrder},
+        ${v.weeklyRate}, ${v.bond}, ${v.status === "available"}, ${v.status},
+        ${v.sortOrder},
         ${v.variant}, ${v.fuelType}, ${v.engine}, ${v.transmission},
         ${v.seats}, ${colours}::jsonb
       )

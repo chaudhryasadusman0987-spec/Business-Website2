@@ -8,6 +8,7 @@ import {
   purgeAbandonedApplications,
 } from "@/lib/db"
 import { validateEmail } from "@/lib/rental-validation"
+import { isBookable } from "@/lib/vehicles"
 import { stripeClient } from "@/lib/stripe-server"
 import {
   RENTAL_TERMS_VERSION,
@@ -40,6 +41,9 @@ export async function POST(req: Request) {
     const vehicle = body.vehicleId ? await getVehicle(String(body.vehicleId)) : null
     if (!vehicle) {
       return NextResponse.json({ error: "Vehicle not found" }, { status: 400 })
+    }
+    if (!isBookable(vehicle)) {
+      return NextResponse.json({ error: "This car can't be booked yet." }, { status: 400 })
     }
     const listedWeeklyRate = vehicle.weeklyRate || 0
     let weeklyRate = listedWeeklyRate

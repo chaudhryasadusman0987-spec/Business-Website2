@@ -19,7 +19,7 @@ export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
     .map((s) => `${s.name}: from $${Math.min(...s.products.map((p) => p.price))}`)
     .join(", ")
 
-  const available = fleet.filter((v) => v.available)
+  const available = fleet.filter((v) => v.status === "available")
   const priced = available.filter((v) => v.weeklyRate > 0)
   const cheapest = priced.length
     ? Math.min(...priced.map((v) => v.weeklyRate))
@@ -29,7 +29,7 @@ export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
   const fleetList = priced
     .map(
       (v) =>
-        `${v.name} (${v.type}${v.rego ? `, rego ${v.rego}` : ""}): $${v.weeklyRate}/week` +
+        `${v.name} (${v.type}): $${v.weeklyRate}/week` +
         `${v.bond > 0 ? `, bond $${v.bond}` : ""}`,
     )
     .join("; ")
@@ -41,6 +41,10 @@ export function buildSystemPrompt(fleet: RentalVehicle[] = []): string {
         ? ` A further ${unpriced} car${unpriced === 1 ? "" : "s"} are available with the rate confirmed by phone.`
         : "")
     : `We have ${available.length} cars available; weekly rates are confirmed by phone.`
+  const comingSoon = fleet.filter((v) => v.status === "coming_soon").map((v) => v.name)
+  const comingSoonLine = comingSoon.length
+    ? ` Coming soon (not bookable yet, no price — suggest registering interest on the contact page): ${comingSoon.join("; ")}.`
+    : ""
 
   const rentalLocations = locationSurcharges
     .map((l) =>
@@ -62,7 +66,7 @@ SERVICES:
 
 CAR RENTAL DETAILS:
 - Long-term rental only: paid WEEKLY in advance, with a 4 WEEK MINIMUM. There are no daily rates.
-- ${fleetLine}
+- ${fleetLine}${comingSoonLine}
 - Included on every car: roadside assistance, servicing and maintenance. Insurance excess is $1,300 AUD.
 - Security bond: refunded at the end of the rental. Amounts are listed above where set.
 - Pick-up / delivery: ${rentalLocations}.

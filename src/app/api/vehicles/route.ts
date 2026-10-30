@@ -1,5 +1,6 @@
 import { getVehicles } from "@/lib/db"
-import type { RentalVehicle } from "@/lib/vehicles"
+import { roleFromRequest } from "@/lib/admin-auth"
+import { isListed, toPublicVehicle, type RentalVehicle } from "@/lib/vehicles"
 
 // Public fleet reads. Used by the car rental pages and the dashboard's Car
 // Rental tab. Writes go through /api/dashboard/update (type: "vehicle").
@@ -7,8 +8,11 @@ import type { RentalVehicle } from "@/lib/vehicles"
 // Query params:
 //   ?light=1   omit the photo galleries (see below)
 //   ?id=<id>   return just that one vehicle, galleries included
-//   ?all=1     include unavailable cars — the dashboard needs them, the
-//              public grid does not
+//   ?all=1     admin only: every car, hidden ones and regos included — the
+//              dashboard needs them, the public grid does not
+//
+// Public responses never carry the rego (it is internal) and never include a
+// hidden car, even by ?id=. Coming-soon cars are listed without a price.
 //
 // Photos uploaded from the dashboard are stored inline as data URLs, so a
 // fleet where every car has a full gallery is megabytes of JSON. The listing
@@ -32,7 +36,9 @@ export async function GET(req: Request) {
   const params = new URL(req.url).searchParams
   const id = params.get("id")
   const light = params.get("light") === "1"
-  const includeUnavailable = params.get("all") === "1"
+  // Checked here rather than in middleware: the same GET serves the public
+  // grid, and only the ?all=1 variant is privileged.
+  const admin = params.get("all") === "1" && (await roleFromRequest(req)) !== null
 
   // Never let a browser/CDN cache this — a newly added car must appear on the
   // next page load, and an early empty result must not stick.
@@ -40,13 +46,14 @@ export async function GET(req: Request) {
 
   try {
     const all = await getVehicles()
+    const shown = admin ? all : all.filter(isListed).map(toPublicVehicle)
 
     if (id) {
-      const vehicle = all.find((v) => v.id === id) ?? null
+      const vehicle = shown.find((v) => v.id === id) ?? null
       return Response.json({ vehicle }, { headers, status: vehicle ? 200 : 404 })
     }
 
-    let vehicles = includeUnavailable ? all : all.filter((v) => v.available)
+    let vehicles = shown
     if (light) vehicles = vehicles.map(stripGallery)
     return Response.json({ vehicles }, { headers })
   } catch (err) {
