@@ -1288,7 +1288,7 @@ export default function VehicleModal({
                   </p>
                   <p className="text-[12px] text-[#9496a8] mb-3">
                     Weekly auto-billed. Visa, Mastercard or Amex. Direct
-                    debit for approved repeat renters.
+                    debit for priority customers.
                   </p>
                   <div className="flex gap-1">
                     {["VISA", "MC", "AMEX"].map((c) => (
@@ -1858,7 +1858,8 @@ function StripeSetupForm({
   const [error, setError] = useState("")
   // Which tab of the PaymentElement is selected — the cardholder name field
   // and the BECS bond rule depend on it.
-  const [methodType, setMethodType] = useState("card")
+  // Priority renters land on the direct debit tab (see paymentMethodOrder).
+  const [methodType, setMethodType] = useState(checkout.becsAllowed ? "au_becs_debit" : "card")
   const [cardholderName, setCardholderName] = useState("")
   const [consent, setConsent] = useState(false)
   const [typedName, setTypedName] = useState("")
@@ -2044,8 +2045,24 @@ function StripeSetupForm({
       )}
 
       <div className="mb-4">
+        {checkout.becsAllowed && (
+          <div className="bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3 mb-3">
+            <p className="text-[13px] text-[#085041] font-semibold">
+              ★ Priority customer — direct debit is available to you
+            </p>
+            <p className="text-[12px] text-[#085041] mt-0.5">
+              Your weekly rent comes straight out of your bank account. You can
+              still pay by card using the Card tab.
+            </p>
+          </div>
+        )}
         <PaymentElement
-          options={{ layout: "tabs" }}
+          options={{
+            layout: "tabs",
+            ...(checkout.becsAllowed
+              ? { paymentMethodOrder: ["au_becs_debit", "card"] }
+              : {}),
+          }}
           onChange={(e) => setMethodType(e.value.type)}
         />
       </div>

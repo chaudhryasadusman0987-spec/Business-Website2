@@ -68,7 +68,9 @@ export async function POST(req: Request) {
     // SetupIntent outright). Everyone else pays by card.
     const becsAllowed =
       process.env.STRIPE_BECS_ENABLED === "true" && (await isTrustedRenter(email))
-    const paymentMethodTypes = becsAllowed ? ["card", "au_becs_debit"] : ["card"]
+    // Priority (trusted) renters get direct debit first — it is the preferred
+    // way for them to pay; card stays available as the fallback.
+    const paymentMethodTypes = becsAllowed ? ["au_becs_debit", "card"] : ["card"]
 
     const customer = await stripe.customers.create({
       name: `${firstName} ${lastName}`,
