@@ -1,11 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, ChevronDown, Plus, Mail, Newspaper } from "lucide-react"
-import { navLinks } from "@/data/navigation"
-import { SITE_FULL, SITE_NAME, SITE_SUFFIX } from "@/data/site"
+import {
+  Menu,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Mail,
+  Newspaper,
+  Phone,
+  Clock,
+  Home,
+  Info,
+  ArrowRight,
+} from "lucide-react"
+import {
+  SITE_EMAIL,
+  SITE_FULL,
+  SITE_HOURS,
+  SITE_NAME,
+  SITE_PHONE,
+  SITE_SUFFIX,
+} from "@/data/site"
 
 /* Custom service SVGs — same shapes/colors as the hero cards */
 function CctvIcon() {
@@ -39,6 +58,8 @@ function MonitorIcon() {
   )
 }
 
+// `action` is each service's own next step, shown as a chip in the mobile
+// menu: security and IT have quote wizards, car rental has a fleet to browse.
 const serviceItems = [
   {
     href: "/services/security-solutions",
@@ -46,13 +67,15 @@ const serviceItems = [
     icon: <CctvIcon />,
     title: "Security Solutions",
     sub: "Surveillance, alarms, access & more",
+    action: { label: "Free quote", href: "/services/security-solutions/quote" },
   },
   {
     href: "/services/car-rental",
     iconBg: "bg-[rgba(76,175,80,0.12)]",
     icon: <CarIcon />,
     title: "Car Rental",
-    sub: "Daily & weekly vehicle hire",
+    sub: "Long-term weekly hire, Brisbane",
+    action: { label: "View cars", href: "/services/car-rental/vehicles" },
   },
   {
     href: "/services/it-services",
@@ -60,8 +83,26 @@ const serviceItems = [
     icon: <MonitorIcon />,
     title: "IT & AI Services",
     sub: "Web, App & AI automation",
+    action: { label: "Free quote", href: "/services/it-services/quote" },
   },
 ]
+
+const tel = `tel:${SITE_PHONE.replace(/s/g, "")}`
+
+/**
+ * The mobile menu's main button follows the section the visitor is in, so it
+ * is always the next step for what they are looking at — not a generic
+ * contact link.
+ */
+function primaryCta(pathname: string): { label: string; href: string } {
+  if (pathname.startsWith("/services/car-rental"))
+    return { label: "Browse available cars", href: "/services/car-rental/vehicles" }
+  if (pathname.startsWith("/services/security-solutions"))
+    return { label: "Get a free security quote", href: "/services/security-solutions/quote" }
+  if (pathname.startsWith("/services/it-services"))
+    return { label: "Get a free IT & AI quote", href: "/services/it-services/quote" }
+  return { label: "Get a free quote", href: "/quote" }
+}
 
 const centerLinks = [
   { label: "Home", href: "/" },
@@ -121,6 +162,27 @@ function NavLogo({ onClick }: { onClick?: () => void }) {
 export default function Header() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const cta = primaryCta(pathname)
+  const close = () => setOpen(false)
+
+  // While the menu is open the page behind it must not scroll, and Escape
+  // closes it like any other dialog.
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false)
+    window.addEventListener("keydown", onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [open])
+
+  const rowClass = (active: boolean) =>
+    `flex items-center gap-3 px-4 h-[52px] text-[15px] transition-colors ${
+      active ? "text-[#534ab7] font-semibold bg-[#f4f4ff]" : "text-[#1a1a2e] font-medium active:bg-[#f4f4ff]"
+    }`
 
   const navLinkClass = (active: boolean) =>
     `text-white text-[14px] font-medium px-4 py-2 rounded-md transition-all duration-200 ${
@@ -219,57 +281,139 @@ export default function Header() {
 
       {/* Overlay (mobile slide-out) */}
       <div
-        onClick={() => setOpen(false)}
-        className={`fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-500 ${
+        onClick={close}
+        className={`fixed inset-0 bg-[#0d0d1a]/60 backdrop-blur-[2px] z-[9998] transition-opacity duration-300 lg:hidden ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* Slide-out panel (mobile) */}
+      {/* Slide-out panel (mobile). Purple header to match the bar, light body
+          so the services read as cards rather than one long purple list. */}
       <nav
-        className={`fixed top-0 right-0 h-full w-[300px] max-w-[85vw] bg-gradient-to-b from-[#7f85f7] to-[#6b71f0] shadow-2xl z-[9999] flex flex-col transition-transform duration-500 ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        aria-hidden={!open}
+        className={`fixed top-0 right-0 h-[100dvh] w-[340px] max-w-[88vw] bg-[#f7f7fb] shadow-2xl z-[9999] flex flex-col transition-transform duration-300 ease-out lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Panel header — matches the navbar bar */}
-        <div className="flex items-center justify-between px-6 h-[65px] border-b border-white/15 flex-shrink-0">
-          <NavLogo onClick={() => setOpen(false)} />
+        <div className="flex items-center justify-between pl-5 pr-4 h-[65px] bg-[#7f85f7] flex-shrink-0">
+          <NavLogo onClick={close} />
           <button
-            onClick={() => setOpen(false)}
+            onClick={close}
             aria-label="Close menu"
-            className="text-white hover:text-white/70 transition-colors"
+            className="w-10 h-10 rounded-full bg-white/15 active:bg-white/25 flex items-center justify-center text-white"
           >
-            <X size={26} />
+            <X size={22} />
           </button>
         </div>
 
-        {/* Links */}
-        <div className="flex-1 overflow-y-auto py-4">
-          {navLinks.map((link) => {
-            const active = pathname === link.href
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={`block mx-4 my-0.5 px-4 py-3 rounded-lg text-white text-[16px] font-medium transition-colors duration-200 ${
-                  active ? "bg-white/20 font-semibold" : "hover:bg-white/15"
-                }`}
-              >
-                {link.label}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5">
+          {/* Primary pages */}
+          <div className="bg-white rounded-[14px] border border-[#ececf4] overflow-hidden divide-y divide-[#f0f0f6]">
+            {[
+              { label: "Home", href: "/", Icon: Home },
+              { label: "About us", href: "/about", Icon: Info },
+            ].map(({ label, href, Icon }) => (
+              <Link key={href} href={href} onClick={close} className={rowClass(pathname === href)}>
+                <Icon size={18} className="text-[#7f85f7] flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                <ChevronRight size={16} className="text-[#c4c6d6]" />
               </Link>
-            )
-          })}
+            ))}
+          </div>
+
+          {/* Services — each card goes to the service, the chip to its next step */}
+          <p className="mt-6 mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9496a8]">
+            Our services
+          </p>
+          <div className="flex flex-col gap-2.5">
+            {serviceItems.map((item) => {
+              const active = pathname.startsWith(item.href)
+              return (
+                <div
+                  key={item.href}
+                  className={`bg-white rounded-[14px] border p-3.5 ${
+                    active ? "border-[#7f85f7] shadow-[0_0_0_3px_rgba(127,133,247,0.12)]" : "border-[#ececf4]"
+                  }`}
+                >
+                  <Link href={item.href} onClick={close} className="flex items-center gap-3">
+                    <span className={`w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0 ${item.iconBg}`}>
+                      {item.icon}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[15px] font-semibold text-[#1a1a2e] leading-tight">
+                        {item.title}
+                      </span>
+                      <span className="block text-[12px] text-[#9496a8] mt-0.5 truncate">{item.sub}</span>
+                    </span>
+                    <ChevronRight size={16} className="text-[#c4c6d6] flex-shrink-0" />
+                  </Link>
+                  <Link
+                    href={item.action.href}
+                    onClick={close}
+                    className="mt-3 ml-14 inline-flex items-center gap-1 text-[12px] font-semibold text-[#534ab7] bg-[#eeedfe] rounded-full px-3 py-1.5 active:bg-[#e2e0fd]"
+                  >
+                    {item.action.label}
+                    <ArrowRight size={12} />
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Secondary pages */}
+          <p className="mt-6 mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9496a8]">
+            More
+          </p>
+          <div className="bg-white rounded-[14px] border border-[#ececf4] overflow-hidden divide-y divide-[#f0f0f6]">
+            {[
+              { label: "Blog", href: "/blog", Icon: Newspaper },
+              { label: "Contact us", href: "/contact", Icon: Mail },
+            ].map(({ label, href, Icon }) => (
+              <Link key={href} href={href} onClick={close} className={rowClass(pathname.startsWith(href))}>
+                <Icon size={18} className="text-[#7f85f7] flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                <ChevronRight size={16} className="text-[#c4c6d6]" />
+              </Link>
+            ))}
+          </div>
+
+          {/* Talk to us — the fastest route for most visitors on a phone */}
+          <div className="mt-6 bg-[#1a1a2e] rounded-[14px] p-4">
+            <p className="text-white font-semibold text-[15px]">Talk to a real person</p>
+            <p className="flex items-center gap-1.5 text-[12px] text-[#9496a8] mt-1">
+              <Clock size={12} /> {SITE_HOURS}
+            </p>
+            <div className="grid grid-cols-2 gap-2.5 mt-3.5">
+              <a
+                href={tel}
+                className="flex items-center justify-center gap-2 h-[44px] rounded-[10px] bg-[#5dcaa5] text-[#0d2a20] text-[14px] font-bold active:opacity-90"
+              >
+                <Phone size={16} /> Call
+              </a>
+              <a
+                href={`mailto:${SITE_EMAIL}`}
+                className="flex items-center justify-center gap-2 h-[44px] rounded-[10px] bg-white/10 text-white text-[14px] font-semibold active:bg-white/15"
+              >
+                <Mail size={16} /> Email
+              </a>
+            </div>
+            <p className="text-[12px] text-[#767892] mt-3 text-center">{SITE_PHONE}</p>
+          </div>
         </div>
 
-        {/* CTA */}
-        <div className="p-4 border-t border-white/15 flex-shrink-0">
+        {/* CTA — follows the section the visitor is in (see primaryCta) */}
+        <div className="flex-shrink-0 bg-white border-t border-[#ececf4] px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]">
           <Link
-            href="/contact"
-            onClick={() => setOpen(false)}
-            className="block text-center bg-white text-[#7f85f7] font-semibold rounded-[8px] py-3 hover:bg-white/90 transition-colors"
+            href={cta.href}
+            onClick={close}
+            className="flex items-center justify-center gap-2 h-[50px] rounded-[12px] bg-[#7f85f7] text-white font-bold text-[15px] shadow-[0_6px_18px_rgba(127,133,247,0.35)] active:bg-[#6b71f0]"
           >
-            Get a Quote
+            {cta.label}
+            <ArrowRight size={17} />
           </Link>
         </div>
       </nav>
