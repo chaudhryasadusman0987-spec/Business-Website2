@@ -161,7 +161,7 @@ export default function ActiveRentalsDbTab() {
                         <div className="flex items-center gap-1">
                           {r.customerName}
                           {r.trusted && (
-                            <span title="Trusted renter — BECS allowed">
+                            <span title="Priority customer">
                               <Star size={12} className="text-[#f0ad4e] fill-[#f0ad4e]" />
                             </span>
                           )}
@@ -179,7 +179,7 @@ export default function ActiveRentalsDbTab() {
                           onClick={() => setTrusted(r, !r.trusted)}
                           className="block mt-1 text-[11px] text-[#7f85f7] hover:underline"
                         >
-                          {r.trusted ? "Remove Trusted" : "Mark Trusted"}
+                          {r.trusted ? "Remove Priority" : "Mark Priority"}
                         </button>
                       </td>
                       <td className="px-5 py-4 font-semibold text-[14px] text-[#1a1a2e]">
@@ -302,15 +302,15 @@ function TrustedRenters({ onChange }: { onChange: () => void }) {
   return (
     <div className="bg-white border border-[#e8e8f0] rounded-[12px] p-4 mb-6">
       <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-[13px] font-semibold text-[#1a1a2e]">
-        <Star size={14} className="text-[#f0ad4e]" /> Trusted renters (allowed to pay by BECS direct debit)
+        <Star size={14} className="text-[#f0ad4e]" /> Priority customers
         <span className="text-[#9496a8] font-normal">{open ? "▲" : "▼"}</span>
       </button>
       {open && (
         <div className="mt-3">
           <p className="text-[12px] text-[#666] mb-3">
-            BECS direct-debit disputes can&apos;t be contested, so only renters listed here see the
-            direct debit option at checkout (matched by email) — and they must pay at least a 1 week
-            bond. Everyone else pays by card.
+            Your record of repeat renters you trust (matched by email). Direct debit is now offered
+            to every customer as the preferred method, with a bond of at least 1 week — BECS
+            direct-debit disputes can&apos;t be contested.
           </p>
           <div className="flex gap-2 mb-3">
             <input

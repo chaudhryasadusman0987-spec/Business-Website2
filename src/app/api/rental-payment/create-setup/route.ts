@@ -3,7 +3,6 @@ import {
   createPendingRental,
   getNegotiations,
   getVehicle,
-  isTrustedRenter,
   newRentalId,
   purgeAbandonedApplications,
 } from "@/lib/db"
@@ -62,13 +61,13 @@ export async function POST(req: Request) {
     const bondWeeks = Math.max(0, Math.min(2, Number(body.bondWeeks) || 0))
     const bondAmount = weeklyRate * bondWeeks
 
-    // BECS disputes cannot be contested, so direct debit is only offered to
-    // renters the owner has marked Trusted in /rental-admin — and only once
+    // Direct debit is the preferred payment method for every customer, once
     // BECS is live on the Stripe account (requesting it otherwise fails the
-    // SetupIntent outright). Everyone else pays by card.
-    const becsAllowed =
-      process.env.STRIPE_BECS_ENABLED === "true" && (await isTrustedRenter(email))
-    const paymentMethodTypes = becsAllowed ? ["card", "au_becs_debit"] : ["card"]
+    // SetupIntent outright). It is listed first; card stays as the fallback.
+    // BECS disputes cannot be contested, so start-subscription still insists
+    // on at least one week's bond for a direct debit rental.
+    const becsAllowed = process.env.STRIPE_BECS_ENABLED === "true"
+    const paymentMethodTypes = becsAllowed ? ["au_becs_debit", "card"] : ["card"]
 
     const customer = await stripe.customers.create({
       name: `${firstName} ${lastName}`,

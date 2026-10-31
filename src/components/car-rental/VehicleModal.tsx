@@ -1284,11 +1284,14 @@ export default function VehicleModal({
                 >
                   <div className="text-[28px] mb-2">💳</div>
                   <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
-                    Card / Direct Debit
+                    Direct Debit / Card
+                    <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wider bg-[#e1f5ee] text-[#0f6e56] px-2 py-0.5 rounded-full">
+                      Preferred
+                    </span>
                   </p>
                   <p className="text-[12px] text-[#9496a8] mb-3">
-                    Weekly auto-billed. Visa, Mastercard or Amex. Direct
-                    debit for approved repeat renters.
+                    Weekly auto-billed from your bank account, or by Visa,
+                    Mastercard or Amex.
                   </p>
                   <div className="flex gap-1">
                     {["VISA", "MC", "AMEX"].map((c) => (
@@ -1362,7 +1365,7 @@ export default function VehicleModal({
               <div className="flex flex-col gap-2.5 mb-5">
                 {(
                   [
-                    { val: 0 as const, label: "No bond", sub: "Pay bond in person at pickup" },
+                    { val: 0 as const, label: "No bond", sub: "Card only — pay bond in person at pickup" },
                     { val: 1 as const, label: "1 week bond", sub: `$${effectiveWeekly.toFixed(2)}` },
                     { val: 2 as const, label: "2 week bond", sub: `$${(effectiveWeekly * 2).toFixed(2)}` },
                   ]
@@ -1398,8 +1401,8 @@ export default function VehicleModal({
               <p className="text-[11px] text-[#9496a8] mb-5">
                 After today, ${effectiveWeekly.toFixed(2)} is auto-debited
                 every week. Cancel anytime when you return the vehicle.
-                Paying by bank direct debit (approved renters only) requires
-                at least a 1 week bond.
+                Paying by bank direct debit (preferred) requires at least a
+                1 week bond.
               </p>
 
               {setupError && (
@@ -1858,7 +1861,9 @@ function StripeSetupForm({
   const [error, setError] = useState("")
   // Which tab of the PaymentElement is selected — the cardholder name field
   // and the BECS bond rule depend on it.
-  const [methodType, setMethodType] = useState("card")
+  // Direct debit is the preferred method, so checkout opens on its tab
+  // (see paymentMethodOrder).
+  const [methodType, setMethodType] = useState(checkout.becsAllowed ? "au_becs_debit" : "card")
   const [cardholderName, setCardholderName] = useState("")
   const [consent, setConsent] = useState(false)
   const [typedName, setTypedName] = useState("")
@@ -2044,8 +2049,24 @@ function StripeSetupForm({
       )}
 
       <div className="mb-4">
+        {checkout.becsAllowed && (
+          <div className="bg-[#e1f5ee] border border-[#0f6e56] rounded-[10px] p-3 mb-3">
+            <p className="text-[13px] text-[#085041] font-semibold">
+              ★ Direct debit — our preferred way to pay
+            </p>
+            <p className="text-[12px] text-[#085041] mt-0.5">
+              Your weekly rent comes straight out of your bank account, with a
+              bond of at least 1 week. You can still pay by card using the Card tab.
+            </p>
+          </div>
+        )}
         <PaymentElement
-          options={{ layout: "tabs" }}
+          options={{
+            layout: "tabs",
+            ...(checkout.becsAllowed
+              ? { paymentMethodOrder: ["au_becs_debit", "card"] }
+              : {}),
+          }}
           onChange={(e) => setMethodType(e.value.type)}
         />
       </div>

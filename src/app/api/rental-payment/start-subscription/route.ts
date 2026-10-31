@@ -6,7 +6,6 @@ import { appendLead } from "@/lib/leads-store"
 import {
   activatePendingRental,
   getRentalAgreement,
-  isTrustedRenter,
   listRentalFiles,
 } from "@/lib/db"
 import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
@@ -60,10 +59,10 @@ export async function POST(req: Request) {
     }
     const isBecs = paymentMethod.type === "au_becs_debit"
 
-    // BECS disputes cannot be contested — trusted renters only, and never
-    // without at least one week's bond held.
+    // BECS disputes cannot be contested — never without at least one week's
+    // bond held.
     if (isBecs) {
-      if (process.env.STRIPE_BECS_ENABLED !== "true" || !(await isTrustedRenter(rental.customerEmail))) {
+      if (process.env.STRIPE_BECS_ENABLED !== "true") {
         return NextResponse.json(
           { error: "Direct debit isn't available for this booking — please pay by card." },
           { status: 400 },
