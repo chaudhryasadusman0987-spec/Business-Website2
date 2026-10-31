@@ -7,6 +7,15 @@ body {
   color: #666666;
 }
 
+/* Slide-in animations start off to the side, and decorative glows hang past
+   the edge. On a phone that made pages scroll sideways (and pushed the fixed
+   mobile menu off-screen). `clip`, unlike `hidden`, does not create a scroll
+   container, so the sticky header keeps working. */
+html,
+body {
+  overflow-x: clip;
+}
+
 @keyframes bounce-dot {
   0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
