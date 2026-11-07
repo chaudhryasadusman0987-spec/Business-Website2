@@ -59,7 +59,13 @@ ${JSON.stringify(businesses)}`;
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.3,
+        // Flash "thinking" added ~35s per search and pushed it near the 60s function limit.
+        // Scoring doesn't need it. (Pro models can't turn thinking off, so leave them alone.)
+        ...(/flash/i.test(MODEL) ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+      },
     }),
     cache: 'no-store',
   });

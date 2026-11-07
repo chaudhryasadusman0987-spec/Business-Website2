@@ -82,11 +82,16 @@ export async function getPlace(placeId: string): Promise<any | null> {
   return res.json();
 }
 
-/** "61 Shelley St, Sunnybank QLD 4109, Australia" -> "Sunnybank QLD" */
+/**
+ * "61 Shelley St, Sunnybank QLD 4109, Australia" -> "Sunnybank QLD"
+ * "10/35 Station Rd, Logan Central QLD 4114"     -> "Logan Central QLD"
+ * (With regionCode AU, Google usually leaves the country off.)
+ */
 export function suburbFromAddress(address: string): string {
   const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
-  const candidate = parts.length >= 2 ? parts[parts.length - 2] : parts[0] ?? '';
-  return candidate.replace(/\s+\d{4}$/, '');
+  if (parts.length && /^australia$/i.test(parts[parts.length - 1])) parts.pop();
+  const withState = [...parts].reverse().find((p) => /\b(QLD|NSW|VIC|SA|WA|TAS|NT|ACT)\b/.test(p));
+  return (withState ?? parts[parts.length - 1] ?? '').replace(/\s+\d{4}$/, '');
 }
 
 /** Only Australian mobiles (04xx / +614xx) can receive WhatsApp reliably. */
