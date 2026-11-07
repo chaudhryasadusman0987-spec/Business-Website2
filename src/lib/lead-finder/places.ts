@@ -1,5 +1,6 @@
 // Google Places API (New) — server-side only.
 // Docs: https://developers.google.com/maps/documentation/places/web-service/text-search
+import { COUNTRIES } from './countries';
 import type { Lead } from './types';
 
 const SEARCH_URL = 'https://places.googleapis.com/v1/places:searchText';
@@ -41,7 +42,7 @@ function apiKey(): string {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export async function searchPlaces(textQuery: string, maxResults = 60): Promise<any[]> {
+export async function searchPlaces(textQuery: string, maxResults = 60, regionCode = 'AU'): Promise<any[]> {
   const out: any[] = [];
   let pageToken: string | undefined;
 
@@ -56,7 +57,7 @@ export async function searchPlaces(textQuery: string, maxResults = 60): Promise<
       body: JSON.stringify({
         textQuery,
         pageSize: 20,
-        regionCode: 'AU',
+        regionCode,
         languageCode: 'en',
         ...(pageToken ? { pageToken } : {}),
       }),
@@ -85,20 +86,27 @@ export async function getPlace(placeId: string): Promise<any | null> {
 /**
  * "61 Shelley St, Sunnybank QLD 4109, Australia" -> "Sunnybank QLD"
  * "10/35 Station Rd, Logan Central QLD 4114"     -> "Logan Central QLD"
- * (With regionCode AU, Google usually leaves the country off.)
+ * "12 Mall Rd, Gulberg III, Lahore, 54000, Pakistan" -> "Lahore"
+ * (Google usually leaves the country off when it matches the regionCode.)
  */
 export function suburbFromAddress(address: string): string {
-  const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
-  if (parts.length && /^australia$/i.test(parts[parts.length - 1])) parts.pop();
+  // UAE addresses often use " - " instead of commas.
+  const parts = address.split(/,|\s+-\s+/).map((p) => p.trim()).filter(Boolean);
+  const countryNames = new Set(COUNTRIES.map((c) => c.name.toLowerCase()).concat(['uae', 'usa', 'uk']));
+  if (parts.length && countryNames.has(parts[parts.length - 1].toLowerCase())) parts.pop();
+  // Australian addresses: the part with the state ("Sunnybank QLD 4109").
   const withState = [...parts].reverse().find((p) => /\b(QLD|NSW|VIC|SA|WA|TAS|NT|ACT)\b/.test(p));
-  return (withState ?? parts[parts.length - 1] ?? '').replace(/\s+\d{4}$/, '');
+  if (withState) return withState.replace(/\s+\d{4}$/, '');
+  // Elsewhere: the last part that isn't just a postcode, with any postcode stripped.
+  const last = [...parts].reverse().find((p) => /[a-z]{3,}/i.test(p.replace(/\b\w*\d\w*\b/g, '')));
+  return (last ?? parts[parts.length - 1] ?? '').replace(/\s*\b\w*\d\w*\b/g, '').trim();
 }
 
-/** Only Australian mobiles (04xx / +614xx) can receive WhatsApp reliably. */
+/** Mobile numbers (per country, see countries.ts) are the ones that can receive WhatsApp. */
 export function whatsappNumberFrom(intlPhone: string | null | undefined): string | null {
   if (!intlPhone) return null;
   const digits = intlPhone.replace(/\D/g, '');
-  return /^614\d{8}$/.test(digits) ? digits : null;
+  return COUNTRIES.some((c) => c.mobile.test(digits)) ? digits : null;
 }
 
 export function isChain(name: string): boolean {

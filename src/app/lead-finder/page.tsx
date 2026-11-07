@@ -3,6 +3,7 @@
 // /lead-finder — lead finder. Separate from /dashboard: its own password
 // (LEAD_FINDER_PASSWORD) and its own session cookie.
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { COUNTRIES, DEFAULT_COUNTRY, countryByCode } from '@/lib/lead-finder/countries';
 import { buildMessage, whatsappLink } from '@/lib/lead-finder/messages';
 import {
   LEAD_STATUSES,
@@ -18,11 +19,6 @@ const BUSINESS_TYPES = [
   'bakery', 'grocery store', 'cleaning service', 'plumber', 'electrician', 'landscaper', 'painter',
   'removalist', 'driving school', 'tutoring', 'childcare', 'physiotherapist', 'dentist', 'massage',
   'gym', 'tattoo studio', 'car detailing', 'towing', 'accountant', 'migration agent', 'real estate agent',
-];
-const LOCATIONS = [
-  'Sunnybank QLD', 'Sunnybank Hills QLD', 'Calamvale QLD', 'Logan QLD', 'Woodridge QLD', 'Springwood QLD',
-  'Browns Plains QLD', 'Beenleigh QLD', 'Inala QLD', 'Ipswich QLD', 'Brisbane CBD QLD', 'Gold Coast QLD',
-  'Moreton Bay QLD', 'Sunshine Coast QLD',
 ];
 
 const WEBSITE_BADGE: Record<WebsiteStatus, { label: string; cls: string }> = {
@@ -40,7 +36,9 @@ export default function LeadsPage() {
 
   // search state
   const [businessType, setBusinessType] = useState('mechanic');
-  const [location, setLocation] = useState('Sunnybank QLD');
+  const [country, setCountry] = useState(DEFAULT_COUNTRY);
+  const [city, setCity] = useState('Sunnybank QLD');
+  const cities = countryByCode(country)?.cities ?? [];
   const [minReviews, setMinReviews] = useState(15);
   const [includeWeak, setIncludeWeak] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -133,7 +131,7 @@ export default function LeadsPage() {
     try {
       const data: SearchResponse = await api('/api/lead-finder/search', {
         method: 'POST',
-        body: JSON.stringify({ businessType, location, minReviews, includeWeakSites: includeWeak, limit: 20 }),
+        body: JSON.stringify({ businessType, country, city, minReviews, includeWeakSites: includeWeak, limit: 20 }),
       });
       setResult(data);
     } catch (e) {
@@ -259,10 +257,20 @@ export default function LeadsPage() {
                   className="w-full border rounded-lg px-3 py-2" required />
                 <datalist id="bt-list">{BUSINESS_TYPES.map((t) => <option key={t} value={t} />)}</datalist>
               </Field>
-              <Field label="Location" htmlFor="loc">
-                <input id="loc" list="loc-list" value={location} onChange={(e) => setLocation(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2" required />
-                <datalist id="loc-list">{LOCATIONS.map((t) => <option key={t} value={t} />)}</datalist>
+              <Field label="Country" htmlFor="country">
+                <select id="country" value={country}
+                  onChange={(e) => {
+                    setCountry(e.target.value);
+                    setCity(countryByCode(e.target.value)?.cities[0] ?? '');
+                  }}
+                  className="w-full border rounded-lg px-3 py-2">
+                  {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+                </select>
+              </Field>
+              <Field label="City / suburb" htmlFor="city">
+                <input id="city" list="city-list" value={city} onChange={(e) => setCity(e.target.value)}
+                  placeholder="Type any city or pick one" className="w-full border rounded-lg px-3 py-2" required />
+                <datalist id="city-list">{cities.map((t) => <option key={t} value={t} />)}</datalist>
               </Field>
               <Field label="Minimum Google reviews" htmlFor="mr">
                 <select id="mr" value={minReviews} onChange={(e) => setMinReviews(Number(e.target.value))}

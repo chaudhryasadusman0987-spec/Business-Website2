@@ -70,7 +70,9 @@ export interface SavedLead extends Partial<Lead> {
 
 export interface SearchRequest {
   businessType: string;
-  location: string;
+  country?: string; // ISO code from countries.ts, default AU
+  city?: string;
+  location?: string; // old name for city
   minReviews?: number;
   includeWeakSites?: boolean;
   limit?: number;

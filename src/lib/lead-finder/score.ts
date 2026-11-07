@@ -12,7 +12,11 @@ export class ScoreError extends Error {}
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-export async function scoreLeads(leads: Lead[], businessType: string): Promise<Map<string, LeadScore>> {
+export async function scoreLeads(
+  leads: Lead[],
+  businessType: string,
+  location = 'Australia',
+): Promise<Map<string, LeadScore>> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new ScoreError('GEMINI_API_KEY is not set');
   if (leads.length === 0) return new Map();
@@ -30,9 +34,10 @@ export async function scoreLeads(leads: Lead[], businessType: string): Promise<M
     reviews: l.reviews.map((r) => r.slice(0, 450)),
   }));
 
-  const prompt = `You help Pak Oz Technologies, a Brisbane IT company, find small Australian businesses that would benefit most from a website and automation.
+  const prompt = `You help Pak Oz Technologies, a Brisbane IT company, find small businesses that would benefit most from a website and automation.
 
 Business type searched: "${businessType}".
+Location searched: "${location}".
 
 For EACH business in the JSON list below, judge how much it needs help with:
 - a proper website (none, social-media-only, or a weak site)
