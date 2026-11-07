@@ -54,6 +54,7 @@ import {
   Package2,
   Tag,
   Undo2,
+  SearchCheck,
 } from "lucide-react"
 
 /* ───────────────────────── Types ───────────────────────── */
@@ -499,6 +500,8 @@ export default function DashboardPage() {
     { id: "discounts", label: "Discounts", Icon: Percent },
     { id: "leads", label: "Leads", Icon: Users },
     { id: "enquiries", label: "Enquiries", Icon: MessageSquare },
+    // Separate page, not a tab.
+    { id: "lead-finder", label: "Lead Finder", Icon: SearchCheck, href: "/dashboard/lead-finder" },
   ]
 
   const activeService =
@@ -550,6 +553,7 @@ export default function DashboardPage() {
               <button
                 key={item.id}
                 onClick={() => {
+                  if (item.href) return void (window.location.href = item.href)
                   setTab(item.id)
                   setMobileMenuOpen(false)
                 }}
@@ -588,7 +592,7 @@ export default function DashboardPage() {
             return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id)}
+                onClick={() => (item.href ? (window.location.href = item.href) : setTab(item.id))}
                 className={`w-full flex items-center gap-3 px-6 py-3 cursor-pointer transition-colors duration-200 font-medium text-[14px] ${
                   active
                     ? "bg-[#7f85f7]/20 text-[#7f85f7] border-r-2 border-[#7f85f7]"
