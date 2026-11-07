@@ -3,19 +3,21 @@ import {
   ADMIN_COOKIE,
   SESSION_SECONDS,
   checkPassword,
+  cookieFor,
   createSession,
+  hasLeadFinderSession,
   roleFromRequest,
   type AdminRole,
 } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 
-// GET — who is logged in (used by the dashboards on load)
+// GET — who is logged in (used by the dashboards on load).
+// `role` is the dashboard login (admin / rental); `leadFinder` is the
+// separate /lead-finder login.
 export async function GET(req: Request) {
-  return NextResponse.json(
-    { role: await roleFromRequest(req) },
-    { headers: { "Cache-Control": "no-store" } },
-  )
+  const [role, leadFinder] = await Promise.all([roleFromRequest(req), hasLeadFinderSession(req)])
+  return NextResponse.json({ role, leadFinder }, { headers: { "Cache-Control": "no-store" } })
 }
 
 // POST {role, password} — log in. Attempts are rate-limited in middleware.ts.
@@ -24,7 +26,7 @@ export async function POST(req: Request) {
   let password: string
   try {
     const body = await req.json()
-    role = body.role === "rental" ? "rental" : "admin"
+    role = body.role === "rental" ? "rental" : body.role === "leads" ? "leads" : "admin"
     password = typeof body.password === "string" ? body.password : ""
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 })
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
   }
 
   const res = NextResponse.json({ role })
-  res.cookies.set(ADMIN_COOKIE, await createSession(role), {
+  res.cookies.set(cookieFor(role), await createSession(role), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -45,9 +47,11 @@ export async function POST(req: Request) {
   return res
 }
 
-// DELETE — log out
-export async function DELETE() {
+// DELETE — log out. `?role=leads` logs out of the lead finder only;
+// otherwise the dashboard session is cleared.
+export async function DELETE(req: Request) {
+  const leads = new URL(req.url).searchParams.get("role") === "leads"
   const res = NextResponse.json({ role: null })
-  res.cookies.set(ADMIN_COOKIE, "", { path: "/", maxAge: 0 })
+  res.cookies.set(leads ? cookieFor("leads") : ADMIN_COOKIE, "", { path: "/", maxAge: 0 })
   return res
 }

@@ -8,31 +8,35 @@
 
 ## 1. What we are building
 
-A real production website for an Australia-based multi-service business.
-Services: CCTV installation, car rental, web/app development, AI automation.
-Each service has its own ad-focused landing page.
+A real production website for **Pak Oz Solutions Pty Ltd** (ACN 700 444 695),
+Brisbane & Southeast QLD — live at **pakozsolutions.com.au** on Vercel.
+Three service brands, each with its own ad-focused landing page:
+- **Pak Oz CCTV** — Security Solutions (CCTV, alarms, access control, intercoms…)
+- **Pak Oz Rentals** — car rental with online application, payment and e-signed lease
+- **Pak Oz Technologies** — web development, app development, AI automation
 
-Built **one page at a time** — complete each page fully before the next.
+**Status (Nov 2026) — all core sections are built and live:**
+1. ✅ Home (`/`)
+2. ✅ Security Solutions hub — landing, 6 solution pages, suburb area pages,
+   products catalog, security packages, 5-step quote wizard (§7)
+3. ✅ Car Rental — landing, fleet (Postgres), rental application, Stripe
+   payments, lease agreements, chargeback protection (§8)
+4. ✅ IT Services — landing, 3 detail pages, portfolio, project-brief quote
+5. ✅ About, Contact, Testimonials (live Google reviews, env-gated), Blog
+6. ✅ Admin dashboard (`/dashboard`) + separate `/rental-admin` (§10)
+7. ✅ AI chat agent (Gemini, §9), SEO (sitemap, robots, JSON-LD, OG image)
+8. 🚧 Lead finder (`/lead-finder`, own password) — on branch `lead-finder`, not yet merged
 
-**Current build order & status** (reflects what actually exists in `src/app/`):
-1. ✅ DONE — Home page (`/`)
-2. ✅ DONE — **Security Solutions** hub (renamed from CCTV Installation):
-   landing + 6 solution subpages (`[slug]`) + all-products page + 5-step quote
-   wizard + `/api/quote/security` email route. See §7.
-3. ❌ NOT STARTED — Car Rental landing + vehicles + quote (placeholder)
-4. ❌ NOT STARTED — IT Services landing + subpages
-5. ❌ NOT STARTED — Contact + About
-6. ❌ NOT STARTED — Dashboard (admin) — planned 6-solution Products tab (§10)
-
-Also: AI chat agent ✅ DONE (Google Gemini, see §9). `/testimonials` and
-`/blog` routes ❌ NOT STARTED (a `TestimonialsStrip` *component* exists and is
-reused on home + service pages, but there is no `/testimonials` page yet).
+Still pending on the business side: ABN registration, Google Business Profile
+verification (then set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID`).
 
 ---
 
 ## 2. BUSINESS NAME SYSTEM (HARD RULE — most important rule in this file)
 
-### The business name is NOT decided yet.
+### The business name is now "Pak Oz Solutions" — but the rule still applies.
+(The example values below are the original placeholders; see `src/data/site.ts`
+for the real ones, incl. SITE_COMPANY, SITE_ACN, bank/PayID and IT_WHATSAPP.)
 
 The name must be changeable in EXACTLY ONE place, after which the entire
 site updates — every page title, every heading, every email, every footer,
@@ -100,8 +104,19 @@ Vercel redeploys automatically in ~60 seconds.
 - **Nodemailer** (`nodemailer`) — sending quote emails
 - **React Hook Form** — all forms
 - **Framer Motion** — hover transitions
-- Deployment: **Vercel free tier**
-- Content: `src/data/*.ts` files (no database yet)
+- **Neon Postgres** (`@neondatabase/serverless`, `DATABASE_URL`) — products,
+  packages, vehicles, site_settings (catalog), rental files/agreements/disputes.
+  Always `neon(url, { fetchOptions: { cache: "no-store" } })` or reads go stale.
+  Tables are created/seeded once via `/api/db/setup`.
+- **Separate Neon DB** (`LEADS_URL`, table `prospects`) — lead finder only
+- **Upstash Redis / Vercel KV** (`@upstash/redis`) — leads + promo discounts
+- **Stripe** — card, BECS direct debit (`STRIPE_BECS_ENABLED`), subscriptions, webhook
+- **pdf-lib** — signed lease agreements + dispute evidence PDFs
+- Deployment: **Vercel** (serverless, read-only filesystem — never persist to files).
+  Daily cron 09:00 → `/api/rental-payment/send-reminders` (`vercel.json`)
+- Static content still lives in `src/data/*.ts` (services, blog, testimonials,
+  service areas, portfolio, IT services)
+- **Pinned versions:** Next 14.2 + Tailwind v3 — don't upgrade to Next 15/16 or Tailwind 4.
 
 ---
 
@@ -170,32 +185,53 @@ colors: {
 ## 5. Site architecture
 
 ```
-/                                       ✅ Home — all services
-/services/security-solutions            ✅ Security Solutions landing (ad target)
-/services/security-solutions/[slug]     ✅ Solution detail — 6 SSG pages (see §7)
-/services/security-solutions/products   ✅ All products, grouped by solution
-/services/security-solutions/quote      ✅ 5-step quote wizard → /api/quote/security
-/services/car-rental                    ❌ Car rental landing (ad target)
-/services/car-rental/vehicles           ❌ Vehicles + rates
-(removed) /services/car-rental/quote     — replaced by the in-page vehicle
-                                          modal → /api/rental-application
-/services/it-services                   ❌ IT services landing (ad target)
-/services/it-services/web-development    ❌
-/services/it-services/app-development    ❌
-/services/it-services/ai-automation      ❌
-/about                                  ❌
-/contact                                ❌
-/testimonials                           ❌ (component exists; route does not)
-/blog                                   ❌ Placeholder
-/dashboard                              ❌ Admin (password protected)
+/                                          ✅ Home — all services
+/services/security-solutions               ✅ Security Solutions landing (ad target)
+/services/security-solutions/[slug]        ✅ Solution detail — 6 SSG pages (see §7)
+/services/security-solutions/areas/[slug]  ✅ Suburb/service-area SEO pages
+/services/security-solutions/products      ✅ All products (live from DB)
+/services/security-solutions/quote         ✅ 5-step quote wizard (also package mode)
+/services/car-rental                       ✅ Car rental landing + "available now" badges
+/services/car-rental/vehicles              ✅ Fleet, vehicle modal → rental application
+/rental-terms                              ✅ Full lease terms
+/sign-agreement/[id]                       ✅ Customer e-signature page
+/services/it-services                      ✅ IT landing (Pak Oz Technologies) + portfolio
+/services/it-services/web-development      ✅
+/services/it-services/app-development      ✅
+/services/it-services/ai-automation        ✅
+/services/it-services/quote                ✅ Project brief + estimate
+/quote                                     ✅ Quote chooser
+/about  /contact  /testimonials            ✅
+/blog  /blog/[slug]                        ✅
+/dashboard                                 ✅ Admin (server-side auth)
+/lead-finder                               🚧 Lead finder — separate login
+/rental-admin                              ✅ Rental-only admin (own password)
 ```
 
-API routes:
+API routes (`src/app/api/`):
 ```
-/api/chat             ✅ AI agent (Google Gemini)
-/api/leads            ✅ Lead capture → data/leads.json (GET returns all)
-/api/quote/security   ✅ Security quote — emails customer + logs lead
+chat                         AI agent (Gemini)
+leads, dashboard/leads       Lead capture → KV (GET for admin)
+contact                      Contact form → lead + emails
+quote/security               Security quote → emails customer + admin, logs lead
+quote/it-services            IT project brief → emails
+products, packages, catalog  Security catalog (Postgres)
+vehicles, vehicles/counts    Fleet (rego never exposed publicly)
+promo                        Category % discounts
+google-reviews               Places API reviews (env-gated)
+db/setup                     Create tables + one-time seed
+admin/session                Login/logout cookie session
+rental-application           Rental application + email quote
+rental-payment/*             create-intent, create-setup, start-subscription,
+                             negotiate-price, accept-terms, licence, trusted,
+                             agreements, return-vehicle, send-reminders (cron),
+                             webhook (Stripe)
+rental-files/[id], rental-evidence(/photo)   Customer files + photo evidence
+agreements(/create, /[id], /[id]/sign)       Lease agreements + e-sign
+disputes(/[id]/build, /[id]/submit)          Chargeback evidence → Stripe
+lead-finder/search, lead-finder/saved        Prospect search (LEADS_URL db)
 ```
+Admin API routes must be listed in `PROTECTED` in `middleware.ts`.
 
 Redirects (`next.config.mjs`, **not** next.config.js — it does not exist):
 ```
@@ -226,8 +262,13 @@ src/data/
                            from security-solutions.ts and exports
                            cctvProducts = the "surveillance" solution's products.
                            Kept so the AI agent prompt keeps working.
-  car-rental.ts          Vehicles + rates (data exists; pages not built yet)
-  it-services.ts         IT packages + features (data exists; pages not built yet)
+  car-rental.ts          Original vehicle seed data — the live fleet is in Postgres
+                           (`vehicles` table, managed from the dashboard)
+  it-services.ts         IT services, packages, estimate pricing
+  blog.ts                Blog posts (real team as authors)
+  service-areas.ts       Suburbs for /services/security-solutions/areas/[slug]
+  portfolio.ts           "Our Work" projects on IT pages
+  catalog.json, promo.json  Legacy fallbacks only — live data is Postgres/KV
   testimonials.ts        Customer reviews — includes an `image` field per review
   navigation.ts          Nav links (mobile slide-out). Security entry updated to
                            { label: "Security Solutions", href: "/services/security-solutions" }
@@ -344,30 +385,35 @@ Body (HTML email):
 - Builds the itemised HTML email **inline** via a local `buildEmail()` (there is
   no separate `src/lib/email-templates/` file) and sends it with `sendEmail()`
   from `src/lib/mailer.ts`
-- Logs the lead to `data/leads.json` (same store as the AI chat) with
+- Logs the lead to the KV leads store (same store as the AI chat) with
   `source: "quote_form"`, `service: "security-solutions"`
 - Email requires SMTP env vars; with placeholders the submit returns 500 and the
   form shows a retry message instead of the success screen
 
-This wizard handles ALL 6 solutions. Car rental will get its own separate quote
-flow (logic TBD — see §8).
+This wizard handles ALL 6 solutions plus **package mode** (bundles built in the
+dashboard). Dashboard category % promos apply via `effectivePrice()` — never
+discount twice.
 
 ---
 
-## 8. Car rental quote (PLACEHOLDER)
+## 8. Car rental (Pak Oz Rentals)
 
-Logic not decided yet. Build a clean form:
-```ts
-// TODO(owner): Car rental quote logic to be provided
-// Do not guess — keep as placeholder until owner provides rules
-function calculateRentalQuote(vehicleId: string, days: number) {
-  // PLACEHOLDER — returns base rate only
-  // Owner will provide full pricing rules (insurance, km, seasonal rates etc.)
-  const vehicle = vehicles.find(v => v.id === vehicleId)
-  return vehicle ? vehicle.dailyRate * days : 0
-}
-```
-No email sending yet for car rental — just show a "We'll be in touch" message.
+- **Fleet** lives in Postgres `vehicles` table (`src/lib/vehicles.ts`), managed in
+  the dashboard. Status: `available` / `coming_soon` / `hidden`. **Rego is internal
+  only — never in the public API.** Nest the payload in API calls (`type` collides
+  with the route discriminator).
+- **Customer flow:** vehicle modal → 3-step rental application
+  (`/api/rental-application`) → admin approves or counter-offers (price
+  negotiation) → customer accepts condensed terms + licence upload → payment →
+  e-signs lease (`/sign-agreement/[id]`) → signed PDF emailed to both parties.
+- **Payments:** Stripe card or BECS direct debit (preferred for every customer;
+  card-only fallback until `STRIPE_BECS_ENABLED`), weekly subscriptions, optional
+  bond, or direct bank transfer / PayID. Return → cancel + detach, pro-rated refund.
+- **Reminders:** daily cron → `/api/rental-payment/send-reminders` (`CRON_SECRET`).
+- **Chargeback protection:** booking starts `pending_payment`; evidence
+  (application, signed terms, licence, photos, IP/timestamps) stored as
+  `rental_files` in Postgres; dispute builder creates an evidence PDF and submits
+  to Stripe. Webhook must subscribe to `charge.succeeded` + `charge.dispute.*`.
 
 ---
 
@@ -412,23 +458,25 @@ If the chat replies "Sorry, I am having trouble right now":
 
 ## 10. Dashboard
 
-Status: ❌ NOT BUILT YET (`src/app/dashboard/` does not exist).
+Status: ✅ BUILT. `/dashboard` (`robots: noindex`).
 
-Password protected client-side (prototype level).
-Password from env: NEXT_PUBLIC_DASHBOARD_PASSWORD (currently `admin123`)
+**Auth is server-side:** `/api/admin/session` sets a signed cookie
+(`ADMIN_SESSION_SECRET`), checked by `middleware.ts`. Passwords:
+`ADMIN_PASSWORD` (main dashboard), `RENTAL_ADMIN_PASSWORD` (`/rental-admin`).
+Every new admin API route must be added to `PROTECTED` in `middleware.ts`.
 
-Tabs: **Products** | Car Rental (edit rates) | Leads | Settings
-Stitch screen: 47e2f4daaefd4f51851aa58e48947d88
+**`/dashboard` tabs:** Overview · Security · Products (DB) · Packages · Car Rental
+(vehicles) · Offers · Active Rentals · IT Services · Discounts · Leads ·
+Enquiries
+- Add/edit/delete products, packages and vehicles → Postgres, show up live on the site
+  (images stored inline as URL/data-URL, compressed client-side)
+- Discounts = category % promos, applied in every quote wizard + email
+- **Lead finder is NOT in the dashboard** — it lives at `/lead-finder` with its own
+  password (`LEAD_FINDER_PASSWORD`) and cookie (`pakoz_leads`, role `leads`).
+  Dashboard logins can't open it and vice versa. Own DB (`LEADS_URL`).
 
-### Products tab — 6-solution structure (planned)
-The Products tab must reflect the new Security Solutions data, NOT a flat CCTV list:
-- A row of solution selector tabs — one per solution: Surveillance, Deterrence,
-  Commercial, Access Control, Smoke Alarms, Intercoms
-- Selecting a tab shows that solution's products in a table:
-  `Product Name | Price (editable input) | Unit | In Stock (toggle) | Save`
-- Each row has an editable price + Save button
-  `// TODO(dashboard): wire Save to an API route that updates the price in security-solutions.ts`
-- Leads tab reads `GET /api/leads`. Settings tab shows read-only site.ts values.
+**`/rental-admin` tabs:** Overview · Vehicles · Active Rentals · Price Offers ·
+Agreements · Disputes · Leads
 
 ---
 
@@ -451,27 +499,48 @@ The Products tab must reflect the new Security Solutions data, NOT a flat CCTV l
 # AI Agent (Google Gemini — free tier, key starts with AIzaSy...)
 GEMINI_API_KEY=AIzaSy...
 
-# Email (Security Solutions quote sending)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=youremail@gmail.com
-SMTP_PASS=your_app_password       # Gmail app password (not account password)
-SMTP_FROM=youremail@gmail.com
+GEMINI_MODEL=gemini-2.5-flash     # optional override
 
-# Dashboard
-NEXT_PUBLIC_DASHBOARD_PASSWORD=admin123
+# Email — Hostinger mailbox info@pakozsolutions.com.au
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=587
+SMTP_USER=info@pakozsolutions.com.au
+SMTP_PASS=...
+SMTP_FROM=info@pakozsolutions.com.au
+LEAD_NOTIFY_EMAIL=...             # where new-lead alerts go
+
+# Databases
+DATABASE_URL=postgres://...       # Neon — ⚠ .env.local points at the LIVE db
+LEADS_URL=postgres://...          # Neon — lead finder only
+KV_REST_API_URL=...  KV_REST_API_TOKEN=...   # (or UPSTASH_REDIS_REST_URL/TOKEN)
+
+# Admin auth
+ADMIN_PASSWORD=...
+RENTAL_ADMIN_PASSWORD=...
+LEAD_FINDER_PASSWORD=...         # /lead-finder only
+ADMIN_SESSION_SECRET=...
+
+# Stripe
+STRIPE_SECRET_KEY=...
+STRIPE_WEBHOOK_SECRET=...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=...
+STRIPE_BECS_ENABLED=true|false
+
+# Misc
+NEXT_PUBLIC_APP_URL=https://pakozsolutions.com.au
+CRON_SECRET=...
+GOOGLE_PLACES_API_KEY=...  GOOGLE_PLACE_ID=...   # reviews — not set yet
 ```
 
 There is **no `ANTHROPIC_API_KEY`** — the agent uses `GEMINI_API_KEY`.
-The same env vars must also be set in Vercel → Project Settings → Environment
-Variables. README must explain how to set up a Gmail app password for SMTP and
-how to get a Gemini key from aistudio.google.com.
+All env vars must also be set in Vercel → Project Settings → Environment
+Variables, **then redeploy** (env changes don't apply to existing deployments).
 
 ---
 
-## 13. Rename script (create this)
+## 13. Rename script (exists: `scripts/rename.ts`)
 
-Create `scripts/rename.ts`:
+Name is now decided (Pak Oz Solutions) — kept for reference:
 ```ts
 // Usage: npx ts-node scripts/rename.ts "BusinessName" "domain.com.au"
 // Updates SITE_NAME and SITE_DOMAIN in src/data/site.ts
@@ -534,3 +603,17 @@ Every UI/design/architecture decision made so far:
   purple `#7f85f7`.
 - **Backwards compat:** `cctv-products.ts` is now a shim re-exporting from
   `security-solutions.ts` so the AI prompt and any old imports keep working.
+- **Business name decided:** Pak Oz Solutions (sub-brands Pak Oz CCTV,
+  Pak Oz Rentals, Pak Oz Technologies). IT has its own WhatsApp number (`IT_WHATSAPP`).
+- **Persistence:** Vercel FS is read-only → products/packages/vehicles/rentals in
+  Neon Postgres; leads + promos in KV. File writes silently vanish on deploy.
+- **DB seeds run once** — re-running `/api/db/setup` must not resurrect deleted products.
+- **Car rental quote form removed** — replaced by vehicle modal + rental application
+  + Stripe checkout + e-signed lease.
+- **Admin auth moved server-side** (cookie + middleware), plus API rate limits and
+  HTML escaping in emails.
+- **SEO:** sitemap, robots, canonicals, LocalBusiness/Service/Breadcrumb/FAQ/
+  BlogPosting JSON-LD, edge-runtime OG image (Node `@vercel/og` breaks the
+  Windows build; Satori rejects multiple gradients).
+- **Testing:** verify with `npm run build`, not `npm run dev` (Google Fonts fetch
+  can hang locally).
