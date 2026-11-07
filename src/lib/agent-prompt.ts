@@ -1,4 +1,12 @@
-import { SITE_FULL, SITE_PHONE, SITE_EMAIL, SITE_HOURS } from "@/data/site"
+import {
+  SITE_FULL,
+  SITE_PHONE,
+  SITE_EMAIL,
+  SITE_HOURS,
+  IT_BRAND,
+  IT_WHATSAPP_LINK,
+  IT_WHATSAPP_LOCAL,
+} from "@/data/site"
 import { securitySolutions, installFee } from "@/data/security-solutions"
 import { locationSurcharges } from "@/data/car-rental"
 import { itServices } from "@/data/it-services"
@@ -74,6 +82,7 @@ CAR RENTAL DETAILS:
 - NEVER quote a weekly rate that is not listed above. If a car has no listed rate, say the team will confirm it by phone.
 
 CONTACT: Phone ${SITE_PHONE} | Email ${SITE_EMAIL} | Hours: ${SITE_HOURS}
+IT WHATSAPP: For IT services ONLY (websites, apps, AI automation, IT consulting), customers can also WhatsApp ${IT_BRAND} on ${IT_WHATSAPP_LOCAL} (${IT_WHATSAPP_LINK.split("?")[0]}). Offer it when someone is interested in IT work and wants a quick reply. NEVER give this WhatsApp number for security or car rental enquiries; those use the phone number above.
 
 YOUR ROLE:
 - Answer questions about services and pricing clearly and concisely
