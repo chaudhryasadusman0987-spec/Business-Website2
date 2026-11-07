@@ -53,3 +53,15 @@ export const SECURITY_TAGLINE = "Professional CCTV & Security Installation Brisb
 //  the parent company. Mirrors SECURITY_BRAND above.
 // ============================================================
 export const IT_BRAND         = "Pak Oz Technologies";
+
+// ============================================================
+//  IT WHATSAPP — dedicated number for Pak Oz Technologies (IT services).
+//  Used ONLY on /services/it-services/**, the footer's IT line and the
+//  IT brief emails. Security and car rental keep SITE_PHONE.
+// ============================================================
+export const IT_WHATSAPP = "+61 494 579 116"
+// Local display format ("0494 579 116"), derived so the number lives in one place.
+export const IT_WHATSAPP_LOCAL = IT_WHATSAPP.replace(/^\+61\s?/, "0")
+export const IT_WHATSAPP_LINK =
+  "https://wa.me/" + IT_WHATSAPP.replace(/\D/g, "") + "?text=" +
+  encodeURIComponent("Hi, I'm interested in Pak Oz Technologies IT services (website / app / AI automation).")

@@ -6,6 +6,7 @@ import DynamicIcon from "@/components/ui/DynamicIcon"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import Price from "@/components/ui/Price"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
+import WhatsAppButton from "@/components/ui/WhatsAppButton"
 import type { ITServiceItem } from "@/data/it-services"
 import { IT_BRAND } from "@/data/site"
 
@@ -93,6 +94,7 @@ export default function ITServiceDetail({
             >
               Get a Free Quote
             </Link>
+            <WhatsAppButton className="h-[52px] mt-8 rounded-[8px] sm:ml-3" />
           </div>
 
           {/* RIGHT — image */}
@@ -250,7 +252,7 @@ export default function ITServiceDetail({
         </div>
       </section>
 
-      <QuoteCTABanner href="/contact" />
+      <QuoteCTABanner href="/contact" showWhatsApp />
     </>
   )
 }

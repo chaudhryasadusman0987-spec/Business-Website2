@@ -23,7 +23,36 @@ import PortfolioSection from "@/components/sections/PortfolioSection"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import { itConsulting } from "@/data/it-services"
 import { getITEstimates } from "@/lib/it-services-server"
-import { IT_BRAND, SITE_PHONE } from "@/data/site"
+import WhatsAppButton from "@/components/ui/WhatsAppButton"
+import {
+  IT_BRAND,
+  IT_WHATSAPP,
+  IT_WHATSAPP_LINK,
+  IT_WHATSAPP_LOCAL,
+  SITE_DOMAIN,
+  SITE_PHONE,
+} from "@/data/site"
+
+/** "Call … · WhatsApp …" line shown under the hero and closing CTA buttons. */
+function ContactLine({ telHref, center = false }: { telHref: string; center?: boolean }) {
+  return (
+    <p className={`mt-4 text-[13px] text-[#9496a8] ${center ? "text-center" : ""}`}>
+      Call{" "}
+      <a href={telHref} className="font-semibold text-white hover:text-[#a5a8ff]">
+        {SITE_PHONE}
+      </a>{" "}
+      · WhatsApp{" "}
+      <a
+        href={IT_WHATSAPP_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-[#25D366] hover:underline"
+      >
+        {IT_WHATSAPP_LOCAL}
+      </a>
+    </p>
+  )
+}
 
 // The estimate ranges come from the dashboard's saved overrides, so this page
 // must not be baked at build time — otherwise admin edits never appear.
@@ -110,13 +139,30 @@ export default async function ITServicesPage() {
   return (
     <main>
       <JsonLd
-        data={serviceJsonLd({
-          name: "IT & AI Services",
-          serviceType: "IT services",
-          description:
-            "Web development, app development, AI automation and IT consulting for Brisbane businesses.",
-          path: "/services/it-services",
-        })}
+        data={{
+          ...serviceJsonLd({
+            name: "IT & AI Services",
+            serviceType: "IT services",
+            description:
+              "Web development, app development, AI automation and IT consulting for Brisbane businesses.",
+            path: "/services/it-services",
+          }),
+          // contactPoint isn't valid on Service, so the IT sub-brand is the
+          // provider and carries it; it links back to the parent business.
+          provider: {
+            "@type": "Organization",
+            name: IT_BRAND,
+            url: `${SITE_DOMAIN}/services/it-services`,
+            parentOrganization: { "@id": `${SITE_DOMAIN}/#business` },
+            contactPoint: {
+              "@type": "ContactPoint",
+              telephone: IT_WHATSAPP.replace(/\s/g, ""),
+              contactType: "sales",
+              areaServed: "AU",
+              url: IT_WHATSAPP_LINK,
+            },
+          },
+        }}
       />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -194,7 +240,9 @@ export default async function ITServicesPage() {
                   <Phone size={16} />
                   {SITE_PHONE}
                 </a>
+                <WhatsAppButton className="h-[54px] text-[15px]" />
               </div>
+              <ContactLine telHref={telHref} />
             </AnimateIn>
 
             {/* commitments */}
@@ -561,6 +609,7 @@ export default async function ITServicesPage() {
                 <Phone size={16} />
                 {SITE_PHONE}
               </a>
+              <WhatsAppButton className="h-[54px] text-[15px]" />
             </div>
           </AnimateIn>
         </div>
@@ -633,7 +682,9 @@ export default async function ITServicesPage() {
                     <Phone size={16} />
                     Call {SITE_PHONE}
                   </a>
+                  <WhatsAppButton className="h-[56px] rounded-[12px] px-10 text-[15px]" />
                 </div>
+                <ContactLine telHref={telHref} center />
               </div>
             </div>
           </AnimateIn>
