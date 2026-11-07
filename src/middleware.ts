@@ -32,6 +32,8 @@ const PROTECTED: { path: RegExp; methods: string[]; roles: AdminRole[] }[] = [
   { path: /^\/api\/rental-files\/[\w-]+$/, methods: ["GET"], roles: BOTH },
   { path: /^\/api\/disputes$/, methods: ["GET"], roles: BOTH },
   { path: /^\/api\/disputes\/[\w-]+\/(build|submit)$/, methods: ["POST"], roles: BOTH },
+  // Lead finder (prospecting) — main admin login only.
+  { path: /^\/api\/lead-finder\/(search|saved)$/, methods: ["GET", "POST", "DELETE"], roles: ADMIN },
 ]
 
 // [max requests, window in ms] per IP. In-memory, so it is per server
