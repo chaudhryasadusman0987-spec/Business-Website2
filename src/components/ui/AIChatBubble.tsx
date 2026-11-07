@@ -3,9 +3,14 @@
 import { useState, useRef, useEffect } from "react"
 import { X, Send } from "lucide-react"
 import type { Message } from "@/types"
-import { SITE_FULL, SITE_PHONE } from "@/data/site"
+import { usePathname } from "next/navigation"
+import { IT_WHATSAPP_LINK, IT_WHATSAPP_LOCAL, SITE_FULL, SITE_PHONE } from "@/data/site"
+import { WhatsAppIcon } from "@/components/ui/WhatsAppButton"
 
 export default function AIChatBubble() {
+  // The floating WhatsApp button is IT-only (Pak Oz Technologies' number).
+  // Security and car rental pages keep just the call button.
+  const isITPage = usePathname()?.startsWith("/services/it-services") ?? false
   const [isOpen, setIsOpen] = useState(false)
   const [showBadge, setShowBadge] = useState(true)
   const [showPulse, setShowPulse] = useState(false)
@@ -88,6 +93,23 @@ export default function AIChatBubble() {
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
         <>
+          {isITPage && (
+            <a
+              href={IT_WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Chat on WhatsApp ${IT_WHATSAPP_LOCAL}`}
+              className="group fixed bottom-[168px] right-6 z-50 flex items-center gap-3"
+            >
+              <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-[#1a1a2e] text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-lg whitespace-nowrap items-center gap-2 pointer-events-none">
+                <span className="text-[#25D366]">●</span>
+                WhatsApp {IT_WHATSAPP_LOCAL}
+              </div>
+              <div className="w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center hover:bg-[#1ebe5b] hover:scale-110 transition-all duration-300 shadow-[0_4px_20px_rgba(37,211,102,0.4)]">
+                <WhatsAppIcon size={28} />
+              </div>
+            </a>
+          )}
           {/* Floating call button — real number from SITE_PHONE; tel: link opens
               the device dialler pre-filled. Hover tooltip shows on desktop. */}
           <a

@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server"
 import { sendEmail, isSmtpConfigured } from "@/lib/mailer"
 import { appendLead } from "@/lib/leads-store"
-import { IT_BRAND, SITE_FULL, SITE_EMAIL, SITE_PHONE } from "@/data/site"
+import {
+  IT_BRAND,
+  IT_WHATSAPP_LINK,
+  IT_WHATSAPP_LOCAL,
+  SITE_FULL,
+  SITE_EMAIL,
+  SITE_PHONE,
+} from "@/data/site"
 
 // IT & AI project brief endpoint.
 //
@@ -224,6 +231,10 @@ function buildCustomerEmail(b: BriefBody, isConsulting: boolean): string {
         Questions? Call us anytime:<br/>
         <a href="tel:${SITE_PHONE.replace(/\s/g, "")}" style="color:#7f85f7;font-weight:bold;font-size:16px">
           ${SITE_PHONE}
+        </a><br/>
+        Prefer WhatsApp? Message us on
+        <a href="${IT_WHATSAPP_LINK}" style="color:#1ebe5b;font-weight:bold;font-size:16px">
+          ${IT_WHATSAPP_LOCAL}
         </a>
       </p>
     </div>

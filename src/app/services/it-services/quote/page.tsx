@@ -15,7 +15,8 @@ import {
 import DynamicIcon from "@/components/ui/DynamicIcon"
 import { itConsulting, itServices, type ITService } from "@/data/it-services"
 import { mergeITEstimates, normaliseOverrides } from "@/lib/catalog"
-import { IT_BRAND, SITE_PHONE } from "@/data/site"
+import WhatsAppButton from "@/components/ui/WhatsAppButton"
+import { IT_BRAND, IT_WHATSAPP_LINK, IT_WHATSAPP_LOCAL, SITE_PHONE } from "@/data/site"
 
 // Single-page project brief. The customer describes what they want, we email
 // the brief to the admin and book a free consultation. Nothing here quotes a
@@ -161,6 +162,16 @@ function ITQuoteBrief() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="mb-4 rounded-[14px] border border-[#25D366]/30 bg-[#effbf3] p-5">
+            <p className="text-[14px] font-semibold text-[#1a1a2e]">
+              Thanks! Want a faster reply? Chat with us on WhatsApp
+            </p>
+            <WhatsAppButton
+              label={`WhatsApp ${IT_WHATSAPP_LOCAL}`}
+              className="mt-3 h-[48px] w-full text-[15px]"
+            />
           </div>
 
           <Link
@@ -548,6 +559,15 @@ function ITQuoteBrief() {
             className="text-[#7f85f7] font-semibold"
           >
             {SITE_PHONE}
+          </a>{" "}
+          or WhatsApp{" "}
+          <a
+            href={IT_WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#1ebe5b] font-semibold"
+          >
+            {IT_WHATSAPP_LOCAL}
           </a>
         </p>
       </div>

@@ -11,6 +11,8 @@ import {
   SITE_COMPANY,
   SITE_ABN,
   SITE_ACN,
+  IT_WHATSAPP_LINK,
+  IT_WHATSAPP_LOCAL,
 } from "@/data/site"
 
 // NOTE: social icons removed — they pointed at "#" with no real profiles behind
@@ -98,6 +100,16 @@ export default function Footer() {
                   className="inline-block py-1 hover:text-white transition-colors"
                 >
                   {SITE_EMAIL}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={IT_WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block py-1 hover:text-white transition-colors"
+                >
+                  IT &amp; AI: WhatsApp {IT_WHATSAPP_LOCAL}
                 </a>
               </li>
               <li>{SITE_ADDRESS}</li>
