@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { roleFromRequest, type AdminRole } from "@/lib/admin-auth"
+import { rolesFromRequest, type AdminRole } from "@/lib/admin-auth"
 
 // Guards every /api route in one place:
 //   1. Admin-only routes require a valid session cookie (see lib/admin-auth).
@@ -8,6 +8,7 @@ import { roleFromRequest, type AdminRole } from "@/lib/admin-auth"
 
 const BOTH: AdminRole[] = ["admin", "rental"]
 const ADMIN: AdminRole[] = ["admin"]
+const LEAD_FINDER: AdminRole[] = ["leads"]
 
 // /api/dashboard/update allows both roles here; the route itself limits the
 // rental login to vehicle edits.
@@ -32,8 +33,9 @@ const PROTECTED: { path: RegExp; methods: string[]; roles: AdminRole[] }[] = [
   { path: /^\/api\/rental-files\/[\w-]+$/, methods: ["GET"], roles: BOTH },
   { path: /^\/api\/disputes$/, methods: ["GET"], roles: BOTH },
   { path: /^\/api\/disputes\/[\w-]+\/(build|submit)$/, methods: ["POST"], roles: BOTH },
-  // Lead finder (prospecting) — main admin login only.
-  { path: /^\/api\/lead-finder\/(search|saved)$/, methods: ["GET", "POST", "DELETE"], roles: ADMIN },
+  // Lead finder (prospecting) — its own separate login (LEAD_FINDER_PASSWORD),
+  // the dashboard logins do not open it.
+  { path: /^\/api\/lead-finder\/(search|saved)$/, methods: ["GET", "POST", "DELETE"], roles: LEAD_FINDER },
 ]
 
 // [max requests, window in ms] per IP. In-memory, so it is per server
@@ -82,8 +84,8 @@ export async function middleware(req: NextRequest) {
 
   const roles = needsAdmin(req)
   if (roles) {
-    const role = await roleFromRequest(req)
-    if (!role || !roles.includes(role)) {
+    const have = await rolesFromRequest(req)
+    if (!have.some((r) => roles.includes(r))) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
     }
     return NextResponse.next()

@@ -201,11 +201,11 @@ export async function POST(req: Request) {
 `src/app/api/leads/route.ts`
 
 ```ts
-// Saves leads to /data/leads.json (prototype storage)
-// TODO(backend): replace with real CRM/database when backend is live
+// Saves leads to KV (Upstash/Vercel KV) via src/lib/leads-store.ts
+// (file fallback only works locally — Vercel FS is read-only)
 export async function POST(req: Request) {
   const lead = await req.json()
-  // append to leads.json
+  // saveLead(lead) → KV
   // return { success: true }
 }
 ```

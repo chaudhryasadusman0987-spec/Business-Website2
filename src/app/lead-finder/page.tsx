@@ -1,8 +1,8 @@
 'use client';
 
-// /dashboard/lead-finder — lead finder (admin session required; log in at /dashboard)
+// /lead-finder — lead finder. Separate from /dashboard: its own password
+// (LEAD_FINDER_PASSWORD) and its own session cookie.
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { buildMessage, whatsappLink } from '@/lib/lead-finder/messages';
 import {
   LEAD_STATUSES,
@@ -52,13 +52,46 @@ export default function LeadsPage() {
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'all'>('all');
 
-  // The admin session is an httpOnly cookie set by the main dashboard login.
+  // login state
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loggingIn, setLoggingIn] = useState(false);
+
+  // The lead finder session is its own httpOnly cookie (not the dashboard's).
   useEffect(() => {
     fetch('/api/admin/session', { cache: 'no-store' })
       .then((r) => r.json())
-      .then((d) => setAuthed(d.role === 'admin'))
+      .then((d) => setAuthed(d.leadFinder === true))
       .catch(() => setAuthed(false));
   }, []);
+
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
+    setLoggingIn(true);
+    setLoginError(null);
+    try {
+      const res = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'leads', password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Login failed');
+      setPassword('');
+      setAuthed(true);
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoggingIn(false);
+    }
+  }
+
+  async function logout() {
+    await fetch('/api/admin/session?role=leads', { method: 'DELETE' }).catch(() => {});
+    setSaved([]);
+    setResult(null);
+    setAuthed(false);
+  }
 
   const api = useCallback(async (url: string, init?: RequestInit) => {
     const res = await fetch(url, {
@@ -160,7 +193,7 @@ export default function LeadsPage() {
 
   const filteredSaved = saved.filter((s) => statusFilter === 'all' || s.status === statusFilter);
 
-  // ---------- login gate: uses the main dashboard session ----------
+  // ---------- login gate: separate lead finder password ----------
   if (authed !== true) {
     return (
       <main className="min-h-screen bg-[#1a1a2e] flex items-center justify-center p-4">
@@ -169,12 +202,25 @@ export default function LeadsPage() {
           {authed === null ? (
             <p className="text-sm text-gray-600">Checking login…</p>
           ) : (
-            <>
-              <p className="text-sm text-gray-600">Log in to the dashboard first, then come back here.</p>
-              <Link href="/dashboard" className="block w-full bg-[#7f85f7] text-white font-semibold rounded-lg py-2.5">
-                Go to dashboard login
-              </Link>
-            </>
+            <form onSubmit={login} className="space-y-3">
+              <input
+                type="password"
+                autoFocus
+                autoComplete="current-password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm"
+              />
+              {loginError && <p className="text-sm text-red-600">{loginError}</p>}
+              <button
+                type="submit"
+                disabled={loggingIn || !password}
+                className="block w-full bg-[#7f85f7] text-white font-semibold rounded-lg py-2.5 disabled:opacity-60"
+              >
+                {loggingIn ? 'Logging in…' : 'Log in'}
+              </button>
+            </form>
           )}
         </div>
       </main>
@@ -184,7 +230,9 @@ export default function LeadsPage() {
   return (
     <main className="min-h-screen bg-gray-50 text-[#1a1a2e]">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <Link href="/dashboard" className="text-sm text-[#7f85f7] font-semibold">← Back to dashboard</Link>
+        <div className="flex justify-end">
+          <button onClick={logout} className="text-sm text-[#7f85f7] font-semibold">Log out</button>
+        </div>
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Lead finder</h1>
