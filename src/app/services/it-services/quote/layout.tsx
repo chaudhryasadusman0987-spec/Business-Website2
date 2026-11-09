@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Get a free quote for web development, app development, AI automation or " +
     "IT consulting. Estimate in 2 minutes.",
-  robots: "noindex", // quote pages don't need SEO
+  alternates: { canonical: "/services/it-services/quote" },
 }
 
 export default function QuoteLayout({

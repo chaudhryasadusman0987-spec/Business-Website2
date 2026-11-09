@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createLeaseAgreement } from "@/lib/db"
 import { sendEmail } from "@/lib/mailer"
-import { SITE_PHONE } from "@/data/site"
+import { SITE_PHONE, SITE_DOMAIN } from "@/data/site"
 
 // Admin (rental-admin dashboard "Agreements" tab) creates a lease agreement
 // for a renter + vehicle, then this emails the renter a link to review and
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     })
 
     const signUrl = `${
-      process.env.NEXT_PUBLIC_APP_URL ?? "https://pakozsolutions.com.au"
+      process.env.NEXT_PUBLIC_APP_URL ?? SITE_DOMAIN
     }/sign-agreement/${agreement.id}`
 
     let emailSent = true

@@ -4,7 +4,7 @@ import { securitySolutions } from "@/data/security-solutions"
 import { blogPosts } from "@/data/blog"
 import { serviceAreas } from "@/data/service-areas"
 
-// Admin, agreement-signing and noindex quote pages are deliberately left out —
+// Admin, agreement-signing and lead-finder pages are deliberately left out —
 // see robots.ts for the matching disallow list.
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
@@ -17,6 +17,8 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/services/it-services/web-development", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/it-services/app-development", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/it-services/ai-automation", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/services/it-services/quote", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/quote", priority: 0.6, changeFrequency: "monthly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
   { path: "/testimonials", priority: 0.5, changeFrequency: "weekly" },

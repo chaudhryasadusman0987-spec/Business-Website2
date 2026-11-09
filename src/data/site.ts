@@ -6,7 +6,9 @@ export const SITE_NAME        = "Pak Oz";                     // ← change this
 export const SITE_SUFFIX      = "Solutions";                  // ← optional second word
 export const SITE_FULL        = `${SITE_NAME} ${SITE_SUFFIX}`; // used everywhere → "Pak Oz Solutions"
 export const SITE_TAGLINE     = "Better Solutions, Better Living.";
-export const SITE_DOMAIN      = "https://pakozsolutions.com.au";
+// www is the canonical host — canonicals, sitemap, robots and JSON-LD all
+// derive from this. Keep the bare domain redirecting to it in Vercel.
+export const SITE_DOMAIN      = "https://www.pakozsolutions.com.au";
 export const SITE_EMAIL       = "info@pakozsolutions.com.au";
 export const SITE_PHONE       = "+61 424 948 512";
 export const SITE_ADDRESS     = "Brisbane & Southeast QLD";

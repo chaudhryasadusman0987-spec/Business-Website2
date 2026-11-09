@@ -2,7 +2,7 @@ export const metadata = {
   title: "Free Quote",
   description:
     "Get a free quote for security installation, car rental or IT services. Instant estimate. No obligation.",
-  robots: "noindex",
+  alternates: { canonical: "/quote" },
 }
 
 export default function QuoteLayout({

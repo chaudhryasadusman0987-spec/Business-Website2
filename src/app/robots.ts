@@ -6,7 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/dashboard", "/rental-admin", "/lead-finder", "/sign-agreement/", "/quote"],
+      // Private areas only. Every public page (quote forms included) is crawlable.
+      disallow: ["/api/", "/dashboard", "/rental-admin", "/demo", "/lead-finder", "/sign-agreement/"],
     },
     sitemap: `${SITE_DOMAIN}/sitemap.xml`,
     host: SITE_DOMAIN,
