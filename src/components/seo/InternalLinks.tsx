@@ -5,6 +5,9 @@ import {
   hubs,
   hubIntros,
   hubAnchor,
+  anchorFor,
+  seedOf,
+  hrefFrom,
   getSpoke,
   relatedSpokes,
   blogServiceLinks,
@@ -66,9 +69,16 @@ export function HubIntro({
         if (typeof seg === "string") return <span key={i}>{seg}</span>
         const s = getSpoke(seg.spoke)
         if (!s) return null
-        return (
-          <Link key={i} href={s.href} className={linkClass}>
-            {s.anchors[(seg.anchor ?? 0) % s.anchors.length]}
+        const text = anchorFor(s, seg.anchor ?? 0)
+        const href = hrefFrom(s.href, hubs[hub].href)
+        if (!href) return <span key={i}>{text}</span>
+        return href.startsWith("#") ? (
+          <a key={i} href={href} className={linkClass}>
+            {text}
+          </a>
+        ) : (
+          <Link key={i} href={href} className={linkClass}>
+            {text}
           </Link>
         )
       })}
@@ -98,7 +108,8 @@ export function HomeHubLinks({ className = "" }: { className?: string }) {
 }
 
 /** Compact link card — same white/border/radius as the area-page focus cards. */
-function SpokeCard({ spoke }: { spoke: Spoke }) {
+function SpokeCard({ spoke, variant = 0 }: { spoke: Spoke; variant?: number }) {
+  const label = anchorFor(spoke, variant)
   return (
     <Link
       href={spoke.href}
@@ -109,7 +120,7 @@ function SpokeCard({ spoke }: { spoke: Spoke }) {
       </h3>
       <p className="text-[14px] text-[#666] mt-2 leading-relaxed flex-1">{spoke.blurb}</p>
       <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#7f85f7]">
-        {spoke.anchors[0].charAt(0).toUpperCase() + spoke.anchors[0].slice(1)}
+        {label.charAt(0).toUpperCase() + label.slice(1)}
         <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
       </span>
     </Link>
@@ -122,8 +133,8 @@ export function SpokeCards({ ids, className = "" }: { ids: string[]; className?:
   if (list.length === 0) return null
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${className}`}>
-      {list.map((s) => (
-        <SpokeCard key={s.id} spoke={s} />
+      {list.map((s, i) => (
+        <SpokeCard key={s.id} spoke={s} variant={i} />
       ))}
     </div>
   )
@@ -173,8 +184,12 @@ export function RelatedServices({
   if (!spoke) return null
   // 2–3 siblings for most spokes; suburb pages carry 4 (CCTV, packages and
   // the two nearest areas), so the list is taken as defined.
-  const siblings = relatedSpokes(spoke.id)
+  const siblings = relatedSpokes(spoke.id).filter((s) => s.href.split("#")[0] !== spoke.href)
   const hub = hubs[spoke.hub]
+  const seed = seedOf(spoke.id)
+  // On the page the CTA points at (fleet → application), jump in-page instead.
+  const ctaHref =
+    hub.quoteHref === spoke.href && hub.quoteAnchor ? `#${hub.quoteAnchor}` : hub.quoteHref
   return (
     <section className={className}>
       <div className="max-w-[1170px] mx-auto px-4">
@@ -191,15 +206,15 @@ export function RelatedServices({
                   : "md:grid-cols-2 max-w-[780px] mx-auto"
             }`}
           >
-            {siblings.map((s) => (
-              <SpokeCard key={s.id} spoke={s} />
+            {siblings.map((s, i) => (
+              <SpokeCard key={s.id} spoke={s} variant={seed + i} />
             ))}
           </div>
         )}
         <FromTheBlog tags={spoke.tags} className="mt-8 text-center" />
         <div className="mt-10 text-center">
           <Link
-            href={hub.quoteHref}
+            href={ctaHref}
             className="inline-flex items-center justify-center gap-2 bg-[#7f85f7] text-white font-semibold rounded-[8px] h-[52px] px-8 hover:bg-[#6b71f0] transition-all"
           >
             {hub.quoteLabel}
@@ -271,13 +286,13 @@ export function BlogServiceLinks({
       <p className="mt-2 text-[15px] leading-[1.8] text-[#444]">
         Need a hand with this? See our{" "}
         <Link href={hub.href} className={LIGHT_LINK}>
-          {hubAnchor(hub.id)}
+          {hubAnchor(hub.id, 1)}
         </Link>
         {spokes.map((s, i) => (
           <span key={s.id}>
             {i === spokes.length - 1 ? " and " : ", "}
             <Link href={s.href} className={LIGHT_LINK}>
-              {s.anchors[0]}
+              {anchorFor(s, i)}
             </Link>
           </span>
         ))}

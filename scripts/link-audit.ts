@@ -7,6 +7,9 @@
  *   - content: links inside <main> (page body — what internal-linking work moves)
  *   - all:     including the site-wide header, mobile menu and footer
  * Pages with fewer than 3 content inbound links are flagged as orphans.
+ * Also reports broken internal links (404 / other non-200) with the pages
+ * linking to them, and pages that link to themselves in their body (a link
+ * back to the same URL — pure #section jumps are fine and not counted).
  *
  * Reads the server-rendered HTML, i.e. what a crawler sees before JS runs, so
  * links injected by client-side fetches (product grids, fleet) don't count.
@@ -78,6 +81,7 @@ async function main() {
   const status = new Map<string, number>()
   const contentIn = new Map<string, Set<string>>()
   const allIn = new Map<string, Set<string>>()
+  const selfLinks: string[] = []
   const add = (m: Map<string, Set<string>>, to: string, from: string) => {
     if (to === from) return
     if (!m.has(to)) m.set(to, new Set())
@@ -103,7 +107,9 @@ async function main() {
       const body = mainOf(html)
       for (const h of hrefs(body)) {
         const to = toPath(h, path)
-        if (to) add(contentIn, to, path)
+        if (!to) continue
+        if (to === path) selfLinks.push(`${path}  (href="${h}")`)
+        add(contentIn, to, path)
       }
       for (const h of hrefs(html)) {
         const to = toPath(h, path)
@@ -131,7 +137,7 @@ async function main() {
     .map(([p, s]) => ({ path: p, status: s, linkedFrom: Array.from(allIn.get(p) ?? []) }))
 
   if (AS_JSON) {
-    console.log(JSON.stringify({ base: BASE, pages, orphans: orphans.map((o) => o.path), broken }, null, 2))
+    console.log(JSON.stringify({ base: BASE, pages, orphans: orphans.map((o) => o.path), broken, selfLinks }, null, 2))
     return
   }
 
@@ -152,10 +158,16 @@ async function main() {
     console.log(`  ${o.path}  (${o.content}${o.from.length ? ": " + o.from.join(", ") : ""})`)
   }
   const missing = seeds.filter((s) => !seen.has(s) || status.get(s) !== 200)
-  if (broken.length) {
-    console.log(`\nNon-200 links: ${broken.length}`)
-    for (const b of broken) console.log(`  ${b.path} → ${b.status || "fetch failed"}  (from ${b.linkedFrom.slice(0, 3).join(", ") || "sitemap"})`)
+  const notFound = broken.filter((b) => b.status === 404)
+  const otherBad = broken.filter((b) => b.status !== 404)
+  console.log(`\nBroken internal links (404): ${notFound.length}`)
+  for (const b of notFound) console.log(`  ${b.path}  ← linked from ${b.linkedFrom.join(", ") || "sitemap"}`)
+  if (otherBad.length) {
+    console.log(`\nOther non-200 responses: ${otherBad.length}`)
+    for (const b of otherBad) console.log(`  ${b.path} → ${b.status || "fetch failed"}  (from ${b.linkedFrom.slice(0, 3).join(", ") || "sitemap"})`)
   }
+  console.log(`\nSelf-links in page body: ${selfLinks.length}`)
+  for (const s of selfLinks) console.log(`  ${s}`)
   if (missing.length) console.log(`\nSitemap URLs not reachable: ${missing.join(", ")}`)
   console.log("")
 }

@@ -137,6 +137,10 @@ export default function AboutPage() {
               >
                 read our customer reviews
               </Link>
+              , or{" "}
+              <Link href="/contact" className="text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8]">
+                get in touch with the team
+              </Link>
               .
             </p>
           </div>

@@ -30,6 +30,8 @@ export interface Hub {
   anchors: string[]
   /** Where this hub's "get a quote" CTAs go. */
   quoteHref: string
+  /** In-page id to jump to instead, when the CTA sits on quoteHref itself. */
+  quoteAnchor?: string
   quoteLabel: string
 }
 
@@ -54,6 +56,10 @@ export interface Spoke {
   upLink?: { lead: string; tail: string; anchor?: number }
 }
 
+// Anchor convention (hubs and spokes): anchors[0] is the exact target keyword,
+// the rest are natural phrases. Components rotate through them (see
+// anchorFor) so roughly half the links sitewide use the exact keyword.
+
 export const hubs: Record<HubId, Hub> = {
   security: {
     id: "security",
@@ -61,9 +67,8 @@ export const hubs: Record<HubId, Hub> = {
     name: "Security Solutions",
     anchors: [
       "CCTV installation in Brisbane",
-      "Brisbane CCTV and security installation",
-      "security camera installation in Brisbane",
-      "home and business security in Brisbane",
+      "Brisbane security installation service",
+      "full range of security services",
     ],
     quoteHref: "/services/security-solutions/quote",
     quoteLabel: "Get a free security quote",
@@ -74,13 +79,14 @@ export const hubs: Record<HubId, Hub> = {
     name: "Car Rental",
     anchors: [
       "weekly car rental in Brisbane",
-      "long-term car rental in Brisbane",
-      "Brisbane weekly car hire",
+      "cars for Uber and DiDi drivers",
+      "long-term rental service",
     ],
-    // Car rental takes enquiries by contact form / phone, not an online quote
-    // (see src/app/quote/page.tsx).
-    quoteHref: "/contact",
-    quoteLabel: "Enquire about a rental",
+    // Car rental has no quote form: you apply for a specific car, and the
+    // application opens from the fleet grid (VehicleGrid, id="vehicles").
+    quoteHref: "/services/car-rental/vehicles",
+    quoteAnchor: "vehicles",
+    quoteLabel: "Choose a car and apply",
   },
   it: {
     id: "it",
@@ -88,8 +94,8 @@ export const hubs: Record<HubId, Hub> = {
     name: "IT & AI Services",
     anchors: [
       "web design in Brisbane",
-      "Brisbane web design and IT services",
-      `${IT_BRAND} IT and AI services`,
+      "web, app and AI services",
+      IT_BRAND,
     ],
     quoteHref: "/services/it-services/quote",
     quoteLabel: "Start your project brief",
@@ -118,6 +124,9 @@ export function nearestAreas(slug: string): string[] {
   )
 }
 
+/** "in Logan" but "on the Gold Coast". */
+const AREA_PREPOSITION: Record<string, string> = { "gold-coast": "on the" }
+
 // Names come from src/data/service-areas.ts so area pages and links agree.
 const AREA_NAMES: Record<string, string> = Object.fromEntries(
   serviceAreas.map((a) => [a.slug, a.name])
@@ -130,66 +139,66 @@ export const spokes: Spoke[] = [
     hub: "security",
     href: "/services/security-solutions/surveillance-evidence",
     name: "CCTV & Surveillance",
-    anchors: ["CCTV camera installation", "surveillance camera systems"],
+    anchors: ["home security cameras", "CCTV camera installation", "camera systems for homes and shops"],
     blurb: "HD cameras, NVR recording and phone viewing.",
     related: ["access-control", "intercoms", "packages"],
     tags: ["cctv", "security-cameras", "surveillance", "nvr"],
-    upLink: { lead: "Planned, installed and set up on your phone as part of our", tail: " service.", anchor: 0 },
+    upLink: { lead: "It's the core of our", tail: " work.", anchor: 0 },
   },
   {
     id: "deterrence",
     hub: "security",
     href: "/services/security-solutions/deterrence",
     name: "Alarms & Deterrence",
-    anchors: ["alarm and deterrence systems", "home alarm installation"],
+    anchors: ["alarm and deterrence systems", "alarms, sirens and floodlights"],
     blurb: "Alarm panels, sirens, sensors and floodlights.",
     related: ["cctv", "smoke-alarms", "products"],
     tags: ["alarms", "deterrence", "sirens", "motion-sensors"],
-    upLink: { lead: "Pair it with cameras through our", tail: ".", anchor: 3 },
+    upLink: { lead: "Pair it with cameras from our", tail: ".", anchor: 2 },
   },
   {
     id: "commercial",
     hub: "security",
     href: "/services/security-solutions/commercial-security",
     name: "Commercial Security",
-    anchors: ["commercial security systems", "business CCTV"],
+    anchors: ["commercial security systems", "security for offices and warehouses"],
     blurb: "Multi-camera NVR and thermal systems for business.",
     related: ["cctv", "access-control", "products"],
     tags: ["commercial", "business-security", "warehouse"],
-    upLink: { lead: "Designed for offices, retail and warehouses by our", tail: " team.", anchor: 2 },
+    upLink: { lead: "Designed and fitted by the team that does", tail: ".", anchor: 0 },
   },
   {
     id: "access-control",
     hub: "security",
     href: "/services/security-solutions/access-control",
     name: "Access Control",
-    anchors: ["access control installation", "keypad and biometric access"],
+    anchors: ["access control systems", "keypad and swipe-card entry"],
     blurb: "Keypads, biometric readers and gate control.",
     related: ["cctv", "intercoms", "commercial"],
     tags: ["access-control", "keypads", "biometric", "gates"],
-    upLink: { lead: "Integrates with the cameras from our", tail: " service.", anchor: 1 },
+    upLink: { lead: "It integrates with everything in our", tail: ".", anchor: 1 },
   },
   {
     id: "smoke-alarms",
     hub: "security",
     href: "/services/security-solutions/smoke-alarms",
     name: "Smoke Alarms",
-    anchors: ["smoke alarm installation", "compliant smoke alarms"],
+    anchors: ["QLD-compliant smoke alarms", "interconnected smoke alarms"],
     blurb: "Photoelectric, interconnected and compliant.",
     related: ["deterrence", "intercoms", "products"],
     tags: ["smoke-alarms", "fire-safety", "compliance"],
-    upLink: { lead: "Fitted by the same licensed installers behind our", tail: ".", anchor: 3 },
+    upLink: { lead: "Fitted by the licensed installers behind our", tail: ".", anchor: 2 },
   },
   {
     id: "intercoms",
     hub: "security",
     href: "/services/security-solutions/intercoms",
     name: "Video Intercoms",
-    anchors: ["video intercom installation", "smartphone video intercoms"],
+    anchors: ["video intercom installation", "answering the door from your phone"],
     blurb: "See and talk to visitors from your phone.",
     related: ["access-control", "cctv", "commercial"],
     tags: ["intercoms", "video-intercom", "doorbell"],
-    upLink: { lead: "Works alongside everything in our", tail: " range.", anchor: 2 },
+    upLink: { lead: "Often installed alongside our", tail: ".", anchor: 0 },
   },
   {
     id: "packages",
@@ -198,7 +207,7 @@ export const spokes: Spoke[] = [
     // carries id="packages"); CCTV is the main one.
     href: "/services/security-solutions/surveillance-evidence#packages",
     name: "CCTV Packages",
-    anchors: ["complete CCTV packages", "CCTV camera bundles"],
+    anchors: ["security camera packages", "ready-made CCTV bundles"],
     blurb: "Pre-configured camera bundles at a package price.",
     related: ["cctv", "products"],
     tags: ["packages", "cctv-kits", "bundles"],
@@ -208,38 +217,49 @@ export const spokes: Spoke[] = [
     hub: "security",
     href: "/services/security-solutions/products",
     name: "All Security Products",
-    anchors: ["all security products", "the full security product range"],
+    anchors: ["all security products", "the full product range"],
     blurb: "Every camera, alarm and intercom we install.",
     related: ["cctv", "packages", "access-control"],
     tags: ["products", "security-products"],
-    upLink: { lead: "Everything here is supplied and fitted through our", tail: " service.", anchor: 0 },
+    upLink: { lead: "Everything here is supplied and fitted through our", tail: ".", anchor: 1 },
   },
   // Service-area pages (one per slug in src/data/service-areas.ts).
   ...areaSpokes(),
 
-
   // ── Car rental ──────────────────────────────────────────────
+  {
+    // The hub itself, as a Related-services sibling: car rental ↔ vehicles ↔
+    // terms. No tags, so blog matching never picks it as a spoke.
+    id: "car-rental-hub",
+    hub: "car-rental",
+    href: "/services/car-rental",
+    name: "Car Rental",
+    anchors: ["weekly car rental in Brisbane", "cars for Uber and DiDi drivers"],
+    blurb: "Weekly payments, 4-week minimum, servicing included.",
+    related: ["fleet", "rental-terms"],
+    tags: [],
+  },
   {
     id: "fleet",
     hub: "car-rental",
     href: "/services/car-rental/vehicles",
     name: "Vehicle Fleet",
-    anchors: ["our full rental fleet", "cars available to rent"],
+    anchors: ["view our rental fleet", "every car on the yard"],
     blurb: "Every car on the yard with weekly rates.",
-    related: ["rental-terms"],
+    related: ["car-rental-hub", "rental-terms"],
     tags: ["car-rental", "fleet", "vehicles", "rideshare"],
-    upLink: { lead: "Every car is part of our", tail: " service.", anchor: 0 },
+    upLink: { lead: "Every car here is part of our", tail: " service.", anchor: 0 },
   },
   {
     id: "rental-terms",
     hub: "car-rental",
     href: "/rental-terms",
     name: "Rental Terms",
-    anchors: ["car rental terms and conditions", "rental terms"],
+    anchors: ["rental terms and conditions", "how the bond and excess work"],
     blurb: "Bond, minimum period and insurance excess.",
-    related: ["fleet"],
+    related: ["car-rental-hub", "fleet"],
     tags: ["rental-terms", "bond", "insurance"],
-    upLink: { lead: "These terms apply to every vehicle in our", tail: " service.", anchor: 1 },
+    upLink: { lead: "These terms apply to every vehicle in our", tail: ".", anchor: 2 },
   },
 
   // ── IT ──────────────────────────────────────────────────────
@@ -248,37 +268,38 @@ export const spokes: Spoke[] = [
     hub: "it",
     href: "/services/it-services/web-development",
     name: "Web Development",
-    anchors: ["website development", "custom website builds"],
+    anchors: ["small business websites", "website design and development"],
     blurb: "Fast, SEO-ready websites built to convert.",
     related: ["ai-automation", "app-development", "portfolio"],
     tags: ["web-design", "websites", "seo", "web-development"],
-    upLink: { lead: "Part of our", tail: " offering.", anchor: 0 },
+    upLink: { lead: "Part of our", tail: " service.", anchor: 0 },
   },
   {
     id: "app-development",
     hub: "it",
     href: "/services/it-services/app-development",
     name: "App Development",
-    anchors: ["mobile app development", "iOS and Android apps"],
+    anchors: ["app development", "iOS and Android apps"],
     blurb: "Cross-platform iOS and Android apps.",
     related: ["web-development", "ai-automation"],
     tags: ["apps", "mobile-apps", "app-development"],
-    upLink: { lead: "Built by the same team behind our", tail: ".", anchor: 1 },
+    upLink: { lead: "Built by", tail: ", the same team behind our websites.", anchor: 2 },
   },
   {
     id: "ai-automation",
     hub: "it",
     href: "/services/it-services/ai-automation",
     name: "AI Automation",
-    anchors: ["AI automation", "AI chatbots and automations"],
-    blurb: "AI agents and workflows that save hours.",
+    anchors: ["AI automation for small businesses", "online booking systems", "instant quote calculators"],
+    blurb: "AI agents, booking systems and quote calculators.",
     related: ["web-development", "app-development"],
-    tags: ["ai", "automation", "chatbots"],
-    upLink: { lead: "One of the", tail: " we offer.", anchor: 2 },
+    tags: ["ai", "automation", "chatbots", "booking"],
+    upLink: { lead: "One of the", tail: " we offer.", anchor: 1 },
   },
   {
     id: "portfolio",
     hub: "it",
+    // No standalone page — the portfolio is a section on the IT hub.
     href: "/services/it-services#our-work",
     name: "Our Work",
     anchors: ["websites we've built", "our portfolio"],
@@ -299,17 +320,21 @@ export const spokes: Spoke[] = [
 ]
 
 function areaSpokes(): Spoke[] {
-  return serviceAreas.map(({ slug }) => ({
+  return serviceAreas.map(({ slug }, i) => ({
     id: `area-${slug}`,
     hub: "security" as const,
     href: `/services/security-solutions/areas/${slug}`,
     name: `CCTV ${AREA_NAMES[slug]}`,
-    anchors: [`CCTV installation ${AREA_NAMES[slug]}`],
+    anchors: [
+      `CCTV installation ${AREA_PREPOSITION[slug] ?? "in"} ${AREA_NAMES[slug]}`,
+      `security cameras across ${AREA_PREPOSITION[slug] === "on the" ? "the " : ""}${AREA_NAMES[slug]}`,
+    ],
     blurb: `Cameras, alarms and intercoms across ${AREA_NAMES[slug]}.`,
     // Suburb rule: CCTV + packages + the 2 nearest areas.
     related: ["cctv", "packages", ...nearestAreas(slug).map((s) => `area-${s}`)],
     tags: [slug],
-    upLink: { lead: "Local installs are handled by the same team behind our", tail: ".", anchor: 1 },
+    // Alternate exact / natural hub anchor across the area pages.
+    upLink: { lead: "Local installs are handled by the same team behind our", tail: ".", anchor: i % 2 },
   }))
 }
 
@@ -341,6 +366,27 @@ export function hubAnchor(hub: HubId, variant = 0): string {
   return a[variant % a.length]
 }
 
+/** Anchor variant n for a spoke (0 = exact keyword, wraps around). */
+export function anchorFor(spoke: Spoke, n = 0): string {
+  return spoke.anchors[n % spoke.anchors.length]
+}
+
+/** Stable per-page seed so different pages pick different anchor variants. */
+export function seedOf(id: string): number {
+  return Math.max(0, spokes.findIndex((s) => s.id === id))
+}
+
+/**
+ * The href to use when linking to `target` from `currentPath` — never a link
+ * from a page to itself. Same page with a #section becomes an in-page jump;
+ * same page without one returns null (render plain text instead).
+ */
+export function hrefFrom(target: string, currentPath: string): string | null {
+  const [path, hash] = target.split("#")
+  if (path !== currentPath) return target
+  return hash ? `#${hash}` : null
+}
+
 /** Breadcrumb trail for a service page: Home › Hub › Spoke. */
 export function serviceCrumbs(
   hub: HubId,
@@ -362,47 +408,47 @@ export type Segment = string | { spoke: string; anchor?: number }
 
 export const hubIntros: Record<HubId, Segment[]> = {
   security: [
-    `${SECURITY_BRAND} handles `,
-    { spoke: "cctv" },
+    `${SECURITY_BRAND} installs `,
+    { spoke: "cctv", anchor: 0 },
     ", ",
-    { spoke: "deterrence" },
+    { spoke: "deterrence", anchor: 1 },
     ", ",
-    { spoke: "commercial" },
+    { spoke: "commercial", anchor: 0 },
     ", ",
-    { spoke: "access-control" },
+    { spoke: "access-control", anchor: 0 },
     ", ",
-    { spoke: "smoke-alarms" },
-    " and ",
-    { spoke: "intercoms" },
-    ". Compare ",
-    { spoke: "packages" },
+    { spoke: "smoke-alarms", anchor: 0 },
+    " and handles ",
+    { spoke: "intercoms", anchor: 1 },
+    ". Compare our ",
+    { spoke: "packages", anchor: 0 },
     " or browse ",
-    { spoke: "products" },
+    { spoke: "products", anchor: 1 },
     ". We also have local pages for ",
     // One link per service area: "a, b, c and d."
     ...serviceAreas.flatMap((a, i, all): Segment[] => [
-      { spoke: `area-${a.slug}` },
+      { spoke: `area-${a.slug}`, anchor: i % 2 },
       i === all.length - 1 ? "." : i === all.length - 2 ? " and " : ", ",
     ]),
   ],
   "car-rental": [
-    "Pick a car from ",
-    { spoke: "fleet" },
-    " and read the full ",
-    { spoke: "rental-terms" },
+    "Ready to drive? Go ahead and ",
+    { spoke: "fleet", anchor: 0 },
+    ", then check ",
+    { spoke: "rental-terms", anchor: 1 },
     " before you apply.",
   ],
   it: [
-    "We take on ",
-    { spoke: "web-development" },
+    "We build ",
+    { spoke: "web-development", anchor: 0 },
     ", ",
-    { spoke: "app-development" },
+    { spoke: "app-development", anchor: 1 },
     " and ",
-    { spoke: "ai-automation" },
+    { spoke: "ai-automation", anchor: 0 },
     ". See ",
-    { spoke: "portfolio" },
+    { spoke: "portfolio", anchor: 1 },
     ", then ",
-    { spoke: "it-quote" },
+    { spoke: "it-quote", anchor: 0 },
     ".",
   ],
 }

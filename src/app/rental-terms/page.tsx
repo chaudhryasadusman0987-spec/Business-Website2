@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
 
@@ -52,6 +53,13 @@ export default function RentalTermsPage() {
           <p>Pak Oz Solutions Pty Ltd (trading as Pak Oz Rentals)</p>
           <p>1 Cedrus St, Sunnybank Hills QLD 4109</p>
           <p>Contact: 0424 948 512 / +61 480 488 080</p>
+          <p>
+            Questions about these terms?{" "}
+            <Link href="/contact" className="text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8]">
+              Send us a message
+            </Link>
+            .
+          </p>
           <p>Email: pakozsolutions.com.au</p>
           <p className="text-[13px] text-[#666] italic">
             The parties choose the addresses stated in the signed agreement

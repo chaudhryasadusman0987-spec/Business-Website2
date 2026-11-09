@@ -78,7 +78,11 @@ export default function VehiclesPage() {
           <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-[16px] p-6 max-w-[700px] mx-auto text-center text-[14px] text-[#185fa5] leading-relaxed">
             💳 The security bond is refunded at the end of the rental. Weekly
             rent is paid in advance and we confirm everything with you by phone
-            before the first payment.
+            before the first payment. Questions about a car?{" "}
+            <Link href="/contact" className="font-semibold underline underline-offset-2 hover:text-[#0d4a80]">
+              Send us a message
+            </Link>
+            .
           </div>
         </div>
       </section>
