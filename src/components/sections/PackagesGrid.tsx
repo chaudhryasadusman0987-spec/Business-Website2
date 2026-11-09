@@ -71,7 +71,7 @@ export default function PackagesGrid({ slug }: { slug: string }) {
   if (packages.length === 0) return null
 
   return (
-    <div className="mb-12">
+    <div id="packages" className="mb-12 scroll-mt-24">
       <div className="flex items-center gap-2 mb-6">
         <span className="text-[24px]">📦</span>
         <h2 className="font-bold text-[24px] text-[#1a1a2e]">Complete Packages</h2>

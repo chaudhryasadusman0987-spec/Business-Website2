@@ -7,10 +7,11 @@ import SolutionCard from "@/components/sections/SolutionCard"
 import HowItWorks from "@/components/sections/HowItWorks"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
-import Link from "next/link"
 import { securitySolutions } from "@/data/security-solutions"
 import { serviceAreas } from "@/data/service-areas"
 import { SECURITY_BRAND, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
+import Link from "next/link"
+import { HubIntro, HubBlogLinks, SpokeCards } from "@/components/seo/InternalLinks"
 
 // Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
 const serviceSuburbs = [
@@ -62,6 +63,10 @@ export default function SecuritySolutionsPage() {
             title="Our Solutions"
             subtitle="Click any solution to explore products and pricing"
           />
+          <HubIntro
+            hub="security"
+            className="text-[15px] text-[#666] leading-[1.8] text-center max-w-[820px] mx-auto mt-6"
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
             {securitySolutions.map((solution, index) => (
@@ -75,6 +80,10 @@ export default function SecuritySolutionsPage() {
               </AnimateIn>
             ))}
           </div>
+
+          {/* Spokes without a solution card of their own */}
+          <SpokeCards ids={["packages", "products"]} className="mt-6 max-w-[780px] mx-auto" />
+          <HubBlogLinks hub="security" className="mt-8 text-center" />
         </div>
       </section>
 
@@ -118,7 +127,11 @@ export default function SecuritySolutionsPage() {
           </h2>
           <p className="text-white/80 text-[15px] mt-3 mb-8 max-w-[560px] mx-auto">
             Leave us a Google review and help other Brisbane families find
-            quality security installation.
+            quality security installation. Or{" "}
+            <Link href="/testimonials" className="text-white underline underline-offset-2 hover:text-white/80">
+              read what our customers say
+            </Link>
+            .
           </p>
           {/* Points at a Google search until the Business Profile is verified;
               swap to the direct review link once it is. */}

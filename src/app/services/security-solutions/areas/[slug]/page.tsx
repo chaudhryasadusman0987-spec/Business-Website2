@@ -11,6 +11,8 @@ import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
 import { serviceAreas, getServiceArea } from "@/data/service-areas"
 import { SECURITY_BRAND } from "@/data/site"
+import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpokeByHref } from "@/data/internal-links"
 
 export function generateStaticParams() {
   return serviceAreas.map((a) => ({ slug: a.slug }))
@@ -40,6 +42,7 @@ export default function ServiceAreaPage({
 
   const path = `/services/security-solutions/areas/${area.slug}`
   const otherAreas = serviceAreas.filter((a) => a.slug !== area.slug)
+  const spoke = getSpokeByHref(path)
 
   return (
     <>
@@ -96,9 +99,10 @@ export default function ServiceAreaPage({
             <span className="text-[#7f85f7]">{area.headline}</span>
           </h1>
           <div className="mt-5 max-w-[680px] space-y-4">
-            {area.intro.map((p) => (
+            {area.intro.map((p, i) => (
               <p key={p} className="text-[15px] text-[#9496a8] leading-relaxed">
                 {p}
+                {i === 0 && <HubLink spoke={spoke} />}
               </p>
             ))}
           </div>
@@ -216,6 +220,9 @@ export default function ServiceAreaPage({
           </div>
         </div>
       </section>
+
+      {/* CCTV, packages and the two nearest areas */}
+      <RelatedServices spoke={spoke} className="bg-white py-[60px]" />
 
       <QuoteCTABanner href="/services/security-solutions/quote" />
     </>

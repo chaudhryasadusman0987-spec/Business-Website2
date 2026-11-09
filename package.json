@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "e2e:quote": "node e2e/security-quote.mjs",
-    "capture:portfolio": "tsx scripts/capture-portfolio.ts"
+    "capture:portfolio": "tsx scripts/capture-portfolio.ts",
+    "audit:links": "tsx scripts/link-audit.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

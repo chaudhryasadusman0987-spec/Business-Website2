@@ -1,6 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
+import JsonLd, { breadcrumbJsonLd } from "@/components/seo/JsonLd"
+import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+
+const spoke = getSpoke("fleet")
 
 // Same database-backed fleet as /services/car-rental, on its own page with the
 // full-fleet framing. There is one source of truth for vehicles now — the
@@ -17,6 +22,11 @@ export const metadata: Metadata = {
 export default function VehiclesPage() {
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd(
+          serviceCrumbs("car-rental", { name: "Vehicles", href: "/services/car-rental/vehicles" })
+        )}
+      />
       {/* HERO STRIP — dark */}
       <section className="relative overflow-hidden bg-[#0d0d1a] py-20 text-center">
         {/* dot grid */}
@@ -50,6 +60,7 @@ export default function VehiclesPage() {
           <p className="text-[15px] text-[#9496a8] mt-4 max-w-[480px] mx-auto leading-relaxed">
             Weekly hire, four-week minimum. Roadside assistance and servicing
             are included on every car.
+            <HubLink spoke={spoke} />
           </p>
         </div>
       </section>
@@ -71,6 +82,8 @@ export default function VehiclesPage() {
           </div>
         </div>
       </section>
+
+      <RelatedServices spoke={spoke} />
     </>
   )
 }

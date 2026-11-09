@@ -11,6 +11,8 @@ import PackagesGrid from "@/components/sections/PackagesGrid"
 import { securitySolutions, installFee } from "@/data/security-solutions"
 import { SECURITY_BRAND } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
+import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpokeByHref } from "@/data/internal-links"
 
 export function generateStaticParams() {
   return securitySolutions.map((s) => ({ slug: s.slug }))
@@ -68,6 +70,7 @@ export default function SolutionDetailPage({
   if (!solution) notFound()
 
   const contain = solution.heroImageFit !== "cover"
+  const spoke = getSpokeByHref(`/services/security-solutions/${solution.slug}`)
 
   return (
     <>
@@ -122,6 +125,7 @@ export default function SolutionDetailPage({
             </p>
             <p className="text-[15px] text-[#9496a8] mt-4 max-w-[600px]">
               {solution.longDescription}
+              <HubLink spoke={spoke} />
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
@@ -199,6 +203,8 @@ export default function SolutionDetailPage({
           </div>
         </div>
       </section>
+
+      <RelatedServices spoke={spoke} />
 
       <QuoteCTABanner href="/services/security-solutions/quote" />
     </>

@@ -8,6 +8,8 @@ export interface BlogPost {
   title: string
   excerpt: string
   category: string
+  /** Drives the post's Related-services links (see blogServiceLinks). */
+  tags?: string[]
   categoryColor: string
   author: string
   authorRole: string
@@ -31,6 +33,7 @@ export const blogCategories = [
 export const blogPosts: BlogPost[] = [
   {
     slug: "cctv-buying-guide-2025",
+    tags: ["cctv", "packages", "security-cameras"],
     title: "The 2025 CCTV Buying Guide for Australian Homes & Businesses",
     excerpt:
       "Resolution, storage, night vision and remote access — everything you need to know before installing security cameras this year.",
@@ -74,6 +77,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "long-term-car-rental-vs-buying",
+    tags: ["car-rental", "fleet", "rental-terms"],
     title: "Long-Term Car Rental vs Buying: What Makes Sense in 2025?",
     excerpt:
       "Flexible mobility is changing how Australians think about owning a car. Here's how the numbers really stack up.",
@@ -108,6 +112,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "ai-automation-small-business",
+    tags: ["ai", "automation", "web-design"],
     title: "5 Ways Small Businesses Are Using AI Automation Right Now",
     excerpt:
       "AI isn't just for tech giants. Here are five practical automations Australian small businesses are deploying today.",
@@ -160,6 +165,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "alarm-systems-explained",
+    tags: ["alarms", "deterrence", "smoke-alarms"],
     title: "Alarm Systems Explained: Monitored vs Self-Monitored",
     excerpt:
       "Should you pay for professional monitoring or watch your own alerts? We break down the trade-offs.",
@@ -193,6 +199,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "website-speed-conversions",
+    tags: ["web-design", "seo", "portfolio"],
     title: "Why a Faster Website Means More Customers",
     excerpt:
       "A one-second delay can cut conversions by 7%. Here's how page speed quietly shapes your bottom line.",
@@ -226,6 +233,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "choosing-business-vehicle",
+    tags: ["car-rental", "fleet", "business"],
     title: "Choosing the Right Vehicle for Your Business Needs",
     excerpt:
       "From compact runabouts to spacious vans — matching the vehicle to the job saves money and headaches.",

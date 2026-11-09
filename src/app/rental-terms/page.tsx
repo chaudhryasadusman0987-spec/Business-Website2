@@ -1,3 +1,8 @@
+import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+
+const spoke = getSpoke("rental-terms")
+
 export const metadata = {
   alternates: { canonical: "/rental-terms" },
   title: "Car Rental Terms & Conditions",
@@ -25,13 +30,23 @@ function Section({
 export default function RentalTermsPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f8] py-12 px-4">
+      <div className="max-w-[800px] mx-auto">
+        <Breadcrumbs
+          tone="light"
+          crumbs={serviceCrumbs("car-rental", { name: "Rental Terms", href: "/rental-terms" })}
+        />
+      </div>
       <div className="max-w-[800px] mx-auto bg-white rounded-[20px] p-8 lg:p-12 shadow-sm">
         <p className="text-[12px] font-bold text-[#7f85f7] uppercase tracking-wider mb-1">
           Pak Oz Rentals — A Pak Oz Solutions Company
         </p>
-        <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-8">
+        <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-4">
           Vehicle Lease Agreement — Terms &amp; Conditions
         </h1>
+        <p className="text-[14px] text-[#444] leading-relaxed mb-8">
+          The full conditions you sign before driving away.
+          <HubLink spoke={spoke} tone="light" />
+        </p>
 
         <Section title="Registered Owner">
           <p>Pak Oz Solutions Pty Ltd (trading as Pak Oz Rentals)</p>
@@ -224,6 +239,7 @@ export default function RentalTermsPage() {
           pakozsolutions.com.au
         </p>
       </div>
+      <RelatedServices spoke={spoke} className="pt-[60px]" />
     </div>
   )
 }

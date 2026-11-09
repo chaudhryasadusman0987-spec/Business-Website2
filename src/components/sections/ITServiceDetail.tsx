@@ -9,6 +9,9 @@ import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import WhatsAppButton from "@/components/ui/WhatsAppButton"
 import type { ITServiceItem } from "@/data/it-services"
 import { IT_BRAND } from "@/data/site"
+import JsonLd, { breadcrumbJsonLd } from "@/components/seo/JsonLd"
+import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpokeByHref, hubs, serviceCrumbs } from "@/data/internal-links"
 
 interface Props {
   service: ITServiceItem
@@ -28,8 +31,11 @@ export default function ITServiceDetail({
   floatingBadge,
   extra,
 }: Props) {
+  const href = `/services/it-services/${service.slug}`
+  const spoke = getSpokeByHref(href)
   return (
     <>
+      <JsonLd data={breadcrumbJsonLd(serviceCrumbs("it", { name: service.name, href }))} />
       {/* ── HERO ── */}
       <section className="relative overflow-hidden bg-[#0d0d1a]">
         <div
@@ -86,6 +92,7 @@ export default function ITServiceDetail({
 
             <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-4">
               {service.longDescription}
+              <HubLink spoke={spoke} />
             </p>
 
             <Link
@@ -252,7 +259,9 @@ export default function ITServiceDetail({
         </div>
       </section>
 
-      <QuoteCTABanner href="/contact" showWhatsApp />
+      <RelatedServices spoke={spoke} />
+
+      <QuoteCTABanner href={hubs.it.quoteHref} showWhatsApp />
     </>
   )
 }

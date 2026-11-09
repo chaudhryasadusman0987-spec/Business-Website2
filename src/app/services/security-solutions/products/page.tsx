@@ -3,6 +3,10 @@ import AllDbProductsGrid from "@/components/sections/AllDbProductsGrid"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
+import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
+import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+
+const spoke = getSpoke("products")
 
 export const metadata: Metadata = {
   alternates: { canonical: "/services/security-solutions/products" },
@@ -26,6 +30,9 @@ export default function AllProductsPage() {
           }}
         />
         <div className="relative z-10 max-w-[1170px] mx-auto px-4">
+          <Breadcrumbs
+            crumbs={serviceCrumbs("security", { name: "All Products", href: "/services/security-solutions/products" })}
+          />
           <h1 className="text-[40px] lg:text-[52px] font-extrabold text-white leading-[1.1]">
             All Security Products
           </h1>
@@ -33,6 +40,7 @@ export default function AllProductsPage() {
             Every product across all of our security solutions, grouped by
             category. Prices per unit · Installation from {formatAUD(installFee)}{" "}
             · GST additional.
+            <HubLink spoke={spoke} />
           </p>
         </div>
       </section>
@@ -43,6 +51,8 @@ export default function AllProductsPage() {
           <AllDbProductsGrid />
         </div>
       </section>
+
+      <RelatedServices spoke={spoke} />
 
       <QuoteCTABanner href="/services/security-solutions/quote" />
     </>

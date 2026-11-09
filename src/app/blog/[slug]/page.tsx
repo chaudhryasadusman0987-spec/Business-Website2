@@ -6,6 +6,15 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { blogPosts, getPostBySlug, getRelatedPosts } from "@/data/blog"
 import { SITE_DOMAIN } from "@/data/site"
+import { BlogServiceLinks } from "@/components/seo/InternalLinks"
+import type { HubId } from "@/data/internal-links"
+
+// Used when a post has no tags that match a spoke.
+const CATEGORY_HUB: Record<string, HubId> = {
+  Security: "security",
+  "Car Rental": "car-rental",
+  "IT & AI": "it",
+}
 
 export function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }))
@@ -154,8 +163,13 @@ export default function BlogPostPage({
             </div>
           ))}
 
+          <BlogServiceLinks tags={post.tags ?? []} fallbackHub={CATEGORY_HUB[post.category]} />
+
           {/* author card */}
-          <div className="mt-12 flex items-center gap-4 rounded-[20px] border border-[#e8e8f0] bg-white p-6">
+          <Link
+            href="/about#team"
+            className="mt-12 flex items-center gap-4 rounded-[20px] border border-[#e8e8f0] bg-white p-6 hover:border-[#7f85f7] transition-colors"
+          >
             <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#7f85f7] text-[18px] font-bold text-white">
               {post.author
                 .split(" ")
@@ -168,7 +182,8 @@ export default function BlogPostPage({
               </p>
               <p className="text-[13px] text-[#9496a8]">{post.authorRole}</p>
             </div>
-          </div>
+            <span className="ml-auto text-[13px] font-semibold text-[#7f85f7]">Meet the team</span>
+          </Link>
         </div>
       </article>
 

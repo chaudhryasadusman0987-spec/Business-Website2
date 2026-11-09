@@ -21,6 +21,7 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import ITFaq from "@/components/sections/ITFaq"
 import PortfolioSection from "@/components/sections/PortfolioSection"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
+import { HubIntro, HubBlogLinks } from "@/components/seo/InternalLinks"
 import { itConsulting } from "@/data/it-services"
 import { getITEstimates } from "@/lib/it-services-server"
 import WhatsAppButton from "@/components/ui/WhatsAppButton"
@@ -324,6 +325,8 @@ export default async function ITServicesPage() {
                 everything. Here&apos;s what we take on, and what it usually
                 costs.
               </p>
+              <HubIntro hub="it" className="mt-3 text-[15px] leading-[1.8] text-[#666]" />
+              <HubBlogLinks hub="it" className="mt-3" />
             </div>
           </AnimateIn>
 

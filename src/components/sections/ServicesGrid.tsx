@@ -6,6 +6,8 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import AnimateIn from "@/components/ui/AnimateIn"
 import FleetCountBadge from "@/components/car-rental/FleetCountBadge"
 import { services } from "@/data/services"
+import { cardAnchors } from "@/data/internal-links"
+import { HomeHubLinks } from "@/components/seo/InternalLinks"
 
 const icons: Record<string, LucideIcon> = {
   Shield,
@@ -24,6 +26,7 @@ export default function ServicesGrid() {
           title="Our Services"
           subtitle="Everything your home or business needs — security, mobility, and technology under one roof."
         />
+        <HomeHubLinks className="text-center text-[15px] text-gray-500 leading-[1.8] max-w-[720px] mx-auto mt-4" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
           {services.map((service, index) => {
@@ -72,7 +75,7 @@ export default function ServicesGrid() {
                     href={service.href}
                     className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[38px] leading-[38px] rounded-[5px] text-[15px] group-hover:bg-white group-hover:text-brand-dark transition-all duration-500"
                   >
-                    Learn More
+                    {cardAnchors[service.href] ?? service.name}
                   </Link>
                 </div>
               </div>

@@ -129,7 +129,15 @@ export default function AboutPage() {
             </p>
             <p className="mt-4 text-[15px] text-[#666666] leading-relaxed">
               Based in Brisbane, we service clients across Australia. Licensed,
-              insured and committed to quality on every job.
+              insured and committed to quality on every job. Don&apos;t take
+              our word for it —{" "}
+              <Link
+                href="/testimonials"
+                className="text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8]"
+              >
+                read our customer reviews
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -158,7 +166,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── 4. TEAM ── */}
-      <section className="bg-[#fefefd] pt-[100px] pb-[100px]">
+      <section id="team" className="scroll-mt-24 bg-[#fefefd] pt-[100px] pb-[100px]">
         <div className="max-w-[1170px] mx-auto px-4">
           <SectionTitle title="Our Team" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-14">

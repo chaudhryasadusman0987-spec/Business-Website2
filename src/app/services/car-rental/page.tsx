@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
+import { HubIntro, HubBlogLinks, SpokeCards } from "@/components/seo/InternalLinks"
 import Image from "next/image"
 import Link from "next/link"
 import { Phone } from "lucide-react"
@@ -221,6 +222,13 @@ export default async function CarRentalPage() {
               </AnimateIn>
             ))}
           </div>
+
+          <HubIntro
+            hub="car-rental"
+            className="mt-10 text-[15px] text-[#666] leading-[1.8] max-w-[640px]"
+          />
+          <SpokeCards ids={["fleet", "rental-terms"]} className="mt-6 max-w-[780px]" />
+          <HubBlogLinks hub="car-rental" className="mt-6 max-w-[640px]" />
         </div>
       </section>
 
