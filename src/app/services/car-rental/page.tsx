@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
-import JsonLd, { serviceJsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd"
+import JsonLd, { serviceJsonLd, breadcrumbJsonLd, autoRentalJsonLd } from "@/components/seo/JsonLd"
 import { HubIntro, HubBlogLinks, SpokeCards } from "@/components/seo/InternalLinks"
+import { getFleetSummary, getPublicFleet, weeklyRange } from "@/lib/fleet-summary"
 import Image from "next/image"
 import Link from "next/link"
 import { Phone } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
-import { SITE_PHONE } from "@/data/site"
+import { SITE_PHONE, RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
 import { getFleetCounts } from "@/lib/db"
 
 // The fleet is dashboard-managed, so the hero counts have to be read at request
@@ -16,12 +17,14 @@ import { getFleetCounts } from "@/lib/db"
 // working on a machine with no DATABASE_URL.
 export const dynamic = "force-dynamic"
 
+// The hub targets the broad "car rental Brisbane"; "long term / weekly" and
+// "rideshare / Uber" each have their own page, linked from here.
 export const metadata: Metadata = {
   alternates: { canonical: "/services/car-rental" },
-  title: "Long-Term Car Rental Brisbane",
+  title: { absolute: `Car Rental Brisbane: Weekly & Rideshare | ${RENTAL_BRAND}` },
   description:
-    "Pak Oz Rentals — long-term car rental in Brisbane. Weekly payment, " +
-    "4 week minimum. Road assistance and maintenance included.",
+    `${RENTAL_BRAND}: car rental in Brisbane by the week. 4-week minimum, ` +
+    "rideshare-ready cars, servicing and roadside assistance included.",
 }
 
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
@@ -51,7 +54,11 @@ const terms = [
 ]
 
 export default async function CarRentalPage() {
-  const fleet = await fleetCounts()
+  const [fleet, summary, publicFleet] = await Promise.all([
+    fleetCounts(),
+    getFleetSummary(),
+    getPublicFleet(),
+  ])
   const count = fleet?.onYard ?? 0
   const allBooked = !!fleet && fleet.onYard > 0 && fleet.available === 0
   const badge = !fleet || fleet.onYard === 0
@@ -73,11 +80,18 @@ export default async function CarRentalPage() {
   return (
     <>
       <JsonLd
+        data={autoRentalJsonLd({
+          path: "/services/car-rental",
+          // Live weekly range from the fleet; "$$" only if the DB is down.
+          priceRange: summary ? `${weeklyRange(summary)} AUD per week` : "$$",
+        })}
+      />
+      <JsonLd
         data={serviceJsonLd({
-          name: "Long-Term Car Rental",
+          name: "Car Rental Brisbane",
           serviceType: "Car rental",
           description:
-            "Long-term car rental in Brisbane with weekly payments, a 4 week minimum, and road assistance and maintenance included.",
+            "Car rental in Brisbane by the week, with a 4 week minimum, rideshare-ready cars, and road assistance and maintenance included.",
           path: "/services/car-rental",
         })}
       />
@@ -100,22 +114,23 @@ export default async function CarRentalPage() {
         />
 
         <div className="relative max-w-[1170px] mx-auto px-4 py-[72px] lg:py-[96px] flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          {/* LEFT — copy */}
-          <AnimateIn animation="slide-left" className="flex-1 w-full">
+          {/* LEFT — copy. Not wrapped in AnimateIn: that holds content at
+              opacity 0 until hydration, which pushed mobile LCP past 2.5s. */}
+          <div className="flex-1 w-full">
             <span className="inline-block bg-white/[0.07] border border-white/10 text-[#c5c8fd] text-[11px] font-semibold uppercase tracking-widest px-4 py-2 rounded-full">
               Pak Oz Rentals · Brisbane QLD
             </span>
 
             <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.08] mt-6">
-              Long-term car rental,
+              Car rental in Brisbane,
               <br />
-              <span className="text-[#7f85f7]">Brisbane.</span>
+              <span className="text-[#7f85f7]">by the week.</span>
             </h1>
 
             <p className="text-[15px] text-[#9496a8] leading-[1.8] mt-5 max-w-[440px]">
-              Cars on the yard in Brisbane, rented by the week with a four-week
-              minimum. Roadside assistance and servicing are on us — you put fuel
-              in it and drive.
+              Car rental in Brisbane from our yard in {RENTAL_LOCALITY}, by the
+              week with a four-week minimum. Roadside assistance and servicing
+              are on us — you put fuel in it and drive.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3.5">
@@ -152,14 +167,10 @@ export default async function CarRentalPage() {
                 </div>
               ))}
             </div>
-          </AnimateIn>
+          </div>
 
           {/* RIGHT — hero photo with an overlapping availability card */}
-          <AnimateIn
-            animation="slide-right"
-            delay={150}
-            className="w-full lg:w-[46%] flex-shrink-0"
-          >
+          <div className="w-full lg:w-[46%] flex-shrink-0">
             <div className="relative">
               <div className="relative h-[300px] sm:h-[380px] lg:h-[440px] rounded-[20px] overflow-hidden ring-1 ring-white/10">
                 <Image
@@ -192,7 +203,7 @@ export default async function CarRentalPage() {
                 </div>
               </div>
             </div>
-          </AnimateIn>
+          </div>
         </div>
       </section>
 
@@ -227,13 +238,16 @@ export default async function CarRentalPage() {
             hub="car-rental"
             className="mt-10 text-[15px] text-[#666] leading-[1.8] max-w-[640px]"
           />
-          <SpokeCards ids={["fleet", "rental-terms"]} className="mt-6 max-w-[780px]" />
+          <SpokeCards
+            ids={["rideshare", "long-term", "fleet", "rental-terms"]}
+            className="mt-6 max-w-[780px]"
+          />
           <HubBlogLinks hub="car-rental" className="mt-6 max-w-[640px]" />
         </div>
       </section>
 
       {/* SECTION 3 — Vehicle grid + detail modal */}
-      <VehicleGrid />
+      <VehicleGrid initialVehicles={publicFleet} />
 
       {/* SECTION 4 — Contact CTA */}
       <section className="bg-[#1a1a2e] py-[68px]">

@@ -33,7 +33,10 @@ import {
 } from "@/data/site"
 import { RENTAL_KEY_TERMS } from "@/lib/rental-terms"
 import { compressImage } from "@/lib/compressImage"
-import { loadStripe } from "@stripe/stripe-js"
+// The /pure entry: the main "@stripe/stripe-js" entry injects stripe.js as a
+// side effect of being imported, which loaded ~200 KB of Stripe on every page
+// that prefetched the fleet. /pure only fetches it when loadStripe() runs.
+import { loadStripe } from "@stripe/stripe-js/pure"
 import {
   Elements,
   PaymentElement,
@@ -590,6 +593,7 @@ export default function VehicleModal({
                   alt={vehicleAlt(v)}
                   fill
                   className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 860px"
                   fallbackIcon="Car"
                   fallbackBg="#0d0d1a"
                   placeholderText="Photo coming soon"
@@ -682,6 +686,7 @@ export default function VehicleModal({
                         alt={`${v.name} view ${i + 1}`}
                         fill
                         className="object-cover"
+                        sizes="80px"
                         fallbackIcon="Car"
                         fallbackBg="#eeeeff"
                         placeholderText=""

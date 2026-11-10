@@ -3,6 +3,7 @@ import { SITE_DOMAIN } from "@/data/site"
 import { securitySolutions } from "@/data/security-solutions"
 import { blogPosts } from "@/data/blog"
 import { serviceAreas } from "@/data/service-areas"
+import { rentalSuburbs } from "@/data/car-rental-pages"
 
 // Admin, agreement-signing and lead-finder pages are deliberately left out —
 // see robots.ts for the matching disallow list.
@@ -13,6 +14,8 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/services/security-solutions/quote", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/car-rental", priority: 0.9, changeFrequency: "weekly" },
   { path: "/services/car-rental/vehicles", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/services/car-rental/rideshare", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/services/car-rental/long-term", priority: 0.8, changeFrequency: "weekly" },
   { path: "/services/it-services", priority: 0.9, changeFrequency: "monthly" },
   { path: "/services/it-services/web-development", priority: 0.7, changeFrequency: "monthly" },
   { path: "/services/it-services/app-development", priority: 0.7, changeFrequency: "monthly" },
@@ -46,6 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    })),
+    ...rentalSuburbs.map((s) => ({
+      url: `${SITE_DOMAIN}/services/car-rental/${s.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     })),
     ...blogPosts.map((p) => {
       const d = new Date(p.date)

@@ -76,6 +76,136 @@ export const blogPosts: BlogPost[] = [
     ],
   },
   {
+    slug: "start-driving-uber-brisbane-without-buying-a-car",
+    tags: ["rideshare", "uber", "didi", "fleet"],
+    title: "How to Start Driving Uber in Brisbane Without Buying a Car",
+    excerpt:
+      "You don't need to own a car to drive Uber or DiDi in Brisbane. How weekly rental works, what it costs, and the steps from sign-up to your first trip.",
+    category: "Car Rental",
+    categoryColor: "#4caf50",
+    author: "Tayyab Iftikhar",
+    authorRole: "Director & Operations",
+    date: "November 10, 2026",
+    readTime: "6 min read",
+    image: "/images/vehicles/car-rental-keys.jpg",
+    content: [
+      {
+        body: [
+          "Most people who want to drive rideshare hit the same wall: the apps want a recent, well-kept car, and buying one means a loan, insurance, rego and depreciation before you've earned a dollar. Renting a car by the week gets around that. You pay one fixed weekly amount, drive as much as you like, and hand the car back if rideshare turns out not to suit you.",
+          "This guide walks through how that works in Brisbane, what to check before you start, and where the costs really sit.",
+        ],
+      },
+      {
+        heading: "Why rent instead of buy?",
+        body: [
+          "A car you buy to drive Uber loses value every week, whether you drive it or not. Servicing, tyres and brakes come round faster when you're doing full shifts, and when something breaks, you're off the road and not earning until it's fixed.",
+          "With a weekly rental, servicing and maintenance are the rental company's job, roadside assistance is usually included, and the weekly cost doesn't change. If you decide after a couple of months that rideshare isn't for you, you give notice instead of trying to sell a car. Our [rideshare car rental in Brisbane](/services/car-rental/rideshare) is set up exactly this way: four-week minimum, then week to week, with unlimited kilometres.",
+        ],
+      },
+      {
+        heading: "Step 1: Check you can drive for Uber or DiDi",
+        body: [
+          "Before you rent anything, make sure you can actually get onto the apps. Uber and DiDi each run their own checks, usually covering your licence history, a criminal history check and your right to work in Australia. In Queensland, rideshare is regulated as a booked hire service by the Department of Transport and Main Roads (TMR), so you'll generally also need a driver authorisation.",
+          "These rules change, so check the current requirements on Uber's and DiDi's driver sites and with TMR rather than relying on a blog post, including this one.",
+        ],
+      },
+      {
+        heading: "Step 2: Pick a car that suits the apps",
+        body: [
+          "Uber and DiDi want four-door cars with room for four passengers, in good condition, and younger than a maximum vehicle age that differs by product. A hybrid such as a Toyota Prius or Camry Hybrid is the classic choice because it uses so little fuel in stop-start traffic. Over a week of full shifts, the fuel saving can easily cover part of the rent.",
+          "Our guide to [Uber and DiDi vehicle requirements in Brisbane](/blog/uber-didi-vehicle-requirements-brisbane) goes into more detail. You can also see [the cars on our yard that suit rideshare](/services/car-rental/rideshare), with their weekly rates.",
+        ],
+      },
+      {
+        heading: "Step 3: Rent it and get it approved for rideshare",
+        body: [
+          "Rental agreements usually prohibit using the car for hire or reward unless the owner agrees in writing, and ours is no different. Tell the rental company you plan to drive rideshare before you sign, so it's recorded on the agreement. Driving Uber in a rental that isn't approved for it can leave you uninsured.",
+          "With us, you choose a car in the [rental fleet](/services/car-rental/vehicles), apply online, and we call to confirm the details, including rideshare use. You then sign the agreement, pay a refundable bond plus the first week, and collect the car. Most drivers are on the road the same week.",
+        ],
+      },
+      {
+        heading: "Step 4: Work out your real weekly costs",
+        body: [
+          "Your weekly rent is the biggest fixed cost, but not the only one. Budget for fuel, tolls (Brisbane has plenty), car washes, phone data, and tax: rideshare income is taxable, and rideshare drivers have to register for GST regardless of turnover. Keep records from day one, because rent and fuel are typically deductible business expenses. Talk to an accountant about your own situation.",
+          "A simple rule: add up rent, fuel and tolls for a week, then aim for net fares comfortably above that. The first few weeks are slower while you learn where and when demand is highest.",
+        ],
+      },
+      {
+        heading: "Step 5: Drive smart",
+        body: [
+          "Running Uber and DiDi side by side cuts the waiting time between trips. Airport runs, Friday and Saturday nights and big events at the Gabba or Suncorp Stadium are busy. Track your earnings per hour, not per trip, and you'll quickly see which shifts are worth it.",
+        ],
+      },
+      {
+        heading: "Ready to start?",
+        body: [
+          "If you'd rather test rideshare before buying a car, a weekly rental is the lowest-risk way in. See the cars, prices and requirements on our [rideshare car rental](/services/car-rental/rideshare) page, or call us and we'll talk you through it.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "uber-didi-vehicle-requirements-brisbane",
+    tags: ["rideshare", "uber", "didi", "rental-terms"],
+    title: "Uber and DiDi Vehicle Requirements in Brisbane (2026)",
+    excerpt:
+      "What Uber and DiDi expect from a car in Brisbane in 2026: size, age, condition, registration and insurance. A plain-English guide to the rules.",
+    category: "Car Rental",
+    categoryColor: "#4caf50",
+    author: "Tayyab Iftikhar",
+    authorRole: "Director & Operations",
+    date: "November 10, 2026",
+    readTime: "5 min read",
+    image: "/images/vehicles/midsize.jpg",
+    content: [
+      {
+        body: [
+          "Before you buy or rent a car to drive rideshare in Brisbane, it pays to know what the apps will accept. Uber and DiDi publish their own vehicle standards, and Queensland adds rules of its own for booked hire. This is a general overview of what those requirements usually cover in 2026.",
+          "Important: requirements change, and they differ between products such as UberX, Uber Comfort and Uber XL. Always check the latest vehicle requirements on Uber's and DiDi's driver websites and with the Department of Transport and Main Roads (TMR) before you commit to a car.",
+        ],
+      },
+      {
+        heading: "Size and seating",
+        body: [
+          "For the standard products, both apps generally want a four-door car that seats at least four passengers plus the driver. In practice that means sedans, hatchbacks, wagons and SUVs. Two-door cars and most utes and vans won't qualify for standard trips. Larger products such as Uber XL need six or more passenger seats.",
+        ],
+      },
+      {
+        heading: "Vehicle age",
+        body: [
+          "Each platform sets a maximum vehicle age, counted from the year of manufacture. The limit isn't the same for every product: premium options such as Comfort or Black want much newer cars than the entry-level product. Limits have been revised before and may change again, so check the exact number for the product you want to drive before choosing a car.",
+        ],
+      },
+      {
+        heading: "Condition",
+        body: [
+          "Expect the car to need to be clean, roadworthy and free of major body damage, with working air-conditioning and seatbelts for every seat. Commercial branding or taxi-style markings are usually not allowed. The apps can ask for photos or an inspection, and riders can report a car in poor condition.",
+        ],
+      },
+      {
+        heading: "Registration, insurance and Queensland rules",
+        body: [
+          "In Queensland, rideshare is a booked hire service regulated by TMR. The car generally needs to be licensed, registered and insured correctly for booked hire, and standard private-use insurance usually won't cover you while you're carrying paying passengers. Drivers typically need their own driver authorisation as well.",
+          "If you rent rather than own, the rental company has to agree to rideshare use. Most agreements, including ours, prohibit hire-or-reward use without written consent, so ask before you sign. Our [rental terms and conditions](/rental-terms) set this out.",
+        ],
+      },
+      {
+        heading: "Choosing a car that will pass",
+        body: [
+          "The safest choices are mainstream sedans and hatchbacks with a good service history: Toyota Camry and Corolla, Toyota Prius, Honda Jazz and similar. Hybrids are popular because they use far less fuel in city driving, which matters when fuel is your biggest variable cost.",
+          "If you'd rather not buy, you can rent a car by the week instead. Our [rideshare car rental in Brisbane](/services/car-rental/rideshare) page lists the bookable cars on our yard that suit rideshare, with their year and weekly rate, so you can check them against the apps' current rules. New to the apps? Start with [how to start driving Uber in Brisbane without buying a car](/blog/start-driving-uber-brisbane-without-buying-a-car).",
+        ],
+      },
+      {
+        heading: "Before you start: a quick checklist",
+        body: [
+          "Check the current vehicle requirements for your chosen product on Uber's and DiDi's driver sites. Confirm the TMR booked hire requirements for you and the car. Make sure the car's insurance covers rideshare. If you're renting, get rideshare use approved in writing on your agreement. Then upload your documents in the driver app and wait for approval before taking your first trip.",
+          "This article is general information only, not legal or tax advice. Platform and government requirements change. Check the latest Uber, DiDi and TMR requirements before you start driving.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "long-term-car-rental-vs-buying",
     tags: ["car-rental", "fleet", "rental-terms"],
     title: "Long-Term Car Rental vs Buying: What Makes Sense in 2025?",

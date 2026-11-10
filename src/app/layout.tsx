@@ -14,6 +14,7 @@ import {
   SITE_TAGLINE,
   SITE_COMPANY,
 } from "@/data/site"
+import { openingHoursJsonLd } from "@/components/seo/JsonLd"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -85,20 +86,7 @@ const localBusinessJsonLd = {
     { "@type": "City", name: "Brisbane" },
     { "@type": "AdministrativeArea", name: "South East Queensland" },
   ],
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "08:00",
-      closes: "18:00",
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: "Saturday",
-      opens: "09:00",
-      closes: "15:00",
-    },
-  ],
+  openingHoursSpecification: openingHoursJsonLd(),
   knowsAbout: [
     "CCTV installation",
     "Security systems",

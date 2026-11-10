@@ -1,6 +1,7 @@
-import { getVehicles } from "@/lib/db"
+import { getVehicle, getVehicles, getVehiclesLight } from "@/lib/db"
 import { roleFromRequest } from "@/lib/admin-auth"
 import { isListed, toPublicVehicle, type RentalVehicle } from "@/lib/vehicles"
+import { withPhotoUrls } from "@/lib/vehicle-photos"
 
 // Public fleet reads. Used by the car rental pages and the dashboard's Car
 // Rental tab. Writes go through /api/dashboard/update (type: "vehicle").
@@ -45,16 +46,27 @@ export async function GET(req: Request) {
   const headers = { "Cache-Control": "no-store, max-age=0" }
 
   try {
-    const all = await getVehicles()
-    const shown = admin ? all : all.filter(isListed).map(toPublicVehicle)
+    // Public responses carry photo URLs instead of inline data URLs (see
+    // vehicle-photos.ts); the dashboard keeps the raw photos to edit them.
+    const toPublic = (v: RentalVehicle) => withPhotoUrls(toPublicVehicle(v))
 
     if (id) {
-      const vehicle = shown.find((v) => v.id === id) ?? null
+      // One row, not the whole fleet with every photo.
+      const found = await getVehicle(id)
+      const vehicle = !found ? null : admin ? found : isListed(found) ? toPublic(found) : null
       return Response.json({ vehicle }, { headers, status: vehicle ? 200 : 404 })
     }
 
-    let vehicles = shown
-    if (light) vehicles = vehicles.map(stripGallery)
+    if (admin) {
+      const all = await getVehicles()
+      return Response.json({ vehicles: light ? all.map(stripGallery) : all }, { headers })
+    }
+
+    // Public listing: the light query never pulls photo data out of Postgres.
+    // Without ?light=1 the galleries are needed, so read the full rows.
+    const vehicles = light
+      ? (await getVehiclesLight()).filter(isListed).map(toPublicVehicle)
+      : (await getVehicles()).filter(isListed).map(toPublic)
     return Response.json({ vehicles }, { headers })
   } catch (err) {
     // Postgres errors carry code/detail that distinguish a missing

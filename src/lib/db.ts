@@ -3,6 +3,7 @@ import { securitySolutions } from "@/data/security-solutions"
 import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
 import type { Product, ProductInput } from "@/lib/products"
 import { parseVehicleStatus, type RentalVehicle, type VehicleInput } from "@/lib/vehicles"
+import { photoPath } from "@/lib/vehicle-photos"
 
 // Database layer. Server-only (imports @neondatabase/serverless) — only import
 // from route handlers, never from client components. Connects via DATABASE_URL
@@ -558,11 +559,37 @@ export async function getVehicles(): Promise<RentalVehicle[]> {
  * included. available: bookable cars not currently out on rent.
  */
 export async function getFleetCounts(): Promise<{ onYard: number; available: number }> {
-  const [vehicles, rented] = await Promise.all([getVehicles(), getRentedVehicleIds()])
+  const [vehicles, rented] = await Promise.all([getVehiclesLight(), getRentedVehicleIds()])
   return {
     onYard: vehicles.filter((v) => v.status !== "hidden").length,
     available: vehicles.filter((v) => v.status === "available" && !rented.has(v.id)).length,
   }
+}
+
+/**
+ * The fleet without the photo data — for public pages and counts.
+ *
+ * Dashboard photos are stored inline as data URLs, so `SELECT *` over the
+ * fleet moves megabytes from Neon on every request (seconds of TTFB). This
+ * leaves the gallery out and swaps an inline main photo for its
+ * /api/vehicles/photo URL, versioned by an md5 Postgres computes in place.
+ * Everything else matches getVehicles(), including the rego, so callers
+ * still pass the result through toPublicVehicle before it leaves the server.
+ */
+export async function getVehiclesLight(): Promise<RentalVehicle[]> {
+  const rows = (await sql()`
+    SELECT id, name, year, make, model, type, rego,
+           CASE WHEN image LIKE 'data:%' THEN NULL ELSE image END AS image,
+           CASE WHEN image LIKE 'data:%' THEN md5(image) END AS image_md5,
+           '[]'::jsonb AS images,
+           image_alt, weekly_rate, bond, available, status, sort_order,
+           variant, fuel_type, engine, transmission, seats, colours, created_at
+    FROM vehicles ORDER BY sort_order ASC, created_at ASC
+  `) as (VehicleRow & { image_md5: string | null })[]
+  return rows.map((r) => {
+    const v = toVehicle(r)
+    return r.image_md5 ? { ...v, image: photoPath(v.id, 0, r.image_md5) } : v
+  })
 }
 
 /** One vehicle by id, or null. */

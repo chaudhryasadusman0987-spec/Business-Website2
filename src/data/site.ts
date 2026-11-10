@@ -17,6 +17,12 @@ export const SITE_ADDRESS     = "Brisbane & Southeast QLD";
 // real registration number.
 export const SITE_ABN         = "ABN: Pending registration";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
+// Machine-readable version of SITE_HOURS for schema.org JSON-LD. Change both
+// together.
+export const SITE_OPENING_HOURS: { days: string[]; opens: string; closes: string }[] = [
+  { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "08:00", closes: "18:00" },
+  { days: ["Saturday"], opens: "09:00", closes: "15:00" },
+];
 export const SITE_COMPANY     = "PAK OZ SOLUTIONS PTY LTD";
 export const SITE_ACN         = "ACN: 700 444 695";
 // Security installer credential shown in trust strips. Replace with your real
@@ -47,6 +53,16 @@ export const BANK_PAYID_TYPE   = "ABN (Australian Business Number)";
 // ============================================================
 export const SECURITY_BRAND   = "Pak Oz CCTV";
 export const SECURITY_TAGLINE = "Professional CCTV & Security Installation Brisbane";
+
+// ============================================================
+//  CAR RENTAL SUB-BRAND — used under /services/car-rental, its blog posts
+//  and the AutoRental JSON-LD. The yard is in Sunnybank Hills; only the
+//  suburb is published in structured data (no street address).
+// ============================================================
+export const RENTAL_BRAND     = "Pak Oz Rentals";
+export const RENTAL_LOCALITY  = "Sunnybank Hills";
+export const RENTAL_REGION    = "QLD";
+export const RENTAL_POSTCODE  = "4109";
 
 // ============================================================
 //  IT SUB-BRAND — used ONLY on the IT landing page, its project

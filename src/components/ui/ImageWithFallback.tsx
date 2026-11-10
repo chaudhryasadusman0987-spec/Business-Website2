@@ -35,6 +35,8 @@ interface Props {
   placeholderText?: string // text shown under the fallback icon
   fallbackInitial?: boolean // show first letter of alt instead of icon/text
   priority?: boolean
+  /** Rendered width hint for next/image, e.g. "(max-width: 768px) 100vw, 300px". */
+  sizes?: string
 }
 
 export default function ImageWithFallback({
@@ -49,6 +51,7 @@ export default function ImageWithFallback({
   placeholderText = "Image Coming Soon",
   fallbackInitial = false,
   priority = false,
+  sizes,
 }: Props) {
   const [error, setError] = useState(false)
 
@@ -113,6 +116,7 @@ export default function ImageWithFallback({
         fill
         className={className}
         priority={priority}
+        sizes={sizes}
         unoptimized={unoptimized}
         onError={() => setError(true)}
       />
@@ -127,6 +131,7 @@ export default function ImageWithFallback({
       height={height ?? 300}
       className={className}
       priority={priority}
+      sizes={sizes}
       unoptimized={unoptimized}
       onError={() => setError(true)}
     />

@@ -30,18 +30,51 @@ interface OpenState {
   view: "details" | "apply" | "offer"
 }
 
+/**
+ * Scroll-in animation for a card, except above-the-fold cards: AnimateIn keeps
+ * its content at opacity 0 until hydration, which would hold back the LCP
+ * photo that the server already rendered.
+ */
+function CardReveal({
+  eager,
+  delay,
+  children,
+}: {
+  eager: boolean
+  delay: number
+  children: React.ReactNode
+}) {
+  if (eager) return <div className="flex">{children}</div>
+  return (
+    <AnimateIn animation="fade-up" delay={delay} className="flex">
+      {children}
+    </AnimateIn>
+  )
+}
+
 export default function VehicleGrid({
   title = "The fleet",
   intro = "Every car below is on the yard right now. Open one for the photos and the specs, or go straight to the application.",
+  initialVehicles,
+  priorityImages = 0,
 }: {
   title?: string
   intro?: string
+  /**
+   * The public fleet, read on the server. When given, the cards are in the
+   * first HTML (crawlable, no fetch waterfall before the photos can load) and
+   * the client fetch is skipped. Null/undefined falls back to fetching.
+   */
+  initialVehicles?: RentalVehicle[] | null
+  /** How many leading card photos to load eagerly (above the fold). */
+  priorityImages?: number
 }) {
-  const [vehicles, setVehicles] = useState<RentalVehicle[]>([])
-  const [loading, setLoading] = useState(true)
+  const [vehicles, setVehicles] = useState<RentalVehicle[]>(initialVehicles ?? [])
+  const [loading, setLoading] = useState(!initialVehicles)
   const [open, setOpen] = useState<OpenState | null>(null)
 
   useEffect(() => {
+    if (initialVehicles) return
     let cancelled = false
     fetch("/api/vehicles?light=1", { cache: "no-store" })
       .then((r) => r.json())
@@ -58,7 +91,7 @@ export default function VehicleGrid({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [initialVehicles])
 
   // Open immediately with the light record so the modal paints at once, then
   // swap in the full one (galleries included) when it lands.
@@ -125,11 +158,10 @@ export default function VehicleGrid({
               return (
               // Stagger across each row of four, then restart — the whole grid
               // reveals in waves instead of one long queue.
-              <AnimateIn
+              <CardReveal
                 key={vehicle.id}
-                animation="fade-up"
+                eager={i < priorityImages}
                 delay={(i % 4) * 100}
-                className="flex"
               >
                 <div
                   {...(bookable
@@ -158,6 +190,8 @@ export default function VehicleGrid({
                       alt={vehicleAlt(vehicle)}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 280px"
+                      priority={i < priorityImages}
                       fallbackIcon="Car"
                       fallbackBg="#f0f0ff"
                       placeholderText="Photo coming soon"
@@ -272,7 +306,7 @@ export default function VehicleGrid({
                     )}
                   </div>
                 </div>
-              </AnimateIn>
+              </CardReveal>
               )
             })}
           </div>

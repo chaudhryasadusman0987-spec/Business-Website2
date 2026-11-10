@@ -16,6 +16,7 @@
 
 import { SECURITY_BRAND, IT_BRAND } from "@/data/site"
 import { serviceAreas } from "@/data/service-areas"
+import { rentalSuburbs } from "@/data/car-rental-pages"
 import { blogPosts, type BlogPost } from "@/data/blog"
 
 export type HubId = "security" | "car-rental" | "it"
@@ -77,10 +78,13 @@ export const hubs: Record<HubId, Hub> = {
     id: "car-rental",
     href: "/services/car-rental",
     name: "Car Rental",
+    // The hub targets the broad "car rental Brisbane". "Weekly / long-term"
+    // and "Uber / DiDi" anchors belong to the long-term and rideshare spokes,
+    // so they aren't used here: that would split the keywords across pages.
     anchors: [
-      "weekly car rental in Brisbane",
-      "cars for Uber and DiDi drivers",
-      "long-term rental service",
+      "car rental in Brisbane",
+      "Brisbane car rental service",
+      "car hire across Brisbane",
     ],
     // Car rental has no quote form: you apply for a specific car, and the
     // application opens from the fleet grid (VehicleGrid, id="vehicles").
@@ -234,9 +238,9 @@ export const spokes: Spoke[] = [
     hub: "car-rental",
     href: "/services/car-rental",
     name: "Car Rental",
-    anchors: ["weekly car rental in Brisbane", "cars for Uber and DiDi drivers"],
+    anchors: ["car rental in Brisbane", "Brisbane car rental service"],
     blurb: "Weekly payments, 4-week minimum, servicing included.",
-    related: ["fleet", "rental-terms"],
+    related: ["fleet", "rideshare", "long-term"],
     tags: [],
   },
   {
@@ -246,9 +250,39 @@ export const spokes: Spoke[] = [
     name: "Vehicle Fleet",
     anchors: ["view our rental fleet", "every car on the yard"],
     blurb: "Every car on the yard with weekly rates.",
-    related: ["car-rental-hub", "rental-terms"],
-    tags: ["car-rental", "fleet", "vehicles", "rideshare"],
+    related: ["car-rental-hub", "rideshare", "long-term"],
+    tags: ["car-rental", "fleet", "vehicles"],
     upLink: { lead: "Every car here is part of our", tail: " service.", anchor: 0 },
+  },
+  {
+    id: "rideshare",
+    hub: "car-rental",
+    href: "/services/car-rental/rideshare",
+    name: "Rideshare Car Rental",
+    anchors: [
+      "rideshare car rental in Brisbane",
+      "cars for Uber and DiDi drivers",
+      "Uber car rental in Brisbane",
+    ],
+    blurb: "Weekly cars for Uber and DiDi drivers, unlimited km.",
+    related: ["fleet", "long-term", "rental-terms"],
+    tags: ["rideshare", "uber", "didi"],
+    upLink: { lead: "It's part of our", tail: ", set up for drivers who work the apps.", anchor: 0 },
+  },
+  {
+    id: "long-term",
+    hub: "car-rental",
+    href: "/services/car-rental/long-term",
+    name: "Long-Term Car Rental",
+    anchors: [
+      "long term car rental in Brisbane",
+      "weekly car rental in Brisbane",
+      "renting a car week to week",
+    ],
+    blurb: "Four-week minimum, then week to week. Servicing included.",
+    related: ["fleet", "rideshare", "rental-terms"],
+    tags: ["long-term-rental", "weekly-rental", "car-rental"],
+    upLink: { lead: "It's how every rental works at our", tail: ".", anchor: 1 },
   },
   {
     id: "rental-terms",
@@ -257,10 +291,12 @@ export const spokes: Spoke[] = [
     name: "Rental Terms",
     anchors: ["rental terms and conditions", "how the bond and excess work"],
     blurb: "Bond, minimum period and insurance excess.",
-    related: ["car-rental-hub", "fleet"],
+    related: ["car-rental-hub", "fleet", "long-term"],
     tags: ["rental-terms", "bond", "insurance"],
     upLink: { lead: "These terms apply to every vehicle in our", tail: ".", anchor: 2 },
   },
+  // Suburb pages (one per slug in src/data/car-rental-pages.ts).
+  ...rentalSuburbSpokes(),
 
   // ── IT ──────────────────────────────────────────────────────
   {
@@ -335,6 +371,21 @@ function areaSpokes(): Spoke[] {
     tags: [slug],
     // Alternate exact / natural hub anchor across the area pages.
     upLink: { lead: "Local installs are handled by the same team behind our", tail: ".", anchor: i % 2 },
+  }))
+}
+
+function rentalSuburbSpokes(): Spoke[] {
+  return rentalSuburbs.map((s, i) => ({
+    id: `car-rental-${s.slug}`,
+    hub: "car-rental" as const,
+    href: `/services/car-rental/${s.slug}`,
+    name: `Car Rental ${s.name}`,
+    anchors: [`car rental ${s.name}`, `weekly car hire in ${s.name}`],
+    blurb: `Weekly hire, picked up close to ${s.name}.`,
+    // Suburb rule: fleet + the nearest suburb page + rideshare.
+    related: ["fleet", `car-rental-${s.nearbyPages[0]}`, "rideshare"],
+    tags: [s.slug],
+    upLink: { lead: "Local pickups are part of our", tail: ".", anchor: i % 2 },
   }))
 }
 
@@ -432,11 +483,20 @@ export const hubIntros: Record<HubId, Segment[]> = {
     ]),
   ],
   "car-rental": [
-    "Ready to drive? Go ahead and ",
+    "Driving Uber or DiDi? See our ",
+    { spoke: "rideshare", anchor: 0 },
+    ". Need a car for a few months? Read how ",
+    { spoke: "long-term", anchor: 0 },
+    " works. Ready to drive? Go ahead and ",
     { spoke: "fleet", anchor: 0 },
     ", then check ",
     { spoke: "rental-terms", anchor: 1 },
-    " before you apply.",
+    " before you apply. Close to the yard? We have local pages for ",
+    // One link per suburb page: "a, b and c."
+    ...rentalSuburbs.flatMap((s, i, all): Segment[] => [
+      { spoke: `car-rental-${s.slug}`, anchor: 0 },
+      i === all.length - 1 ? "." : i === all.length - 2 ? " and " : ", ",
+    ]),
   ],
   it: [
     "We build ",
@@ -460,7 +520,7 @@ export const cardAnchors: Record<string, string> = {
   "/services/it-services/app-development": "Mobile app development",
   "/services/it-services/ai-automation": "AI automation services",
   "/services/security-solutions": "CCTV installation Brisbane",
-  "/services/car-rental": "Weekly car rental Brisbane",
+  "/services/car-rental": "Car rental Brisbane",
   "/services/it-services": "IT services Brisbane",
 }
 

@@ -4,22 +4,31 @@ import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import JsonLd, { breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+import { RENTAL_BRAND } from "@/data/site"
+import { getPublicFleet } from "@/lib/fleet-summary"
 
 const spoke = getSpoke("fleet")
 
 // Same database-backed fleet as /services/car-rental, on its own page with the
 // full-fleet framing. There is one source of truth for vehicles now — the
 // dashboard's Car Rental tab — so this page never drifts from the main one.
+//
+// The fleet is read on the server (photo data excluded) and rendered into the
+// first HTML, so the first car photo, which is this page's LCP on mobile,
+// starts loading straight away instead of after a client-side fetch.
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/services/car-rental/vehicles" },
-  title: "Vehicle Fleet | Long-Term Car Rental Brisbane",
+  // Not "long-term car rental": that keyword belongs to /long-term.
+  title: { absolute: `Rental Car Fleet Brisbane: Weekly Rates | ${RENTAL_BRAND}` },
   description:
     "The full Pak Oz Rentals fleet in Brisbane — weekly hire with a four-week " +
     "minimum. Roadside assistance, servicing and maintenance included.",
 }
 
-export default function VehiclesPage() {
+export default async function VehiclesPage() {
+  const fleet = await getPublicFleet()
   return (
     <>
       <JsonLd
@@ -69,6 +78,8 @@ export default function VehiclesPage() {
       <VehicleGrid
         title="Every car on the yard"
         intro="Open a car for its photos, specs and weekly rate, or go straight to the application."
+        initialVehicles={fleet}
+        priorityImages={2}
       />
 
       {/* BOND INFO BOX — continues the grid's background so the strip reads as

@@ -16,6 +16,34 @@ const CATEGORY_HUB: Record<string, HubId> = {
   "IT & AI": "it",
 }
 
+/**
+ * Post paragraphs are plain strings; `[anchor text](/internal/path)` inside
+ * one becomes an internal link. Only site-relative paths are linked.
+ */
+const INLINE_LINK = /\[([^\]]+)\]\((\/[^)\s]*)\)/g
+
+function withLinks(text: string): React.ReactNode {
+  const out: React.ReactNode[] = []
+  let last = 0
+  for (const m of Array.from(text.matchAll(INLINE_LINK))) {
+    const at = m.index ?? 0
+    if (at > last) out.push(text.slice(last, at))
+    out.push(
+      <Link
+        key={at}
+        href={m[2]}
+        className="text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8] transition-colors"
+      >
+        {m[1]}
+      </Link>
+    )
+    last = at + m[0].length
+  }
+  if (last === 0) return text
+  if (last < text.length) out.push(text.slice(last))
+  return out
+}
+
 export function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }))
 }
@@ -130,6 +158,7 @@ export default function BlogPostPage({
               alt={post.title}
               fill
               className="object-cover"
+              sizes="(max-width: 900px) 100vw, 868px"
               fallbackBg="#eeedfe"
               placeholderText="Article image"
               priority
@@ -157,7 +186,7 @@ export default function BlogPostPage({
                   key={j}
                   className="mb-4 text-[16px] leading-[1.8] text-[#444]"
                 >
-                  {para}
+                  {withLinks(para)}
                 </p>
               ))}
             </div>
