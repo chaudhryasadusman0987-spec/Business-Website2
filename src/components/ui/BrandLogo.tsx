@@ -43,6 +43,10 @@ export default function BrandLogo({
       <img
         src="/images/pak-oz-logo-color.webp"
         alt={SITE_FULL}
+        // The footer copy is far below the fold on every page; don't let it
+        // compete with the LCP image for bandwidth.
+        loading={size === "sm" ? "lazy" : undefined}
+        decoding="async"
         className={`${s.img} w-auto object-contain`}
       />
     </span>

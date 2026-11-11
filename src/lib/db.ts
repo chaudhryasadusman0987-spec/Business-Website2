@@ -1,3 +1,5 @@
+import { cache } from "react"
+import { revalidateTag, unstable_cache } from "next/cache"
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import { securitySolutions } from "@/data/security-solutions"
 import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
@@ -575,8 +577,36 @@ export async function getFleetCounts(): Promise<{ onYard: number; available: num
  * /api/vehicles/photo URL, versioned by an md5 Postgres computes in place.
  * Everything else matches getVehicles(), including the rego, so callers
  * still pass the result through toPublicVehicle before it leaves the server.
+ *
+ * Cached, because this query sits in front of the first byte of every car
+ * rental page and a cold Neon connection costs a second or more of mobile
+ * LCP. Every write below calls vehiclesChanged(), so a dashboard edit shows on
+ * the next page load; the 60 s revalidate only covers edits made outside the
+ * app (SQL console, another deployment). Rented/available is not part of this
+ * query and stays live. React cache on top makes it one read per render: the
+ * hub needs it for the counts, the price range and the grid.
  */
-export async function getVehiclesLight(): Promise<RentalVehicle[]> {
+export const getVehiclesLight = cache(
+  (): Promise<RentalVehicle[]> => cachedVehiclesLight(),
+)
+
+const VEHICLES_TAG = "vehicles"
+
+/** Drop the cached fleet after a write. A no-op outside a request. */
+function vehiclesChanged(): void {
+  try {
+    revalidateTag(VEHICLES_TAG)
+  } catch {
+    /* no request scope (script, build): nothing cached to drop */
+  }
+}
+
+const cachedVehiclesLight = unstable_cache(readVehiclesLight, ["vehicles-light"], {
+  tags: [VEHICLES_TAG],
+  revalidate: 60,
+})
+
+async function readVehiclesLight(): Promise<RentalVehicle[]> {
   const rows = (await sql()`
     SELECT id, name, year, make, model, type, rego,
            CASE WHEN image LIKE 'data:%' THEN NULL ELSE image END AS image,
@@ -641,6 +671,7 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
     )
     RETURNING *
   `) as VehicleRow[]
+  vehiclesChanged()
   return toVehicle(rows[0])
 }
 
@@ -676,6 +707,7 @@ export async function updateVehicle(
     WHERE id = ${id}
     RETURNING *
   `) as VehicleRow[]
+  vehiclesChanged()
   return rows[0] ? toVehicle(rows[0]) : null
 }
 
@@ -683,6 +715,7 @@ export async function deleteVehicle(id: string): Promise<boolean> {
   const rows = (await sql()`
     DELETE FROM vehicles WHERE id = ${id} RETURNING id
   `) as { id: string }[]
+  vehiclesChanged()
   return rows.length > 0
 }
 
@@ -719,6 +752,7 @@ export async function seedAllVehicles(force = false): Promise<number> {
     inserted += rows.length
   }
   await markSeedRun("vehicles")
+  vehiclesChanged()
   return inserted
 }
 
@@ -754,6 +788,7 @@ export async function backfillVehicleSpecs(force = false): Promise<number> {
     filled += rows.length
   }
   await markSeedRun("vehicle-specs")
+  vehiclesChanged()
   return filled
 }
 
@@ -1255,13 +1290,21 @@ export async function insertRentalAgreement(input: RentalAgreementInput): Promis
   `
 }
 
+let rentalAgreementsReady: Promise<void> | undefined
+
 /**
  * Vehicle ids currently out on rent — any active rental agreement (card/BECS
  * subscription, bank transfer or signed lease). Unpaid pending applications
  * don't count; "Return" in /rental-admin frees the car.
  */
 export async function getRentedVehicleIds(): Promise<Set<string>> {
-  await createRentalAgreementsTable()
+  // This runs on every hub page view, so the CREATE TABLE IF NOT EXISTS is
+  // sent once per server instance rather than as an extra round trip each time.
+  rentalAgreementsReady ??= createRentalAgreementsTable().catch((err) => {
+    rentalAgreementsReady = undefined
+    throw err
+  })
+  await rentalAgreementsReady
   const rows = (await sql()`
     SELECT DISTINCT vehicle_id FROM rental_agreements WHERE status = 'active'
   `) as { vehicle_id: string }[]

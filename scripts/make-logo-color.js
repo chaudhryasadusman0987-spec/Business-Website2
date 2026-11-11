@@ -55,7 +55,8 @@ const SOLID = 45
     .toBuffer()
 
   const out = await sharp(keyed).trim({ threshold: 1 }).toBuffer({ resolveWithObject: true })
-  await sharp(out.data).webp({ quality: 92 }).toFile(OUT)
+  // 216px tall = the largest display size (72px) at 3x. See shrink-logos.js.
+  await sharp(out.data).resize({ height: 216 }).webp({ quality: 90 }).toFile(OUT)
 
   console.log(`bg ${bg.map((v) => v.toFixed(0)).join(",")} -> keyed`)
   console.log(`${W}x${H} -> trimmed ${out.info.width}x${out.info.height} -> ${OUT}`)
