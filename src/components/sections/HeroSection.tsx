@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { Phone } from "lucide-react"
 import Button from "@/components/ui/Button"
+import HeroStatus from "@/components/sections/HeroStatus"
 import {
   SITE_ADDRESS,
   SITE_FULL,
@@ -47,6 +48,7 @@ export default function HeroSection() {
                 Call {SITE_PHONE_LOCAL}
               </Button>
             </div>
+            <HeroStatus />
           </div>
 
           {/* RIGHT — hero image: 16/10 on mobile, 4/5 on desktop */}
@@ -57,7 +59,7 @@ export default function HeroSection() {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 440px"
-              className="object-cover object-center"
+              className="hero-zoom object-cover object-center"
             />
           </div>
         </div>

@@ -58,7 +58,7 @@ export default function ServiceCard({
             alt={imageAlt ?? title}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 380px"
-            className={imageFit === "contain" ? "object-contain p-4" : "object-cover"}
+            className={`card-zoom ${imageFit === "contain" ? "object-contain p-4" : "object-cover"}`}
             fallbackIcon={fallbackIcon}
             fallbackBg={fallbackBg}
           />

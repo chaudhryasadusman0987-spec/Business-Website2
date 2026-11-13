@@ -178,28 +178,21 @@ export default async function ITServicesPage() {
         <div className="container-page relative grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:py-24">
           {/* copy */}
           <div>
-            <AnimateIn animation="fade-up">
               <p className="eyebrow">{IT_BRAND} · Brisbane &amp; Remote</p>
-            </AnimateIn>
 
-            <AnimateIn animation="fade-up" delay={100}>
               <h1 className="mt-4 text-white">
                 Technology that pays
                 <br />
                 for itself.
               </h1>
-            </AnimateIn>
 
-            <AnimateIn animation="fade-up" delay={200}>
               <p className="lead mt-5 max-w-[560px]">
                 Websites, mobile apps and AI automation for Australian
                 businesses — built by the people you actually talk to. Tell us
                 what you need and we&apos;ll come back with an honest estimate
                 inside 24 hours.
               </p>
-            </AnimateIn>
 
-            <AnimateIn animation="fade-up" delay={300}>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/services/it-services/quote"
@@ -229,10 +222,8 @@ export default async function ITServicesPage() {
                 </span>{" "}
                 · Estimate only · confirmed on the call
               </p>
-            </AnimateIn>
 
             {/* commitments */}
-            <AnimateIn animation="fade-up" delay={400}>
               <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-x-8 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
                 {PROMISES.map((p) => (
                   <div key={p.label}>
@@ -243,23 +234,22 @@ export default async function ITServicesPage() {
                   </div>
                 ))}
               </div>
-            </AnimateIn>
           </div>
 
           {/* photo */}
-          <AnimateIn animation="fade-in" delay={200} className="w-full">
+          <div className="w-full">
             <div className="relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5]">
               <ImageWithFallback
                 src="/images/it-services/hero.jpg"
                 alt="Development team building software for Australian businesses"
                 fill
                 sizes="(max-width: 1024px) 100vw, 440px"
-                className="object-cover object-center"
+                className="hero-zoom object-cover object-center"
                 fallbackIcon="Camera"
                 priority
               />
             </div>
-          </AnimateIn>
+          </div>
         </div>
       </section>
 
@@ -267,7 +257,7 @@ export default async function ITServicesPage() {
       <section className="border-b border-line bg-white on-light">
         <div className="mx-auto grid max-w-container grid-cols-1 gap-4 px-4 sm:px-6 lg:px-8 py-6 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST.map(({ Icon, text }, i) => (
-            <AnimateIn key={text} animation="fade-up" delay={i * 100}>
+            <AnimateIn key={text} animation="fade-up" delay={i * 80}>
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint on-light">
                   <Icon size={16} className="text-[#7f85f7]" />
@@ -321,7 +311,7 @@ export default async function ITServicesPage() {
               <AnimateIn
                 key={service.id}
                 animation="fade-up"
-                delay={(i % 3) * 150}
+                delay={(i % 3) * 80}
                 className="flex"
               >
                 <article className="group flex w-full flex-col overflow-hidden rounded-card border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-card-hover on-light">
@@ -454,7 +444,7 @@ export default async function ITServicesPage() {
 
             <div className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2">
               {INCLUDED.map((item, i) => (
-                <AnimateIn key={item.title} animation="fade-up" delay={(i % 2) * 100}>
+                <AnimateIn key={item.title} animation="fade-up" delay={(i % 2) * 80}>
                   <div className="h-full rounded-card border border-white bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover on-light">
                     <span className="flex h-11 w-11 items-center justify-center rounded-card bg-brand-tint on-light">
                       <item.Icon size={19} className="text-[#7f85f7]" />
@@ -493,7 +483,7 @@ export default async function ITServicesPage() {
 
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
               {PROCESS.map((p, i) => (
-                <AnimateIn key={p.step} animation="fade-up" delay={i * 150}>
+                <AnimateIn key={p.step} animation="fade-up" delay={i * 80}>
                   <div className="group relative text-center lg:text-left">
                     <span className="relative z-10 mx-auto flex h-12 w-[52px] items-center justify-center rounded-full border-2 border-line bg-white text-[15px] font-semibold text-accent transition-all duration-200 group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white lg:mx-0 on-light">
                       {p.step}
@@ -546,7 +536,7 @@ export default async function ITServicesPage() {
 
             <div className="mt-7 flex flex-col gap-3">
               {itConsulting.features.map((f, i) => (
-                <AnimateIn key={f} animation="fade-up" delay={i * 100}>
+                <AnimateIn key={f} animation="fade-up" delay={i * 80}>
                   <div className="flex items-center gap-3">
                     <span className="flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-[rgba(93,202,165,0.15)]">
                       <Check size={11} className="text-[#5dcaa5]" strokeWidth={3} />

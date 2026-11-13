@@ -16,6 +16,10 @@ export const SITE_PHONE       = "+61 424 948 512";
 export const SITE_PHONE_LOCAL = SITE_PHONE.replace(/^\+61\s?/, "0");
 export const SITE_PHONE_HREF  = `tel:${SITE_PHONE.replace(/\s/g, "")}`;
 export const SITE_ADDRESS     = "Brisbane & Southeast QLD";
+// Short form for tight spaces (stats strip).
+export const SITE_AREA_SHORT  = "Brisbane & SE QLD";
+// Year the team started in security installation — shown as "Since 2018".
+export const SECURITY_SINCE   = 2018;
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 // Machine-readable version of SITE_HOURS for schema.org JSON-LD. Change both
 // together.
@@ -93,3 +97,10 @@ export const IT_WHATSAPP_LOCAL = IT_WHATSAPP.replace(/^\+61\s?/, "0")
 export const IT_WHATSAPP_LINK =
   "https://wa.me/" + IT_WHATSAPP.replace(/\D/g, "") + "?text=" +
   encodeURIComponent("Hi, I'm interested in Pak Oz Technologies IT services (website / app / AI automation).")
+
+// General pages (anything outside /services/it-services) use the parent
+// company name in the pre-filled message; the IT sub-brand message above is
+// for IT pages only. Same number.
+export const SITE_WHATSAPP_LINK =
+  "https://wa.me/" + IT_WHATSAPP.replace(/\D/g, "") + "?text=" +
+  encodeURIComponent(`Hi, I'd like to ask about ${SITE_FULL} services.`)

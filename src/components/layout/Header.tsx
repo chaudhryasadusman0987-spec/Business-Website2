@@ -134,9 +134,18 @@ function NavLogo({ onClick }: { onClick?: () => void }) {
 
 export default function Header() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
   const cta = primaryCta(pathname)
   const close = () => setOpen(false)
+
+  // Past 40px the bar shrinks and picks up a blur and border.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   // Navigating always closes the menu, including via the browser back button.
   useEffect(() => {
@@ -174,7 +183,16 @@ export default function Header() {
 
   return (
     <>
-      <header className="on-dark sticky top-0 z-[60] h-16 w-full border-b border-white/10 bg-brand-navy lg:h-[72px]">
+      {/* The header box keeps its full height so the page below never moves;
+          only the bar inside it shrinks. */}
+      <header className="on-dark pointer-events-none sticky top-0 z-[60] h-16 w-full lg:h-[72px]">
+        <div
+          className={`pointer-events-auto h-16 border-b transition-[height,background-color,border-color] duration-200 motion-reduce:transition-none ${
+            scrolled && !open
+              ? "border-white/10 bg-brand-navy/85 backdrop-blur-md lg:h-16"
+              : "border-transparent bg-brand-navy lg:h-[72px]"
+          }`}
+        >
         <div className="container-page flex h-full items-center justify-between gap-6">
           <NavLogo onClick={close} />
 
@@ -257,6 +275,7 @@ export default function Header() {
               {open ? <X size={26} /> : <Menu size={26} />}
             </button>
           </div>
+        </div>
         </div>
       </header>
 

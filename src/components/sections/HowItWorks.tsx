@@ -33,7 +33,7 @@ export default function HowItWorks() {
         <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step, i) => (
             <li key={step.title} className="flex">
-              <AnimateIn animation="fade-up" delay={i * 100} className="flex w-full">
+              <AnimateIn animation="fade-up" delay={i * 80} className="flex w-full">
                 <div className="card w-full p-6">
                   <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
                     <step.icon size={22} aria-hidden="true" />

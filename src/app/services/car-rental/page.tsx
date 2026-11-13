@@ -185,7 +185,7 @@ export default async function CarRentalPage() {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 440px"
-              className="object-cover"
+              className="hero-zoom object-cover"
             />
           </div>
         </div>
@@ -205,7 +205,7 @@ export default async function CarRentalPage() {
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-1">
             {terms.map((t, i) => (
-              <AnimateIn key={t.label} animation="fade-up" delay={(i % 3) * 100}>
+              <AnimateIn key={t.label} animation="fade-up" delay={(i % 3) * 80}>
                 <div className="flex items-baseline justify-between gap-4 py-[18px] border-b border-line">
                   <span className="text-[15px] font-medium text-[#2f3149]">
                     {t.label}

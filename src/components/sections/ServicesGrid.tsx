@@ -22,7 +22,7 @@ export default function ServicesGrid() {
             <AnimateIn
               key={service.id}
               animation="fade-up"
-              delay={(index % 3) * 100}
+              delay={(index % 3) * 80}
               className="flex"
             >
               <ServiceCard

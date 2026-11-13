@@ -1,30 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useFleetCounts } from "@/hooks/useFleetCounts"
 
 // Live "N cars on the yard · X available now" line for the homepage's Car
 // Rental card. Fetched client-side so the homepage itself stays static; the
 // numbers come from the same getFleetCounts() the car rental hero uses.
 export default function FleetCountBadge() {
-  const [counts, setCounts] = useState<{ onYard: number; available: number } | null>(null)
+  const counts = useFleetCounts()
 
-  useEffect(() => {
-    let cancelled = false
-    fetch("/api/vehicles/counts", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled && typeof data.onYard === "number" && data.onYard > 0) {
-          setCounts({ onYard: data.onYard, available: Number(data.available) || 0 })
-        }
-      })
-      .catch(() => {
-        /* no badge — never show a made-up number */
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
+  // No badge until the live count arrives — never show a made-up number.
   if (!counts) return null
   return (
     <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent transition-colors duration-200 group-hover:text-white">

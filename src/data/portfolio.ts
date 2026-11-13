@@ -105,3 +105,12 @@ export const portfolio: PortfolioProject[] = [
     imageAlt: "Homepage of the Dune Falcon Dubai website for desert safaris and city tours",
   },
 ]
+
+/**
+ * Sites delivered to a client on their own domain. Used for the homepage
+ * "Our work" strip and the "websites delivered" figure — a project still on a
+ * preview domain is shown in the portfolio but not counted as delivered.
+ */
+export const deliveredProjects = portfolio.filter(
+  (p) => !/\.vercel\.app/i.test(p.url),
+)

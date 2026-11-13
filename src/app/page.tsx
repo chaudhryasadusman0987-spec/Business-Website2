@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import HeroSection from "@/components/sections/HeroSection"
+import StatsStrip from "@/components/sections/StatsStrip"
+import WorkStrip from "@/components/sections/WorkStrip"
 import ServicesGrid from "@/components/sections/ServicesGrid"
 import AboutStrip from "@/components/sections/AboutStrip"
 import WhyChooseUs from "@/components/sections/WhyChooseUs"
@@ -20,9 +22,11 @@ export default function Home() {
   return (
     <>
       <HeroSection />
+      <StatsStrip />
       <ServicesGrid />
       <AboutStrip />
       <WhyChooseUs />
+      <WorkStrip />
       <TestimonialsStrip />
       <QuoteCTABanner />
     </>

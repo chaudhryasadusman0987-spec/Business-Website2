@@ -82,7 +82,7 @@ export default function TestimonialsPage() {
               const numeric = /^(\d+)(.*)$/.exec(s.value)
               return (
               <div key={s.label} className="flex items-center gap-8 lg:gap-16">
-                <AnimateIn animation="scale" delay={i * 100}>
+                <AnimateIn animation="scale" delay={i * 80}>
                   <div className="text-[36px] font-bold text-accent lg:text-[44px]">
                     {numeric ? (
                       <CountUp end={Number(numeric[1])} suffix={numeric[2]} />
@@ -164,7 +164,7 @@ export default function TestimonialsPage() {
                 <AnimateIn
                   key={t.id}
                   animation="fade-up"
-                  delay={(index % 3) * 100}
+                  delay={(index % 3) * 80}
                   className="flex"
                 >
                 <div

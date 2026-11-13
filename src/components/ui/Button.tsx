@@ -12,7 +12,9 @@ type Tone = "light" | "dark"
 export const buttonBase =
   "inline-flex h-12 items-center justify-center gap-2 rounded-btn px-6 " +
   "text-[15px] font-semibold leading-none whitespace-nowrap " +
-  "transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+  "transition-[color,background-color,border-color,transform] duration-200 " +
+  "active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 " +
+  "disabled:cursor-not-allowed disabled:opacity-60"
 
 const styles: Record<Variant, Record<Tone, string>> = {
   primary: {

@@ -185,82 +185,6 @@ body {
   animation: expandLine 1.2s ease-out 0.5s forwards;
 }
 
-/* ============================================================
-   Scroll reveal — paired with <AnimateIn>. The `visible` class
-   is added by useScrollAnimation the first time the element
-   enters the viewport; the observer then disconnects, so each
-   element animates exactly once per visit.
-   ============================================================ */
-
-/* Fade up — for cards and sections */
-.anim-fade-up {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.anim-fade-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Fade in — for images and heroes */
-.anim-fade-in {
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-.anim-fade-in.visible {
-  opacity: 1;
-}
-
-/* Slide left — for text content */
-.anim-slide-left {
-  opacity: 0;
-  transform: translateX(-32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.anim-slide-left.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Slide right — for images */
-.anim-slide-right {
-  opacity: 0;
-  transform: translateX(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.anim-slide-right.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Scale up — for stat numbers */
-.anim-scale {
-  opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.anim-scale.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Stagger delays for grid items. Covers index×100, ×150 and ×200 steps —
-   AnimateIn builds the class name from its `delay` prop, so any value used
-   there must exist here. */
-.delay-100 { transition-delay: 0.1s; }
-.delay-150 { transition-delay: 0.15s; }
-.delay-200 { transition-delay: 0.2s; }
-.delay-300 { transition-delay: 0.3s; }
-.delay-400 { transition-delay: 0.4s; }
-.delay-450 { transition-delay: 0.45s; }
-.delay-500 { transition-delay: 0.5s; }
-.delay-600 { transition-delay: 0.6s; }
-.delay-750 { transition-delay: 0.75s; }
-.delay-800 { transition-delay: 0.8s; }
-.delay-900 { transition-delay: 0.9s; }
-.delay-1000 { transition-delay: 1s; }
-
 /* Modal entry — backdrop fades, panel rises. Mobile sheets slide up from the
    bottom edge, desktop dialogs lift a little and settle. */
 @keyframes modal-backdrop-in {
@@ -288,16 +212,94 @@ body {
   animation: view-in 0.3s ease forwards;
 }
 
-/* Respect reduced-motion: show everything immediately, no transforms. */
+/* ============================================================
+   Motion — everything here runs only for visitors who have not
+   asked for reduced motion.
+   ============================================================ */
+
+/* Homepage "available now" dot. */
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #5dcaa5;
+}
+
+/* "Our work" strip: static and centred by default, scrolling when motion is ok. */
+.work-marquee-track {
+  margin-inline: auto;
+}
+
+@keyframes hero-zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Slow drift on hero photos. Transform only, inside an overflow-hidden
+     frame, so it costs no layout and does not delay the first paint. */
+  .hero-zoom {
+    animation: hero-zoom 20s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: pulse-ring 1.8s ease-out infinite;
+  }
+
+  .work-marquee-track {
+    margin-inline: 0;
+    animation: marquee 60s linear infinite;
+  }
+  .work-marquee:hover .work-marquee-track,
+  .work-marquee:focus-within .work-marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* Buttons: press feedback, and arrows nudge on hover. */
+  a[class*="rounded-btn"],
+  button[class*="rounded-btn"] {
+    transition-property: color, background-color, border-color, transform;
+    transition-duration: 200ms;
+  }
+  a[class*="rounded-btn"]:active,
+  button[class*="rounded-btn"]:active {
+    transform: scale(0.98);
+  }
+  .lucide-arrow-right {
+    transition: transform 200ms ease;
+  }
+  a:hover > .lucide-arrow-right,
+  button:hover > .lucide-arrow-right {
+    transform: translateX(4px);
+  }
+
+  /* Service cards: the photo zooms inside its frame. */
+  .card-zoom {
+    transition: transform 200ms ease;
+  }
+  .group:hover .card-zoom {
+    transform: scale(1.05);
+  }
+}
+
+/* Reduced motion: no reveals, no drifting, no lifts. */
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade-up,
-  .anim-fade-in,
-  .anim-slide-left,
-  .anim-slide-right,
-  .anim-scale {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
   .animate-expand-line {
     animation: none;
@@ -308,10 +310,20 @@ body {
   .view-in {
     animation: none;
   }
-  /* Hover lifts and other movement. */
+  .work-marquee-track {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+  }
+  .work-marquee-track > li[aria-hidden="true"] {
+    display: none;
+  }
   .card-hover,
   [class*="hover:-translate-y"] {
     transition: none !important;
     transform: none !important;
+  }
+  [class*="animate-"] {
+    animation: none !important;
   }
 }

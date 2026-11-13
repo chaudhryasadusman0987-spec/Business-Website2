@@ -74,7 +74,7 @@ export default function SecuritySolutionsPage() {
               <AnimateIn
                 key={solution.id}
                 animation="fade-up"
-                delay={(index % 3) * 150}
+                delay={(index % 3) * 80}
                 className="flex"
               >
                 <SolutionCard solution={solution} />

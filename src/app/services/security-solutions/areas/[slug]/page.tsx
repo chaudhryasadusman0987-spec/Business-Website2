@@ -116,7 +116,7 @@ export default function ServiceAreaPage({
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             {area.focus.map((f, i) => (
-              <AnimateIn key={f.title} animation="fade-up" delay={i * 150}>
+              <AnimateIn key={f.title} animation="fade-up" delay={i * 80}>
                 <div className="h-full bg-white border border-line rounded-card p-6 on-light">
                   <h3 className="font-bold text-[18px] text-[#1a1a2e]">{f.title}</h3>
                   <p className="text-[14px] text-muted mt-3 leading-relaxed">{f.body}</p>
@@ -139,7 +139,7 @@ export default function ServiceAreaPage({
               <AnimateIn
                 key={solution.id}
                 animation="fade-up"
-                delay={(index % 3) * 150}
+                delay={(index % 3) * 80}
                 className="flex"
               >
                 <SolutionCard solution={solution} />

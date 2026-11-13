@@ -136,7 +136,7 @@ export default function AboutPage() {
           <SectionTitle eyebrow="What we stand for" title="Our Values" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
             {values.map((v, index) => (
-              <AnimateIn key={v.title} animation="fade-up" delay={(index % 4) * 100}>
+              <AnimateIn key={v.title} animation="fade-up" delay={(index % 4) * 80}>
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
                   <v.Icon size={22} aria-hidden="true" />
                 </span>
@@ -154,7 +154,7 @@ export default function AboutPage() {
           <SectionTitle title="Our Team" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-14">
             {team.map((m, index) => (
-              <AnimateIn key={m.initials} animation="scale" delay={index * 200}>
+              <AnimateIn key={m.initials} animation="scale" delay={index * 80}>
               <div
                 className="bg-white border border-line rounded-card p-8 text-center h-full on-light"
               >

@@ -43,7 +43,7 @@ export default function TestimonialsStrip() {
             <AnimateIn
               key={t.id}
               animation="fade-up"
-              delay={index * 100}
+              delay={index * 80}
               className="flex"
             >
             <div

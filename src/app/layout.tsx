@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import NewsTicker from "@/components/layout/NewsTicker"
 import PromoProvider from "@/components/providers/PromoProvider"
+import MotionProvider from "@/components/providers/MotionProvider"
 import AIChatBubble from "@/components/ui/AIChatBubble"
 import {
   SITE_FULL,
@@ -118,7 +119,7 @@ export default function RootLayout({
             IntersectionObserver. Without JS that observer never runs, so
             reveal them unconditionally instead of leaving the page blank. */}
         <noscript>
-          <style>{`.anim-fade-up,.anim-fade-in,.anim-slide-left,.anim-slide-right,.anim-scale{opacity:1!important;transform:none!important}.animate-expand-line{width:100%!important}`}</style>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}.animate-expand-line{width:100%!important}`}</style>
         </noscript>
         <script
           type="application/ld+json"
@@ -126,6 +127,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <MotionProvider>
         <PromoProvider>
           <Header />
           <NewsTicker />
@@ -133,6 +135,7 @@ export default function RootLayout({
           <Footer />
           <AIChatBubble />
         </PromoProvider>
+        </MotionProvider>
       </body>
     </html>
   )

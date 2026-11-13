@@ -35,7 +35,7 @@ export default function PortfolioSection({ limit, compact = false, viewAllHref }
 
         <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
           {projects.map((p, i) => (
-            <AnimateIn key={p.slug} animation="fade-up" delay={(i % 2) * 150} className="h-full">
+            <AnimateIn key={p.slug} animation="fade-up" delay={(i % 2) * 80} className="h-full">
               <article className="group flex h-full flex-col overflow-hidden rounded-card border border-line bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover on-light">
                 <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-surface on-light">
                   <Image

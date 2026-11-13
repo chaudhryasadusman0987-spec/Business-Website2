@@ -1,5 +1,6 @@
 import Link from "next/link"
 import NewsletterForm from "@/components/layout/NewsletterForm"
+import FooterWhatsApp from "@/components/layout/FooterWhatsApp"
 import { services } from "@/data/services"
 import {
   SITE_FULL,
@@ -11,8 +12,6 @@ import {
   SITE_DOMAIN,
   COMPANY_LEGAL_NAME,
   COMPANY_ABN,
-  IT_WHATSAPP_LINK,
-  IT_WHATSAPP_LOCAL,
 } from "@/data/site"
 
 // NOTE: social icons removed — they pointed at "#" with no real profiles behind
@@ -101,14 +100,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href={IT_WHATSAPP_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={LINK}
-                >
-                  IT &amp; AI: WhatsApp {IT_WHATSAPP_LOCAL}
-                </a>
+                <FooterWhatsApp className={LINK} />
               </li>
               <li className="py-1">{SITE_ADDRESS}</li>
               <li>

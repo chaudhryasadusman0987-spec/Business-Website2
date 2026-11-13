@@ -1,36 +1,35 @@
 "use client"
 
-import { useScrollAnimation } from "@/hooks/useScrollAnimation"
+import { m } from "framer-motion"
 
 interface Props {
   children: React.ReactNode
+  /** Kept for existing call sites — every reveal is the same fade-up now. */
   animation?: "fade-up" | "fade-in" | "slide-left" | "slide-right" | "scale"
-  delay?: number // in ms: 0, 100, 150, 200, 300 …
+  /** Stagger in ms; cards in a grid pass index × 80. */
+  delay?: number
   className?: string
   threshold?: number
 }
 
-export default function AnimateIn({
-  children,
-  animation = "fade-up",
-  delay = 0,
-  className = "",
-  threshold = 0.15,
-}: Props) {
-  const { ref, visible } = useScrollAnimation(threshold)
-
-  const classes = [
-    `anim-${animation}`,
-    visible ? "visible" : "",
-    delay ? `delay-${delay}` : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ")
-
+// Scroll reveal: fades up 16px over 0.5s the first time the element enters the
+// viewport, once only. Use for below-the-fold content — never for a hero H1 or
+// hero image, which must paint immediately.
+//
+// `data-reveal` lets globals.css force the element visible for visitors who
+// prefer reduced motion, and the <noscript> rule in layout.tsx do the same
+// when JavaScript is off.
+export default function AnimateIn({ children, delay = 0, className = "" }: Props) {
   return (
-    <div ref={ref} className={classes}>
+    <m.div
+      data-reveal
+      className={className}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -8% 0px" }}
+      transition={{ duration: 0.5, ease: "easeOut", delay: delay / 1000 }}
+    >
       {children}
-    </div>
+    </m.div>
   )
 }

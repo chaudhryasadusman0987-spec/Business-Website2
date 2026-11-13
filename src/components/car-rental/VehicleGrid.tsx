@@ -161,7 +161,7 @@ export default function VehicleGrid({
               <CardReveal
                 key={vehicle.id}
                 eager={i < priorityImages}
-                delay={(i % 4) * 100}
+                delay={(i % 4) * 80}
               >
                 <div
                   {...(bookable
