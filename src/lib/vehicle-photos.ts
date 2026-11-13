@@ -41,8 +41,3 @@ export function withPhotoUrls(v: RentalVehicle): RentalVehicle {
     images: v.images.map((src, i) => photoUrl(v.id, i + 1, src)),
   }
 }
-
-/** The stored photo for index n (0 = main), or "" if there is none. */
-export function photoSource(v: RentalVehicle, n: number): string {
-  return (n === 0 ? v.image : v.images[n - 1]) ?? ""
-}

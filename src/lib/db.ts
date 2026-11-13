@@ -650,6 +650,29 @@ export async function getVehicle(id: string): Promise<RentalVehicle | null> {
   return rows[0] ? toVehicle(rows[0]) : null
 }
 
+/**
+ * One stored photo of a vehicle (n = 0 is the main photo, 1… the gallery in
+ * order) plus its status. Picked out in SQL: a full row carries every gallery
+ * photo as an inline data URL — megabytes — and the photo route needs one.
+ * Null when the vehicle does not exist; `src` is "" when that slot is empty.
+ */
+export async function getVehiclePhoto(
+  id: string,
+  n: number,
+): Promise<{ src: string; status: RentalVehicle["status"] } | null> {
+  const rows = (await sql()`
+    SELECT status, available,
+           CASE WHEN ${n}::int = 0 THEN image ELSE images ->> (${n}::int - 1) END AS src
+    FROM vehicles WHERE id = ${id}
+  `) as { status: string | null; available: boolean; src: string | null }[]
+  const r = rows[0]
+  if (!r) return null
+  return {
+    src: r.src ?? "",
+    status: r.status ? parseVehicleStatus(r.status) : r.available ? "available" : "hidden",
+  }
+}
+
 function newVehicleId(): string {
   return `veh-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 }

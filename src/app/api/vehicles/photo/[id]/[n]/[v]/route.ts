@@ -1,6 +1,6 @@
-import { getVehicle } from "@/lib/db"
+import { getVehiclePhoto } from "@/lib/db"
 import { isListed } from "@/lib/vehicles"
-import { photoSource, photoVersion } from "@/lib/vehicle-photos"
+import { photoVersion } from "@/lib/vehicle-photos"
 
 // Serves one fleet photo as a real image file, so browsers and next/image can
 // cache and resize it. See src/lib/vehicle-photos.ts for why.
@@ -36,16 +36,17 @@ export async function GET(
     return new Response("Not found", { status: 404 })
   }
 
-  let vehicle
+  // Just this one photo — not the whole row with every gallery shot in it.
+  let photo
   try {
-    vehicle = await getVehicle(decodeURIComponent(params.id))
+    photo = await getVehiclePhoto(decodeURIComponent(params.id), n)
   } catch {
     return new Response("Unavailable", { status: 503, headers: { "Cache-Control": "no-store" } })
   }
   // Hidden cars are off the public site, photos included.
-  if (!vehicle || !isListed(vehicle)) return new Response("Not found", { status: 404 })
+  if (!photo || !isListed(photo)) return new Response("Not found", { status: 404 })
 
-  const src = photoSource(vehicle, n)
+  const src = photo.src
   const image = decodeImageDataUrl(src)
   if (!image) return new Response("Not found", { status: 404 })
 
