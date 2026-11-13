@@ -11,7 +11,7 @@ import { hasDiscount, type Product } from "@/lib/products"
 function badgeClasses(badge: string): string {
   const b = badge.toLowerCase()
   if (b.includes("sale")) return "bg-[#c62828] text-white"
-  if (b.includes("soon")) return "bg-[#1a1a2e] text-white"
+  if (b.includes("soon")) return "bg-brand-navy text-white on-dark"
   if (b.includes("new")) return "bg-[#2e7d32] text-white"
   return "bg-brand-primary text-white"
 }
@@ -45,17 +45,17 @@ export default function DbProductCard({
             }
           : undefined
       }
-      className={`group flex flex-col bg-white rounded-[18px] border border-[#ececf4] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(127,133,247,0.18)]${
+      className={`group flex flex-col bg-white rounded-card border border-line overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover${
         clickable ? " cursor-pointer" : ""
-      }`}
+      } on-light`}
     >
       {/* Image */}
-      <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#f0f0ff]">
+      <div className="relative w-full aspect-[4/3] overflow-hidden bg-surface on-light">
         <ImageWithFallback
           src={product.imageUrl}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-200"
           fallbackBg="#f0f0ff"
         />
 
@@ -72,7 +72,7 @@ export default function DbProductCard({
         {/* Hover hint that the card opens a detail view */}
         {clickable && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/10">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 opacity-0 shadow-md transition-opacity duration-300 group-hover:opacity-100">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 opacity-0 shadow-card transition-opacity duration-300 group-hover:opacity-100">
               <svg
                 width="18"
                 height="18"
@@ -104,20 +104,20 @@ export default function DbProductCard({
           {product.name}
         </h3>
         {product.sku && (
-          <p className="text-[11px] text-[#9496a8] mt-1">SKU: {product.sku}</p>
+          <p className="text-[11px] text-muted mt-1">SKU: {product.sku}</p>
         )}
         {product.description && (
-          <p className="text-[12px] text-[#666] mt-2 leading-relaxed line-clamp-3">
+          <p className="text-[12px] text-muted mt-2 leading-relaxed line-clamp-3">
             {product.description}
           </p>
         )}
 
         <div className="mt-3 flex items-baseline gap-2 flex-wrap">
-          <span className="text-[#1a1a2e] font-extrabold text-[20px] sm:text-[22px]">
+          <span className="text-[#1a1a2e] font-bold text-[20px] sm:text-[22px]">
             {formatAUD(current)}
           </span>
           {discounted && (
-            <span className="text-[13px] text-[#9496a8] line-through">
+            <span className="text-[13px] text-muted line-through">
               {formatAUD(product.price)}
             </span>
           )}
@@ -129,8 +129,8 @@ export default function DbProductCard({
           aria-disabled={!product.inStock}
           className={`mt-4 inline-flex items-center justify-center h-[42px] rounded-[8px] text-[13px] font-semibold transition-colors ${
             product.inStock
-              ? "bg-brand-primary text-white hover:bg-[#6b71f0]"
-              : "bg-[#f0f0f4] text-[#9496a8] pointer-events-none"
+              ? "bg-brand-primary text-white hover:bg-brand-hover"
+              : "bg-[#f0f0f4] text-muted pointer-events-none"
           }`}
         >
           {product.inStock ? "Get Quote" : "Unavailable"}

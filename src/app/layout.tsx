@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Poppins } from "next/font/google"
+import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -16,13 +16,20 @@ import {
 } from "@/data/site"
 import { openingHoursJsonLd } from "@/components/seo/JsonLd"
 
+// Poppins is the brand font and is used for headings only (600–700). Inter
+// carries body copy and buttons. Both are exposed as CSS variables and wired
+// up in globals.css / tailwind.config.ts.
 const poppins = Poppins({
   subsets: ["latin"],
-  // 800 backs `font-extrabold`, used by the navbar wordmark and every hero H1.
-  // Without it the browser synthesises a faux-bold from 700, which smears the
-  // letterforms at large sizes.
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["600", "700"],
   display: "swap",
+  variable: "--font-poppins",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 })
 
 export const metadata: Metadata = {
@@ -103,7 +110,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en-AU" className={poppins.className}>
+    <html lang="en-AU" className={`${inter.variable} ${poppins.variable}`}>
       <head>
         {/* Scroll-reveal elements start hidden and are shown by an
             IntersectionObserver. Without JS that observer never runs, so

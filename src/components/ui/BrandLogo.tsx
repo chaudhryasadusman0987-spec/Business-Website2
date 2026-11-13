@@ -21,9 +21,9 @@ import { SITE_FULL } from "@/data/site"
  */
 const SIZES = {
   /** Footer. */
-  sm: { card: "rounded-[14px] px-[18px] py-[14px]", img: "h-[52px]" },
+  sm: { card: "rounded-card px-[18px] py-[14px]", img: "h-[52px]" },
   /** Page heroes. */
-  md: { card: "rounded-[18px] px-6 py-[18px]", img: "h-[64px] lg:h-[72px]" },
+  md: { card: "rounded-card px-6 py-[18px]", img: "h-[64px] lg:h-[72px]" },
 } as const
 
 export default function BrandLogo({
@@ -37,7 +37,7 @@ export default function BrandLogo({
 
   return (
     <span
-      className={`inline-flex items-center bg-white shadow-[0_4px_18px_rgba(0,0,0,0.22)] ${s.card} ${className}`}
+      className={`on-light inline-flex items-center bg-white ${s.card} ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

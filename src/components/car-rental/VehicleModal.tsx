@@ -309,9 +309,9 @@ export default function VehicleModal({
     ] ?? "Licence number"
 
   const inp =
-    "w-full border border-[#e8e8f0] rounded-[10px] h-[48px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors"
+    "w-full border border-line rounded-input h-12 px-4 text-[14px] focus:border-brand-primary outline-none transition-colors"
   const lbl =
-    "block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mb-1.5"
+    "block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1.5"
   const err = "text-red-500 text-[11px] mt-1"
 
   // Editing a field clears its error: keeping a red message under a box the
@@ -527,11 +527,11 @@ export default function VehicleModal({
       aria-label={`${v.name} — rental details`}
     >
       <div
-        className="modal-panel bg-white w-full lg:max-w-[860px] rounded-t-[20px] lg:rounded-[20px] max-h-[96vh] lg:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+        className="modal-panel bg-white w-full lg:max-w-[860px] rounded-t-card lg:rounded-card max-h-[96vh] lg:max-h-[90vh] flex flex-col overflow-hidden shadow-card-hover on-light"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Top bar — step indicator + close ── */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#f0f0f8] flex-shrink-0 bg-white z-10">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-line flex-shrink-0 bg-white z-10 on-light">
           <div className="flex items-center gap-2">
             {STEPS.map((s, i) => {
               const done = submitted || i < stepIndex
@@ -540,10 +540,10 @@ export default function VehicleModal({
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
                       view === s && !submitted
-                        ? "bg-[#7f85f7] text-white"
+                        ? "bg-brand-primary text-white"
                         : done
                           ? "bg-[#0f6e56] text-white"
-                          : "bg-[#f0f0f8] text-[#9496a8]"
+                          : "bg-line text-muted"
                     }`}
                   >
                     {done ? <Check size={10} /> : i + 1}
@@ -551,8 +551,8 @@ export default function VehicleModal({
                   <span
                     className={`text-[11px] hidden sm:block ${
                       view === s && !submitted
-                        ? "text-[#7f85f7] font-semibold"
-                        : "text-[#9496a8]"
+                        ? "text-accent font-semibold"
+                        : "text-muted"
                     }`}
                   >
                     {STEP_LABELS[s]}
@@ -560,7 +560,7 @@ export default function VehicleModal({
                   {i < STEPS.length - 1 && (
                     <div
                       className={`w-6 h-px ml-1 ${
-                        done ? "bg-[#7f85f7]" : "bg-[#e8e8f0]"
+                        done ? "bg-brand-primary" : "bg-line"
                       }`}
                     />
                   )}
@@ -572,7 +572,7 @@ export default function VehicleModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-8 h-8 rounded-full bg-[#f0f0f8] flex items-center justify-center hover:bg-[#1a1a2e] hover:text-white transition-all flex-shrink-0"
+            className="w-8 h-8 rounded-full bg-line flex items-center justify-center hover:bg-brand-navy hover:text-white transition-all flex-shrink-0"
           >
             <X size={15} />
           </button>
@@ -585,7 +585,7 @@ export default function VehicleModal({
             <div className="view-in flex flex-col">
               {/* A — hero photo, full width */}
               <div
-                className="relative w-full bg-[#0d0d1a] overflow-hidden"
+                className="relative w-full bg-brand-hero overflow-hidden on-dark"
                 style={{ height: "clamp(220px, 40vw, 400px)" }}
               >
                 <ImageWithFallback
@@ -608,32 +608,32 @@ export default function VehicleModal({
                     {v.sortOrder > 0 ? `#${v.sortOrder} · ` : ""}
                     {v.type}
                   </p>
-                  <h2 className="text-white font-extrabold text-[18px] lg:text-[22px] leading-tight drop-shadow-lg">
+                  <h2 className="text-white font-bold text-[18px] lg:text-[22px] leading-tight drop-shadow-lg">
                     {v.name}
                   </h2>
                 </div>
 
                 {isBookable(v) && (
-                  <div className="absolute top-4 left-4 bg-[#0f6e56] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <div className="absolute top-4 left-4 bg-[#0f6e56] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-card-hover">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse on-light" />
                     Available
                   </div>
                 )}
 
                 {/* The weekly rate still has to be on this screen — it is the
                     number the visitor came for and the one the owner sets. */}
-                <div className="absolute top-4 right-4 bg-white/95 rounded-full px-3.5 py-1.5 shadow-lg">
+                <div className="absolute top-4 right-4 bg-white/95 rounded-full px-3.5 py-1.5 shadow-card-hover">
                   {weeklyLabel ? (
                     <p className="text-[#1a1a2e] leading-none">
-                      <span className="font-extrabold text-[16px] text-[#534ab7]">
+                      <span className="font-bold text-[16px] text-accent">
                         {weeklyLabel}
                       </span>
-                      <span className="text-[11px] text-[#666880] ml-1">
+                      <span className="text-[11px] text-muted ml-1">
                         / week
                       </span>
                     </p>
                   ) : (
-                    <p className="text-[11px] font-bold text-[#534ab7] leading-none">
+                    <p className="text-[11px] font-bold text-accent leading-none">
                       Ask us for the rate
                     </p>
                   )}
@@ -670,7 +670,7 @@ export default function VehicleModal({
 
               {/* B — thumbnail strip */}
               {imgs.length > 1 && (
-                <div className="flex gap-2 px-4 py-3 overflow-x-auto bg-[#f8f8ff] border-b border-[#eeeeff]">
+                <div className="flex gap-2 px-4 py-3 overflow-x-auto bg-surface border-b border-line on-light">
                   {imgs.map((img, i) => (
                     <button
                       key={i}
@@ -678,7 +678,7 @@ export default function VehicleModal({
                       aria-label={`View photo ${i + 1}`}
                       className={`relative flex-shrink-0 w-[80px] h-[56px] rounded-[8px] overflow-hidden border-2 transition-all ${
                         activeImg === i
-                          ? "border-[#7f85f7] opacity-100 scale-105"
+                          ? "border-brand-primary opacity-100 scale-105"
                           : "border-transparent opacity-50 hover:opacity-80"
                       }`}
                     >
@@ -705,18 +705,18 @@ export default function VehicleModal({
                     <button
                       type="button"
                       onClick={() => setShowOfferBox(true)}
-                      className="w-full flex items-center justify-center gap-2 bg-[#eeedfe] border-2 border-[#d6d8f5] text-[#534ab7] rounded-[12px] h-[52px] font-bold text-[14px] hover:bg-[#e0deff] hover:border-[#7f85f7] transition-all"
+                      className="w-full flex items-center justify-center gap-2 bg-brand-tint border-2 border-[#d6d8f5] text-accent rounded-btn h-12 font-semibold text-[14px] hover:bg-[#e0deff] hover:border-brand-primary transition-all on-light"
                     >
                       <span className="text-[18px]">💬</span>
                       Think ${weekly.toLocaleString("en-AU")}/week is high?
                       Make an offer
                     </button>
                   ) : (
-                    <div className="bg-[#f8f8ff] border-2 border-[#7f85f7] rounded-[14px] p-4">
+                    <div className="bg-surface border-2 border-brand-primary rounded-card p-4 on-light">
                       <p className="text-[14px] font-bold text-[#1a1a2e] mb-1">
                         Name your weekly price
                       </p>
-                      <p className="text-[11px] text-[#666] mb-3">
+                      <p className="text-[11px] text-muted mb-3">
                         We&apos;ll review it and reply within a few hours — by
                         phone, text or email.
                       </p>
@@ -725,7 +725,7 @@ export default function VehicleModal({
                         <div className="flex flex-col gap-2.5">
                           <div className="flex gap-2">
                             <div className="relative flex-1">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9496a8] text-[14px]">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-[14px]">
                                 $
                               </span>
                               <input
@@ -733,10 +733,10 @@ export default function VehicleModal({
                                 value={offerAmount}
                                 onChange={(e) => setOfferAmount(e.target.value)}
                                 placeholder={String(weekly - 10)}
-                                className="w-full border border-[#e0deff] rounded-[8px] pl-7 pr-3 h-[42px] text-[14px] font-semibold outline-none focus:border-[#7f85f7]"
+                                className="w-full border border-[#e0deff] rounded-[8px] pl-7 pr-3 h-[42px] text-[14px] font-semibold outline-none focus:border-brand-primary"
                               />
                             </div>
-                            <span className="flex items-center text-[13px] text-[#9496a8]">
+                            <span className="flex items-center text-[13px] text-muted">
                               / week
                             </span>
                           </div>
@@ -745,21 +745,21 @@ export default function VehicleModal({
                             value={offerName}
                             onChange={(e) => setOfferName(e.target.value)}
                             placeholder="Your name"
-                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                            className="w-full border border-[#e0deff] rounded-input px-3 h-12 text-[13px] outline-none focus:border-brand-primary"
                           />
                           <input
                             type="tel"
                             value={offerPhone}
                             onChange={(e) => setOfferPhone(e.target.value)}
                             placeholder="Your phone number"
-                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                            className="w-full border border-[#e0deff] rounded-input px-3 h-12 text-[13px] outline-none focus:border-brand-primary"
                           />
                           <input
                             type="email"
                             value={offerEmail}
                             onChange={(e) => setOfferEmail(e.target.value)}
                             placeholder="Your email (optional)"
-                            className="w-full border border-[#e0deff] rounded-[8px] px-3 h-[42px] text-[13px] outline-none focus:border-[#7f85f7]"
+                            className="w-full border border-[#e0deff] rounded-input px-3 h-12 text-[13px] outline-none focus:border-brand-primary"
                           />
                           <button
                             type="button"
@@ -770,7 +770,7 @@ export default function VehicleModal({
                               offerSubmitting
                             }
                             onClick={handleSendOffer}
-                            className="w-full bg-[#7f85f7] text-white rounded-[8px] h-[44px] font-semibold text-[14px] hover:bg-[#6b71f0] disabled:opacity-40 transition-all"
+                            className="w-full bg-brand-primary text-white rounded-btn h-12 font-semibold text-[14px] hover:bg-brand-hover disabled:opacity-40 transition-all"
                           >
                             {offerSubmitting ? "Sending…" : "Send My Offer"}
                           </button>
@@ -817,18 +817,18 @@ export default function VehicleModal({
               {/* C + D — colour note and swatches */}
               {v.colours.length > 0 && (
                 <>
-                  <p className="text-[11px] text-[#9496a8] italic px-5 pt-4 pb-1">
+                  <p className="text-[11px] text-muted italic px-5 pt-4 pb-1">
                     Vehicle colours may vary
                   </p>
                   <div className="px-5 pb-4">
-                    <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider mb-2">
+                    <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
                       Available Colours
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {v.colours.map((colour) => (
                         <span
                           key={colour}
-                          className="text-[12px] font-medium text-[#444] bg-[#f7f7f7] border border-[#e8e8f0] rounded-full px-3 py-1 flex items-center gap-1.5"
+                          className="text-[12px] font-medium text-muted bg-surface border border-line rounded-full px-3 py-1 flex items-center gap-1.5 on-light"
                         >
                           <span
                             className="w-3 h-3 rounded-full flex-shrink-0 border border-[#e0e0e0]"
@@ -843,9 +843,9 @@ export default function VehicleModal({
               )}
 
               {/* E — specifications */}
-              <div className="mx-4 mt-4 mb-4 border border-[#e8e8f0] rounded-[14px] overflow-hidden">
-                <div className="bg-[#f8f8ff] px-5 py-3 border-b border-[#e8e8f0]">
-                  <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider">
+              <div className="mx-4 mt-4 mb-4 border border-line rounded-card overflow-hidden">
+                <div className="bg-surface px-5 py-3 border-b border-line on-light">
+                  <p className="text-[11px] font-bold text-muted uppercase tracking-wider">
                     Vehicle Specifications
                   </p>
                 </div>
@@ -855,16 +855,16 @@ export default function VehicleModal({
                     <div
                       key={label}
                       className={`px-5 py-4 ${
-                        i % 2 === 0 ? "border-r border-[#e8e8f0]" : ""
+                        i % 2 === 0 ? "border-r border-line" : ""
                       } ${
                         // Every row but the last gets a rule under it; the
                         // last row is two cells when the count is even.
                         i < specs.length - (specs.length % 2 === 0 ? 2 : 1)
-                          ? "border-b border-[#e8e8f0]"
+                          ? "border-b border-line"
                           : ""
                       }`}
                     >
-                      <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider mb-1.5">
+                      <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">
                         {label}
                       </p>
                       <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">
@@ -876,8 +876,8 @@ export default function VehicleModal({
               </div>
 
               {/* F — rental terms */}
-              <div className="mx-4 mb-6 bg-[#f8f8ff] rounded-[14px] p-5">
-                <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider mb-4">
+              <div className="mx-4 mb-6 bg-surface rounded-card p-5 on-light">
+                <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-4">
                   Rental Terms
                 </p>
                 <div className="grid grid-cols-2 gap-y-4">
@@ -894,7 +894,7 @@ export default function VehicleModal({
                     ["🔧 Service", "Included"],
                   ].map(([k, val]) => (
                     <div key={k}>
-                      <p className="text-[11px] text-[#9496a8]">{k}</p>
+                      <p className="text-[11px] text-muted">{k}</p>
                       <p className="text-[13px] font-semibold text-[#1a1a2e] mt-0.5">
                         {val}
                       </p>
@@ -911,26 +911,26 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Your Details
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-4">
+              <p className="text-[13px] text-muted mb-4">
                 Fill in your personal details. We will email you the rental quote
                 with weekly pricing.
               </p>
 
               {/* Which car this application is for. */}
-              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[12px] px-4 py-3 mb-6 flex items-center justify-between gap-3">
+              <div className="bg-surface border border-line rounded-card px-4 py-3 mb-6 flex items-center justify-between gap-3 on-light">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider">
                     Selected vehicle
                   </p>
                   <p className="font-bold text-[14px] text-[#1a1a2e] truncate">
                     {v.name}
                   </p>
                   {v.rego && (
-                    <p className="text-[12px] text-[#666880]">Rego: {v.rego}</p>
+                    <p className="text-[12px] text-muted">Rego: {v.rego}</p>
                   )}
                 </div>
                 {weeklyLabel && (
-                  <p className="text-[13px] font-bold text-[#534ab7] flex-shrink-0">
+                  <p className="text-[13px] font-bold text-accent flex-shrink-0">
                     {weeklyLabel} / week
                   </p>
                 )}
@@ -1021,7 +1021,7 @@ export default function VehicleModal({
                     {errors.licenceNumber ? (
                       <p className={err}>{errors.licenceNumber}</p>
                     ) : (
-                      <p className="text-[10px] text-[#9496a8] mt-1">
+                      <p className="text-[10px] text-muted mt-1">
                         {licenceHint}
                       </p>
                     )}
@@ -1100,7 +1100,7 @@ export default function VehicleModal({
                     so no ref juggling is needed inside the map. */}
                 <div>
                   <span className={lbl}>Upload Driving Licence *</span>
-                  <p className="text-[11px] text-[#9496a8] -mt-1 mb-2">
+                  <p className="text-[11px] text-muted -mt-1 mb-2">
                     JPG, PNG, WEBP, HEIC or PDF · up to 3MB each
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -1153,18 +1153,18 @@ export default function VehicleModal({
                           className={`block w-full border-2 border-dashed rounded-[10px] py-5 text-center cursor-pointer transition-all ${
                             file
                               ? "border-[#0f6e56] bg-[#e1f5ee]"
-                              : "border-[#e8e8f0] hover:border-[#7f85f7] bg-[#f9f9ff]"
+                              : "border-line hover:border-brand-primary bg-[#f9f9ff]"
                           }`}
                         >
                           <Upload
                             size={18}
                             className={`mx-auto mb-1 ${
-                              file ? "text-[#0f6e56]" : "text-[#9496a8]"
+                              file ? "text-[#0f6e56]" : "text-muted"
                             }`}
                           />
                           <span
                             className={`block text-[11px] font-medium px-2 truncate ${
-                              file ? "text-[#0f6e56]" : "text-[#9496a8]"
+                              file ? "text-[#0f6e56]" : "text-muted"
                             }`}
                           >
                             {file ? `✓ ${file.name}` : `${label} of licence`}
@@ -1180,7 +1180,7 @@ export default function VehicleModal({
               {/* Condensed terms + required acknowledgement before the customer
                   can move on to payment. The full lease agreement is signed
                   separately, via the link emailed once the admin generates it. */}
-              <div className="bg-[#f8f8ff] rounded-[14px] p-4 mt-6 mb-4 max-h-[180px] overflow-y-auto text-[12px] text-[#555] leading-relaxed">
+              <div className="bg-surface rounded-card p-4 mt-6 mb-4 max-h-[180px] overflow-y-auto text-[12px] text-muted leading-relaxed on-light">
                 <p className="font-semibold text-[#1a1a2e] mb-1">
                   Key Rental Terms
                 </p>
@@ -1190,7 +1190,7 @@ export default function VehicleModal({
                 <a
                   href="/rental-terms"
                   target="_blank"
-                  className="text-[#7f85f7] font-medium"
+                  className="text-accent font-medium"
                 >
                   Read full terms →
                 </a>
@@ -1203,7 +1203,7 @@ export default function VehicleModal({
                   onChange={(e) => setTermsAgreed(e.target.checked)}
                   className="mt-1 accent-[#7f85f7] w-4 h-4"
                 />
-                <span className="text-[12px] text-[#444]">
+                <span className="text-[12px] text-muted">
                   I have read and agree to the Pak Oz Rentals terms above and
                   understand a full lease agreement will be provided for
                   signature.
@@ -1214,7 +1214,7 @@ export default function VehicleModal({
                 <button
                   type="button"
                   onClick={() => setView("details")}
-                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all"
+                  className="flex-1 border-2 border-line text-muted rounded-btn h-12 font-semibold text-[14px] hover:border-brand-primary hover:text-accent transition-all"
                 >
                   ← Back
                 </button>
@@ -1227,7 +1227,7 @@ export default function VehicleModal({
                       setView("payment")
                     }
                   }}
-                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all"
+                  className="flex-[2] bg-brand-primary text-white rounded-btn h-12 font-semibold text-[15px] hover:bg-brand-hover disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all"
                 >
                   Next: Payment →
                 </button>
@@ -1241,7 +1241,7 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Choose Payment Method
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-5">
+              <p className="text-[13px] text-muted mb-5">
                 Your first payment covers 1 week&apos;s rent. You can also add
                 the security bond now, or pay it in person when you pick up
                 the vehicle.
@@ -1269,7 +1269,7 @@ export default function VehicleModal({
               )}
 
               {/* Bond toggle card */}
-              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[14px] p-4 mb-5">
+              <div className="bg-surface border border-line rounded-card p-4 mb-5 on-light">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1284,7 +1284,7 @@ export default function VehicleModal({
                         +${bond.toFixed(2)}
                       </span>
                     </p>
-                    <p className="text-[12px] text-[#9496a8] mt-1 leading-relaxed">
+                    <p className="text-[12px] text-muted mt-1 leading-relaxed">
                       Optional. 2 weeks rent as a refundable bond. If you skip
                       this now, we will collect the bond in person when you
                       pick up the vehicle — no online payment required today.
@@ -1294,16 +1294,16 @@ export default function VehicleModal({
               </div>
 
               {/* Live total preview */}
-              <div className="bg-[#eeedfe] rounded-[12px] p-4 mb-5 flex items-center justify-between">
+              <div className="bg-brand-tint rounded-card p-4 mb-5 flex items-center justify-between on-light">
                 <div>
-                  <p className="text-[11px] font-semibold text-[#534ab7] uppercase tracking-wider">
+                  <p className="text-[11px] font-semibold text-accent uppercase tracking-wider">
                     Paying today
                   </p>
-                  <p className="text-[11px] text-[#7f85f7] mt-0.5">
+                  <p className="text-[11px] text-accent mt-0.5">
                     {includeBond ? "1 week rent + bond" : "1 week rent only"}
                   </p>
                 </div>
-                <p className="font-extrabold text-[22px] text-[#534ab7]">
+                <p className="font-bold text-[22px] text-accent">
                   ${totalFirst.toFixed(2)}
                 </p>
               </div>
@@ -1312,7 +1312,7 @@ export default function VehicleModal({
                 <button
                   type="button"
                   onClick={handleSelectCard}
-                  className="border-2 border-[#e8e8f0] rounded-[16px] p-5 text-left hover:border-[#7f85f7] transition-all duration-200 disabled:opacity-50"
+                  className="border-2 border-line rounded-card p-5 text-left hover:border-brand-primary transition-all duration-200 disabled:opacity-50"
                 >
                   <div className="text-[28px] mb-2">💳</div>
                   <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
@@ -1321,7 +1321,7 @@ export default function VehicleModal({
                       Preferred
                     </span>
                   </p>
-                  <p className="text-[12px] text-[#9496a8] mb-3">
+                  <p className="text-[12px] text-muted mb-3">
                     Weekly auto-billed from your bank account, or by Visa,
                     Mastercard or Amex.
                   </p>
@@ -1329,7 +1329,7 @@ export default function VehicleModal({
                     {["VISA", "MC", "AMEX"].map((c) => (
                       <span
                         key={c}
-                        className="text-[9px] font-bold bg-[#f7f7f7] border border-[#e8e8f0] rounded-[3px] px-1.5 py-0.5 text-[#666]"
+                        className="text-[9px] font-bold bg-surface border border-line rounded-[3px] px-1.5 py-0.5 text-muted on-light"
                       >
                         {c}
                       </span>
@@ -1340,16 +1340,16 @@ export default function VehicleModal({
                 <button
                   type="button"
                   onClick={() => setPayMethod("deposit")}
-                  className="border-2 border-[#e8e8f0] rounded-[16px] p-5 text-left hover:border-[#7f85f7] transition-all duration-200"
+                  className="border-2 border-line rounded-card p-5 text-left hover:border-brand-primary transition-all duration-200"
                 >
                   <div className="text-[28px] mb-2">🏦</div>
                   <p className="font-bold text-[15px] text-[#1a1a2e] mb-1">
                     Bank Transfer
                   </p>
-                  <p className="text-[12px] text-[#9496a8] mb-3">
+                  <p className="text-[12px] text-muted mb-3">
                     Direct deposit or PayID. We confirm receipt manually.
                   </p>
-                  <span className="text-[11px] text-[#7f85f7] font-medium">
+                  <span className="text-[11px] text-accent font-medium">
                     View bank details →
                   </span>
                 </button>
@@ -1367,7 +1367,7 @@ export default function VehicleModal({
               <button
                 type="button"
                 onClick={() => setView("apply")}
-                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] transition-colors"
+                className="text-[13px] text-muted hover:text-accent transition-colors"
               >
                 ← Back to details
               </button>
@@ -1380,7 +1380,7 @@ export default function VehicleModal({
               <button
                 type="button"
                 onClick={() => setPayMethod(null)}
-                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] mb-4 flex items-center gap-1"
+                className="text-[13px] text-muted hover:text-accent mb-4 flex items-center gap-1"
               >
                 ← Choose different method
               </button>
@@ -1388,7 +1388,7 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Security Bond
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-5">
+              <p className="text-[13px] text-muted mb-5">
                 Pay the bond online now, or skip it and pay in person at
                 pickup. After today, ${effectiveWeekly.toFixed(2)} is
                 auto-debited every week.
@@ -1406,8 +1406,8 @@ export default function VehicleModal({
                     key={opt.val}
                     className={`flex items-center justify-between border-2 rounded-[10px] p-3 cursor-pointer transition-all ${
                       bondWeeks === opt.val
-                        ? "border-[#7f85f7] bg-[#eeedfe]"
-                        : "border-[#e8e8f0]"
+                        ? "border-brand-primary bg-brand-tint on-light"
+                        : "border-line"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -1419,18 +1419,18 @@ export default function VehicleModal({
                       />
                       <span className="text-[13px] font-medium">{opt.label}</span>
                     </div>
-                    <span className="text-[12px] text-[#666]">{opt.sub}</span>
+                    <span className="text-[12px] text-muted">{opt.sub}</span>
                   </label>
                 ))}
               </div>
 
-              <div className="bg-[#eeedfe] rounded-[10px] p-3 flex justify-between items-center mb-2">
-                <span className="text-[13px] text-[#534ab7]">Total charged today</span>
-                <span className="font-bold text-[16px] text-[#534ab7]">
+              <div className="bg-brand-tint rounded-[10px] p-3 flex justify-between items-center mb-2 on-light">
+                <span className="text-[13px] text-accent">Total charged today</span>
+                <span className="font-bold text-[16px] text-accent">
                   ${cardTotalToday.toFixed(2)}
                 </span>
               </div>
-              <p className="text-[11px] text-[#9496a8] mb-5">
+              <p className="text-[11px] text-muted mb-5">
                 After today, ${effectiveWeekly.toFixed(2)} is auto-debited
                 every week. Cancel anytime when you return the vehicle.
                 Paying by bank direct debit (preferred) requires at least a
@@ -1448,7 +1448,7 @@ export default function VehicleModal({
                   type="button"
                   onClick={() => setPayMethod(null)}
                   disabled={setupLoading}
-                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] disabled:opacity-40 transition-all"
+                  className="flex-1 border-2 border-line text-muted rounded-btn h-12 font-semibold text-[14px] hover:border-brand-primary disabled:opacity-40 transition-all"
                 >
                   ← Back
                 </button>
@@ -1456,7 +1456,7 @@ export default function VehicleModal({
                   type="button"
                   onClick={handleContinueToCardPayment}
                   disabled={setupLoading}
-                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
+                  className="flex-[2] bg-brand-primary text-white rounded-btn h-12 font-semibold text-[15px] hover:bg-brand-hover disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
                 >
                   {setupLoading ? (
                     <>
@@ -1507,7 +1507,7 @@ export default function VehicleModal({
               <button
                 type="button"
                 onClick={() => setPayMethod(null)}
-                className="text-[13px] text-[#9496a8] hover:text-[#7f85f7] mb-4 flex items-center gap-1"
+                className="text-[13px] text-muted hover:text-accent mb-4 flex items-center gap-1"
               >
                 ← Choose different method
               </button>
@@ -1515,14 +1515,14 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Payment Details
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-5">
+              <p className="text-[13px] text-muted mb-5">
                 Transfer your first payment via bank transfer or PayID. We
                 confirm receipt and arrange pickup within 2 hours.
               </p>
 
               {/* Payment breakdown */}
-              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[16px] p-5 mb-5">
-                <p className="text-[11px] font-bold text-[#9496a8] uppercase tracking-wider mb-3">
+              <div className="bg-surface border border-line rounded-card p-5 mb-5 on-light">
+                <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-3">
                   Payment Breakdown
                 </p>
                 <div className="space-y-3">
@@ -1531,7 +1531,7 @@ export default function VehicleModal({
                       <p className="text-[14px] font-medium text-[#1a1a2e]">
                         First Week Rent
                       </p>
-                      <p className="text-[11px] text-[#9496a8]">
+                      <p className="text-[11px] text-muted">
                         Paid weekly in advance thereafter
                       </p>
                     </div>
@@ -1549,7 +1549,7 @@ export default function VehicleModal({
                             REFUNDABLE
                           </span>
                         </p>
-                        <p className="text-[11px] text-[#9496a8]">
+                        <p className="text-[11px] text-muted">
                           2 weeks rent — included today
                         </p>
                       </div>
@@ -1560,24 +1560,24 @@ export default function VehicleModal({
                   ) : (
                     <div className="flex justify-between items-center opacity-60">
                       <div>
-                        <p className="text-[13px] text-[#666] italic">
+                        <p className="text-[13px] text-muted italic">
                           Security Bond
                         </p>
-                        <p className="text-[11px] text-[#9496a8]">
+                        <p className="text-[11px] text-muted">
                           To be collected at pickup
                         </p>
                       </div>
-                      <p className="text-[13px] text-[#666] italic">
+                      <p className="text-[13px] text-muted italic">
                         ${bond.toFixed(2)}
                       </p>
                     </div>
                   )}
 
-                  <div className="border-t border-[#e8e8f0] pt-3 mt-1 flex justify-between items-center">
-                    <p className="font-extrabold text-[16px] text-[#1a1a2e]">
+                  <div className="border-t border-line pt-3 mt-1 flex justify-between items-center">
+                    <p className="font-bold text-[16px] text-[#1a1a2e]">
                       Total to Transfer Today
                     </p>
-                    <p className="font-extrabold text-[22px] text-[#7f85f7]">
+                    <p className="font-bold text-[22px] text-accent">
                       {totalFirst > 0
                         ? `$${totalFirst.toFixed(2)}`
                         : "Contact us"}
@@ -1587,7 +1587,7 @@ export default function VehicleModal({
               </div>
 
               {/* Bank transfer details */}
-              <div className="bg-[#1a1a2e] rounded-[16px] p-5 mb-5">
+              <div className="bg-brand-navy rounded-card p-5 mb-5 on-dark">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[18px]">🏦</span>
                   <p className="font-bold text-white text-[15px]">
@@ -1599,15 +1599,15 @@ export default function VehicleModal({
                   {[
                     ["Bank", BANK_NAME, "text-white"],
                     ["Account Name", BANK_ACCOUNT_NAME, "text-white"],
-                    ["BSB", BANK_BSB, "text-[#7f85f7]"],
-                    ["Account Number", BANK_ACCOUNT, "text-[#7f85f7]"],
+                    ["BSB", BANK_BSB, "text-accent"],
+                    ["Account Number", BANK_ACCOUNT, "text-accent"],
                     ["Reference", payRef, "text-[#5dcaa5]"],
                   ].map(([label, value, colour]) => (
                     <div
                       key={label}
                       className="flex items-center justify-between py-2 border-b border-white/10 last:border-none"
                     >
-                      <span className="text-[12px] text-[#9496a8]">{label}</span>
+                      <span className="text-[12px] text-muted">{label}</span>
                       <span className={`font-bold text-[14px] ${colour}`}>
                         {value}
                       </span>
@@ -1619,7 +1619,7 @@ export default function VehicleModal({
                   <p className="text-[11px] text-[#f5a623] font-semibold flex items-center gap-1.5">
                     ⚠️ Important — Use this payment reference
                   </p>
-                  <p className="text-[11px] text-[#9496a8] mt-1">
+                  <p className="text-[11px] text-muted mt-1">
                     Always use <strong className="text-white">{payRef}</strong>{" "}
                     as your payment reference so we can match your transfer
                     instantly.
@@ -1628,24 +1628,24 @@ export default function VehicleModal({
               </div>
 
               {/* PayID option */}
-              <div className="bg-[#eeedfe] rounded-[16px] p-5 mb-5">
+              <div className="bg-brand-tint rounded-card p-5 mb-5 on-light">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[18px]">⚡</span>
-                  <p className="font-bold text-[#534ab7] text-[15px]">
+                  <p className="font-bold text-accent text-[15px]">
                     Pay Faster with PayID
                   </p>
                 </div>
-                <p className="text-[13px] text-[#534ab7] mb-3">
+                <p className="text-[13px] text-accent mb-3">
                   Use PayID for instant transfer — no BSB or account number
                   needed.
                 </p>
-                <div className="bg-white rounded-[10px] p-3 flex items-center justify-between gap-3">
+                <div className="bg-white rounded-[10px] p-3 flex items-center justify-between gap-3 on-light">
                   <div>
-                    <p className="text-[11px] text-[#9496a8]">PayID (ABN)</p>
-                    <p className="font-extrabold text-[18px] text-[#7f85f7]">
+                    <p className="text-[11px] text-muted">PayID (ABN)</p>
+                    <p className="font-bold text-[18px] text-accent">
                       {BANK_PAYID}
                     </p>
-                    <p className="text-[11px] text-[#9496a8] mt-0.5">
+                    <p className="text-[11px] text-muted mt-0.5">
                       Registered to: {BANK_ACCOUNT_NAME}
                     </p>
                   </div>
@@ -1654,19 +1654,19 @@ export default function VehicleModal({
                     onClick={() => {
                       navigator.clipboard?.writeText(BANK_PAYID)
                     }}
-                    className="bg-[#7f85f7] text-white text-[11px] font-bold px-3 py-2 rounded-[8px] hover:bg-[#6b71f0] transition-all flex-shrink-0"
+                    className="bg-brand-primary text-white text-[11px] font-bold px-3 py-2 rounded-[8px] hover:bg-brand-hover transition-all flex-shrink-0"
                   >
                     Copy
                   </button>
                 </div>
-                <p className="text-[11px] text-[#9496a8] mt-2">
+                <p className="text-[11px] text-muted mt-2">
                   ⚠️ Still use <strong>{payRef}</strong> as reference in your
                   PayID transfer description
                 </p>
               </div>
 
               {/* Important notes */}
-              <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[14px] p-4 mb-5">
+              <div className="bg-[#fff8e1] border border-[#f0c040] rounded-card p-4 mb-5">
                 <p className="font-bold text-[13px] text-[#7d5a00] mb-2">
                   📋 Before you transfer:
                 </p>
@@ -1692,7 +1692,7 @@ export default function VehicleModal({
               </div>
 
               {/* Confirmation checkbox */}
-              <label className="flex items-start gap-3 cursor-pointer bg-[#f9f9ff] border border-[#e8e8f0] rounded-[12px] p-4 mb-4 hover:border-[#7f85f7] transition-colors">
+              <label className="flex items-start gap-3 cursor-pointer bg-[#f9f9ff] border border-line rounded-card p-4 mb-4 hover:border-brand-primary transition-colors">
                 <input
                   type="checkbox"
                   checked={payConfirmed}
@@ -1702,7 +1702,7 @@ export default function VehicleModal({
                   }}
                   className="mt-0.5 flex-shrink-0 accent-[#7f85f7] w-4 h-4"
                 />
-                <span className="text-[13px] text-[#444] leading-relaxed">
+                <span className="text-[13px] text-muted leading-relaxed">
                   I have transferred
                   {totalFirst > 0
                     ? ` $${totalFirst.toFixed(2)}`
@@ -1725,7 +1725,7 @@ export default function VehicleModal({
                   type="button"
                   onClick={() => setView("apply")}
                   disabled={paySubmitting}
-                  className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] disabled:opacity-40 transition-all"
+                  className="flex-1 border-2 border-line text-muted rounded-btn h-12 font-semibold text-[14px] hover:border-brand-primary hover:text-accent disabled:opacity-40 transition-all"
                 >
                   ← Back
                 </button>
@@ -1733,7 +1733,7 @@ export default function VehicleModal({
                   type="button"
                   disabled={!payConfirmed || paySubmitting}
                   onClick={handleSubmit}
-                  className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  className="flex-[2] bg-brand-primary text-white rounded-btn h-12 font-semibold text-[15px] hover:bg-brand-hover disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
                   {paySubmitting ? (
                     <>
@@ -1746,7 +1746,7 @@ export default function VehicleModal({
                 </button>
               </div>
 
-              <p className="text-[11px] text-center text-[#9496a8] mt-4">
+              <p className="text-[11px] text-center text-muted mt-4">
                 🔒 Your personal details are kept secure and never shared with
                 third parties.
               </p>
@@ -1766,7 +1766,7 @@ export default function VehicleModal({
                   : "Application Submitted! 🎉"}
               </h3>
 
-              <p className="text-[#555] text-[14px] leading-relaxed mb-5">
+              <p className="text-muted text-[14px] leading-relaxed mb-5">
                 Thank you <strong>{form.firstName}</strong>. We have received
                 your {payMethod === "card-pay" ? "payment" : "application and transfer confirmation"}{" "}
                 for <strong>{v.name}</strong>
@@ -1774,7 +1774,7 @@ export default function VehicleModal({
               </p>
 
               {/* What happens next */}
-              <div className="bg-[#f8f8ff] rounded-[14px] p-4 text-left mb-4">
+              <div className="bg-surface rounded-card p-4 text-left mb-4 on-light">
                 <p className="font-bold text-[13px] text-[#1a1a2e] mb-3">
                   What happens next:
                 </p>
@@ -1791,10 +1791,10 @@ export default function VehicleModal({
                     ["4", "Vehicle pickup arranged"],
                   ].map(([num, text]) => (
                     <div key={num} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white bg-[#7f85f7]">
+                      <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white bg-brand-primary">
                         {num}
                       </div>
-                      <p className="text-[13px] text-[#444] leading-snug pt-0.5">
+                      <p className="text-[13px] text-muted leading-snug pt-0.5">
                         {text}
                       </p>
                     </div>
@@ -1805,7 +1805,7 @@ export default function VehicleModal({
               {/* Bank details reminder — only relevant if they still owe a
                   transfer; a card payer has already paid in full. */}
               {payMethod !== "card-pay" && (
-                <div className="bg-[#fff8e1] border border-[#f0c040] rounded-[12px] p-4 text-left mb-5">
+                <div className="bg-[#fff8e1] border border-[#f0c040] rounded-card p-4 text-left mb-5">
                   <p className="text-[12px] font-bold text-[#7d5a00] mb-2">
                     ⚠️ If you haven&apos;t transferred yet:
                   </p>
@@ -1833,16 +1833,16 @@ export default function VehicleModal({
 
               <button
                 onClick={onClose}
-                className="w-full bg-[#0f6e56] text-white rounded-[10px] h-[46px] font-semibold text-[14px] hover:bg-[#085041] transition-all"
+                className="w-full bg-[#0f6e56] text-white rounded-btn h-12 font-semibold text-[14px] hover:bg-[#085041] transition-all"
               >
                 Close
               </button>
 
-              <p className="text-[11px] text-[#9496a8] mt-3">
+              <p className="text-[11px] text-muted mt-3">
                 Questions? Call us:
                 <a
                   href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
-                  className="text-[#7f85f7] font-semibold ml-1"
+                  className="text-accent font-semibold ml-1"
                 >
                   {SITE_PHONE}
                 </a>
@@ -1854,16 +1854,16 @@ export default function VehicleModal({
         {/* ── Sticky actions — details step only; the other steps carry their
             own Back / Next pair at the end of the form. ── */}
         {view === "details" && !submitted && (
-          <div className="flex-shrink-0 p-4 border-t border-[#f0f0f8] bg-white flex flex-col gap-2.5">
+          <div className="flex-shrink-0 p-4 border-t border-line bg-white flex flex-col gap-2.5 on-light">
             <button
               onClick={() => setView("apply")}
-              className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] transition-all duration-200"
+              className="w-full bg-brand-primary text-white rounded-btn h-12 font-semibold text-[15px] hover:bg-brand-hover transition-all duration-200"
             >
               🚗 Get on Rent
             </button>
             <a
               href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
-              className="flex items-center justify-center gap-2 border-2 border-[#e8e8f0] text-[#1a1a2e] rounded-[10px] h-[46px] font-semibold text-[14px] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all duration-200"
+              className="flex items-center justify-center gap-2 border-2 border-line text-[#1a1a2e] rounded-btn h-12 font-semibold text-[14px] hover:border-brand-primary hover:text-accent transition-all duration-200"
             >
               <Phone size={15} />
               Call {SITE_PHONE}
@@ -2017,45 +2017,45 @@ function StripeSetupForm({
   }
 
   const inp =
-    "w-full border border-[#e8e8f0] rounded-[10px] h-[46px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors"
+    "w-full border border-line rounded-input h-12 px-4 text-[14px] focus:border-brand-primary outline-none transition-colors"
 
   return (
     <div className="p-6 max-w-[600px] mx-auto">
       <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
         Secure Payment Details
       </h3>
-      <p className="text-[13px] text-[#9496a8] mb-5">
+      <p className="text-[13px] text-muted mb-5">
         Powered by Stripe — bank-grade encryption. We never see your card or
         bank details. Your bank will ask you to confirm the card.
       </p>
 
-      <div className="bg-[#f8f8ff] rounded-[14px] p-5 mb-5">
+      <div className="bg-surface rounded-card p-5 mb-5 on-light">
         <p className="font-bold text-[14px] text-[#1a1a2e] mb-3">
           {vehicle.name}
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-[13px]">
-            <span className="text-[#666]">1 week rent (today)</span>
+            <span className="text-muted">1 week rent (today)</span>
             <span className="font-semibold text-[#1a1a2e]">{fmt(weeklyRate)}</span>
           </div>
           {bondWeeks > 0 ? (
             <div className="flex justify-between text-[13px]">
-              <span className="text-[#666]">
+              <span className="text-muted">
                 Security bond ({bondWeeks} week{bondWeeks > 1 ? "s" : ""})
-                <span className="text-[#9496a8] text-[11px] ml-1">refundable</span>
+                <span className="text-muted text-[11px] ml-1">refundable</span>
               </span>
               <span className="font-semibold text-[#1a1a2e]">{fmt(bondAmount)}</span>
             </div>
           ) : (
-            <div className="flex justify-between text-[12px] text-[#9496a8] italic">
+            <div className="flex justify-between text-[12px] text-muted italic">
               <span>Bond — pay at pickup</span>
             </div>
           )}
-          <div className="border-t border-[#e8e8f0] pt-2 mt-2 flex justify-between">
+          <div className="border-t border-line pt-2 mt-2 flex justify-between">
             <span className="font-bold text-[15px] text-[#1a1a2e]">Total today</span>
-            <span className="font-extrabold text-[18px] text-[#7f85f7]">{fmt(totalToday)}</span>
+            <span className="font-bold text-[18px] text-accent">{fmt(totalToday)}</span>
           </div>
-          <p className="text-[11px] text-[#9496a8]">
+          <p className="text-[11px] text-muted">
             Then {fmt(weeklyRate)} auto-billed every week thereafter. Shows on
             your statement as PAKOZ RENTAL.
           </p>
@@ -2066,7 +2066,7 @@ function StripeSetupForm({
         <div className="mb-3">
           <label
             htmlFor="cardholderName"
-            className="block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mb-1.5"
+            className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1.5"
           >
             Name on card *
           </label>
@@ -2115,7 +2115,7 @@ function StripeSetupForm({
 
       {/* Proof of agreement: exact weekly amount and billing day, ticked and
           signed with a typed name before any payment details are confirmed. */}
-      <div className="border-2 border-[#e8e8f0] rounded-[14px] p-4 mb-4">
+      <div className="border-2 border-line rounded-card p-4 mb-4">
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -2125,14 +2125,14 @@ function StripeSetupForm({
           />
           <span className="text-[13px] text-[#1a1a2e] font-medium leading-relaxed">
             {checkout.consentSentence}{" "}
-            <a href="/rental-terms" target="_blank" className="text-[#7f85f7] underline">
+            <a href="/rental-terms" target="_blank" className="text-accent underline">
               Read the rental terms
             </a>
           </span>
         </label>
         <label
           htmlFor="typedName"
-          className="block text-[11px] font-semibold text-[#666880] uppercase tracking-wider mt-4 mb-1.5"
+          className="block text-[11px] font-semibold text-muted uppercase tracking-wider mt-4 mb-1.5"
         >
           Type your full name to sign *
         </label>
@@ -2165,7 +2165,7 @@ function StripeSetupForm({
           type="button"
           onClick={onBack}
           disabled={processing}
-          className="flex-1 border-2 border-[#e8e8f0] text-[#666] rounded-[10px] h-[52px] font-semibold text-[14px] hover:border-[#7f85f7] disabled:opacity-40 transition-all"
+          className="flex-1 border-2 border-line text-muted rounded-btn h-12 font-semibold text-[14px] hover:border-brand-primary disabled:opacity-40 transition-all"
         >
           ← Back
         </button>
@@ -2173,7 +2173,7 @@ function StripeSetupForm({
           type="button"
           onClick={handlePay}
           disabled={processing || !stripe || !consent || becsNeedsBond}
-          className="flex-[2] bg-[#7f85f7] text-white rounded-[10px] h-[52px] font-bold text-[15px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
+          className="flex-[2] bg-brand-primary text-white rounded-btn h-12 font-semibold text-[15px] hover:bg-brand-hover disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
         >
           {processing ? (
             <>

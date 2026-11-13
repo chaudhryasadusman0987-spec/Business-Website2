@@ -23,55 +23,43 @@ export default function BlogPage() {
   return (
     <main>
       {/* ── 1. DARK HERO ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-24 text-center">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 rounded-full opacity-40 blur-[120px]"
-          style={{ background: "#7f85f7" }}
-        />
+      <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
 
-        <div className="relative z-10 mx-auto max-w-[1170px] px-4">
-          <nav className="mb-6 flex items-center justify-center gap-2 text-[12px] text-[#666880]">
-            <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
+        <div className="relative z-10 mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+          <nav className="mb-6 flex items-center justify-center gap-2 text-[12px] text-muted">
+            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />
-            <span className="text-[#9496a8]">Blog</span>
+            <span className="text-muted">Blog</span>
           </nav>
 
           <div className="mb-8 flex justify-center">
             <BrandLogo />
           </div>
 
-          <h1 className="text-[40px] font-extrabold text-white lg:text-[56px]">
+          <h1 className="text-white">
             Blog &amp; Insights
           </h1>
-          <p className="mt-4 text-[16px] text-[#9496a8]">
+          <p className="mt-4 text-[16px] text-muted">
             Guides, news and tips on security, mobility and technology.
           </p>
         </div>
       </section>
 
       {/* ── 2. FEATURED POST ─────────────────────────────────── */}
-      <section className="bg-[#fefefd] pt-[70px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <Link
             href={`/blog/${featured.slug}`}
-            className="group grid grid-cols-1 overflow-hidden rounded-[24px] border border-[#e8e8f0] bg-white transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)] lg:grid-cols-2"
+            className="group grid grid-cols-1 overflow-hidden rounded-card border border-line bg-white transition-all duration-300 hover:border-brand-primary hover:shadow-card-hover lg:grid-cols-2 on-light"
           >
             <div className="relative h-[260px] w-full lg:h-full lg:min-h-[340px]">
               <ImageWithFallback
                 src={featured.image}
                 alt={featured.title}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                className="object-cover transition-transform duration-200"
                 fallbackBg="#eeedfe"
                 placeholderText="Article image"
                 priority
@@ -85,17 +73,17 @@ export default function BlogPage() {
             </div>
 
             <div className="flex flex-col justify-center p-8 lg:p-12">
-              <span className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7]">
+              <span className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-accent">
                 Featured
               </span>
-              <h2 className="text-[26px] font-bold leading-tight text-[#1a1a2e] lg:text-[32px]">
+              <h2 className="text-[#1a1a2e]">
                 {featured.title}
               </h2>
-              <p className="mt-4 text-[15px] leading-relaxed text-[#666666]">
+              <p className="mt-4 text-[15px] leading-relaxed text-muted">
                 {featured.excerpt}
               </p>
 
-              <div className="mt-6 flex items-center gap-4 text-[13px] text-[#9496a8]">
+              <div className="mt-6 flex items-center gap-4 text-[13px] text-muted">
                 <span className="font-medium text-[#1a1a2e]">
                   {featured.author}
                 </span>
@@ -106,7 +94,7 @@ export default function BlogPage() {
                 </span>
               </div>
 
-              <span className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-[#7f85f7]">
+              <span className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-accent">
                 Read article
                 <ArrowRight
                   size={16}
@@ -119,8 +107,8 @@ export default function BlogPage() {
       </section>
 
       {/* ── 3. CATEGORY FILTER ───────────────────────────────── */}
-      <section className="bg-[#fefefd] pt-[50px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white pt-[50px] on-light">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-3">
             {blogCategories.map((c) => {
               const active = category === c
@@ -130,8 +118,8 @@ export default function BlogPage() {
                   onClick={() => setCategory(c)}
                   className={`cursor-pointer rounded-full border px-5 py-2 text-[13px] font-medium transition-all duration-200 ${
                     active
-                      ? "border-[#7f85f7] bg-[#7f85f7] text-white"
-                      : "border-[#e8e8f0] bg-white text-[#666666] hover:border-[#7f85f7] hover:text-[#7f85f7]"
+                      ? "border-brand-primary bg-brand-primary text-white"
+                      : "border-line bg-white text-muted hover:border-brand-primary hover:text-accent on-light"
                   }`}
                 >
                   {c}
@@ -143,10 +131,10 @@ export default function BlogPage() {
       </section>
 
       {/* ── 4. POSTS GRID ────────────────────────────────────── */}
-      <section className="bg-[#fefefd] pb-[120px] pt-[40px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           {filtered.length === 0 ? (
-            <div className="py-16 text-center text-[15px] text-[#9496a8]">
+            <div className="py-16 text-center text-[15px] text-muted">
               No articles yet in this category.
             </div>
           ) : (
@@ -155,14 +143,14 @@ export default function BlogPage() {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-[24px] border border-[#e8e8f0] bg-white transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
+                  className="group flex flex-col overflow-hidden rounded-card border border-line bg-white transition-all duration-300 hover:border-brand-primary hover:shadow-card-hover on-light"
                 >
                   <div className="relative h-[200px] w-full">
                     <ImageWithFallback
                       src={post.image}
                       alt={post.title}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      className="object-cover transition-transform duration-200"
                       fallbackBg="#eeedfe"
                       placeholderText="Article image"
                     />
@@ -175,14 +163,14 @@ export default function BlogPage() {
                   </div>
 
                   <div className="flex flex-1 flex-col p-6">
-                    <h3 className="text-[18px] font-bold leading-snug text-[#1a1a2e] transition-colors group-hover:text-[#7f85f7]">
+                    <h3 className="text-[18px] font-bold leading-snug text-[#1a1a2e] transition-colors group-hover:text-accent">
                       {post.title}
                     </h3>
-                    <p className="mt-3 flex-1 text-[14px] leading-relaxed text-[#666666]">
+                    <p className="mt-3 flex-1 text-[14px] leading-relaxed text-muted">
                       {post.excerpt}
                     </p>
 
-                    <div className="mt-5 flex items-center gap-3 border-t border-[#f0f0f8] pt-4 text-[12px] text-[#9496a8]">
+                    <div className="mt-5 flex items-center gap-3 border-t border-line pt-4 text-[12px] text-muted">
                       <span className="font-medium text-[#1a1a2e]">
                         {post.author}
                       </span>

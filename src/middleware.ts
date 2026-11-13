@@ -44,7 +44,7 @@ const LIMITS: { path: RegExp; max: number; windowMs: number }[] = [
   { path: /^\/api\/admin\/session$/, max: 8, windowMs: 15 * 60_000 },
   { path: /^\/api\/chat$/, max: 20, windowMs: 60_000 },
   {
-    path: /^\/api\/(contact|leads|quote\/[\w-]+|rental-application|rental-payment\/(negotiate-price|create-intent|create-setup|start-subscription|accept-terms|licence)|agreements\/[\w-]+\/sign)$/,
+    path: /^\/api\/(contact|newsletter|leads|quote\/[\w-]+|rental-application|rental-payment\/(negotiate-price|create-intent|create-setup|start-subscription|accept-terms|licence)|agreements\/[\w-]+\/sign)$/,
     max: 6,
     windowMs: 60_000,
   },

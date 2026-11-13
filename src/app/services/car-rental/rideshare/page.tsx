@@ -60,7 +60,7 @@ export default async function RidesharePage() {
         eyebrow={`${RENTAL_BRAND} · Uber & DiDi`}
         title={
           <>
-            Rideshare car rental <span className="text-[#7f85f7]">in Brisbane</span>
+            Rideshare car rental <span className="text-accent">in Brisbane</span>
           </>
         }
         stats={[
@@ -108,7 +108,7 @@ export default async function RidesharePage() {
             {cars.length > 0 ? (
               <CarCards cars={cars} />
             ) : (
-              <p className="text-[15px] text-[#666]">
+              <p className="text-[15px] text-muted">
                 The live list isn&apos;t available right now.{" "}
                 <Link href={FLEET_HREF} className={PROSE_LINK}>
                   See every car on the yard
@@ -116,7 +116,7 @@ export default async function RidesharePage() {
                 instead.
               </p>
             )}
-            <p className="mt-6 text-[14px] text-[#666]">
+            <p className="mt-6 text-[14px] text-muted">
               Open a car in the{" "}
               <Link href={FLEET_HREF} className={PROSE_LINK}>
                 full rental fleet
@@ -131,7 +131,7 @@ export default async function RidesharePage() {
           the Prius use noticeably less fuel in stop-start city driving, which adds up over a week of shifts.
           Utes are left off this list because the apps generally won&apos;t accept them for standard trips.
         </p>
-        <p className="text-[14px] text-[#666]">
+        <p className="text-[14px] text-muted">
           Uber and DiDi each set a maximum vehicle age, and it varies by product (UberX, Comfort and so on) and
           changes over time. Check the year of the car against the app&apos;s current rules before you apply, or
           ask us which cars are cleared for rideshare right now.
@@ -170,7 +170,7 @@ export default async function RidesharePage() {
           Department of Transport and Main Roads (TMR) as a booked hire service. Drivers generally need a driver
           authorisation, and the car needs the right registration and insurance for booked hire.
         </p>
-        <p className="text-[14px] text-[#666]">
+        <p className="text-[14px] text-muted">
           Platform and government rules change. Always check the latest requirements with Uber, DiDi and TMR
           before you start driving. Our guide to{" "}
           <Link href="/blog/uber-didi-vehicle-requirements-brisbane" className={PROSE_LINK}>

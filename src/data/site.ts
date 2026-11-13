@@ -11,10 +11,14 @@ export const SITE_TAGLINE     = "Better Solutions, Better Living.";
 export const SITE_DOMAIN      = "https://www.pakozsolutions.com.au";
 export const SITE_EMAIL       = "info@pakozsolutions.com.au";
 export const SITE_PHONE       = "+61 424 948 512";
+// Derived from SITE_PHONE so the number lives in one place: the local display
+// format ("0424 948 512") for buttons, and the tel: link.
+export const SITE_PHONE_LOCAL = SITE_PHONE.replace(/^\+61\s?/, "0");
+export const SITE_PHONE_HREF  = `tel:${SITE_PHONE.replace(/\s/g, "")}`;
 export const SITE_ADDRESS     = "Brisbane & Southeast QLD";
-// Temporary until the ATO issues the company ABN. The footer renders any value
-// containing "Pending" in muted italics so it reads as a placeholder, not a
-// real registration number.
+// Temporary until the ATO issues the company ABN. The footer hides the ABN
+// line while this is empty or still says "Pending" — set it to e.g.
+// "ABN: 12 345 678 901" and it appears.
 export const SITE_ABN         = "ABN: Pending registration";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 // Machine-readable version of SITE_HOURS for schema.org JSON-LD. Change both

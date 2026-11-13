@@ -56,7 +56,7 @@ const cards = [
     // No figure here on purpose: IT prices are ranges the owner edits in the
     // dashboard, so a hard-coded number would drift out of date.
     price: "Estimate in 24 hours",
-    priceColor: "text-[#7f85f7]",
+    priceColor: "text-accent",
     tag: "Project brief · Free consultation",
   },
 ]
@@ -89,12 +89,12 @@ function QuotePicker() {
   if (selectedService !== null) {
     return (
       <div>
-        <div className="bg-[#0d0d1a] px-6 py-3 flex items-center gap-2">
+        <div className="bg-brand-hero px-6 py-3 flex items-center gap-2 on-dark">
           <button
             onClick={() => setSelectedService(null)}
-            className="flex items-center gap-2 text-[#9496a8] text-[13px] hover:text-white transition-colors"
+            className="flex items-center gap-2 text-muted text-[13px] hover:text-white transition-colors"
           >
-            <ArrowLeft size={14} className="text-[#9496a8]" />
+            <ArrowLeft size={14} className="text-muted" />
             Change service
           </button>
         </div>
@@ -105,22 +105,11 @@ function QuotePicker() {
 
   // ─── STATE A — service selector ───
   return (
-    <div className="bg-[#0d0d1a] min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.4]"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgba(127,133,247,0.15) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      />
-      {/* purple glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[rgba(127,133,247,0.15)] rounded-full blur-[120px] pointer-events-none" />
+    <div className="bg-brand-hero min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden on-dark">
 
       <div className="relative w-full max-w-[900px] flex flex-col items-center">
         <h1 className="text-white font-bold text-[20px] mb-2">{SITE_FULL}</h1>
-        <p className="text-[#9496a8] text-[14px]">
+        <p className="text-muted text-[14px]">
           Select a service to get your free quote
         </p>
 
@@ -129,21 +118,21 @@ function QuotePicker() {
             <div
               key={c.key}
               onClick={() => pick(c.key)}
-              className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[24px] p-8 cursor-pointer flex-1 text-center hover:bg-[rgba(127,133,247,0.12)] hover:border-[rgba(127,133,247,0.4)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(127,133,247,0.2)] transition-all duration-300"
+              className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-card p-8 cursor-pointer flex-1 text-center hover:bg-[rgba(127,133,247,0.12)] hover:border-[rgba(127,133,247,0.4)] hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-300"
             >
-              <div className={`w-16 h-16 rounded-[16px] mx-auto mb-5 flex items-center justify-center ${c.iconBg}`}>
+              <div className={`w-16 h-16 rounded-card mx-auto mb-5 flex items-center justify-center ${c.iconBg}`}>
                 {c.icon}
               </div>
               <div className="text-white font-bold text-[20px]">{c.title}</div>
-              <div className="text-[#9496a8] text-[13px] mt-2">{c.sub}</div>
+              <div className="text-muted text-[13px] mt-2">{c.sub}</div>
               <div className={`font-bold text-[15px] mt-3 ${c.priceColor}`}>{c.price}</div>
-              <div className="text-[11px] text-[#666880] mt-2">{c.tag}</div>
+              <div className="text-[11px] text-muted mt-2">{c.tag}</div>
               <ArrowRight size={20} className="text-[#7f85f7] mt-5 mx-auto" />
             </div>
           ))}
         </div>
 
-        <p className="text-[#555770] text-[12px] mt-8 text-center">
+        <p className="text-muted text-[12px] mt-8 text-center">
           Free quotes · No obligation · Response within 1 business day
         </p>
       </div>

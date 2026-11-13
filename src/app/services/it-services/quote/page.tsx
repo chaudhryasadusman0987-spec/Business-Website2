@@ -76,11 +76,11 @@ function ITQuoteBrief() {
     : selectedService.estimatedDisplay
 
   const inp =
-    "w-full border border-[#e8e8f0] rounded-[10px] h-[48px] px-4 text-[14px] focus:border-[#7f85f7] outline-none transition-colors bg-white"
+    "w-full border border-line rounded-input h-12 px-4 text-[14px] focus:border-brand-primary outline-none transition-colors bg-white on-light"
   const ta =
-    "w-full border border-[#e8e8f0] rounded-[10px] px-4 py-3 text-[14px] focus:border-[#7f85f7] outline-none transition-colors bg-white resize-none"
+    "w-full border border-line rounded-[10px] px-4 py-3 text-[14px] focus:border-brand-primary outline-none transition-colors bg-white resize-none on-light"
   const lbl =
-    "block text-[12px] font-semibold text-[#666880] uppercase tracking-wider mb-1.5"
+    "block text-[12px] font-semibold text-muted uppercase tracking-wider mb-1.5"
   const sel = inp + " appearance-none cursor-pointer"
 
   const handleSubmit = async () => {
@@ -120,23 +120,23 @@ function ITQuoteBrief() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#0d0d1a] flex items-center justify-center px-4 py-16">
-        <div className="bg-white rounded-[24px] p-10 max-w-[560px] w-full text-center shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-[#eeedfe] flex items-center justify-center mx-auto mb-5">
+      <div className="min-h-screen bg-brand-hero flex items-center justify-center px-4 py-16 on-dark">
+        <div className="bg-white rounded-card p-10 max-w-[560px] w-full text-center shadow-card-hover on-light">
+          <div className="w-16 h-16 rounded-full bg-brand-tint flex items-center justify-center mx-auto mb-5 on-light">
             <Check size={32} className="text-[#7f85f7]" />
           </div>
           <h2 className="font-bold text-[24px] text-[#1a1a2e] mb-3">
             {isConsulting ? "Consultation booked" : "Brief received"}
           </h2>
-          <p className="text-[#555] text-[14px] leading-relaxed mb-4">
+          <p className="text-muted text-[14px] leading-relaxed mb-4">
             {isConsulting
               ? `Hi ${form.firstName}, your free consultation request has been received. We will call you on ${form.phone} within 24 hours to confirm the time.`
               : `Hi ${form.firstName}, your project brief for ${serviceName} has been sent to our team. We will review it and send you an estimated price range within 24 hours.`}
           </p>
 
-          <div className="bg-[#f8f8ff] rounded-[14px] p-5 text-left text-[13px] mb-6">
+          <div className="bg-surface rounded-card p-5 text-left text-[13px] mb-6 on-light">
             <p className="font-bold text-[#1a1a2e] mb-3">What happens next</p>
-            <div className="space-y-3 text-[#555]">
+            <div className="space-y-3 text-muted">
               {(isConsulting
                 ? [
                     { Icon: Mail, text: `Confirmation email sent to ${form.email}` },
@@ -155,7 +155,7 @@ function ITQuoteBrief() {
                   ]
               ).map(({ Icon, text }) => (
                 <div key={text} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-[#eeedfe]">
+                  <span className="mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full bg-brand-tint on-light">
                     <Icon size={10} className="text-[#7f85f7]" />
                   </span>
                   <span className="leading-snug">{text}</span>
@@ -164,7 +164,7 @@ function ITQuoteBrief() {
             </div>
           </div>
 
-          <div className="mb-4 rounded-[14px] border border-[#25D366]/30 bg-[#effbf3] p-5">
+          <div className="mb-4 rounded-card border border-[#25D366]/30 bg-[#effbf3] p-5">
             <p className="text-[14px] font-semibold text-[#1a1a2e]">
               Thanks! Want a faster reply? Chat with us on WhatsApp
             </p>
@@ -176,7 +176,7 @@ function ITQuoteBrief() {
 
           <Link
             href="/services/it-services"
-            className="w-full bg-[#7f85f7] text-white rounded-[10px] h-[48px] flex items-center justify-center font-bold text-[15px] hover:bg-[#6b71f0] transition-all"
+            className="w-full bg-brand-primary text-white rounded-btn h-12 flex items-center justify-center font-semibold text-[15px] hover:bg-brand-hover transition-all"
           >
             Back to IT Services
           </Link>
@@ -203,15 +203,15 @@ function ITQuoteBrief() {
   return (
     <div className="min-h-screen bg-[#f5f5f8]">
       {/* Header */}
-      <div className="bg-[#0d0d1a] py-12">
+      <div className="bg-brand-hero py-12 on-dark">
         <div className="max-w-[760px] mx-auto px-4 text-center">
-          <p className="text-[#7f85f7] text-[11px] font-semibold uppercase tracking-widest mb-3">
+          <p className="text-accent text-[11px] font-semibold uppercase tracking-widest mb-3">
             {IT_BRAND}
           </p>
-          <h1 className="text-white font-bold text-[32px] lg:text-[40px] leading-tight mb-3">
+          <h1 className="text-white mb-3">
             {isConsulting ? "Book a Free Consultation" : "Describe Your Project"}
           </h1>
-          <p className="text-[#9496a8] text-[15px] max-w-[480px] mx-auto">
+          <p className="text-muted text-[15px] max-w-[480px] mx-auto">
             {isConsulting
               ? "Tell us about your business and technology needs. We will contact you within 24 hours to confirm your free call."
               : "The more detail you provide the more accurate our estimate. Prices shown are guides only — confirmed in your free consultation."}
@@ -221,8 +221,8 @@ function ITQuoteBrief() {
 
       <div className="max-w-[760px] mx-auto px-4 py-10">
         {/* Service selector */}
-        <div className="bg-white rounded-[20px] p-6 mb-5 border border-[#e8e8f0]">
-          <p className="text-[12px] font-bold text-[#666880] uppercase tracking-wider mb-3">
+        <div className="bg-white rounded-card p-6 mb-5 border border-line on-light">
+          <p className="text-[12px] font-bold text-muted uppercase tracking-wider mb-3">
             Which service do you need?
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -233,29 +233,29 @@ function ITQuoteBrief() {
                   key={s.id}
                   type="button"
                   onClick={() => set("service", s.id)}
-                  className={`p-4 rounded-[14px] border-2 text-left transition-all duration-200 ${
+                  className={`p-4 rounded-card border-2 text-left transition-all duration-200 ${
                     active
-                      ? "border-[#7f85f7] bg-[#eeedfe] shadow-[0_8px_24px_rgba(127,133,247,0.15)]"
-                      : "border-[#e8e8f0] hover:border-[#7f85f7] hover:-translate-y-0.5 bg-white"
+                      ? "border-brand-primary bg-brand-tint shadow-card on-light"
+                      : "border-line hover:border-brand-primary hover:-translate-y-0.5 bg-white on-light"
                   }`}
                 >
                   <span
                     className={`mb-3 flex h-10 w-10 items-center justify-center rounded-[11px] transition-colors duration-200 ${
-                      active ? "bg-[#7f85f7] text-white" : "bg-[#f4f4ff] text-[#7f85f7]"
+                      active ? "bg-brand-primary text-white" : "bg-surface text-accent on-light"
                     }`}
                   >
                     <DynamicIcon name={s.iconName} size={19} />
                   </span>
                   <p
                     className={`font-bold text-[13px] leading-tight ${
-                      active ? "text-[#534ab7]" : "text-[#1a1a2e]"
+                      active ? "text-accent" : "text-[#1a1a2e]"
                     }`}
                   >
                     {s.name}
                   </p>
                   <p
                     className={`text-[11px] mt-1 ${
-                      active ? "text-[#7f85f7]" : "text-[#9496a8]"
+                      active ? "text-accent" : "text-muted"
                     }`}
                   >
                     {s.price}
@@ -281,8 +281,8 @@ function ITQuoteBrief() {
         </div>
 
         {/* Contact details */}
-        <div className="bg-white rounded-[20px] p-6 mb-5 border border-[#e8e8f0]">
-          <p className="text-[12px] font-bold text-[#666880] uppercase tracking-wider mb-4">
+        <div className="bg-white rounded-card p-6 mb-5 border border-line on-light">
+          <p className="text-[12px] font-bold text-muted uppercase tracking-wider mb-4">
             Your Contact Details
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -339,11 +339,11 @@ function ITQuoteBrief() {
 
         {/* Project brief — everything except consulting */}
         {!isConsulting && (
-          <div className="bg-white rounded-[20px] p-6 mb-5 border border-[#e8e8f0]">
-            <p className="text-[12px] font-bold text-[#666880] uppercase tracking-wider mb-1">
+          <div className="bg-white rounded-card p-6 mb-5 border border-line on-light">
+            <p className="text-[12px] font-bold text-muted uppercase tracking-wider mb-1">
               Project Brief
             </p>
-            <p className="text-[12px] text-[#9496a8] mb-4">
+            <p className="text-[12px] text-muted mb-4">
               The more detail you give, the more accurate our estimate. There are
               no wrong answers.
             </p>
@@ -418,8 +418,8 @@ function ITQuoteBrief() {
 
         {/* Consulting brief */}
         {isConsulting && (
-          <div className="bg-white rounded-[20px] p-6 mb-5 border border-[#e8e8f0]">
-            <p className="text-[12px] font-bold text-[#666880] uppercase tracking-wider mb-4">
+          <div className="bg-white rounded-card p-6 mb-5 border border-line on-light">
+            <p className="text-[12px] font-bold text-muted uppercase tracking-wider mb-4">
               Tell us about your business
             </p>
             <div>
@@ -436,8 +436,8 @@ function ITQuoteBrief() {
         )}
 
         {/* Budget & timeline */}
-        <div className="bg-white rounded-[20px] p-6 mb-5 border border-[#e8e8f0]">
-          <p className="text-[12px] font-bold text-[#666880] uppercase tracking-wider mb-4">
+        <div className="bg-white rounded-card p-6 mb-5 border border-line on-light">
+          <p className="text-[12px] font-bold text-muted uppercase tracking-wider mb-4">
             {isConsulting ? "Availability" : "Budget & Timeline"}
           </p>
 
@@ -504,7 +504,7 @@ function ITQuoteBrief() {
         </div>
 
         {/* How did you hear */}
-        <div className="bg-white rounded-[20px] p-6 mb-6 border border-[#e8e8f0]">
+        <div className="bg-white rounded-card p-6 mb-6 border border-line on-light">
           <label htmlFor="brief-hearAboutUs" className={lbl}>How did you hear about us?</label>
           <select id="brief-hearAboutUs"
             value={form.hearAboutUs}
@@ -524,7 +524,7 @@ function ITQuoteBrief() {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-[12px] p-4 mb-4">
+          <div className="bg-red-50 border border-red-200 rounded-card p-4 mb-4">
             <p className="text-red-600 text-[13px] font-medium">{error}</p>
           </div>
         )}
@@ -534,7 +534,7 @@ function ITQuoteBrief() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="w-full bg-[#7f85f7] text-white rounded-[12px] h-[58px] font-bold text-[16px] hover:bg-[#6b71f0] disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
+          className="w-full bg-brand-primary text-white rounded-btn h-12 font-semibold text-[16px] hover:bg-brand-hover disabled:bg-[#b0bec5] transition-all flex items-center justify-center gap-2"
         >
           {submitting ? (
             <>
@@ -550,13 +550,13 @@ function ITQuoteBrief() {
           )}
         </button>
 
-        <p className="text-[12px] text-[#9496a8] text-center mt-4">
+        <p className="text-[12px] text-muted text-center mt-4">
           No spam. No obligation. We respond within 24 hours.
           <br />
           Questions? Call{" "}
           <a
             href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
-            className="text-[#7f85f7] font-semibold"
+            className="text-accent font-semibold"
           >
             {SITE_PHONE}
           </a>{" "}

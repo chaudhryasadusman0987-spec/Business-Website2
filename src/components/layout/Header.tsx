@@ -3,33 +3,22 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  Menu,
-  X,
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Mail,
-  Newspaper,
-  Phone,
-  Clock,
-  Home,
-  Info,
-  ArrowRight,
-} from "lucide-react"
+import { Menu, X, ChevronDown, Phone, Mail, ArrowRight } from "lucide-react"
+import { buttonClass } from "@/components/ui/Button"
 import {
   SITE_EMAIL,
   SITE_FULL,
   SITE_HOURS,
   SITE_NAME,
-  SITE_PHONE,
+  SITE_PHONE_HREF,
+  SITE_PHONE_LOCAL,
   SITE_SUFFIX,
 } from "@/data/site"
 
 /* Custom service SVGs — same shapes/colors as the hero cards */
 function CctvIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f57c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f57c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M23 7l-7 5 7 5V7z" />
       <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
       <circle cx="6" cy="12" r="1.5" fill="#f57c00" stroke="none" />
@@ -39,7 +28,7 @@ function CctvIcon() {
 
 function CarIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="1" y="3" width="15" height="13" rx="2" />
       <path d="M16 8h4l3 3v5h-7V8z" />
       <circle cx="5.5" cy="18.5" r="2.5" />
@@ -50,7 +39,7 @@ function CarIcon() {
 
 function MonitorIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7f85f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7f85f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="2" y="3" width="20" height="14" rx="2" />
       <path d="M8 21h8M12 17v4" />
       <path d="M9 9l2 2 4-4" strokeWidth="2.5" />
@@ -58,7 +47,7 @@ function MonitorIcon() {
   )
 }
 
-// `action` is each service's own next step, shown as a chip in the mobile
+// `action` is each service's own next step, shown beside it in the mobile
 // menu: security and IT have quote wizards, car rental has a fleet to browse.
 const serviceItems = [
   {
@@ -87,8 +76,6 @@ const serviceItems = [
   },
 ]
 
-const tel = `tel:${SITE_PHONE.replace(/s/g, "")}`
-
 /**
  * The mobile menu's main button follows the section the visitor is in, so it
  * is always the next step for what they are looking at — not a generic
@@ -101,44 +88,30 @@ function primaryCta(pathname: string): { label: string; href: string } {
     return { label: "Get a free security quote", href: "/services/security-solutions/quote" }
   if (pathname.startsWith("/services/it-services"))
     return { label: "Get a free IT & AI quote", href: "/services/it-services/quote" }
-  return { label: "Get a free quote", href: "/quote" }
+  return { label: "Get a Free Quote", href: "/quote" }
 }
 
-const centerLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-]
-
 /**
- * The logo for the purple surfaces: the navbar and the mobile slide-out panel
- * header, which share the same #7f85f7 background.
- *
- * Uses the light artwork directly, with no white chip behind it. That works
- * here specifically because #7f85f7 is a mid-tone: the white ibex and kangaroo
- * bodies read against it, and so does the dark navy wordmark. It does NOT hold
- * up on the genuinely dark footer (#252525) or heroes (#0f0f18), where that
- * navy wordmark disappears — those keep the BrandLogo lockup instead.
- *
- * Renders pak-oz-logo-light.webp, the trimmed build of the supplied file. The
- * original 1024x1024 canvas is ~21% transparent padding, which would have made
- * the artwork render at roughly half the height it was asked for.
- *
- * Height is capped at 52px inside the 65px bar. The wordmark is stacked three
- * lines deep plus a tagline, so pushing it toward the full bar height leaves no
- * breathing room and turns the tagline to mush.
+ * Navbar logo. The bar is solid navy, and the supplied light artwork has a
+ * dark navy wordmark that would disappear on it — so the whole mark is
+ * rendered white with a CSS filter (brightness-0 flattens it to black, invert
+ * flips that to white). No second image file to keep in sync.
  */
 function NavLogo({ onClick }: { onClick?: () => void }) {
   return (
     <Link
       href="/"
       onClick={onClick}
+      aria-label={`${SITE_FULL} home`}
       className="flex flex-shrink-0 items-center transition-opacity hover:opacity-80"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/pak-oz-logo-light.webp"
         alt={SITE_FULL}
-        className="h-[46px] w-auto object-contain lg:h-[52px]"
+        width={110}
+        height={52}
+        className="h-[44px] w-auto object-contain brightness-0 invert lg:h-[50px]"
         onError={(e) => {
           const img = e.currentTarget
           img.style.display = "none"
@@ -148,7 +121,7 @@ function NavLogo({ onClick }: { onClick?: () => void }) {
       />
       {/* Text fallback — only revealed if the artwork fails to load. */}
       <span className="hidden flex-col leading-none">
-        <span className="text-[18px] font-extrabold uppercase tracking-[-0.01em] text-white">
+        <span className="font-heading text-[18px] font-bold uppercase tracking-[-0.01em] text-white">
           {SITE_NAME}
         </span>
         <span className="mt-[3px] text-[9.5px] font-semibold uppercase tracking-[0.225em] text-white/70">
@@ -165,6 +138,11 @@ export default function Header() {
   const cta = primaryCta(pathname)
   const close = () => setOpen(false)
 
+  // Navigating always closes the menu, including via the browser back button.
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
   // While the menu is open the page behind it must not scroll, and Escape
   // closes it like any other dialog.
   useEffect(() => {
@@ -179,244 +157,181 @@ export default function Header() {
     }
   }, [open])
 
-  const rowClass = (active: boolean) =>
-    `flex items-center gap-3 px-4 h-[52px] text-[15px] transition-colors ${
-      active ? "text-[#534ab7] font-semibold bg-[#f4f4ff]" : "text-[#1a1a2e] font-medium active:bg-[#f4f4ff]"
-    }`
+  // Desktop link: purple underline on hover and for the current page — no
+  // background blocks.
+  const navLink = (active: boolean) =>
+    `relative inline-flex h-10 items-center text-[15px] font-medium text-white transition-colors ` +
+    `after:absolute after:inset-x-0 after:bottom-1 after:h-[2px] after:origin-left after:bg-brand-primary ` +
+    `after:transition-transform after:duration-200 hover:after:scale-x-100 ` +
+    (active ? "after:scale-x-100" : "after:scale-x-0")
 
-  const navLinkClass = (active: boolean) =>
-    `text-white text-[14px] font-medium px-4 py-2 rounded-md transition-all duration-200 ${
-      active ? "bg-white/20 font-semibold" : "hover:bg-white/15"
-    }`
+  // Mobile row: full width, 48px touch target.
+  const mobileRow = (active: boolean) =>
+    `flex min-h-[48px] w-full items-center px-4 sm:px-6 text-[16px] font-medium transition-colors ` +
+    (active ? "text-white bg-white/[0.06]" : "text-white/90 active:bg-white/[0.06]")
+
+  const servicesActive = pathname.startsWith("/services")
 
   return (
     <>
-      <header className="bg-[rgba(127,133,247,0.95)] backdrop-blur-md sticky top-0 z-50 w-full px-6 py-0 h-[65px] flex items-center">
-        <div className="w-full flex items-center justify-between gap-6">
-          {/* LEFT — logo */}
-          <NavLogo />
+      <header className="on-dark sticky top-0 z-[60] h-16 w-full border-b border-white/10 bg-brand-navy lg:h-[72px]">
+        <div className="container-page flex h-full items-center justify-between gap-6">
+          <NavLogo onClick={close} />
 
-          {/* CENTER — nav links (desktop only) */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {centerLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={navLinkClass(pathname === link.href)}>
-                {link.label}
-              </Link>
-            ))}
+          {/* Desktop nav */}
+          <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
+            <Link href="/" className={navLink(pathname === "/")}>
+              Home
+            </Link>
+            <Link href="/about" className={navLink(pathname === "/about")}>
+              About
+            </Link>
 
-            {/* Services dropdown */}
-            <div className="relative group inline-block">
+            {/* Services dropdown — opens on hover and on keyboard focus */}
+            <div className="group relative">
               <Link
                 href="/#services"
-                className={`${navLinkClass(pathname.startsWith("/services"))} flex items-center gap-1`}
+                aria-haspopup="true"
+                className={`${navLink(servicesActive)} gap-1`}
               >
                 Services
-                <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                <ChevronDown
+                  size={14}
+                  aria-hidden="true"
+                  className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                />
               </Link>
 
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-[12px] shadow-xl border border-gray-100 py-2 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                {serviceItems.map((item, i) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f4f4ff] transition-colors duration-150 cursor-pointer group/item ${
-                      i < serviceItems.length - 1 ? "border-b border-gray-50" : ""
-                    }`}
-                  >
-                    <span className={`w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0 ${item.iconBg}`}>
-                      {item.icon}
-                    </span>
-                    <span>
-                      <span className="block text-[13px] font-semibold text-[#1a1a2e]">{item.title}</span>
-                      <span className="block text-[11px] text-gray-400 mt-0.5">{item.sub}</span>
-                    </span>
-                  </Link>
-                ))}
+              <div className="on-light invisible absolute left-1/2 top-full z-50 w-[300px] -translate-x-1/2 pt-3 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div className="overflow-hidden rounded-card border border-line bg-white py-2 shadow-card-hover">
+                  {serviceItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface"
+                    >
+                      <span className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${item.iconBg}`}>
+                        {item.icon}
+                      </span>
+                      <span>
+                        <span className="block text-[14px] font-semibold text-ink">{item.title}</span>
+                        <span className="mt-0.5 block text-[12px] text-muted">{item.sub}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* Testimonials intentionally not linked here until there are real
+                reviews to show. The /testimonials page still exists. */}
+            <Link href="/blog" className={navLink(pathname.startsWith("/blog"))}>
+              Blog
+            </Link>
+            <Link href="/contact" className={navLink(pathname.startsWith("/contact"))}>
+              Contact
+            </Link>
           </nav>
 
-          {/* RIGHT — plus menu + Get Quote + mobile hamburger */}
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Plus icon menu (desktop only) */}
-            <div className="relative group hidden lg:inline-block">
-              <button
-                aria-label="More links"
-                className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 transition-all flex items-center justify-center"
-              >
-                <Plus size={18} className="text-white" />
-              </button>
-
-              <div className="absolute top-full right-0 mt-1 bg-white rounded-[12px] shadow-xl border border-gray-100 py-2 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                {/* Testimonials intentionally not linked here until there are
-                    real reviews to show. The /testimonials page still exists. */}
-                <Link
-                  href="/blog"
-                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f4ff] transition-colors"
-                >
-                  <Newspaper size={14} className="text-[#7f85f7]" />
-                  <span className="text-[13px] font-medium text-[#1a1a2e]">Blog</span>
-                </Link>
-                <Link
-                  href="/contact"
-                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f4ff] transition-colors"
-                >
-                  <Mail size={14} className="text-[#7f85f7]" />
-                  <span className="text-[13px] font-medium text-[#1a1a2e]">Contact Us</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Open menu"
-              className="lg:hidden text-white hover:text-white/70 transition-colors"
+          {/* Right — phone + CTA (desktop), menu button (mobile) */}
+          <div className="flex shrink-0 items-center gap-5">
+            <a
+              href={SITE_PHONE_HREF}
+              className="hidden items-center gap-2 text-[15px] font-semibold text-white transition-colors hover:text-on-dark-muted lg:inline-flex"
             >
-              <Menu size={28} />
+              <Phone size={16} aria-hidden="true" className="text-brand-primary" />
+              {SITE_PHONE_LOCAL}
+            </a>
+            <Link href="/quote" className={buttonClass("primary", "dark", "hidden h-11 px-5 lg:inline-flex")}>
+              Get a Free Quote
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              className="-mr-2 flex h-12 w-12 items-center justify-center rounded-btn text-white lg:hidden"
+            >
+              {open ? <X size={26} /> : <Menu size={26} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Overlay (mobile slide-out) */}
+      {/* Mobile menu — slides down from under the bar and fills the screen. */}
       <div
-        onClick={close}
-        className={`fixed inset-0 bg-[#0d0d1a]/60 backdrop-blur-[2px] z-[9998] transition-opacity duration-300 lg:hidden ${
-          open ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* Slide-out panel (mobile). Purple header to match the bar, light body
-          so the services read as cards rather than one long purple list. */}
-      <nav
+        id="mobile-menu"
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
         aria-hidden={!open}
-        className={`fixed top-0 right-0 h-[100dvh] w-[340px] max-w-[88vw] bg-[#f7f7fb] shadow-2xl z-[9999] flex flex-col transition-transform duration-300 ease-out lg:hidden ${
-          open ? "translate-x-0" : "translate-x-full"
+        className={`on-dark fixed inset-x-0 bottom-0 top-16 z-[9998] flex flex-col bg-brand-navy transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none lg:hidden ${
+          open ? "visible translate-y-0 opacity-100" : "invisible -translate-y-3 opacity-0"
         }`}
       >
-        {/* Panel header — matches the navbar bar */}
-        <div className="flex items-center justify-between pl-5 pr-4 h-[65px] bg-[#7f85f7] flex-shrink-0">
-          <NavLogo onClick={close} />
-          <button
-            onClick={close}
-            aria-label="Close menu"
-            className="w-10 h-10 rounded-full bg-white/15 active:bg-white/25 flex items-center justify-center text-white"
-          >
-            <X size={22} />
-          </button>
-        </div>
+        <nav aria-label="Mobile" className="flex-1 overflow-y-auto overscroll-contain py-3">
+          <Link href="/" onClick={close} className={mobileRow(pathname === "/")}>
+            Home
+          </Link>
+          <Link href="/about" onClick={close} className={mobileRow(pathname === "/about")}>
+            About
+          </Link>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5">
-          {/* Primary pages */}
-          <div className="bg-white rounded-[14px] border border-[#ececf4] overflow-hidden divide-y divide-[#f0f0f6]">
-            {[
-              { label: "Home", href: "/", Icon: Home },
-              { label: "About us", href: "/about", Icon: Info },
-            ].map(({ label, href, Icon }) => (
-              <Link key={href} href={href} onClick={close} className={rowClass(pathname === href)}>
-                <Icon size={18} className="text-[#7f85f7] flex-shrink-0" />
-                <span className="flex-1">{label}</span>
-                <ChevronRight size={16} className="text-[#c4c6d6]" />
-              </Link>
-            ))}
-          </div>
-
-          {/* Services — each card goes to the service, the chip to its next step */}
-          <p className="mt-6 mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9496a8]">
-            Our services
+          <p className="mt-4 px-4 pb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-on-dark-muted sm:px-6">
+            Services
           </p>
-          <div className="flex flex-col gap-2.5">
-            {serviceItems.map((item) => {
-              const active = pathname.startsWith(item.href)
-              return (
-                <div
-                  key={item.href}
-                  className={`bg-white rounded-[14px] border p-3.5 ${
-                    active ? "border-[#7f85f7] shadow-[0_0_0_3px_rgba(127,133,247,0.12)]" : "border-[#ececf4]"
-                  }`}
-                >
-                  <Link href={item.href} onClick={close} className="flex items-center gap-3">
-                    <span className={`w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0 ${item.iconBg}`}>
-                      {item.icon}
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-[15px] font-semibold text-[#1a1a2e] leading-tight">
-                        {item.title}
-                      </span>
-                      <span className="block text-[12px] text-[#9496a8] mt-0.5 truncate">{item.sub}</span>
-                    </span>
-                    <ChevronRight size={16} className="text-[#c4c6d6] flex-shrink-0" />
-                  </Link>
-                  <Link
-                    href={item.action.href}
-                    onClick={close}
-                    className="mt-3 ml-14 inline-flex items-center gap-1 text-[12px] font-semibold text-[#534ab7] bg-[#eeedfe] rounded-full px-3 py-1.5 active:bg-[#e2e0fd]"
-                  >
-                    {item.action.label}
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Secondary pages */}
-          <p className="mt-6 mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9496a8]">
-            More
-          </p>
-          <div className="bg-white rounded-[14px] border border-[#ececf4] overflow-hidden divide-y divide-[#f0f0f6]">
-            {[
-              { label: "Blog", href: "/blog", Icon: Newspaper },
-              { label: "Contact us", href: "/contact", Icon: Mail },
-            ].map(({ label, href, Icon }) => (
-              <Link key={href} href={href} onClick={close} className={rowClass(pathname.startsWith(href))}>
-                <Icon size={18} className="text-[#7f85f7] flex-shrink-0" />
-                <span className="flex-1">{label}</span>
-                <ChevronRight size={16} className="text-[#c4c6d6]" />
+          {serviceItems.map((item) => (
+            <div key={item.href} className="flex items-stretch">
+              <Link
+                href={item.href}
+                onClick={close}
+                className={`${mobileRow(pathname.startsWith(item.href))} flex-1 gap-3`}
+              >
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  {item.icon}
+                </span>
+                {item.title}
               </Link>
-            ))}
-          </div>
-
-          {/* Talk to us — the fastest route for most visitors on a phone */}
-          <div className="mt-6 bg-[#1a1a2e] rounded-[14px] p-4">
-            <p className="text-white font-semibold text-[15px]">Talk to a real person</p>
-            <p className="flex items-center gap-1.5 text-[12px] text-[#9496a8] mt-1">
-              <Clock size={12} /> {SITE_HOURS}
-            </p>
-            <div className="grid grid-cols-2 gap-2.5 mt-3.5">
-              <a
-                href={tel}
-                className="flex items-center justify-center gap-2 h-[44px] rounded-[10px] bg-[#5dcaa5] text-[#0d2a20] text-[14px] font-bold active:opacity-90"
+              <Link
+                href={item.action.href}
+                onClick={close}
+                className="flex min-h-[48px] flex-shrink-0 items-center gap-1 px-4 text-[14px] font-semibold text-accent sm:px-6"
               >
-                <Phone size={16} /> Call
-              </a>
-              <a
-                href={`mailto:${SITE_EMAIL}`}
-                className="flex items-center justify-center gap-2 h-[44px] rounded-[10px] bg-white/10 text-white text-[14px] font-semibold active:bg-white/15"
-              >
-                <Mail size={16} /> Email
-              </a>
+                {item.action.label}
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
             </div>
-            <p className="text-[12px] text-[#767892] mt-3 text-center">{SITE_PHONE}</p>
-          </div>
-        </div>
+          ))}
+
+          <div className="mx-4 my-3 border-t border-white/10 sm:mx-6" />
+
+          <Link href="/blog" onClick={close} className={mobileRow(pathname.startsWith("/blog"))}>
+            Blog
+          </Link>
+          <Link href="/contact" onClick={close} className={mobileRow(pathname.startsWith("/contact"))}>
+            Contact
+          </Link>
+          <a href={SITE_PHONE_HREF} className={`${mobileRow(false)} gap-3`}>
+            <Phone size={18} aria-hidden="true" className="text-brand-primary" />
+            Call {SITE_PHONE_LOCAL}
+          </a>
+          <a href={`mailto:${SITE_EMAIL}`} className={`${mobileRow(false)} gap-3`}>
+            <Mail size={18} aria-hidden="true" className="text-brand-primary" />
+            {SITE_EMAIL}
+          </a>
+          <p className="px-4 pt-2 text-[13px] text-on-dark-muted sm:px-6">{SITE_HOURS}</p>
+        </nav>
 
         {/* CTA — follows the section the visitor is in (see primaryCta) */}
-        <div className="flex-shrink-0 bg-white border-t border-[#ececf4] px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-          <Link
-            href={cta.href}
-            onClick={close}
-            className="flex items-center justify-center gap-2 h-[50px] rounded-[12px] bg-[#7f85f7] text-white font-bold text-[15px] shadow-[0_6px_18px_rgba(127,133,247,0.35)] active:bg-[#6b71f0]"
-          >
+        <div className="flex-shrink-0 border-t border-white/10 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4 sm:px-6">
+          <Link href={cta.href} onClick={close} className={buttonClass("primary", "dark", "w-full")}>
             {cta.label}
-            <ArrowRight size={17} />
+            <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </div>
-      </nav>
+      </div>
     </>
   )
 }

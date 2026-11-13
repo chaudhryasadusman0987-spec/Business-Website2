@@ -37,18 +37,9 @@ export default async function VehiclesPage() {
         )}
       />
       {/* HERO STRIP — dark */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-20 text-center">
-        {/* dot grid */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4">
-          <nav className="text-[13px] text-[#9496a8] mb-5">
+      <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
+        <div className="relative z-10 max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="text-[13px] text-muted mb-5">
             <Link href="/" className="hover:text-white transition-colors">
               Home
             </Link>
@@ -63,10 +54,10 @@ export default async function VehiclesPage() {
             <span className="text-white">Vehicles</span>
           </nav>
 
-          <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.1]">
+          <h1 className="text-white">
             Our Vehicle Fleet
           </h1>
-          <p className="text-[15px] text-[#9496a8] mt-4 max-w-[480px] mx-auto leading-relaxed">
+          <p className="text-[15px] text-muted mt-4 max-w-[480px] mx-auto leading-relaxed">
             Weekly hire, four-week minimum. Roadside assistance and servicing
             are included on every car.
             <HubLink spoke={spoke} />
@@ -84,9 +75,9 @@ export default async function VehiclesPage() {
 
       {/* BOND INFO BOX — continues the grid's background so the strip reads as
           part of the same section */}
-      <section className="bg-[#f5f5f8] pb-[100px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-[16px] p-6 max-w-[700px] mx-auto text-center text-[14px] text-[#185fa5] leading-relaxed">
+      <section className="bg-[#f5f5f8] py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#e6f1fb] border border-[#90caf9] rounded-card p-6 max-w-[700px] mx-auto text-center text-[14px] text-[#185fa5] leading-relaxed">
             💳 The security bond is refunded at the end of the rental. Weekly
             rent is paid in advance and we confirm everything with you by phone
             before the first payment. Questions about a car?{" "}

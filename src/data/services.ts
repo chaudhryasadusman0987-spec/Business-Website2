@@ -53,7 +53,7 @@ export const services: Service[] = [
     id: "car-rental",
     name: "Car Rental",
     description:
-      "Flexible, well-maintained vehicles for every need. Daily and weekly rates with free cancellation.",
+      "Flexible, well-maintained vehicles for every need. Weekly rates with a 4-week minimum, then week-to-week.",
     href: "/services/car-rental",
     iconName: "Car",
     comingSoon: false,

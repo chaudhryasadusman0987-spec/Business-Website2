@@ -22,7 +22,7 @@ export default function WhatsAppButton({
       href={IT_WHATSAPP_LINK}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#25D366] px-8 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe5b] ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-btn bg-[#25D366] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#1ebe5b] ${className}`}
     >
       <WhatsAppIcon size={18} />
       {label}

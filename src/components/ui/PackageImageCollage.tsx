@@ -46,7 +46,7 @@ export default function PackageImageCollage({ items, allProducts, className = ""
 
   if (capped.length === 0) {
     return (
-      <div className={`bg-[#f0f0ff] flex items-center justify-center ${className}`}>
+      <div className={`bg-surface flex items-center justify-center ${className} on-light`}>
         <span className="text-[#c5c8fd] text-[13px]">No product images yet</span>
       </div>
     )
@@ -54,7 +54,7 @@ export default function PackageImageCollage({ items, allProducts, className = ""
 
   return (
     <div
-      className={`relative bg-gradient-to-b from-[#0d0d1a] to-[#1a1a2e] overflow-hidden flex items-center justify-center gap-3 px-4 ${className}`}
+      className={`relative bg-brand-navy overflow-hidden flex items-center justify-center gap-3 px-4 ${className}`}
     >
       {capped.map((tile, i) => (
         <div

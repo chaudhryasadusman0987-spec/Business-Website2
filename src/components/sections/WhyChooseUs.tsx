@@ -1,5 +1,6 @@
 import { ShieldCheck, Globe, Star, Clock } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import SectionTitle from "@/components/ui/SectionTitle"
 
 interface Feature {
   Icon: LucideIcon
@@ -16,7 +17,7 @@ const features: Feature[] = [
   {
     Icon: Globe,
     title: "Brisbane & Southeast QLD",
-    description: "Service and support right across the country.",
+    description: "Service and support across Brisbane and Southeast QLD.",
   },
   {
     Icon: Star,
@@ -30,27 +31,25 @@ const features: Feature[] = [
   },
 ]
 
+// Plain items on the page background — no cards. Sits between two surface
+// sections, so it stays white to keep the alternating rhythm.
 export default function WhyChooseUs() {
   return (
-    <section className="pt-[200px] pb-[100px] bg-brand-primary">
-      <div className="max-w-[1170px] mx-auto px-4">
-        <h2 className="text-[45px] font-bold uppercase text-white text-center mb-16">
-          Why Choose Us
-        </h2>
+    <section className="section bg-white">
+      <div className="container-page">
+        <SectionTitle eyebrow="Why us" title="Why Choose Us" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+        <ul className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {features.map(({ Icon, title, description }) => (
-            <div key={title} className="text-center">
-              <div className="flex justify-center mb-5 text-white">
-                <Icon size={48} />
-              </div>
-              <h3 className="text-white font-bold text-xl mb-2">{title}</h3>
-              <p className="text-white/80 text-[15px] leading-[24px]">
-                {description}
-              </p>
-            </div>
+            <li key={title}>
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
+                <Icon size={22} aria-hidden="true" />
+              </span>
+              <h3 className="mt-4 text-ink">{title}</h3>
+              <p className="mt-2 text-[15px] leading-[1.6] text-muted">{description}</p>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   )
