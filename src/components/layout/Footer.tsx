@@ -2,15 +2,13 @@ import Link from "next/link"
 import BrandLogo from "@/components/ui/BrandLogo"
 import { services } from "@/data/services"
 import {
-  SITE_FULL,
   SITE_TAGLINE,
   SITE_PHONE,
   SITE_EMAIL,
   SITE_ADDRESS,
   SITE_DOMAIN,
-  SITE_COMPANY,
-  SITE_ABN,
-  SITE_ACN,
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
   IT_WHATSAPP_LINK,
   IT_WHATSAPP_LOCAL,
 } from "@/data/site"
@@ -148,23 +146,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-[#444] mt-12 pt-6 text-[14px] text-center">
-          © {year} {SITE_FULL}. All rights reserved.
-          <p className="text-[12px] text-[#666] mt-2">
-            {SITE_COMPANY}
-            {SITE_ABN && (
-              <span
-                className={
-                  SITE_ABN.includes("Pending")
-                    ? "text-[#666880] italic"
-                    : "text-[#9496a8]"
-                }
-              >
-                {" "}
-                · {SITE_ABN}
-              </span>
-            )}{" "}
-            · {SITE_ACN}
-          </p>
+          © {year} {COMPANY_LEGAL_NAME} · ABN {COMPANY_ABN}
         </div>
       </div>
     </footer>

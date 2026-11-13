@@ -1,4 +1,5 @@
 import { PDFDocument, PDFFont, StandardFonts, rgb } from "pdf-lib"
+import { COMPANY_LEGAL_LINE, COMPANY_LEGAL_NAME, COMPANY_ABN, COMPANY_ACN } from "@/data/site"
 
 // Generates the Pak Oz Rentals vehicle lease agreement PDF — used both for a
 // blank agreement (no signature yet) and the finalised, signed copy attached
@@ -111,12 +112,13 @@ export async function generateLeaseAgreementPdf(
 
   // ── HEADER ──
   drawText("PAK OZ RENTALS", { size: 18, font: bold, gapAfter: 2 })
-  drawText("A Pak Oz Solutions Company", { size: 10, gapAfter: 2 })
+  drawText(COMPANY_LEGAL_LINE, { size: 10, gapAfter: 2 })
   drawText("VEHICLE LEASE AGREEMENT", { size: 13, font: bold, gapAfter: 12 })
 
   // ── REGISTERED OWNER ──
   heading("Registered Owner")
-  row("Name:", "Pak Oz Solutions Pty Ltd (trading as Pak Oz Rentals)")
+  row("Name:", `${COMPANY_LEGAL_NAME} (trading as Pak Oz Rentals)`)
+  row("ABN / ACN:", `ABN ${COMPANY_ABN} / ACN ${COMPANY_ACN}`)
   row("Address:", "1 Cedrus St, Sunnybank Hills QLD 4109")
   row("Contact:", "0424 948 512 / +61 480 488 080")
   row("Email:", "pakozsolutions.com.au")
@@ -312,7 +314,7 @@ export async function generateLeaseAgreementPdf(
 
   // ── SIGNATURES ──
   newPageIfNeeded(120)
-  drawText("Owner — Pak Oz Solutions Pty Ltd", {
+  drawText(`Owner — ${COMPANY_LEGAL_LINE}`, {
     size: 10,
     font: bold,
     gapAfter: 30,
@@ -343,6 +345,7 @@ export async function generateLeaseAgreementPdf(
     "Pak Oz Rentals • 0424 948 512 / +61 480 488 080 • pakozsolutions.com.au",
     { size: 8, color: [0.5, 0.5, 0.5] },
   )
+  drawText(COMPANY_LEGAL_LINE, { size: 8, color: [0.5, 0.5, 0.5] })
 
   return pdfDoc.save()
 }

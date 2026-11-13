@@ -5,7 +5,16 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { Phone, Mail, MapPin, ArrowRight, ChevronRight, Check } from "lucide-react"
 import BrandLogo from "@/components/ui/BrandLogo"
-import { SITE_PHONE, SITE_EMAIL, SITE_HOURS, SITE_FULL } from "@/data/site"
+import {
+  SITE_PHONE,
+  SITE_EMAIL,
+  SITE_HOURS,
+  SITE_FULL,
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
+  COMPANY_ACN,
+  COMPANY_OFFICE_LOCALITY,
+} from "@/data/site"
 
 const dotGrid = {
   backgroundImage:
@@ -249,6 +258,13 @@ export default function ContactPage() {
                 read customer reviews
               </Link>
               .
+            </p>
+            <p className="text-[13px] text-[#666666] mt-4 leading-relaxed border-t border-[#e8e8f0] pt-4">
+              <span className="font-semibold text-[#1a1a2e]">{COMPANY_LEGAL_NAME}</span>
+              <br />
+              ABN {COMPANY_ABN} · ACN {COMPANY_ACN}
+              <br />
+              Registered office: {COMPANY_OFFICE_LOCALITY}
             </p>
           </div>
         </div>

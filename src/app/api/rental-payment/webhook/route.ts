@@ -8,7 +8,15 @@ import {
   logRentalEmail,
   upsertDispute,
 } from "@/lib/db"
-import { SITE_EMAIL, SITE_PHONE } from "@/data/site"
+import {
+  SITE_EMAIL,
+  SITE_PHONE,
+  BANK_NAME,
+  BANK_ACCOUNT_NAME,
+  BANK_BSB,
+  BANK_ACCOUNT,
+  BANK_PAYID,
+} from "@/data/site"
 import { escapeHtml as esc } from "@/lib/html"
 
 export const runtime = "nodejs"
@@ -300,11 +308,11 @@ export async function POST(req: Request) {
               <p style="font-size:14px;color:#444;margin:0 0 10px">You can pay via direct bank transfer instead:</p>
               <table style="width:100%">
                 ${[
-                  ["Bank", "Westpac"],
-                  ["Account Name", "Pak Oz Solutions Pty Ltd"],
-                  ["BSB", "034-076"],
-                  ["Account", "841442"],
-                  ["PayID (ABN)", "53700444695"],
+                  ["Bank", BANK_NAME],
+                  ["Account Name", BANK_ACCOUNT_NAME],
+                  ["BSB", BANK_BSB],
+                  ["Account", BANK_ACCOUNT],
+                  ["PayID (ABN)", BANK_PAYID],
                   ["Amount", `$${meta.totalCharged} AUD`],
                   ["Reference", meta.vehicleRego],
                 ]
