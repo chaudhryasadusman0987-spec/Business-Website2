@@ -100,11 +100,14 @@ export function vehicleLabel(name: string, rego?: string | null): string {
 }
 
 /**
- * Bank-transfer reference for a car, derived from the vehicle id — stable,
- * short, and set even for a car with no rego entered. The admin email prints
- * it next to the rego.
+ * Bank-transfer reference for a car: its rego, which is what the owner looks
+ * for on the bank statement. A car with no rego entered yet falls back to a
+ * short code derived from the vehicle id, so there is always something to
+ * quote.
  */
-export function paymentReference(v: Pick<RentalVehicle, "id">): string {
+export function paymentReference(v: Pick<RentalVehicle, "id"> & { rego?: string }): string {
+  const rego = normaliseRego(v.rego ?? "")
+  if (rego) return rego
   const tail = v.id.split("-").pop() ?? v.id
   return `POZ${tail.replace(/[^a-z0-9]/gi, "").toUpperCase()}`
 }

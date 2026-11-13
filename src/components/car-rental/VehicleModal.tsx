@@ -280,8 +280,8 @@ export default function VehicleModal({
   const bondAmountForWeeks = effectiveWeekly * bondWeeks
   const cardTotalToday = effectiveWeekly + bondAmountForWeeks
 
-  // Bank-transfer reference, derived from the vehicle id so it exists even for
-  // a car with no rego entered yet.
+  // Bank-transfer reference: the rego, or an id-based code for a car with no
+  // rego entered yet.
   const payRef = paymentReference(v)
 
   // The specification grid, in reading order down two columns. Blanks render

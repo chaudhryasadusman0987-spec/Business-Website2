@@ -116,10 +116,11 @@ export async function POST(req: Request) {
       : ""
     const vehicleName = get("vehicleName")
     // The rego is read from the database below rather than trusted from the
-    // form, and goes in both the owner's and the customer's email. The bank
-    // transfer still quotes the vehicle's payment reference.
+    // form, and goes in both the owner's and the customer's email. It is also
+    // the bank-transfer reference (see paymentReference), set once the vehicle
+    // has been read below.
     let vehicleRego = ""
-    const paymentRef = get("vehicleId") ? paymentReference({ id: get("vehicleId") }) : "your full name"
+    let paymentRef = get("vehicleId") ? paymentReference({ id: get("vehicleId") }) : "your full name"
 
     // Price the quote from the database rather than from the submitted form —
     // the browser could send anything, and the owner sets the weekly rate in
@@ -136,6 +137,7 @@ export async function POST(req: Request) {
           )
         }
         vehicleRego = vehicle.rego
+        paymentRef = paymentReference(vehicle)
         if (vehicle.weeklyRate > 0) {
           weeklyLabel = `$${vehicle.weeklyRate.toLocaleString("en-AU")} per week`
         }
