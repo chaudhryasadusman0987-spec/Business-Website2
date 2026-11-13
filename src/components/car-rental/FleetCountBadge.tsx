@@ -27,7 +27,7 @@ export default function FleetCountBadge() {
 
   if (!counts) return null
   return (
-    <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent">
+    <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent transition-colors duration-200 group-hover:text-white">
       <span
         className={`w-1.5 h-1.5 rounded-full ${counts.available > 0 ? "bg-[#0f6e56]" : "bg-[#f0ad4e]"}`}
       />

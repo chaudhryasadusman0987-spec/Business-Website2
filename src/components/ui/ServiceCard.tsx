@@ -19,6 +19,8 @@ interface ServiceCardProps {
   tagline?: string
   /** Extra content under the description (e.g. a live availability badge). */
   children?: ReactNode
+  /** Fill the card with brand purple on hover, text turning white. */
+  hoverFill?: boolean
 }
 
 // The one service card: used by the homepage grid and the hub pages. The whole
@@ -36,9 +38,19 @@ export default function ServiceCard({
   fallbackBg,
   tagline,
   children,
+  hoverFill = false,
 }: ServiceCardProps) {
+  // With hoverFill the whole card turns brand purple and its text white.
+  const fill = hoverFill
+  const onFill = fill ? " transition-colors duration-200 group-hover:text-white" : ""
   return (
-    <article className="card card-hover group relative flex h-full w-full flex-col overflow-hidden">
+    <article
+      className={`card card-hover group relative flex h-full w-full flex-col overflow-hidden ${
+        fill
+          ? "transition-[transform,box-shadow,background-color,border-color] hover:border-brand-primary hover:bg-brand-primary"
+          : ""
+      }`}
+    >
       {image && (
         <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-line bg-surface">
           <ImageWithFallback
@@ -54,13 +66,13 @@ export default function ServiceCard({
       )}
 
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="text-ink">{title}</h3>
-        {tagline && <p className="mt-1 text-[13px] font-semibold text-accent">{tagline}</p>}
-        <p className="mt-2 line-clamp-2 text-[15px] leading-[1.6] text-muted">{description}</p>
+        <h3 className={`text-ink${onFill}`}>{title}</h3>
+        {tagline && <p className={`mt-1 text-[13px] font-semibold text-accent${onFill}`}>{tagline}</p>}
+        <p className={`mt-2 line-clamp-2 text-[15px] leading-[1.6] text-muted${onFill}`}>{description}</p>
         {children}
         <Link
           href={href}
-          className="mt-auto inline-flex items-center gap-1.5 pt-5 text-[15px] font-semibold text-accent after:absolute after:inset-0 after:content-['']"
+          className={`mt-auto inline-flex items-center gap-1.5 pt-5 text-[15px] font-semibold text-accent after:absolute after:inset-0 after:content-['']${onFill}`}
         >
           <span className="underline-offset-4 group-hover:underline">{linkLabel}</span>
           <ArrowRight

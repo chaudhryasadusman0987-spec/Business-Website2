@@ -34,6 +34,7 @@ export default function ServicesGrid() {
                 image={service.image}
                 imageAlt={service.imageAlt}
                 fallbackIcon={service.iconName}
+                hoverFill
               >
                 {service.id === "car-rental" && <FleetCountBadge />}
               </ServiceCard>
