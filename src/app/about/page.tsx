@@ -67,7 +67,7 @@ export default function AboutPage() {
       <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
         <div className="relative z-10 max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-center gap-2 text-[12px] text-muted mb-6">
-            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
+            <Link href="/" className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />
@@ -88,8 +88,8 @@ export default function AboutPage() {
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-16 items-center">
           <div className="relative w-full aspect-[4/3] lg:w-[45%] rounded-img overflow-hidden">
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1572021335469-31706a17aaef?auto=format&fit=crop&w=1600&q=80"
-              alt="Our team collaborating in the office"
+              src="/images/about-workspace.jpg"
+              alt="Meeting table in a bright, modern office"
               fill
               sizes="(max-width: 1024px) 100vw, 540px"
               className="object-cover object-center"

@@ -445,7 +445,7 @@ export default async function ITServicesPage() {
               </p>
               <Link
                 href="/services/it-services/quote?service=it-consulting"
-                className="mt-7 inline-flex items-center gap-2 text-[14px] font-semibold text-accent transition-colors hover:text-accent"
+                className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-[14px] font-semibold text-accent transition-colors hover:text-accent"
               >
                 Book the free consultation
                 <ArrowRight size={15} />

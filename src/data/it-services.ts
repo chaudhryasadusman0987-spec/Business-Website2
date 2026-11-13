@@ -137,7 +137,7 @@ export const itServiceItems: ITServiceItem[] = [
       "We build mobile apps that solve real business problems. Customer-facing apps or internal business tools — we design, build and submit to the App Store for you.",
     startingFrom: "From $8,000",
     image:
-      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1600&q=80",
+      "/images/it-services/app-code.jpg",
     imageAlt: "Mobile app development Australia",
     href: "/services/it-services/app-development",
     packages: [
@@ -345,7 +345,7 @@ export const itServices: ITService[] = [
     description:
       "Native and cross-platform mobile apps. From MVP to full product. We handle design, development and App Store submission.",
     iconName: "Smartphone",
-    image: "/images/it-services/app-development.jpg",
+    image: "/images/it-services/app-code.jpg",
     imageAlt: "Mobile app development for iOS and Android",
     detailHref: "/services/it-services/app-development",
     estimatedFrom: 5000,

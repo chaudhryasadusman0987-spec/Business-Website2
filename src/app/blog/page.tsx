@@ -27,7 +27,7 @@ export default function BlogPage() {
 
         <div className="relative z-10 mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <nav className="mb-6 flex items-center justify-center gap-2 text-[12px] text-muted">
-            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
+            <Link href="/" className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />

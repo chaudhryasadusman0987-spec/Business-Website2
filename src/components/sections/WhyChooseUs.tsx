@@ -8,45 +8,48 @@ interface Feature {
   description: string
 }
 
+// Kept short so each item fits a half-width column on a phone.
 const features: Feature[] = [
   {
     Icon: ShieldCheck,
     title: "Licensed & Insured",
-    description: "Fully accredited installers and operators you can trust.",
+    description: "Accredited installers you can trust.",
   },
   {
     Icon: Globe,
-    title: "Brisbane & Southeast QLD",
-    description: "Service and support across Brisbane and Southeast QLD.",
+    title: "Brisbane & SE QLD",
+    description: "Local service and support.",
   },
   {
     Icon: Star,
     title: "Quality Guaranteed",
-    description: "Every job done right the first time — no shortcuts.",
+    description: "Done right the first time.",
   },
   {
     Icon: Clock,
     title: "Fast & Flexible",
-    description: "Quick quotes and same-week service to fit your schedule.",
+    description: "Quick quotes, same-week service.",
   },
 ]
 
-// Plain items on the page background — no cards. Sits between two surface
-// sections, so it stays white to keep the alternating rhythm.
+// Plain items on the page background — no cards. 2×2 on mobile, 4 across on
+// desktop.
 export default function WhyChooseUs() {
   return (
     <section className="section bg-white">
       <div className="container-page">
         <SectionTitle eyebrow="Why us" title="Why Choose Us" />
 
-        <ul className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 lg:mt-12 lg:grid-cols-4 lg:gap-8">
           {features.map(({ Icon, title, description }) => (
             <li key={title}>
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
                 <Icon size={22} aria-hidden="true" />
               </span>
-              <h3 className="mt-4 text-ink">{title}</h3>
-              <p className="mt-2 text-[15px] leading-[1.6] text-muted">{description}</p>
+              <h3 className="mt-3 text-[1.0625rem] text-ink lg:mt-4 lg:text-[1.25rem]">{title}</h3>
+              <p className="mt-1.5 text-[14px] leading-[1.5] text-muted lg:mt-2 lg:text-[15px] lg:leading-[1.6]">
+                {description}
+              </p>
             </li>
           ))}
         </ul>

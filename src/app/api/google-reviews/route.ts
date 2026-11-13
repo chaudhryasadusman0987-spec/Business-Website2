@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server"
-import { fetchGoogleReviews } from "@/lib/googleReviews"
+import { getGoogleReviews } from "@/lib/googleReviews"
 
 // Re-check Google for new reviews at most once an hour.
 export const revalidate = 3600
 
-// Returns the business's Google reviews (or [] if not configured yet).
-// The testimonials page calls this and merges the result into its grid.
+// The business's Google rating and reviews (empty until configured). The
+// pages read getGoogleReviews() directly on the server; this route stays for
+// anything that needs the same data client-side.
 export async function GET() {
-  const reviews = await fetchGoogleReviews()
-  return NextResponse.json({ reviews })
+  const { rating, count, reviews } = await getGoogleReviews()
+  return NextResponse.json({ rating, count, reviews })
 }

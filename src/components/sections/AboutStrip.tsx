@@ -12,8 +12,8 @@ export default function AboutStrip() {
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-img">
             <Image
-              src="/images/about.jpg"
-              alt={`The ${SITE_FULL} team at work`}
+              src="/images/about-workspace.jpg"
+              alt="Meeting table in a bright, modern office"
               fill
               sizes="(max-width: 1024px) 100vw, 568px"
               className="object-cover"

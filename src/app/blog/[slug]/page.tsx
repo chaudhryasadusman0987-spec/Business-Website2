@@ -103,13 +103,13 @@ export default function BlogPostPage({
       <section className="relative overflow-hidden bg-brand-hero on-dark py-16 lg:py-24">
         <div className="relative z-10 mx-auto max-w-[800px] px-4 text-center">
           <nav className="mb-6 flex items-center justify-center gap-2 text-[12px] text-muted">
-            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
+            <Link href="/" className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />
             <Link
               href="/blog"
-              className="inline-block py-1 hover:text-accent transition-colors"
+              className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors"
             >
               Blog
             </Link>

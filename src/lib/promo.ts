@@ -93,8 +93,33 @@ export function buildTickerMessages(config: PromoConfig): string[] {
   ;(Object.keys(CATEGORY_LABELS) as PromoCategory[]).forEach((key) => {
     const c = config[key]
     if (c.active && c.percent > 0) {
-      out.push(`🔥 ${c.percent}% OFF ${CATEGORY_LABELS[key]} — limited time offer!`)
+      out.push(`${c.percent}% OFF ${CATEGORY_LABELS[key]} — limited time offer!`)
     }
   })
   return out
+}
+
+// Where each offer leads, and how it reads in a sentence.
+const PROMO_TARGETS: Record<PromoCategory, { label: string; href: string }> = {
+  carRental: { label: "car rental", href: "/services/car-rental" },
+  security: { label: "security products", href: "/services/security-solutions" },
+  it: { label: "IT & AI services", href: "/services/it-services" },
+}
+
+/**
+ * The single static promo line shown on phones instead of the scrolling
+ * ticker, e.g. "10% off car rental — limited time", with the page it links
+ * to. A custom dashboard message is shown as written, with no link. When
+ * several discounts are active the first of car rental, security, IT is used.
+ */
+export function mobilePromoLine(config: PromoConfig): { text: string; href: string | null } {
+  if (config.message.trim()) return { text: config.message.trim(), href: null }
+  for (const key of ["carRental", "security", "it"] as PromoCategory[]) {
+    const c = config[key]
+    if (c.active && c.percent > 0) {
+      const t = PROMO_TARGETS[key]
+      return { text: `${c.percent}% off ${t.label} — limited time`, href: t.href }
+    }
+  }
+  return { text: "", href: null }
 }

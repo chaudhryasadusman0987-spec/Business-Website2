@@ -6,9 +6,9 @@ import { buttonClass } from "@/components/ui/Button"
 
 type Status = "idle" | "sending" | "done" | "error"
 
-// Footer newsletter sign-up: a labelled email field beside the Subscribe
-// button. Posts to /api/newsletter, which saves the address and notifies the
-// business.
+// Footer newsletter sign-up: label above a 48px email field, Subscribe button,
+// and a reassurance line. Posts to /api/newsletter, which saves the address
+// and notifies the business.
 export default function NewsletterForm() {
   const pathname = usePathname()
   const [email, setEmail] = useState("")
@@ -70,8 +70,8 @@ export default function NewsletterForm() {
           }}
           placeholder="you@example.com"
           aria-invalid={status === "error"}
-          aria-describedby="newsletter-status"
-          className="h-12 min-w-0 flex-1 rounded-input border border-white/20 bg-white/5 px-4 text-[15px] text-white placeholder:text-white/50 focus:border-brand-primary"
+          aria-describedby="newsletter-hint newsletter-status"
+          className="h-12 w-full min-w-0 flex-none rounded-input sm:flex-1 lg:flex-none xl:flex-1 border border-white/40 bg-white/5 px-4 py-0 text-[15px] text-white placeholder:text-white/50 focus:border-brand-primary"
         />
         {/* Honeypot: hidden from people and assistive tech, tempting to bots. */}
         <input
@@ -92,11 +92,14 @@ export default function NewsletterForm() {
           {status === "sending" ? "Subscribing…" : "Subscribe"}
         </button>
       </div>
+      <p id="newsletter-hint" className="mt-2 text-[13px] text-on-dark-muted">
+        No spam. Unsubscribe anytime.
+      </p>
       <p
         id="newsletter-status"
         role="status"
         aria-live="polite"
-        className={`mt-2 min-h-[20px] text-[13px] ${
+        className={`mt-1 min-h-[20px] text-[13px] ${
           status === "error" ? "text-[#fca5a5]" : "text-[#86efac]"
         }`}
       >

@@ -1,42 +1,76 @@
-import type { Testimonial } from "@/data/testimonials"
-
 // ============================================================
 //  GOOGLE BUSINESS PROFILE REVIEWS
-//  Pulls real reviews from your Google Business Profile via the
-//  Google Places API (New) and maps them into the same card
-//  shape used by the manual testimonials.
+//  Reads the rating and reviews straight from Google via the
+//  Places API (New). Server-only. Nothing is stored in our
+//  database: the response is cached by Next for an hour and
+//  that is all.
 //
-//  To switch it ON, set these two env vars (e.g. in .env.local
-//  or your Vercel project settings):
+//  Env (Vercel project settings / .env.local):
+//    GOOGLE_PLACES_API_KEY  Google Cloud API key with Places API (New)
+//    GOOGLE_PLACE_ID        the Business Profile's Place ID
+//    GOOGLE_REVIEW_URL      "write a review" link from the profile
 //
-//    GOOGLE_PLACES_API_KEY = <your Google Cloud API key>
-//    GOOGLE_PLACE_ID       = <your Business Profile Place ID>
-//
-//  Until BOTH are set, this returns [] and the testimonials page
-//  simply shows the manual reviews — no errors, nothing breaks.
-//
-//  Note: Google's API returns at most the 5 most-relevant reviews.
+//  Until the first two are set this returns an empty summary and
+//  the site shows its "be one of our first reviewers" state.
+//  Google's API returns at most the 5 most relevant reviews.
 // ============================================================
 
-interface GooglePlacesReview {
+import { SITE_GOOGLE_REVIEWS_URL } from "@/data/site"
+
+export interface GoogleReview {
+  id: string
+  author: string
+  /** Reviewer's profile photo, when Google provides one. */
+  photo: string
+  rating: number
+  /** e.g. "2 weeks ago" — Google's own wording. */
+  when: string
+  text: string
+}
+
+export interface GoogleReviewSummary {
+  /** Average rating across all Google reviews, or 0 when there are none. */
+  rating: number
+  /** Total number of Google reviews (not just the ones returned). */
+  count: number
+  reviews: GoogleReview[]
+  /** Where "See all reviews on Google" goes. */
+  allReviewsUrl: string
+  /** Where "Leave us a review" goes. */
+  writeReviewUrl: string
+}
+
+interface PlacesReview {
   rating?: number
   text?: { text?: string }
   originalText?: { text?: string }
-  authorAttribution?: {
-    displayName?: string
-    photoUri?: string
-    uri?: string
-  }
+  authorAttribution?: { displayName?: string; photoUri?: string }
   relativePublishTimeDescription?: string
 }
 
-export async function fetchGoogleReviews(): Promise<Testimonial[]> {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY
-  const placeId =
-    process.env.GOOGLE_PLACE_ID || process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID
+interface PlacesResponse {
+  rating?: number
+  userRatingCount?: number
+  reviews?: PlacesReview[]
+  googleMapsUri?: string
+}
 
-  // Not configured yet → no Google reviews; page falls back to manual list.
-  if (!apiKey || !placeId) return []
+function links(): Pick<GoogleReviewSummary, "allReviewsUrl" | "writeReviewUrl"> {
+  return {
+    allReviewsUrl: SITE_GOOGLE_REVIEWS_URL,
+    // Falls back to the public profile link until GOOGLE_REVIEW_URL is set.
+    writeReviewUrl: process.env.GOOGLE_REVIEW_URL || SITE_GOOGLE_REVIEWS_URL,
+  }
+}
+
+const EMPTY = (): GoogleReviewSummary => ({ rating: 0, count: 0, reviews: [], ...links() })
+
+export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY
+  const placeId = process.env.GOOGLE_PLACE_ID || process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID
+
+  // Not configured yet → empty; callers show the "we're new" state.
+  if (!apiKey || !placeId) return EMPTY()
 
   try {
     const res = await fetch(
@@ -44,46 +78,39 @@ export async function fetchGoogleReviews(): Promise<Testimonial[]> {
       {
         headers: {
           "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask": [
-            "reviews.rating",
-            "reviews.text",
-            "reviews.originalText",
-            "reviews.authorAttribution",
-            "reviews.relativePublishTimeDescription",
-          ].join(","),
+          "X-Goog-FieldMask": "rating,userRatingCount,reviews,googleMapsUri",
         },
-        // Cache 1h: Google's terms allow limited caching, and this keeps us
-        // well under quota instead of calling the API on every page view.
+        // Re-check Google at most once an hour.
         next: { revalidate: 3600 },
-      }
+      },
     )
+    if (!res.ok) return EMPTY()
 
-    if (!res.ok) return []
+    const data = (await res.json()) as PlacesResponse
+    const reviews = (data.reviews ?? [])
+      .map((r, i): GoogleReview => ({
+        id: `google-${i}`,
+        author: r.authorAttribution?.displayName ?? "Google user",
+        photo: r.authorAttribution?.photoUri ?? "",
+        rating: Math.max(0, Math.min(5, Math.round(r.rating ?? 0))),
+        when: r.relativePublishTimeDescription ?? "",
+        text: (r.text?.text ?? r.originalText?.text ?? "").trim(),
+      }))
+      .filter((r) => r.text.length > 0 && r.rating > 0)
 
-    const data = (await res.json()) as { reviews?: GooglePlacesReview[] }
-    const reviews = data.reviews ?? []
+    const count = data.userRatingCount ?? 0
+    const rating = data.rating ?? 0
+    // A rating without a single review to show is not worth claiming.
+    if (count === 0 || rating === 0) return EMPTY()
 
-    return reviews
-      .map((r, i): Testimonial => {
-        const text = r.text?.text ?? r.originalText?.text ?? ""
-        return {
-          id: `google-${i}`,
-          name: r.authorAttribution?.displayName ?? "Google user",
-          suburb: "", // Google reviews don't expose reviewer location
-          state: "",
-          rating: r.rating ?? 5,
-          text,
-          service: "Google Review",
-          serviceIcon: "⭐",
-          serviceColor: "#4285F4",
-          date: r.relativePublishTimeDescription ?? "",
-          image: r.authorAttribution?.photoUri ?? "",
-          verified: true,
-        }
-      })
-      .filter((t) => t.text.trim().length > 0)
+    return { rating, count, reviews, ...links() }
   } catch {
-    // Network/API failure → degrade gracefully to manual testimonials.
-    return []
+    // Network/API failure → degrade to the empty state, never an error page.
+    return EMPTY()
   }
+}
+
+/** True when there is at least one real review to show. */
+export function hasReviews(s: GoogleReviewSummary): boolean {
+  return s.count > 0 && s.reviews.length > 0
 }
