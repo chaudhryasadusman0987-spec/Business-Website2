@@ -57,18 +57,19 @@ export default function SecuritySolutionsPage() {
       <SecuritySolutionsHero />
 
       {/* Solutions grid */}
-      <section id="solutions" className="bg-[#fefefd] pt-[100px] pb-[80px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section id="solutions" className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             title="Our Solutions"
             subtitle="Click any solution to explore products and pricing"
+            eyebrow="What we install"
           />
           <HubIntro
             hub="security"
-            className="text-[15px] text-[#666] leading-[1.8] text-center max-w-[820px] mx-auto mt-6"
+            className="text-[15px] text-muted leading-[1.8] text-center max-w-[820px] mx-auto mt-6"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
             {securitySolutions.map((solution, index) => (
               <AnimateIn
                 key={solution.id}
@@ -90,17 +91,15 @@ export default function SecuritySolutionsPage() {
       <HowItWorks />
 
       {/* Areas We Service — suburb coverage for local SEO */}
-      <section className="bg-[#fefefd] py-[60px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <h2 className="font-bold text-[24px] text-[#1a1a2e] text-center mb-8">
-            Areas We Service
-          </h2>
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-ink text-center mb-8">Areas We Service</h2>
           <div className="flex flex-wrap justify-center gap-3 mb-6">
             {serviceAreas.map((a) => (
               <Link
                 key={a.slug}
                 href={`/services/security-solutions/areas/${a.slug}`}
-                className="bg-[#7f85f7] text-white font-semibold rounded-full px-5 py-2 text-[14px] hover:bg-[#6a70e6] transition-all"
+                className="bg-brand-primary text-white font-semibold rounded-full px-5 py-2 text-[14px] hover:bg-brand-hover transition-all"
               >
                 CCTV Installation {a.headline}
               </Link>
@@ -110,7 +109,7 @@ export default function SecuritySolutionsPage() {
             {serviceSuburbs.map((suburb) => (
               <span
                 key={suburb}
-                className="bg-white border border-[#e8e8f0] rounded-full px-4 py-2 text-[13px] text-[#444] hover:border-[#7f85f7] hover:text-[#7f85f7] transition-all"
+                className="bg-white border border-line rounded-full px-4 py-2 text-[13px] text-muted hover:border-brand-primary hover:text-accent transition-all on-light"
               >
                 {suburb}
               </span>
@@ -120,15 +119,15 @@ export default function SecuritySolutionsPage() {
       </section>
 
       {/* Leave us a Google review CTA */}
-      <section className="bg-[#7f85f7] py-[60px] text-center">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <h2 className="text-white font-bold text-[28px]">
+      <section className="bg-surface on-light text-center py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-ink">
             Happy with our service?
           </h2>
-          <p className="text-white/80 text-[15px] mt-3 mb-8 max-w-[560px] mx-auto">
+          <p className="text-muted mt-4 mb-8 max-w-[560px] mx-auto">
             Leave us a Google review and help other Brisbane families find
             quality security installation. Or{" "}
-            <Link href="/testimonials" className="text-white underline underline-offset-2 hover:text-white/80">
+            <Link href="/testimonials" className="text-accent font-medium underline underline-offset-2">
               read what our customers say
             </Link>
             .
@@ -139,11 +138,11 @@ export default function SecuritySolutionsPage() {
             href={SITE_GOOGLE_REVIEW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center bg-white text-[#7f85f7] font-bold rounded-[8px] h-[52px] px-8 hover:bg-white/90 transition-all"
+            className="inline-flex items-center justify-center border border-line bg-white text-ink font-semibold rounded-btn h-12 px-6 hover:border-ink transition-colors on-light"
           >
             ⭐ Find Us on Google
           </a>
-          <p className="text-[12px] text-white/60 text-center mt-2">
+          <p className="text-[13px] text-muted text-center mt-3">
             Search for us on Google and click &quot;Write a review&quot;
           </p>
         </div>

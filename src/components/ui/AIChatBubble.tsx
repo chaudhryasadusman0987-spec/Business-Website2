@@ -101,11 +101,11 @@ export default function AIChatBubble() {
               aria-label={`Chat on WhatsApp ${IT_WHATSAPP_LOCAL}`}
               className="group fixed bottom-[168px] right-6 z-50 flex items-center gap-3"
             >
-              <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-[#1a1a2e] text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-lg whitespace-nowrap items-center gap-2 pointer-events-none">
+              <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-brand-navy text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-card-hover whitespace-nowrap items-center gap-2 pointer-events-none on-dark">
                 <span className="text-[#25D366]">●</span>
                 WhatsApp {IT_WHATSAPP_LOCAL}
               </div>
-              <div className="w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center hover:bg-[#1ebe5b] hover:scale-110 transition-all duration-300 shadow-[0_4px_20px_rgba(37,211,102,0.4)]">
+              <div className="w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center hover:bg-[#1ebe5b] transition-colors duration-200 shadow-card-hover">
                 <WhatsAppIcon size={28} />
               </div>
             </a>
@@ -118,14 +118,14 @@ export default function AIChatBubble() {
             className="group fixed bottom-24 right-6 z-50 flex items-center gap-3"
           >
             {/* Tooltip — shows on hover desktop */}
-            <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-[#1a1a2e] text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-lg whitespace-nowrap items-center gap-2 pointer-events-none">
+            <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-brand-navy text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-card-hover whitespace-nowrap items-center gap-2 pointer-events-none on-dark">
               <span className="text-[#5dcaa5]">●</span>
               {SITE_PHONE}
               <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 border-[6px] border-transparent border-l-[#1a1a2e]" />
             </div>
 
             {/* Green phone circle button */}
-            <div className="w-[56px] h-[56px] rounded-full bg-[#22c55e] shadow-lg flex items-center justify-center hover:bg-[#16a34a] hover:scale-110 transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)]">
+            <div className="w-[56px] h-[56px] rounded-full bg-[#22c55e] shadow-card-hover flex items-center justify-center hover:bg-[#16a34a] transition-colors duration-200">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                 <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C9.6 21 3 14.4 3 6c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
               </svg>
@@ -137,7 +137,7 @@ export default function AIChatBubble() {
           <button
             onClick={openPanel}
             aria-label="Open chat"
-            className="relative w-[60px] h-[60px] rounded-full bg-brand-primary text-white flex items-center justify-center cursor-pointer shadow-[0_4px_20px_rgba(127,133,247,0.4)]"
+            className="relative w-[60px] h-[60px] rounded-full bg-brand-primary text-white flex items-center justify-center cursor-pointer shadow-card-hover"
           >
           {showPulse && (
             <span className="animate-ping absolute inset-0 rounded-full bg-brand-primary opacity-30" />
@@ -168,9 +168,9 @@ export default function AIChatBubble() {
           </div>
         </>
       ) : (
-        <div className="w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-white rounded-[16px] shadow-2xl flex flex-col overflow-hidden">
+        <div className="w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-white rounded-card shadow-card-hover flex flex-col overflow-hidden on-light">
           {/* Header */}
-          <div className="bg-brand-dark rounded-t-[16px] px-4 py-3 flex items-center justify-between">
+          <div className="bg-brand-dark rounded-t-card px-4 py-3 flex items-center justify-between">
             <span className="text-white font-semibold text-sm">{SITE_FULL}</span>
             <button
               onClick={() => setIsOpen(false)}
@@ -188,15 +188,15 @@ export default function AIChatBubble() {
                 key={i}
                 className={
                   m.role === "assistant"
-                    ? "self-start bg-[#f7f7f7] text-[#2f2f2f] rounded-2xl rounded-tl-none px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap"
-                    : "self-end bg-brand-primary text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap"
+                    ? "self-start bg-surface text-[#2f2f2f] rounded-card rounded-tl-none px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap on-light"
+                    : "self-end bg-brand-primary text-white rounded-card rounded-tr-none px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap"
                 }
               >
                 {m.content}
               </div>
             ))}
             {isLoading && (
-              <div className="self-start bg-[#f7f7f7] rounded-2xl px-4 py-3">
+              <div className="self-start bg-surface rounded-card px-4 py-3 on-light">
                 <span className="dot" />
                 <span className="dot" />
                 <span className="dot" />

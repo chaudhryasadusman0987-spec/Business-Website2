@@ -8,7 +8,8 @@ import Price from "@/components/ui/Price"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import WhatsAppButton from "@/components/ui/WhatsAppButton"
 import type { ITServiceItem } from "@/data/it-services"
-import { IT_BRAND } from "@/data/site"
+import Button from "@/components/ui/Button"
+import { IT_BRAND, SITE_PHONE_HREF, SITE_PHONE_LOCAL } from "@/data/site"
 import JsonLd, { breadcrumbJsonLd } from "@/components/seo/JsonLd"
 import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpokeByHref, hubs, serviceCrumbs } from "@/data/internal-links"
@@ -37,113 +38,90 @@ export default function ITServiceDetail({
     <>
       <JsonLd data={breadcrumbJsonLd(serviceCrumbs("it", { name: service.name, href }))} />
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a]">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div
-          className="absolute z-0 w-[500px] h-[500px] rounded-full top-[-120px] right-[-60px] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(127,133,247,0.2) 0%, transparent 65%)",
-          }}
-        />
+      <section className="relative overflow-hidden bg-brand-hero on-dark">
 
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4 py-20 lg:py-28 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        <div className="container-page relative grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:py-24">
           {/* LEFT */}
-          <div className="flex-1">
-            <nav className="flex items-center gap-2 text-[12px] text-[#666880] mb-4">
-              <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
+          <div>
+            <nav className="flex items-center gap-2 text-[12px] text-muted mb-4">
+              <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
                 Home
               </Link>
               <ChevronRight size={12} />
               <Link
                 href="/services/it-services"
-                className="inline-block py-1 hover:text-[#7f85f7] transition-colors"
+                className="inline-block py-1 hover:text-accent transition-colors"
               >
                 IT &amp; AI Services
               </Link>
               <ChevronRight size={12} />
-              <span className="text-[#9496a8]">{service.name}</span>
+              <span className="text-muted">{service.name}</span>
             </nav>
 
             {/* Sub-brand first, service second — same pill as the IT landing
                 page hero. The breadcrumb above stays "IT & AI Services"
                 because that's navigation, not branding. */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 bg-[rgba(127,133,247,0.15)] border border-[rgba(127,133,247,0.3)] text-[#a5a8ff] text-[11px] font-semibold rounded-full px-4 py-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7f85f7] animate-pulse" />
-                {IT_BRAND}
-              </span>
-              <span className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-[#c9cbd8] text-[11px] rounded-full px-4 py-1.5">
-                {service.name}
-              </span>
-            </div>
+            <p className="eyebrow">
+              {IT_BRAND} · {service.name}
+            </p>
 
-            <h1 className="font-extrabold text-[40px] lg:text-[60px] leading-[1.1] mt-6">
+            <h1 className="mt-4">
               <span className="block text-white">{headlineWhite}</span>
-              <span className="block text-[#7f85f7]">{headlinePurple}</span>
+              <span className="block text-brand-primary">{headlinePurple}</span>
             </h1>
 
-            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-4">
+            <p className="lead mt-5 max-w-[560px]">
               {service.longDescription}
               <HubLink spoke={spoke} />
             </p>
 
-            <Link
-              href="/services/it-services/quote"
-              className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-semibold mt-8 hover:bg-[#6b71f0] transition-all"
-            >
-              Get a Free Quote
-            </Link>
-            <WhatsAppButton className="h-[52px] mt-8 rounded-[8px] sm:ml-3" />
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Button href="/services/it-services/quote" variant="primary" tone="dark">
+                Get a Free Quote
+              </Button>
+              <Button href={SITE_PHONE_HREF} variant="secondary" tone="dark">
+                Call {SITE_PHONE_LOCAL}
+              </Button>
+              <WhatsAppButton className="h-12 text-[15px]" />
+            </div>
+            {floatingBadge && (
+              <p className="mt-5 flex items-center gap-2.5 text-[14px] text-muted">
+                <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#5dcaa5]" />
+                <span>
+                  <span className="font-semibold text-white">{floatingBadge.title}</span>
+                  {" · "}
+                  {floatingBadge.sub}
+                </span>
+              </p>
+            )}
           </div>
 
           {/* RIGHT — image */}
-          <div className="lg:w-[45%] w-full relative">
-            <div className="relative w-full h-[420px] lg:h-[480px] rounded-[24px] overflow-hidden">
-              <ImageWithFallback
-                src={service.image}
-                alt={service.imageAlt}
-                fill
-                className="object-cover object-center"
-                fallbackBg={service.iconBg}
-                priority
-              />
-            </div>
-            {floatingBadge && (
-              <div className="absolute bottom-5 left-5 bg-black/55 backdrop-blur border border-white/15 rounded-[12px] px-4 py-3 flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#5dcaa5] animate-pulse" />
-                <span>
-                  <span className="block text-white font-semibold text-[14px]">
-                    {floatingBadge.title}
-                  </span>
-                  <span className="block text-[#5dcaa5] text-[11px]">
-                    {floatingBadge.sub}
-                  </span>
-                </span>
-              </div>
-            )}
+          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5]">
+            <ImageWithFallback
+              src={service.image}
+              alt={service.imageAlt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 440px"
+              className="object-cover object-center"
+              fallbackBg={service.iconBg}
+              priority
+            />
           </div>
         </div>
       </section>
 
       {/* ── FEATURES STRIP ── */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[60px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {service.features.map((f) => (
-              <div key={f.title} className="text-center">
-                <div className="flex justify-center text-brand-primary mb-4">
-                  <DynamicIcon name={f.icon} size={40} />
-                </div>
-                <h3 className="font-bold text-[#1a1a2e]">{f.title}</h3>
-                <p className="text-gray-500 text-[13px] mt-1">{f.description}</p>
+              <div key={f.title}>
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
+                  <DynamicIcon name={f.icon} size={22} />
+                </span>
+                <h3 className="mt-4 text-ink">{f.title}</h3>
+                <p className="mt-2 text-[15px] leading-[1.6] text-muted">{f.description}</p>
               </div>
             ))}
           </div>
@@ -151,18 +129,18 @@ export default function ITServiceDetail({
       </section>
 
       {/* ── PACKAGES GRID ── */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[100px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             title={packagesTitle}
             subtitle="Fixed prices · No hidden costs"
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-12">
             {service.packages.map((pkg) => (
               <div
                 key={pkg.id}
-                className="bg-white border border-[#e8e8f0] rounded-[24px] p-8 relative hover:border-brand-primary hover:shadow-xl transition-all duration-300"
+                className="card card-hover relative p-6 on-light"
               >
                 {pkg.badge && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-primary text-white text-[10px] font-bold px-4 py-1 rounded-full">
@@ -170,27 +148,25 @@ export default function ITServiceDetail({
                   </span>
                 )}
 
-                <h3 className="font-bold text-[22px] text-[#1a1a2e]">
-                  {pkg.name}
-                </h3>
-                <p className="text-gray-500 text-[14px] mt-1">
+                <h3 className="text-ink">{pkg.name}</h3>
+                <p className="text-muted text-[14px] mt-1">
                   {pkg.description}
                 </p>
 
-                <div className="text-[32px] font-extrabold text-brand-primary mt-6">
+                <div className="text-[32px] font-bold text-accent mt-6">
                   {pkg.startingFromValue > 0 ? (
                     <Price
                       amount={pkg.startingFromValue}
                       category="it"
                       prefix="From "
-                      className="text-[32px] font-extrabold text-brand-primary"
+                      className="text-[32px] font-bold text-accent"
                     />
                   ) : (
                     pkg.startingFrom
                   )}
                 </div>
 
-                <div className="w-full h-px bg-[#e8e8f0] my-6" />
+                <div className="w-full h-px bg-line my-6" />
 
                 <ul className="flex flex-col gap-3">
                   {pkg.features.map((feat) => (
@@ -207,7 +183,7 @@ export default function ITServiceDetail({
 
                 <Link
                   href="/services/it-services/quote"
-                  className="flex items-center justify-center w-full mt-8 bg-brand-primary text-white rounded-[10px] h-[52px] font-semibold hover:bg-[#6b71f0] transition-all"
+                  className="flex items-center justify-center w-full mt-8 bg-brand-primary text-white rounded-btn h-12 font-semibold hover:bg-brand-hover transition-all"
                 >
                   Get a Quote
                 </Link>
@@ -221,21 +197,17 @@ export default function ITServiceDetail({
       {extra}
 
       {/* ── PROCESS ── */}
-      <section className="bg-brand-primary pt-[100px] pb-[100px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <h2 className="text-[45px] font-bold text-white uppercase leading-tight text-center">
-            How We Work
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
+      <section className="bg-white py-14 lg:py-20 on-light">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="The process" title="How We Work" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
             {service.process.map((p) => (
-              <div key={p.step} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/30 text-white font-bold text-[22px] mx-auto mb-4 flex items-center justify-center">
+              <div key={p.step}>
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint font-heading text-[16px] font-bold text-accent">
                   {p.step}
-                </div>
-                <h3 className="text-white font-bold text-[16px]">{p.title}</h3>
-                <p className="text-white/75 text-[13px] mt-2 leading-relaxed max-w-[200px] mx-auto">
-                  {p.description}
-                </p>
+                </span>
+                <h3 className="mt-4 text-ink">{p.title}</h3>
+                <p className="mt-2 text-[15px] leading-[1.6] text-muted">{p.description}</p>
               </div>
             ))}
           </div>
@@ -243,14 +215,14 @@ export default function ITServiceDetail({
       </section>
 
       {/* ── TECHNOLOGIES ── */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[80px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title="Technologies We Use" />
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             {service.technologies.map((tech) => (
               <span
                 key={tech}
-                className="bg-white border border-[#e8e8f0] rounded-[10px] px-5 py-2.5 text-[13px] font-semibold text-[#1a1a2e] shadow-sm hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-300"
+                className="rounded-full border border-line bg-white px-4 py-2 text-[14px] font-medium text-ink on-light"
               >
                 {tech}
               </span>

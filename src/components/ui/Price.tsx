@@ -59,7 +59,7 @@ export default function Price({
 
   return (
     <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
-      <span className="text-[0.7em] font-semibold text-gray-400 line-through decoration-1 group-hover:text-white/60">
+      <span className="text-[0.7em] font-semibold text-muted line-through decoration-1 group-hover:text-white/60">
         {prefix}
         {formatAUD(amount)}
       </span>
@@ -68,7 +68,7 @@ export default function Price({
         {formatAUD(newAmount)}
         {suffix}
       </span>
-      <span className="rounded-full bg-[#e1f5ee] px-2 py-0.5 text-[10px] font-bold text-[#0f6e56] group-hover:bg-white group-hover:text-brand-primary">
+      <span className="rounded-full bg-[#e1f5ee] px-2 py-0.5 text-[10px] font-bold text-[#0f6e56] group-hover:bg-white group-hover:text-accent">
         −{percent}%
       </span>
     </span>

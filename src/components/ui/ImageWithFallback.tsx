@@ -76,7 +76,7 @@ export default function ImageWithFallback({
           }}
         >
           <span
-            className="font-bold text-[#7f85f7]"
+            className="font-bold text-accent"
             style={{ fontSize: "40%", lineHeight: 1 }}
           >
             {initial}
@@ -101,7 +101,7 @@ export default function ImageWithFallback({
         <div className="opacity-30">
           <Icon size={48} color="#7f85f7" />
         </div>
-        <p className="text-[11px] text-[#9496a8] mt-2 font-medium">
+        <p className="text-[11px] text-muted mt-2 font-medium">
           {placeholderText}
         </p>
       </div>

@@ -1,87 +1,45 @@
-import Link from "next/link"
-import { Shield, Car, Globe, Smartphone, Bot, Monitor } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
-import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import ServiceCard from "@/components/ui/ServiceCard"
 import AnimateIn from "@/components/ui/AnimateIn"
 import FleetCountBadge from "@/components/car-rental/FleetCountBadge"
 import { services } from "@/data/services"
 import { cardAnchors } from "@/data/internal-links"
 import { HomeHubLinks } from "@/components/seo/InternalLinks"
 
-const icons: Record<string, LucideIcon> = {
-  Shield,
-  Car,
-  Globe,
-  Smartphone,
-  Bot,
-  Monitor,
-}
-
 export default function ServicesGrid() {
   return (
-    <section id="services" className="py-[120px] bg-brand-section">
-      <div className="max-w-[1170px] mx-auto px-4">
+    <section id="services" className="section scroll-mt-20 bg-white">
+      <div className="container-page">
         <SectionTitle
+          eyebrow="What we do"
           title="Our Services"
           subtitle="Everything your home or business needs — security, mobility, and technology under one roof."
         />
-        <HomeHubLinks className="text-center text-[15px] text-gray-500 leading-[1.8] max-w-[720px] mx-auto mt-4" />
+        <HomeHubLinks className="mx-auto mt-4 max-w-[65ch] text-center text-[15px] leading-[1.7] text-muted" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
-          {services.map((service, index) => {
-            const Icon = icons[service.iconName] ?? Shield
-            return (
-              <AnimateIn
-                key={service.id}
-                animation="fade-up"
-                delay={(index % 3) * 100}
-                className="flex"
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {services.map((service, index) => (
+            <AnimateIn
+              key={service.id}
+              animation="fade-up"
+              delay={(index % 3) * 100}
+              className="flex"
+            >
+              <ServiceCard
+                href={service.href}
+                title={service.name}
+                description={service.description}
+                // Keyword anchor text from the internal-linking map.
+                linkLabel={`Learn more about ${cardAnchors[service.href] ?? service.name}`}
+                image={service.image}
+                imageAlt={service.imageAlt}
+                fallbackIcon={service.iconName}
+                hoverFill
               >
-              <div
-                className="group flex flex-col w-full bg-brand-card rounded-[40px] overflow-hidden text-center cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.25)]"
-              >
-                {/* Hero image strip — mirrors the service's landing-page hero.
-                    Services without a dedicated hero (e.g. IT Consulting) skip it. */}
-                {service.image && (
-                  <div className="h-[200px] relative overflow-hidden">
-                    <ImageWithFallback
-                      src={service.image}
-                      alt={service.imageAlt ?? service.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      fallbackIcon={service.iconName}
-                    />
-                    <div className="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/30 transition duration-500" />
-                  </div>
-                )}
-
-                <div
-                  className={`px-8 ${
-                    service.image ? "pt-10 pb-12" : "py-[90px]"
-                  }`}
-                >
-                  <div className="flex justify-center mb-6 text-brand-primary group-hover:text-white transition-all duration-500">
-                    <Icon size={service.image ? 48 : 70} />
-                  </div>
-                  <h3 className="font-bold text-xl text-[#363636] group-hover:text-white transition-all duration-500">
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 group-hover:text-white/80 mt-2 transition-all duration-500">
-                    {service.description}
-                  </p>
-                  {service.id === "car-rental" && <FleetCountBadge />}
-                  <Link
-                    href={service.href}
-                    className="inline-block mt-6 bg-brand-dark text-brand-text px-8 h-[38px] leading-[38px] rounded-[5px] text-[15px] group-hover:bg-white group-hover:text-brand-dark transition-all duration-500"
-                  >
-                    {cardAnchors[service.href] ?? service.name}
-                  </Link>
-                </div>
-              </div>
-              </AnimateIn>
-            )
-          })}
+                {service.id === "car-rental" && <FleetCountBadge />}
+              </ServiceCard>
+            </AnimateIn>
+          ))}
         </div>
       </div>
     </section>

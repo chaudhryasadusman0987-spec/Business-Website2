@@ -65,7 +65,7 @@ export default function SuburbRentalPage({ params }: { params: { suburb: string 
         eyebrow={`${RENTAL_BRAND} · ${s.name}`}
         title={
           <>
-            Car rental <span className="text-[#7f85f7]">{s.name}</span>
+            Car rental <span className="text-accent">{s.name}</span>
           </>
         }
       >
@@ -134,10 +134,10 @@ export default function SuburbRentalPage({ params }: { params: { suburb: string 
         </p>
       </ProseSection>
 
-      <section className="bg-[#fefefd] py-[64px]">
-        <div className="max-w-[1170px] mx-auto px-4">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7] mb-3">How to start</p>
-          <h2 className="text-[26px] lg:text-[32px] font-bold text-[#1a1a2e] leading-tight">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-accent mb-3">How to start</p>
+          <h2 className="text-[#1a1a2e]">
             On the road in {s.name} this week
           </h2>
           <HowToStart />

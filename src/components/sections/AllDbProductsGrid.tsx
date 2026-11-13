@@ -42,7 +42,7 @@ export default function AllDbProductsGrid() {
 
   if (loading) {
     return (
-      <p className="mt-12 text-center text-[15px] text-[#9496a8]">
+      <p className="mt-12 text-center text-[15px] text-muted">
         Loading products…
       </p>
     )
@@ -50,7 +50,7 @@ export default function AllDbProductsGrid() {
 
   if (products.length === 0) {
     return (
-      <p className="mt-12 text-center text-[15px] text-[#9496a8]">
+      <p className="mt-12 text-center text-[15px] text-muted">
         No products available right now. Please check back soon.
       </p>
     )

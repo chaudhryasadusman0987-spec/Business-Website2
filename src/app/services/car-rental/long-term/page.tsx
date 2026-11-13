@@ -62,7 +62,7 @@ export default async function LongTermPage() {
         eyebrow={`${RENTAL_BRAND} · Weekly hire`}
         title={
           <>
-            Long term car rental <span className="text-[#7f85f7]">in Brisbane</span>
+            Long term car rental <span className="text-accent">in Brisbane</span>
           </>
         }
         stats={[

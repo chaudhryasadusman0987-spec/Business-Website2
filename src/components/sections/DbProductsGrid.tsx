@@ -56,7 +56,7 @@ export default function DbProductsGrid({
 
   if (loading) {
     return (
-      <p className="mt-12 text-center text-[15px] text-[#9496a8]">
+      <p className="mt-12 text-center text-[15px] text-muted">
         Loading products…
       </p>
     )
@@ -64,7 +64,7 @@ export default function DbProductsGrid({
 
   if (products.length === 0) {
     return (
-      <p className="mt-12 text-center text-[15px] text-[#9496a8]">
+      <p className="mt-12 text-center text-[15px] text-muted">
         No products available right now. Please check back soon.
       </p>
     )
@@ -82,7 +82,7 @@ export default function DbProductsGrid({
               className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-colors ${
                 active === c
                   ? "bg-brand-primary border-brand-primary text-white"
-                  : "bg-white border-[#e8e8f0] text-[#666] hover:border-brand-primary"
+                  : "bg-white border-line text-muted hover:border-brand-primary on-light"
               }`}
             >
               {c}

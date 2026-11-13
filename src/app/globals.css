@@ -2,9 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Poppins', sans-serif;
-  color: #666666;
+/* ============================================================
+   Design tokens — mirrored in tailwind.config.ts. Change both.
+   ============================================================ */
+:root {
+  --brand-primary: #7f85f7;
+  --brand-hover: #6b71f0;
+  --brand-navy: #1a1a2e;
+  --brand-hero: #0d0d1a;
+  --brand-quote: #0f6e56;
+
+  --bg: #ffffff;
+  --surface: #f7f8fa;
+  --border: #e5e7eb;
+  --border-on-dark: rgba(255, 255, 255, 0.1);
+  --text: #0f172a;
+  --text-muted: #475569;
+  --on-dark: #ffffff;
+  --on-dark-muted: #c9cbe0;
+
+  --radius-btn: 10px;
+  --radius-card: 12px;
+  --radius-input: 10px;
+  --radius-img: 12px;
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* Context-aware text colours, used by text-muted / text-accent. Brand
+     purple is 3.2:1 on white, so small purple text on a light background
+     uses a darker shade of the same hue (5.2:1). */
+  --muted: var(--text-muted);
+  --accent-text: #555bd9;
+}
+
+/* Dark surfaces flip the context colours; a light card inside a dark section
+   flips them back. */
+.on-dark {
+  --muted: var(--on-dark-muted);
+  --accent-text: #a5a8ff;
+}
+.on-light {
+  --muted: var(--text-muted);
+  --accent-text: #555bd9;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-poppins), "Poppins", sans-serif;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 4vw + 1rem, 3.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  /* Page container and section rhythm. */
+  .container-page {
+    @apply mx-auto w-full max-w-container px-4 sm:px-6 lg:px-8;
+  }
+  .section {
+    @apply py-14 lg:py-20;
+  }
+
+  .eyebrow {
+    @apply text-[13px] font-semibold uppercase tracking-[0.12em] text-accent;
+  }
+  .lead {
+    @apply text-[1.125rem] leading-[1.7] text-muted;
+    max-width: 65ch;
+  }
+  .prose-width {
+    max-width: 65ch;
+  }
+
+  /* Form fields: 48px, 1px border, 10px radius, labels above. */
+  .field {
+    @apply h-12 w-full rounded-input border border-line bg-white px-4 text-[15px] text-ink transition-colors placeholder:text-[#94a3b8] focus:border-brand-primary;
+  }
+  textarea.field {
+    @apply h-auto py-3;
+  }
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-semibold text-ink;
+  }
+
+  /* Card surface shared by service, spoke and step cards. */
+  .card {
+    @apply rounded-card border border-line bg-white shadow-card;
+  }
+  .card-hover {
+    @apply transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover;
+  }
+}
+
+/* Visible keyboard focus everywhere. !important so per-element `outline-none`
+   utilities can't hide it. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--brand-primary) !important;
+  outline-offset: 2px !important;
+}
+.on-dark a:focus-visible,
+.on-dark button:focus-visible {
+  outline-color: #ffffff !important;
 }
 
 /* Slide-in animations start off to the side, and decorative glows hang past
@@ -178,5 +307,11 @@ body {
   .modal-panel,
   .view-in {
     animation: none;
+  }
+  /* Hover lifts and other movement. */
+  .card-hover,
+  [class*="hover:-translate-y"] {
+    transition: none !important;
+    transform: none !important;
   }
 }

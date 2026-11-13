@@ -50,41 +50,27 @@ export default function TestimonialsPage() {
   return (
     <main>
       {/* ── SECTION 1 — DARK HERO ───────────────────────────── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-24 text-center">
-        {/* dot grid */}
-        <div
-          className="absolute inset-0 opacity-[0.15]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        {/* purple glow */}
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 rounded-full opacity-40 blur-[120px]"
-          style={{ background: "#7f85f7" }}
-        />
+      <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
 
-        <div className="relative mx-auto max-w-[1170px] px-4">
+        <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           {/* breadcrumb */}
-          <div className="mb-6 flex items-center justify-center gap-2 text-[12px] text-[#666880]">
-            <Link href="/" className="hover:text-[#7f85f7]">
+          <div className="mb-6 flex items-center justify-center gap-2 text-[12px] text-muted">
+            <Link href="/" className="hover:text-accent">
               Home
             </Link>
             <ChevronRight size={12} />
-            <span className="text-[#9496a8]">Testimonials</span>
+            <span className="text-muted">Testimonials</span>
           </div>
 
           <div className="mb-4 text-[32px] tracking-[4px] text-[#f5a623]">
             ★★★★★
           </div>
 
-          <h1 className="text-[40px] font-extrabold text-white lg:text-[56px]">
+          <h1 className="text-white">
             What Our Customers Say
           </h1>
 
-          <p className="mt-4 text-[16px] text-[#9496a8]">
+          <p className="mt-4 text-[16px] text-muted">
             Real reviews from real customers across Brisbane and Australia
           </p>
 
@@ -97,14 +83,14 @@ export default function TestimonialsPage() {
               return (
               <div key={s.label} className="flex items-center gap-8 lg:gap-16">
                 <AnimateIn animation="scale" delay={i * 100}>
-                  <div className="text-[36px] font-extrabold text-[#7f85f7] lg:text-[44px]">
+                  <div className="text-[36px] font-bold text-accent lg:text-[44px]">
                     {numeric ? (
                       <CountUp end={Number(numeric[1])} suffix={numeric[2]} />
                     ) : (
                       s.value
                     )}
                   </div>
-                  <div className="mt-1 text-[13px] text-[#9496a8]">
+                  <div className="mt-1 text-[13px] text-muted">
                     {s.label}
                   </div>
                 </AnimateIn>
@@ -120,20 +106,20 @@ export default function TestimonialsPage() {
 
       {allTestimonials.length === 0 ? (
         /* ── EMPTY STATE — REVIEWS COMING SOON ──────────────── */
-        <section className="bg-[#fefefd] py-[120px]">
+        <section className="bg-white on-light py-14 lg:py-20">
           <div className="max-w-[600px] mx-auto px-4 text-center">
             <div className="text-[48px] text-[#e0e0e8] mb-6">★</div>
             <h2 className="font-bold text-[24px] text-[#1a1a2e]">
               Reviews Coming Soon
             </h2>
-            <p className="text-[15px] text-[#666] mt-3 leading-relaxed">
+            <p className="text-[15px] text-muted mt-3 leading-relaxed">
               We are a new business and building our reputation one happy
               customer at a time. Check back soon or leave us a review after
               your experience.
             </p>
             <a
               href="mailto:info@pakozsolutions.com.au"
-              className="inline-block mt-8 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 leading-[52px] font-semibold text-[15px] hover:bg-[#6b71f0] transition-all"
+              className="inline-block mt-8 bg-brand-primary text-white rounded-btn h-12 px-8 leading-[52px] font-semibold text-[15px] hover:bg-brand-hover transition-all"
             >
               Contact Us
             </a>
@@ -142,8 +128,8 @@ export default function TestimonialsPage() {
       ) : (
         <>
       {/* ── SECTION 2 — FILTER TABS ─────────────────────────── */}
-      <section className="bg-[#fefefd] pt-[60px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex flex-wrap justify-center gap-3">
             {FILTERS.map((f) => {
               const active = filter === f
@@ -153,8 +139,8 @@ export default function TestimonialsPage() {
                   onClick={() => setFilter(f)}
                   className={`cursor-pointer rounded-full border px-5 py-2 text-[13px] font-medium transition-all duration-200 ${
                     active
-                      ? "border-[#7f85f7] bg-[#7f85f7] text-white"
-                      : "border-[#e8e8f0] bg-white text-[#666666] hover:border-[#7f85f7] hover:text-[#7f85f7]"
+                      ? "border-brand-primary bg-brand-primary text-white"
+                      : "border-line bg-white text-muted hover:border-brand-primary hover:text-accent on-light"
                   }`}
                 >
                   {f}
@@ -166,10 +152,10 @@ export default function TestimonialsPage() {
       </section>
 
       {/* ── SECTION 3 — TESTIMONIALS GRID ───────────────────── */}
-      <section className="bg-[#fefefd] pb-[120px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           {filtered.length === 0 ? (
-            <div className="py-16 text-center text-[15px] text-[#9496a8]">
+            <div className="py-16 text-center text-[15px] text-muted">
               No reviews yet for this service.
             </div>
           ) : (
@@ -182,11 +168,11 @@ export default function TestimonialsPage() {
                   className="flex"
                 >
                 <div
-                  className="flex w-full flex-col rounded-[24px] border border-[#e8e8f0] bg-white p-7 transition-all duration-300 hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
+                  className="flex w-full flex-col rounded-card border border-line bg-white p-7 transition-all duration-300 hover:border-brand-primary hover:shadow-card-hover on-light"
                 >
                   {/* top row — service badge + stars */}
                   <div className="mb-5 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#f7f7f7] px-3 py-1.5 text-[11px] font-semibold text-[#1a1a2e]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-[11px] font-semibold text-[#1a1a2e] on-light">
                       <span>{t.serviceIcon}</span>
                       {t.service}
                     </span>
@@ -206,17 +192,17 @@ export default function TestimonialsPage() {
 
                   {/* quote text */}
                   <div className="relative mb-6 flex-1 pl-2">
-                    <span className="pointer-events-none absolute -left-2 -top-4 select-none font-serif text-[80px] leading-none text-[#7f85f7]/20">
+                    <span className="pointer-events-none absolute -left-2 -top-4 select-none font-serif text-[80px] leading-none text-accent/20">
                       &ldquo;
                     </span>
-                    <p className="relative text-[14px] leading-[1.75] text-[#444]">
+                    <p className="relative text-[14px] leading-[1.75] text-muted">
                       {t.text}
                     </p>
                   </div>
 
                   {/* bottom row — photo + info */}
-                  <div className="mt-auto flex items-center gap-3 border-t border-[#f0f0f8] pt-5">
-                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#e8e8f0]">
+                  <div className="mt-auto flex items-center gap-3 border-t border-line pt-5">
+                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-line">
                       <ImageWithFallback
                         src={t.image}
                         alt={t.name}
@@ -232,7 +218,7 @@ export default function TestimonialsPage() {
                         {t.name}
                       </p>
                       {(t.suburb || t.state) && (
-                        <p className="mt-0.5 text-[12px] text-[#9496a8]">
+                        <p className="mt-0.5 text-[12px] text-muted">
                           {[t.suburb, t.state].filter(Boolean).join(", ")}
                         </p>
                       )}
@@ -261,12 +247,12 @@ export default function TestimonialsPage() {
       )}
 
       {/* ── SECTION 4 — LEAVE A REVIEW CTA ──────────────────── */}
-      <section className="bg-[#7f85f7] py-[80px] text-center">
-        <div className="mx-auto max-w-[1170px] px-4">
-          <h2 className="text-[45px] font-bold uppercase text-white">
+      <section className="bg-brand-navy on-dark text-center py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+          <h2 className="text-white">
             Loved Our Service?
           </h2>
-          <p className="mb-8 mt-4 text-[16px] text-white/80">
+          <p className="lead mx-auto mb-8 mt-4">
             Your review helps other Australians find quality service.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -274,13 +260,13 @@ export default function TestimonialsPage() {
               href={GOOGLE_REVIEW_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-[52px] items-center rounded-[8px] bg-white px-8 text-[15px] font-bold text-[#7f85f7] hover:bg-white/90"
+              className="inline-flex h-12 items-center justify-center rounded-btn bg-brand-primary px-6 text-[15px] font-semibold text-white hover:bg-brand-hover"
             >
               {PLACE_ID ? "⭐ Leave a Google Review" : "⭐ Find Us on Google"}
             </a>
             <Link
               href="/contact"
-              className="inline-flex h-[52px] items-center rounded-[8px] border-2 border-white px-8 text-[15px] font-semibold text-white hover:bg-white/10"
+              className="inline-flex h-12 items-center justify-center rounded-btn border border-white/40 px-6 text-[15px] font-semibold text-white hover:bg-white/10"
             >
               Contact Us
             </Link>
@@ -288,7 +274,7 @@ export default function TestimonialsPage() {
           {/* Only needed while the button points at a search page rather than
               the direct review form. */}
           {!PLACE_ID && (
-            <p className="mt-2 text-center text-[12px] text-white/60">
+            <p className="mt-3 text-center text-[13px] text-muted">
               Search for us on Google and click &quot;Write a review&quot;
             </p>
           )}

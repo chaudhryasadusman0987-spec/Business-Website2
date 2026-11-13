@@ -20,23 +20,15 @@ export default function AllProductsPage() {
   return (
     <>
       {/* HERO STRIP */}
-      <section className="bg-[#0d0d1a] py-20 relative overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4">
+      <section className="bg-brand-hero relative overflow-hidden on-dark py-16 lg:py-24">
+        <div className="relative z-10 max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumbs
             crumbs={serviceCrumbs("security", { name: "All Products", href: "/services/security-solutions/products" })}
           />
-          <h1 className="text-[40px] lg:text-[52px] font-extrabold text-white leading-[1.1]">
+          <h1 className="text-white">
             All Security Products
           </h1>
-          <p className="text-[15px] text-[#9496a8] mt-4 max-w-[600px]">
+          <p className="text-[15px] text-muted mt-4 max-w-[600px]">
             Every product across all of our security solutions, grouped by
             category. Prices per unit · Installation from {formatAUD(installFee)}{" "}
             · GST additional.
@@ -46,8 +38,8 @@ export default function AllProductsPage() {
       </section>
 
       {/* PRODUCTS BY SOLUTION (served from Postgres — see /api/products) */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[120px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <AllDbProductsGrid />
         </div>
       </section>

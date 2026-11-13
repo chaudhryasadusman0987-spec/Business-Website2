@@ -22,35 +22,32 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-[#fefefd] pt-[80px] pb-[80px]">
-      <div className="max-w-[1170px] mx-auto px-4">
+    <section className="section bg-surface">
+      <div className="container-page">
         <SectionTitle
+          eyebrow="The process"
           title="How It Works"
           subtitle="From first call to fully installed — three simple steps."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
+        <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step, i) => (
-            <AnimateIn key={step.title} animation="scale" delay={i * 200}>
-            <div
-              className="bg-white rounded-2xl p-8 text-center shadow-sm h-full"
-            >
-              <div className="w-14 h-14 rounded-[16px] mx-auto flex items-center justify-center bg-[rgba(127,133,247,0.12)]">
-                <step.icon size={26} className="text-brand-primary" />
-              </div>
-              <p className="text-brand-primary font-bold text-[14px] mt-4">
-                Step {i + 1}
-              </p>
-              <h3 className="font-bold text-[20px] text-[#1a1a2e] mt-1">
-                {step.title}
-              </h3>
-              <p className="text-[14px] text-gray-500 mt-3 leading-relaxed">
-                {step.text}
-              </p>
-            </div>
-            </AnimateIn>
+            <li key={step.title} className="flex">
+              <AnimateIn animation="fade-up" delay={i * 100} className="flex w-full">
+                <div className="card w-full p-6">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-tint text-brand-primary">
+                    <step.icon size={22} aria-hidden="true" />
+                  </span>
+                  <p className="mt-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+                    Step {i + 1}
+                  </p>
+                  <h3 className="mt-1 text-ink">{step.title}</h3>
+                  <p className="mt-2 text-[15px] leading-[1.6] text-muted">{step.text}</p>
+                </div>
+              </AnimateIn>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   )

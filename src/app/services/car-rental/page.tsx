@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Phone } from "lucide-react"
 import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
-import { SITE_PHONE, RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
+import { SITE_PHONE, SITE_PHONE_LOCAL, RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
 import { getFleetCounts } from "@/lib/db"
 
 // The fleet is dashboard-managed, so the hero counts have to be read at request
@@ -102,54 +102,62 @@ export default async function CarRentalPage() {
         ])}
       />
       {/* SECTION 1 — Hero */}
-      <section className="bg-[#0d0d1a] relative overflow-hidden">
-        {/* Single soft glow behind the copy — no pattern fill, the photo carries
-            the visual weight. */}
-        <div
-          className="absolute -top-40 -left-24 w-[620px] h-[620px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(127,133,247,0.22) 0%, transparent 68%)",
-          }}
-        />
+      <section className="bg-brand-hero relative overflow-hidden on-dark">
 
-        <div className="relative max-w-[1170px] mx-auto px-4 py-[72px] lg:py-[96px] flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        <div className="container-page relative grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:py-24">
           {/* LEFT — copy. Not wrapped in AnimateIn: that holds content at
               opacity 0 until hydration, which pushed mobile LCP past 2.5s. */}
-          <div className="flex-1 w-full">
-            <span className="inline-block bg-white/[0.07] border border-white/10 text-[#c5c8fd] text-[11px] font-semibold uppercase tracking-widest px-4 py-2 rounded-full">
-              Pak Oz Rentals · Brisbane QLD
-            </span>
+          <div>
+            <p className="eyebrow">Pak Oz Rentals · Brisbane QLD</p>
 
-            <h1 className="text-white font-extrabold text-[40px] lg:text-[56px] leading-[1.08] mt-6">
+            <h1 className="text-white mt-4">
               Car rental in Brisbane,
               <br />
-              <span className="text-[#7f85f7]">by the week.</span>
+              <span className="text-brand-primary">by the week.</span>
             </h1>
 
-            <p className="text-[15px] text-[#9496a8] leading-[1.8] mt-5 max-w-[440px]">
+            <p className="lead mt-5 max-w-[560px]">
               Car rental in Brisbane from our yard in {RENTAL_LOCALITY}, by the
               week with a four-week minimum. Roadside assistance and servicing
               are on us — you put fuel in it and drive.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3.5">
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
               {/* Scrolls to the fleet — you pick a car before you can apply, so
                   this can't open a form for a vehicle nobody has chosen yet. */}
               <a
                 href="#vehicles"
-                className="flex items-center justify-center bg-[#7f85f7] text-white rounded-[8px] h-[52px] px-8 font-bold text-[15px] uppercase tracking-wider hover:bg-[#6b71f0] transition-colors duration-300"
+                className="flex items-center justify-center bg-brand-primary text-white rounded-btn h-12 px-6 font-semibold text-[15px] hover:bg-brand-hover transition-colors duration-200"
               >
                 Get on Rent
               </a>
               <a
                 href={tel}
-                className="flex items-center justify-center gap-2 border border-white/20 text-white rounded-[8px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/[0.06] transition-colors duration-300"
+                className="flex items-center justify-center gap-2 border border-white/40 text-white rounded-btn h-12 px-6 font-semibold text-[15px] hover:border-white hover:bg-white/10 transition-colors duration-200"
               >
-                <Phone size={16} />
-                Call us
+                <Phone size={16} aria-hidden="true" />
+                Call {SITE_PHONE_LOCAL}
               </a>
             </div>
+
+            {/* Live availability — a plain status line, not a card floating
+                over the photo. */}
+            <p className="mt-5 flex items-start gap-2.5 text-[14px] text-muted">
+              <span
+                className={`mt-[7px] h-2.5 w-2.5 flex-shrink-0 rounded-full ${allBooked ? "bg-[#f0ad4e]" : "bg-[#5dcaa5]"}`}
+              />
+              <span>
+                <span className="font-semibold text-white">{badge}</span>
+                {" · "}
+                {allBooked ? (
+                  <a href={tel} className="underline underline-offset-2 hover:text-white">
+                    Call {SITE_PHONE} to be next in line
+                  </a>
+                ) : (
+                  "Pick up in Brisbane — usually same week"
+                )}
+              </span>
+            </p>
 
             {/* Stats as a typographic row, divided — not a glass card grid. */}
             <div className="mt-10 flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-10">
@@ -160,61 +168,37 @@ export default async function CarRentalPage() {
                     i > 0 ? "sm:pl-10 sm:border-l sm:border-white/10" : ""
                   }
                 >
-                  <p className="text-white font-extrabold text-[26px] leading-none">
+                  <p className="text-white font-bold text-[26px] leading-none">
                     {s.value}
                   </p>
-                  <p className="text-[#767892] text-[12px] mt-2">{s.label}</p>
+                  <p className="text-muted text-[13px] mt-2">{s.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* RIGHT — hero photo with an overlapping availability card */}
-          <div className="w-full lg:w-[46%] flex-shrink-0">
-            <div className="relative">
-              <div className="relative h-[300px] sm:h-[380px] lg:h-[440px] rounded-[20px] overflow-hidden ring-1 ring-white/10">
-                <Image
-                  src="/images/vehicles/car-rental-keys.jpg"
-                  alt="Driver behind the wheel of a Pak Oz Rentals car in Brisbane"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 540px"
-                  className="object-cover"
-                />
-                {/* Grounds the photo against the dark section. */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d1a] via-transparent to-transparent opacity-70" />
-              </div>
-
-              <div className="absolute -bottom-5 left-5 right-5 sm:right-auto sm:w-[290px] bg-white rounded-[14px] p-4 shadow-xl flex items-center gap-3.5">
-                <span
-                  className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${allBooked ? "bg-[#f0ad4e]" : "bg-[#0f6e56]"}`}
-                />
-                <div>
-                  <p className="font-bold text-[14px] text-[#1a1a2e] leading-tight">{badge}</p>
-                  <p className="text-[12px] text-[#9496a8] mt-0.5">
-                    {allBooked ? (
-                      <a href={tel} className="hover:text-[#7f85f7]">
-                        Call {SITE_PHONE} to be next in line
-                      </a>
-                    ) : (
-                      "Pick up in Brisbane — usually same week"
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* RIGHT — hero photo: 16/10 on mobile, 4/5 on desktop */}
+          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5]">
+            <Image
+              src="/images/vehicles/car-rental-keys.jpg"
+              alt="Driver behind the wheel of a Pak Oz Rentals car in Brisbane"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 440px"
+              className="object-cover"
+            />
           </div>
         </div>
       </section>
 
       {/* SECTION 2 — Rental terms, as a spec sheet */}
-      <section className="bg-[#fefefd] pt-[92px] pb-[80px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateIn animation="fade-up">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7f85f7] mb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-accent mb-3">
               How it works
             </p>
-            <h2 className="text-[28px] lg:text-[34px] font-bold text-[#1a1a2e] leading-tight max-w-[520px]">
+            <h2 className="text-[#1a1a2e] max-w-[520px]">
               Same terms on every car. No fine print.
             </h2>
           </AnimateIn>
@@ -222,11 +206,11 @@ export default async function CarRentalPage() {
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-1">
             {terms.map((t, i) => (
               <AnimateIn key={t.label} animation="fade-up" delay={(i % 3) * 100}>
-                <div className="flex items-baseline justify-between gap-4 py-[18px] border-b border-[#ececf4]">
+                <div className="flex items-baseline justify-between gap-4 py-[18px] border-b border-line">
                   <span className="text-[15px] font-medium text-[#2f3149]">
                     {t.label}
                   </span>
-                  <span className="text-[15px] font-bold text-[#7f85f7] text-right">
+                  <span className="text-[15px] font-bold text-accent text-right">
                     {t.value}
                   </span>
                 </div>
@@ -236,7 +220,7 @@ export default async function CarRentalPage() {
 
           <HubIntro
             hub="car-rental"
-            className="mt-10 text-[15px] text-[#666] leading-[1.8] max-w-[640px]"
+            className="mt-10 text-[15px] text-muted leading-[1.8] max-w-[640px]"
           />
           <SpokeCards
             ids={["rideshare", "long-term", "fleet", "rental-terms"]}
@@ -250,27 +234,27 @@ export default async function CarRentalPage() {
       <VehicleGrid initialVehicles={publicFleet} />
 
       {/* SECTION 4 — Contact CTA */}
-      <section className="bg-[#1a1a2e] py-[68px]">
+      <section className="bg-brand-navy on-dark py-14 lg:py-20">
         <AnimateIn animation="fade-up">
           <div className="max-w-[700px] mx-auto px-4 text-center">
-            <h2 className="text-white font-bold text-[28px] leading-tight">
+            <h2 className="text-white">
               Not sure which one suits you?
             </h2>
-            <p className="text-[#9496a8] text-[15px] mt-3 mb-8 leading-relaxed">
+            <p className="text-muted text-[15px] mt-3 mb-8 leading-relaxed">
               Give us a call and tell us what you need it for — we will point you
               at the right car. We answer within two hours.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href={tel}
-                className="flex items-center justify-center gap-2 bg-[#7f85f7] text-white rounded-[10px] h-[52px] px-8 font-bold text-[15px] hover:bg-[#6b71f0] transition-colors duration-300"
+                className="flex items-center justify-center gap-2 bg-brand-primary text-white rounded-btn h-12 px-8 font-semibold text-[15px] hover:bg-brand-hover transition-colors duration-200"
               >
                 <Phone size={16} />
                 {SITE_PHONE}
               </a>
               <Link
                 href="/contact"
-                className="flex items-center justify-center border-2 border-white/20 text-white rounded-[10px] h-[52px] px-8 font-semibold text-[15px] hover:bg-white/[0.06] transition-colors duration-300"
+                className="flex items-center justify-center border-2 border-white/20 text-white rounded-btn h-12 px-8 font-semibold text-[15px] hover:bg-white/[0.06] transition-colors duration-200"
               >
                 Send a message
               </Link>

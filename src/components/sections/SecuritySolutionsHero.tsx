@@ -1,15 +1,17 @@
-import Link from "next/link"
-import { ShieldCheck } from "lucide-react"
+import { Phone, ShieldCheck } from "lucide-react"
+import Button from "@/components/ui/Button"
 import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import { securitySolutions } from "@/data/security-solutions"
 import {
   SITE_SECURITY_LICENCE,
+  SITE_PHONE_HREF,
+  SITE_PHONE_LOCAL,
   SECURITY_BRAND,
   SECURITY_TAGLINE,
 } from "@/data/site"
 
-// Dark hero for the Security Solutions landing page.
-// Mirrors the home hero's #0d0d1a dot-grid + glow treatment.
+// Dark hero for the Security Solutions landing page — same layout as the
+// homepage hero.
 export default function SecuritySolutionsHero() {
   const heroSolution = securitySolutions.find((s) => s.id === "surveillance")
   const heroImage = heroSolution?.heroImage ?? ""
@@ -21,116 +23,74 @@ export default function SecuritySolutionsHero() {
   const brandAccent = brandWords[brandWords.length - 1]
 
   return (
-    <section className="relative overflow-hidden bg-[#0d0d1a]">
-      {/* Layer 1 — dot grid */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-          backgroundSize: "36px 36px",
-        }}
-      />
-      {/* Layer 2 — purple glow top-right */}
-      <div
-        className="absolute z-0 w-[250px] h-[250px] lg:w-[500px] lg:h-[500px] rounded-full top-[-120px] right-[-60px] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(127,133,247,0.2) 0%, transparent 65%)",
-        }}
-      />
-
-      <div className="relative z-10 max-w-[1170px] mx-auto px-4 w-full py-20 lg:py-28">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+    <section className="on-dark relative overflow-hidden bg-brand-hero">
+      <div className="container-page py-16 lg:py-24">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16">
           {/* LEFT */}
-          <div className="flex-1">
-            <span className="inline-block text-[12px] font-medium text-[#9496a8] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] rounded-full px-4 py-1.5">
-              Security Solutions · Brisbane & Southeast QLD
-            </span>
+          <div>
+            <p className="eyebrow">Security Solutions · Brisbane &amp; Southeast QLD</p>
 
             {/* The security section runs under the CCTV sub-brand, so the brand
                 itself is the headline here. Split off SECURITY_BRAND so the
                 last word takes the accent colour without hardcoding "CCTV". */}
-            <h1 className="font-extrabold text-[52px] lg:text-[76px] leading-[1.05] tracking-tight mt-6">
-              <span className="block text-white">{brandLead}</span>
-              <span className="block text-[#7f85f7]">{brandAccent}</span>
+            <h1 className="mt-4">
+              <span className="text-white">{brandLead}</span>{" "}
+              <span className="text-brand-primary">{brandAccent}</span>
             </h1>
 
-            <p className="text-white text-[18px] lg:text-[22px] font-semibold leading-snug max-w-[480px] mt-5">
+            <p className="mt-4 max-w-[560px] font-heading text-[1.25rem] font-semibold leading-snug text-white lg:text-[1.5rem]">
               {SECURITY_TAGLINE}
             </p>
 
-            <p className="text-[15px] text-[#9496a8] max-w-[420px] mt-4">
+            <p className="lead mt-4 max-w-[560px]">
               Surveillance, deterrence, access control, intercoms and more —
-              professionally installed across Brisbane & Southeast QLD.
+              professionally installed across Brisbane &amp; Southeast QLD.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-8">
-              <Link
-                href="/services/security-solutions/quote"
-                className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[5px] text-[15px] font-medium h-[52px] px-8 hover:opacity-90 transition-all duration-300"
-              >
-                Get Free Quote
-              </Link>
-              <a
-                href="#solutions"
-                className="inline-flex items-center justify-center border border-[rgba(255,255,255,0.2)] text-white rounded-[5px] text-[15px] font-medium h-[52px] px-8 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
-              >
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Button href="/services/security-solutions/quote" variant="primary" tone="dark">
+                Get a Free Quote
+              </Button>
+              <Button href={SITE_PHONE_HREF} variant="secondary" tone="dark">
+                <Phone size={16} aria-hidden="true" />
+                Call {SITE_PHONE_LOCAL}
+              </Button>
+              <Button href="#solutions" variant="ghost" tone="dark">
                 View Solutions
-              </a>
+              </Button>
             </div>
 
             {/* Trust strip — reassurance signals below the CTAs */}
-            <div className="flex items-center gap-6 mt-6 flex-wrap">
+            <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2">
               {[
                 SITE_SECURITY_LICENCE,
                 "Free Site Assessment",
                 "Same-Week Installation",
+                `${securitySolutions.length} Security Solutions`,
               ].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-2 text-[#9496a8] text-[13px]"
-                >
-                  <ShieldCheck size={14} className="text-[#5dcaa5]" />
+                <li key={item} className="flex items-center gap-2 text-[14px] text-muted">
+                  <ShieldCheck size={16} aria-hidden="true" className="text-[#5dcaa5]" />
                   {item}
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* RIGHT — hero image */}
-          <div className="lg:w-[45%] w-full relative">
-            <div
-              className={`relative w-full h-[420px] lg:h-[500px] rounded-[24px] overflow-hidden ${
-                contain ? "bg-white" : ""
-              }`}
-            >
-              <ImageWithFallback
-                src={heroImage}
-                alt="Professional security solutions Australia"
-                fill
-                className={`${
-                  contain ? "object-contain p-10" : "object-cover"
-                } object-center`}
-                fallbackBg="linear-gradient(135deg, #1e2140, #2d3561)"
-                priority
-              />
-              {/* Dark overlay for text readability — only over scene photos, a
-                  cutout on white would just be muddied by it. */}
-              {!contain && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-[24px]" />
-              )}
-            </div>
-
-            {/* Floating info badge — bottom left of image */}
-            <div className="absolute bottom-5 left-5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-[12px] px-4 py-3">
-              <p className="text-white font-semibold text-[13px]">
-                {securitySolutions.length} Security Solutions
-              </p>
-              <p className="text-[#5dcaa5] text-[11px] mt-0.5">
-                All professionally installed
-              </p>
-            </div>
+          {/* RIGHT — hero image: 16/10 on mobile, 4/5 on desktop */}
+          <div
+            className={`relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5] ${
+              contain ? "bg-white" : ""
+            }`}
+          >
+            <ImageWithFallback
+              src={heroImage}
+              alt="Professional security solutions Australia"
+              fill
+              sizes="(max-width: 1024px) 100vw, 440px"
+              className={`${contain ? "object-contain p-8" : "object-cover"} object-center`}
+              fallbackBg="#1e2140"
+              priority
+            />
           </div>
         </div>
       </div>

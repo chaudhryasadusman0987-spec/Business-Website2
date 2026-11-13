@@ -15,7 +15,7 @@ export default function NewsTicker() {
   const items = messages.map((m, i) => (
     <span key={i} className="flex items-center">
       <span className="px-6">{m}</span>
-      <span className="text-[#7f85f7]">◆</span>
+      <span className="text-accent">◆</span>
     </span>
   ))
 
@@ -23,7 +23,7 @@ export default function NewsTicker() {
   const duration = Math.max(18, messages.join("").length * 0.35)
 
   return (
-    <div className="relative overflow-hidden bg-[#0d0d1a] text-white text-[13px] font-medium py-2 border-b border-white/10">
+    <div className="relative overflow-hidden bg-brand-hero text-white text-[13px] font-medium py-2 border-b border-white/10 on-dark">
       <div
         className="flex w-max whitespace-nowrap animate-[marquee_linear_infinite] hover:[animation-play-state:paused]"
         style={{ animationDuration: `${duration}s` }}

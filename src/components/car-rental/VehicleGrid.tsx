@@ -117,14 +117,14 @@ export default function VehicleGrid({
   )
 
   return (
-    <section id="vehicles" className="bg-[#f5f5f8] py-[84px] scroll-mt-20">
-      <div className="max-w-[1170px] mx-auto px-4">
+    <section id="vehicles" className="bg-[#f5f5f8] scroll-mt-20 py-14 lg:py-20">
+      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateIn animation="fade-up">
           <div className="text-center max-w-[560px] mx-auto mb-12">
-            <h2 className="font-bold text-[28px] lg:text-[36px] text-[#1a1a2e] leading-tight">
+            <h2 className="text-[#1a1a2e]">
               {title}
             </h2>
-            <p className="text-[#666] text-[15px] mt-3">{intro}</p>
+            <p className="text-muted text-[15px] mt-3">{intro}</p>
           </div>
         </AnimateIn>
 
@@ -133,7 +133,7 @@ export default function VehicleGrid({
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-[16px] border border-[#e8e8f0] overflow-hidden animate-pulse"
+                className="bg-white rounded-card border border-line overflow-hidden animate-pulse on-light"
               >
                 <div className="h-[160px] bg-[#eeeef6]" />
                 <div className="p-4">
@@ -145,7 +145,7 @@ export default function VehicleGrid({
             ))}
           </div>
         ) : vehicles.length === 0 ? (
-          <p className="text-center text-[#666] text-[15px] py-10">
+          <p className="text-center text-muted text-[15px] py-10">
             Our fleet listing is being updated right now — give us a call and
             we&apos;ll tell you exactly what&apos;s available.
           </p>
@@ -178,18 +178,18 @@ export default function VehicleGrid({
                         "aria-label": `${vehicle.name} — view details`,
                       }
                     : {})}
-                  className={`group w-full flex flex-col bg-white rounded-[16px] overflow-hidden border border-[#e8e8f0] transition-all duration-300 ${
+                  className={`group w-full flex flex-col bg-white rounded-card overflow-hidden border border-line transition-all duration-300 ${
                     bookable
-                      ? "cursor-pointer hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-[#d6d8f5]"
+                      ? "cursor-pointer hover:shadow-card-hover hover:-translate-y-0.5 hover:border-[#d6d8f5]"
                       : ""
-                  }`}
+                  } on-light`}
                 >
-                  <div className="h-[160px] relative bg-[#f0f0ff] overflow-hidden">
+                  <div className="h-[160px] relative bg-surface overflow-hidden on-light">
                     <ImageWithFallback
                       src={vehicle.image}
                       alt={vehicleAlt(vehicle)}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      className="object-cover transition-transform duration-200"
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 280px"
                       priority={i < priorityImages}
                       fallbackIcon="Car"
@@ -197,7 +197,7 @@ export default function VehicleGrid({
                       placeholderText="Photo coming soon"
                     />
                     {!bookable && (
-                      <span className="absolute top-3 left-3 bg-[#1a1a2e] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow">
+                      <span className="absolute top-3 left-3 bg-brand-navy text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow on-dark">
                         Coming soon
                       </span>
                     )}
@@ -208,11 +208,11 @@ export default function VehicleGrid({
                       {vehicle.name}
                     </h3>
                     {vehicle.rego && (
-                      <p className="text-[11px] text-[#666880] mt-0.5">
+                      <p className="text-[11px] text-muted mt-0.5">
                         Rego: {vehicle.rego}
                       </p>
                     )}
-                    <p className="text-[11px] text-[#9496a8] mt-1">
+                    <p className="text-[11px] text-muted mt-1">
                       {vehicleSpecLine(vehicle)}
                     </p>
 
@@ -228,7 +228,7 @@ export default function VehicleGrid({
                           />
                         ))}
                         {vehicle.colours.length > 5 && (
-                          <span className="text-[10px] text-[#9496a8] self-center">
+                          <span className="text-[10px] text-muted self-center">
                             +{vehicle.colours.length - 5}
                           </span>
                         )}
@@ -241,15 +241,15 @@ export default function VehicleGrid({
                     <div className="mt-3">
                       {vehicle.weeklyRate > 0 ? (
                         <p className="text-[#1a1a2e]">
-                          <span className="font-extrabold text-[20px] text-[#7f85f7]">
+                          <span className="font-bold text-[20px] text-accent">
                             ${vehicle.weeklyRate.toLocaleString("en-AU")}
                           </span>
-                          <span className="text-[12px] text-[#9496a8] ml-1">
+                          <span className="text-[12px] text-muted ml-1">
                             per week
                           </span>
                         </p>
                       ) : (
-                        <p className="text-[13px] font-semibold text-[#666880]">
+                        <p className="text-[13px] font-semibold text-muted">
                           Ask us for the weekly rate
                         </p>
                       )}
@@ -262,7 +262,7 @@ export default function VehicleGrid({
                             e.stopPropagation()
                             openVehicle(vehicle, "offer")
                           }}
-                          className="flex items-center gap-1.5 mt-2 text-[12px] font-semibold text-[#7f85f7] hover:text-[#6b71f0] transition-colors"
+                          className="flex items-center gap-1.5 mt-2 text-[12px] font-semibold text-accent hover:text-[#6b71f0] transition-colors"
                         >
                           <span className="text-[14px]">💬</span>
                           Make an offer
@@ -272,18 +272,18 @@ export default function VehicleGrid({
                     )}
 
                     {bookable ? (
-                    <div className="mt-auto pt-4 border-t border-[#f0f0f8] flex flex-col gap-2.5">
+                    <div className="mt-auto pt-4 border-t border-line flex flex-col gap-2.5">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation()
                           openVehicle(vehicle, "apply")
                         }}
-                        className="w-full bg-[#7f85f7] text-white rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider hover:bg-[#6b71f0] transition-colors"
+                        className="w-full bg-brand-primary text-white rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider hover:bg-brand-hover transition-colors"
                       >
                         Get on Rent
                       </button>
-                      <span className="text-[12px] text-[#7f85f7] font-semibold flex items-center justify-center gap-1.5">
+                      <span className="text-[12px] text-accent font-semibold flex items-center justify-center gap-1.5">
                         View details
                         <ArrowRight
                           size={13}
@@ -292,17 +292,17 @@ export default function VehicleGrid({
                       </span>
                     </div>
                     ) : (
-                    <div className="mt-auto pt-4 border-t border-[#f0f0f8] flex flex-col gap-2.5">
+                    <div className="mt-auto pt-4 border-t border-line flex flex-col gap-2.5">
                       <button
                         type="button"
                         disabled
-                        className="w-full bg-[#e8e8f0] text-[#9496a8] rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider cursor-not-allowed"
+                        className="w-full bg-line text-muted rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider cursor-not-allowed"
                       >
                         Get on Rent
                       </button>
                       <Link
                         href="/contact"
-                        className="text-[12px] text-[#7f85f7] font-semibold flex items-center justify-center gap-1.5 hover:text-[#6b71f0]"
+                        className="text-[12px] text-accent font-semibold flex items-center justify-center gap-1.5 hover:text-[#6b71f0]"
                       >
                         Register interest
                         <ArrowRight size={13} />

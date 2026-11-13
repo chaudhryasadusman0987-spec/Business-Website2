@@ -402,7 +402,7 @@ function QuoteWizard() {
         <h2 className="text-[20px] font-medium text-[#1a1a2e] mb-2">
           Quote sent successfully!
         </h2>
-        <p className="text-[14px] text-gray-500 leading-relaxed">
+        <p className="text-[14px] text-muted leading-relaxed">
           Your personalised quote has been emailed to you.
           <br />
           Our team will also follow up within 1 business day.
@@ -425,7 +425,7 @@ function QuoteWizard() {
         <h2 className="text-[20px] font-medium text-[#1a1a2e] mb-2">
           We couldn&apos;t load our products
         </h2>
-        <p className="text-[14px] text-gray-500 leading-relaxed mb-5">
+        <p className="text-[14px] text-muted leading-relaxed mb-5">
           Something went wrong loading the live catalogue.
           <br />
           Please call us and we&apos;ll put a quote together for you.
@@ -461,7 +461,7 @@ function QuoteWizard() {
 
       {/* Package banner — arrived via "Get This Package" */}
       {isPackageMode && pkg && (
-        <div className="bg-[#F4FBF8] border border-[#0F6E56]/20 rounded-[12px] p-4 mb-6 flex items-center justify-between gap-3">
+        <div className="bg-[#F4FBF8] border border-[#0F6E56]/20 rounded-card p-4 mb-6 flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold text-[#0F6E56] uppercase tracking-wide">
               Package selected
@@ -474,12 +474,12 @@ function QuoteWizard() {
         </div>
       )}
       {isPackageMode && pkgLoading && (
-        <div className="bg-gray-50 border border-gray-200 rounded-[12px] p-4 mb-6 text-[13px] text-gray-500">
+        <div className="bg-gray-50 border border-gray-200 rounded-card p-4 mb-6 text-[13px] text-muted">
           Loading package details…
         </div>
       )}
       {Boolean(prePackage) && pkgError && (
-        <div className="bg-[#FDECEC] border border-[#A32D2D]/20 rounded-[12px] p-4 mb-6 text-[13px] text-[#A32D2D]">
+        <div className="bg-[#FDECEC] border border-[#A32D2D]/20 rounded-card p-4 mb-6 text-[13px] text-[#A32D2D]">
           We couldn&apos;t find that package — continuing with the standard quote
           builder instead.
         </div>
@@ -563,7 +563,7 @@ function QuoteWizard() {
                   solutions actually span more than one brand. */}
               {brandTabs.length > 1 && (
                 <div className="mb-5">
-                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <p className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-2">
                     Filter by brand
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -575,7 +575,7 @@ function QuoteWizard() {
                         className={`px-4 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
                           activeCategory === cat
                             ? "bg-[#0F6E56] border-[#0F6E56] text-white"
-                            : "bg-white border-gray-200 text-gray-500 hover:border-[#0F6E56] hover:text-[#0F6E56]"
+                            : "bg-white border-gray-200 text-muted hover:border-[#0F6E56] hover:text-[#0F6E56] on-light"
                         }`}
                       >
                         {cat}
@@ -623,7 +623,7 @@ function QuoteWizard() {
               {/* Every selected solution has products, but none match the brand */}
               {pickedProducts.length > 0 &&
                 selectedCats.every((slug) => visibleIn(slug).length === 0) && (
-                  <div className="text-center py-8 text-gray-500 text-[14px] bg-gray-50 rounded-[12px] mb-4">
+                  <div className="text-center py-8 text-muted text-[14px] bg-gray-50 rounded-card mb-4">
                     No products in this category.
                     <br />
                     <span className="text-[12px]">
@@ -634,8 +634,8 @@ function QuoteWizard() {
 
               {/* Live running total — updates as quantities change so the
                   per-unit install cost is never a surprise at step 5. */}
-              <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-3 mt-2 pb-1">
-                <div className="flex justify-between text-[13px] text-gray-500 mb-2">
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-3 mt-2 pb-1 on-light">
+                <div className="flex justify-between text-[13px] text-muted mb-2">
                   <span>
                     {totalQty === 0
                       ? "No products selected yet"
@@ -645,7 +645,7 @@ function QuoteWizard() {
                 </div>
 
                 {totalQty > 0 && (
-                  <div className="flex justify-between text-[13px] text-gray-500 mb-2">
+                  <div className="flex justify-between text-[13px] text-muted mb-2">
                     <span>
                       Installation ({totalQty} × {formatAUD(INSTALL_FEE_PER_UNIT)}
                       /unit)
@@ -657,7 +657,7 @@ function QuoteWizard() {
                 <div className="flex justify-between font-medium text-[15px] text-[#0F6E56] pt-2 mt-2 border-t border-gray-200">
                   <span>
                     Estimated total
-                    <span className="font-normal text-[11px] text-gray-400 ml-2">
+                    <span className="font-normal text-[11px] text-muted ml-2">
                       (ex. GST)
                     </span>
                   </span>
@@ -665,7 +665,7 @@ function QuoteWizard() {
                 </div>
 
                 {totalQty === 0 && (
-                  <p className="text-[12px] text-gray-400 text-center mt-3">
+                  <p className="text-[12px] text-muted text-center mt-3">
                     Select products above to see your quote total
                   </p>
                 )}
@@ -720,13 +720,13 @@ function QuoteWizard() {
               onChange={(v) => setForm({ ...form, suburb: v })} />
           </div>
           <div className="mb-4">
-            <label className="text-[12px] text-gray-500 block mb-1">
+            <label className="text-[12px] text-muted block mb-1">
               How did you hear about us?
             </label>
             <select
               value={form.source}
               onChange={(e) => setForm({ ...form, source: e.target.value })}
-              className="w-full border border-gray-200 rounded-[8px] px-3 py-2 text-[14px] text-[#1a1a2e] bg-white"
+              className="w-full border border-gray-200 rounded-[8px] px-3 py-2 text-[14px] text-[#1a1a2e] bg-white on-light"
             >
               <option value="">Select an option</option>
               <option>Google</option>
@@ -737,8 +737,8 @@ function QuoteWizard() {
           </div>
 
           {/* Live summary */}
-          <div className="bg-gray-50 border border-gray-200 rounded-[12px] p-5 mb-3">
-            <h3 className="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-3">
+          <div className="bg-gray-50 border border-gray-200 rounded-card p-5 mb-3">
+            <h3 className="text-[13px] font-medium text-muted uppercase tracking-wide mb-3">
               Quote summary
             </h3>
             {isPackageMode && pkg ? (
@@ -750,7 +750,7 @@ function QuoteWizard() {
                   {items.map((i) => (
                     <div
                       key={i.id}
-                      className="text-[12px] text-gray-500 py-0.5 flex justify-between"
+                      className="text-[12px] text-muted py-0.5 flex justify-between"
                     >
                       <span>
                         {i.name} × {i.qty}
@@ -765,7 +765,7 @@ function QuoteWizard() {
                 />
               </>
             ) : items.length === 0 ? (
-              <p className="text-[13px] text-gray-500 py-2">
+              <p className="text-[13px] text-muted py-2">
                 No products selected. Go back to add products to your quote.
               </p>
             ) : (
@@ -777,9 +777,9 @@ function QuoteWizard() {
                   >
                     <div className="pr-3">
                       <div className="text-[13px] text-[#1a1a2e]">
-                        {i.name} <span className="text-gray-400">× {i.qty}</span>
+                        {i.name} <span className="text-muted">× {i.qty}</span>
                       </div>
-                      <div className="text-[11px] text-gray-500">
+                      <div className="text-[11px] text-muted">
                         {i.category} ·{" "}
                         {i.isOnSale ? (
                           <>
@@ -809,7 +809,7 @@ function QuoteWizard() {
                       <div className="text-[13px] text-[#1a1a2e]">
                         Installation &amp; labour
                       </div>
-                      <div className="text-[11px] text-gray-500">
+                      <div className="text-[11px] text-muted">
                         {totalQty} camera{totalQty === 1 ? "" : "s"} ×{" "}
                         {formatAUD(INSTALL_FEE_PER_UNIT)} per unit
                       </div>
@@ -841,7 +841,7 @@ function QuoteWizard() {
         {step > 0 && (
           <button
             onClick={back}
-            className="px-4 py-2.5 border border-gray-300 rounded-[8px] text-gray-500 text-[14px] hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 border border-gray-300 rounded-[8px] text-muted text-[14px] hover:bg-gray-50 transition-colors"
           >
             <ArrowLeft size={16} />
           </button>
@@ -908,15 +908,15 @@ function OptionCard({
   return (
     <button
       onClick={onClick}
-      className={`text-center rounded-[12px] p-4 transition-colors ${
+      className={`text-center rounded-card p-4 transition-colors ${
         selected
           ? "border-2 border-[#0F6E56] bg-[#E1F5EE]"
-          : "border border-gray-200 bg-white hover:border-[#5DCAA5]"
+          : "border border-gray-200 bg-white hover:border-[#5DCAA5] on-light"
       }`}
     >
       <Icon size={26} className="text-[#0F6E56] mx-auto mb-2" />
       <div className="text-[13px] font-medium text-[#1a1a2e]">{label}</div>
-      <div className="text-[11px] text-gray-500 mt-0.5">{sub}</div>
+      <div className="text-[11px] text-muted mt-0.5">{sub}</div>
     </button>
   )
 }
@@ -938,7 +938,7 @@ function CheckItem({
       className={`flex items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-left transition-colors ${
         selected
           ? "border-[1.5px] border-[#0F6E56] bg-[#E1F5EE]"
-          : "border border-gray-200 bg-white hover:border-[#5DCAA5]"
+          : "border border-gray-200 bg-white hover:border-[#5DCAA5] on-light"
       }`}
     >
       <ShieldCheck size={18} className="text-[#0F6E56] flex-shrink-0" />
@@ -946,7 +946,7 @@ function CheckItem({
         <span className="block text-[13px] font-medium text-[#1a1a2e]">
           {label}
         </span>
-        <span className="block text-[11px] text-gray-500">{price}</span>
+        <span className="block text-[11px] text-muted">{price}</span>
       </span>
     </button>
   )
@@ -976,7 +976,7 @@ function ProductPick({
           ? "border-gray-200 bg-gray-50 opacity-70"
           : qty > 0
           ? "border-[1.5px] border-[#0F6E56] bg-[#F4FBF8]"
-          : "border-gray-200 bg-white"
+          : "border-gray-200 bg-white on-light"
       }`}
     >
       <div className="relative w-16 h-16 rounded-[8px] overflow-hidden bg-[#f0f5f3] flex-shrink-0">
@@ -1000,7 +1000,7 @@ function ProductPick({
           {product.name}
         </div>
         {product.description && (
-          <div className="text-[11px] text-gray-500 line-clamp-2 mt-0.5">
+          <div className="text-[11px] text-muted line-clamp-2 mt-0.5">
             {product.description}
           </div>
         )}
@@ -1015,7 +1015,7 @@ function ProductPick({
                 {formatAUD(current)}
               </span>
               {discounted && (
-                <span className="text-[12px] text-gray-400 line-through">
+                <span className="text-[12px] text-muted line-through">
                   {formatAUD(product.price)}
                 </span>
               )}
@@ -1025,7 +1025,7 @@ function ProductPick({
       </div>
 
       {out ? (
-        <span className="text-[11px] text-gray-400 px-2">Unavailable</span>
+        <span className="text-[11px] text-muted px-2">Unavailable</span>
       ) : (
         <div className="flex items-center gap-2 flex-shrink-0">
           <QtyBtn onClick={() => onChange(-1)} Icon={Minus} />
@@ -1042,7 +1042,7 @@ function ProductPick({
 function EmptyCategory() {
   return (
     <div className="border border-dashed border-gray-300 rounded-[10px] px-4 py-5 text-center">
-      <p className="text-[12px] text-gray-500">
+      <p className="text-[12px] text-muted">
         No products currently available in this category — contact us for a
         custom quote.
       </p>
@@ -1108,13 +1108,13 @@ function Field({
 }) {
   return (
     <div className="mb-4">
-      <label className="text-[12px] text-gray-500 block mb-1">{label}</label>
+      <label className="text-[12px] text-muted block mb-1">{label}</label>
       <input
         type={type}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-gray-200 rounded-[8px] px-3 py-2 text-[14px] text-[#1a1a2e] bg-white"
+        className="w-full border border-gray-200 rounded-[8px] px-3 py-2 text-[14px] text-[#1a1a2e] bg-white on-light"
       />
     </div>
   )
@@ -1132,7 +1132,7 @@ function Line({
   return (
     <div
       className={`flex justify-between py-1 border-b border-gray-200 last:border-0 ${
-        muted ? "text-[12px] text-gray-500" : "text-[13px] text-[#1a1a2e]"
+        muted ? "text-[12px] text-muted" : "text-[13px] text-[#1a1a2e]"
       }`}
     >
       <span>{left}</span>
@@ -1143,7 +1143,7 @@ function Line({
 
 export default function SecurityQuoteForm() {
   return (
-    <main className="bg-white min-h-screen">
+    <main className="bg-white min-h-screen on-light">
       <Suspense fallback={null}>
         <QuoteWizard />
       </Suspense>

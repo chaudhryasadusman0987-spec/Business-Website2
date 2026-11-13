@@ -16,20 +16,9 @@ import {
   COMPANY_OFFICE_LOCALITY,
 } from "@/data/site"
 
-const dotGrid = {
-  backgroundImage:
-    "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-  backgroundSize: "36px 36px",
-}
-const purpleGlow = {
-  background:
-    "radial-gradient(circle, rgba(127,133,247,0.2) 0%, transparent 65%)",
-}
-
-const INPUT =
-  "w-full border border-[#e8e8f0] rounded-[10px] h-[48px] px-4 text-[14px] " +
-  "text-[#1a1a2e] outline-none transition-colors focus:border-[#7f85f7] bg-white"
-const LABEL = "text-[12px] font-semibold text-[#666666] mb-1.5"
+// Shared field styles live in globals.css (.field / .field-label).
+const INPUT = "field"
+const LABEL = "field-label"
 
 const SERVICES = [
   "Security Solutions",
@@ -95,43 +84,38 @@ export default function ContactPage() {
   return (
     <>
       {/* ── 1. HERO ── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-20 text-center">
-        <div className="absolute inset-0 z-0 pointer-events-none" style={dotGrid} />
-        <div
-          className="absolute z-0 w-[500px] h-[500px] rounded-full top-[-120px] right-[-60px] pointer-events-none"
-          style={purpleGlow}
-        />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4">
-          <nav className="flex items-center justify-center gap-2 text-[12px] text-[#666880] mb-6">
-            <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
+      <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
+        <div className="relative z-10 max-w-container mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center justify-center gap-2 text-[12px] text-muted mb-6">
+            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />
-            <span className="text-[#9496a8]">Contact</span>
+            <span className="text-muted">Contact</span>
           </nav>
           <div className="flex justify-center mb-8">
             <BrandLogo />
           </div>
-          <h1 className="text-white font-extrabold text-[40px] lg:text-[52px] leading-[1.1]">
+          <h1 className="text-white">
             Get In Touch
           </h1>
-          <p className="text-[#9496a8] text-[15px] mt-3">
+          <p className="text-muted text-[15px] mt-3">
             Free quotes · Fast response · Brisbane & Southeast QLD
           </p>
         </div>
       </section>
 
       {/* ── 2. CONTACT SECTION ── */}
-      <section className="bg-[#fefefd] pt-[80px] pb-[120px]">
-        <div className="max-w-[1170px] mx-auto px-4 flex flex-col lg:flex-row gap-12">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-12">
           {/* LEFT — form */}
-          <div className="flex-1 bg-white rounded-[24px] p-6 sm:p-10 border border-[#e8e8f0] shadow-sm">
+          <div className="flex-1 bg-white rounded-card p-6 sm:p-10 border border-line shadow-card on-light">
             <h2 className="font-bold text-[22px] text-[#1a1a2e] mb-6">
               Send Us a Message
             </h2>
 
             {submitted ? (
-              <div className="bg-[#e1f5ee] border border-[#5dcaa5] rounded-[14px] p-6 flex items-start gap-3">
+              <div className="bg-[#e1f5ee] border border-[#5dcaa5] rounded-card p-6 flex items-start gap-3">
                 <span className="w-6 h-6 rounded-full bg-[#0f6e56] flex items-center justify-center flex-shrink-0 mt-0.5">
                   <Check size={14} className="text-white" strokeWidth={3} />
                 </span>
@@ -181,7 +165,7 @@ export default function ContactPage() {
                   <label htmlFor="contact-message" className={LABEL}>Message *</label>
                   <textarea id="contact-message"
                     rows={5}
-                    className="w-full border border-[#e8e8f0] rounded-[10px] px-4 py-3 text-[14px] text-[#1a1a2e] outline-none transition-colors focus:border-[#7f85f7] bg-white resize-y"
+                    className="field resize-y"
                     placeholder="How can we help you?"
                     {...register("message", { required: true })}
                   />
@@ -191,7 +175,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#7f85f7] text-white h-[52px] rounded-[10px] font-semibold mt-2 hover:bg-[#6b71f0] disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all"
+                  className="w-full bg-brand-primary text-white h-12 rounded-btn font-semibold mt-2 hover:bg-brand-hover disabled:bg-[#b0bec5] disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </button>
@@ -205,62 +189,62 @@ export default function ContactPage() {
 
           {/* RIGHT — contact info */}
           <div className="lg:w-[380px] flex flex-col gap-4">
-            <div className="bg-white border border-[#e8e8f0] rounded-[20px] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#7f85f7] flex items-center justify-center mb-3">
+            <div className="bg-white border border-line rounded-card p-6 on-light">
+              <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center mb-3">
                 <Phone size={20} className="text-white" />
               </div>
               <h3 className="font-bold text-[#1a1a2e]">Call Us</h3>
-              <p className="font-semibold text-[#7f85f7] text-[18px]">{SITE_PHONE}</p>
-              <p className="text-[#666666] text-[13px] mt-1">{SITE_HOURS}</p>
+              <p className="font-semibold text-accent text-[18px]">{SITE_PHONE}</p>
+              <p className="text-muted text-[13px] mt-1">{SITE_HOURS}</p>
             </div>
 
-            <div className="bg-white border border-[#e8e8f0] rounded-[20px] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#7f85f7] flex items-center justify-center mb-3">
+            <div className="bg-white border border-line rounded-card p-6 on-light">
+              <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center mb-3">
                 <Mail size={20} className="text-white" />
               </div>
               <h3 className="font-bold text-[#1a1a2e]">Email Us</h3>
-              <p className="font-semibold text-[#7f85f7]">{SITE_EMAIL}</p>
+              <p className="font-semibold text-accent">{SITE_EMAIL}</p>
             </div>
 
-            <div className="bg-white border border-[#e8e8f0] rounded-[20px] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#7f85f7] flex items-center justify-center mb-3">
+            <div className="bg-white border border-line rounded-card p-6 on-light">
+              <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center mb-3">
                 <MapPin size={20} className="text-white" />
               </div>
               <h3 className="font-bold text-[#1a1a2e]">Service Area</h3>
-              <p className="text-[#666666] text-[13px] mt-1">
+              <p className="text-muted text-[13px] mt-1">
                 Brisbane, Gold Coast, Sunshine Coast, Queensland-wide and
                 Australia
               </p>
             </div>
 
-            <div className="bg-[#eeedfe] rounded-[20px] p-6 mt-4">
-              <p className="font-bold text-[14px] text-[#534ab7] mb-4">
+            <div className="bg-brand-tint rounded-card p-6 mt-4 on-light">
+              <p className="font-bold text-[14px] text-accent mb-4">
                 Get a specific quote:
               </p>
               {quickLinks.map((q) => (
                 <Link
                   key={q.href}
                   href={q.href}
-                  className="w-full bg-white rounded-[10px] px-4 h-[44px] flex items-center gap-3 text-[13px] font-medium text-[#1a1a2e] border border-[#e8e8f0] hover:border-[#7f85f7] transition-colors mb-2"
+                  className="w-full bg-white rounded-[10px] px-4 h-[44px] flex items-center gap-3 text-[13px] font-medium text-[#1a1a2e] border border-line hover:border-brand-primary transition-colors mb-2 on-light"
                 >
                   {q.label}
                   <ArrowRight size={14} className="text-[#7f85f7] ml-auto" />
                 </Link>
               ))}
             </div>
-            <p className="text-[13px] text-[#666666] mt-4 leading-relaxed">
+            <p className="text-[13px] text-muted mt-4 leading-relaxed">
               New to us? Meet{" "}
-              <Link href="/about" className="text-[#7f85f7] font-medium hover:underline">
+              <Link href="/about" className="text-accent font-medium hover:underline">
                 the team behind {SITE_FULL}
               </Link>{" "}
               or{" "}
-              <Link href="/testimonials" className="text-[#7f85f7] font-medium hover:underline">
+              <Link href="/testimonials" className="text-accent font-medium hover:underline">
                 read customer reviews
               </Link>
               .
             </p>
-            <p className="text-[13px] text-[#666666] mt-4 leading-relaxed border-t border-[#e8e8f0] pt-4">
-              <span className="font-semibold text-[#1a1a2e]">{COMPANY_LEGAL_NAME}</span>
+            <p className="text-[13px] text-muted mt-4 leading-relaxed border-t border-line pt-4">
+              <span className="font-semibold text-ink">{COMPANY_LEGAL_NAME}</span>
               <br />
               ABN {COMPANY_ABN} · ACN {COMPANY_ACN}
               <br />
@@ -271,8 +255,8 @@ export default function ContactPage() {
       </section>
 
       {/* ── 3. MAP PLACEHOLDER ── */}
-      <div className="max-w-[1170px] mx-auto px-4 pb-[80px]">
-        <div className="bg-[#f0f0ff] rounded-[24px] h-[200px] flex items-center justify-center text-[#9496a8] text-[14px] text-center px-4">
+      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 pb-[80px]">
+        <div className="bg-surface rounded-card h-[200px] flex items-center justify-center text-muted text-[14px] text-center px-4 on-light">
           🗺️ Service Area: Brisbane &amp; Southeast QLD
         </div>
       </div>

@@ -32,14 +32,15 @@ import {
   IT_WHATSAPP_LOCAL,
   SITE_DOMAIN,
   SITE_PHONE,
+  SITE_PHONE_LOCAL,
 } from "@/data/site"
 
 /** "Call … · WhatsApp …" line shown under the hero and closing CTA buttons. */
 function ContactLine({ telHref, center = false }: { telHref: string; center?: boolean }) {
   return (
-    <p className={`mt-4 text-[13px] text-[#9496a8] ${center ? "text-center" : ""}`}>
+    <p className={`mt-4 text-[13px] text-muted ${center ? "text-center" : ""}`}>
       Call{" "}
-      <a href={telHref} className="font-semibold text-white hover:text-[#a5a8ff]">
+      <a href={telHref} className="font-semibold text-white hover:text-accent">
         {SITE_PHONE}
       </a>{" "}
       · WhatsApp{" "}
@@ -172,41 +173,17 @@ export default async function ITServicesPage() {
         ])}
       />
       {/* ───────────────────── HERO ───────────────────── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a]">
-        {/* grid + glows */}
-        <div
-          className="pointer-events-none absolute inset-0 z-0 opacity-[0.5]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.06) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -right-24 -top-32 z-0 h-[520px] w-[520px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(127,133,247,0.22) 0%, transparent 65%)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -bottom-24 -left-20 z-0 h-[380px] w-[380px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(93,202,165,0.14) 0%, transparent 65%)",
-          }}
-        />
+      <section className="relative overflow-hidden bg-brand-hero on-dark">
 
-        <div className="relative z-10 mx-auto flex max-w-[1170px] flex-col items-center gap-14 px-4 py-20 lg:flex-row lg:py-28">
+        <div className="container-page relative grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:py-24">
           {/* copy */}
-          <div className="flex-1">
+          <div>
             <AnimateIn animation="fade-up">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(127,133,247,0.3)] bg-[rgba(127,133,247,0.12)] px-4 py-1.5 text-[11px] font-semibold text-[#a5a8ff]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#7f85f7]" />
-                {IT_BRAND} · Brisbane &amp; Remote
-              </span>
+              <p className="eyebrow">{IT_BRAND} · Brisbane &amp; Remote</p>
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={100}>
-              <h1 className="mt-6 text-[40px] font-extrabold leading-[1.08] text-white lg:text-[58px]">
+              <h1 className="mt-4 text-white">
                 Technology that pays
                 <br />
                 for itself.
@@ -214,7 +191,7 @@ export default async function ITServicesPage() {
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={200}>
-              <p className="mt-5 max-w-[500px] text-[16px] leading-[1.8] text-[#9496a8]">
+              <p className="lead mt-5 max-w-[560px]">
                 Websites, mobile apps and AI automation for Australian
                 businesses — built by the people you actually talk to. Tell us
                 what you need and we&apos;ll come back with an honest estimate
@@ -223,10 +200,10 @@ export default async function ITServicesPage() {
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={300}>
-              <div className="mt-9 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/services/it-services/quote"
-                  className="group inline-flex h-[54px] items-center gap-2 rounded-[10px] bg-[#7f85f7] px-8 text-[15px] font-bold text-white shadow-[0_10px_30px_rgba(127,133,247,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#6b71f0] hover:shadow-[0_14px_40px_rgba(127,133,247,0.45)]"
+                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-btn bg-brand-primary px-6 text-[15px] font-semibold text-white transition-all duration-200 hover:bg-brand-hover"
                 >
                   Start my project brief
                   <ArrowRight
@@ -236,25 +213,33 @@ export default async function ITServicesPage() {
                 </Link>
                 <a
                   href={telHref}
-                  className="inline-flex h-[54px] items-center gap-2 rounded-[10px] border border-white/20 px-8 text-[15px] font-semibold text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-btn border border-white/40 px-6 text-[15px] font-semibold text-white transition-colors duration-200 hover:border-white hover:bg-white/10"
                 >
-                  <Phone size={16} />
-                  {SITE_PHONE}
+                  <Phone size={16} aria-hidden="true" />
+                  Call {SITE_PHONE_LOCAL}
                 </a>
-                <WhatsAppButton className="h-[54px] text-[15px]" />
+                <WhatsAppButton className="h-12 text-[15px]" />
               </div>
               <ContactLine telHref={telHref} />
+              {/* Starting price — a plain line, not a card floating over the photo. */}
+              <p className="mt-3 text-[14px] text-muted">
+                Projects start from{" "}
+                <span className="font-semibold text-white">
+                  ${lowest.toLocaleString("en-AU")}
+                </span>{" "}
+                · Estimate only · confirmed on the call
+              </p>
             </AnimateIn>
 
             {/* commitments */}
             <AnimateIn animation="fade-up" delay={400}>
-              <div className="mt-12 grid max-w-[520px] grid-cols-2 gap-x-8 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
+              <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-x-8 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
                 {PROMISES.map((p) => (
                   <div key={p.label}>
-                    <p className="text-[26px] font-extrabold leading-none text-white">
+                    <p className="text-[26px] font-bold leading-none text-white">
                       <CountUp end={p.value} prefix={p.prefix} suffix={p.suffix} />
                     </p>
-                    <p className="mt-2 text-[11px] leading-snug text-[#9496a8]">{p.label}</p>
+                    <p className="mt-2 text-[13px] leading-snug text-muted">{p.label}</p>
                   </div>
                 ))}
               </div>
@@ -262,47 +247,32 @@ export default async function ITServicesPage() {
           </div>
 
           {/* photo */}
-          <AnimateIn animation="slide-left" delay={200} className="w-full lg:w-[46%]">
-            <div className="relative">
-              <div className="relative h-[380px] w-full overflow-hidden rounded-[24px] shadow-2xl lg:h-[500px]">
-                <ImageWithFallback
-                  src="/images/it-services/hero.jpg"
-                  alt="Development team building software for Australian businesses"
-                  fill
-                  className="object-cover object-center"
-                  fallbackIcon="Camera"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d1a] via-transparent to-transparent" />
-              </div>
-
-              {/* floating price card */}
-              <div className="absolute -bottom-6 -left-4 hidden rounded-[16px] border border-white/10 bg-[#14142a]/95 px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur sm:block">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9496a8]">
-                  Projects start from
-                </p>
-                <p className="mt-1 text-[24px] font-extrabold leading-none text-white">
-                  ${lowest.toLocaleString("en-AU")}
-                </p>
-                <p className="mt-1.5 text-[11px] text-[#5dcaa5]">
-                  Estimate only · confirmed on the call
-                </p>
-              </div>
+          <AnimateIn animation="fade-in" delay={200} className="w-full">
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5]">
+              <ImageWithFallback
+                src="/images/it-services/hero.jpg"
+                alt="Development team building software for Australian businesses"
+                fill
+                sizes="(max-width: 1024px) 100vw, 440px"
+                className="object-cover object-center"
+                fallbackIcon="Camera"
+                priority
+              />
             </div>
           </AnimateIn>
         </div>
       </section>
 
       {/* ─────────────── TRUST STRIP ─────────────── */}
-      <section className="border-b border-[#eeeeff] bg-white">
-        <div className="mx-auto grid max-w-[1170px] grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="border-b border-line bg-white on-light">
+        <div className="mx-auto grid max-w-container grid-cols-1 gap-4 px-4 sm:px-6 lg:px-8 py-6 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST.map(({ Icon, text }, i) => (
             <AnimateIn key={text} animation="fade-up" delay={i * 100}>
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#eeedfe]">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint on-light">
                   <Icon size={16} className="text-[#7f85f7]" />
                 </span>
-                <span className="text-[13px] font-medium leading-snug text-[#444]">{text}</span>
+                <span className="text-[13px] font-medium leading-snug text-muted">{text}</span>
               </div>
             </AnimateIn>
           ))}
@@ -310,29 +280,29 @@ export default async function ITServicesPage() {
       </section>
 
       {/* ─────────────── SERVICES ─────────────── */}
-      <section id="services" className="bg-[#fefefd] pb-[90px] pt-[90px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section id="services" className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <AnimateIn animation="fade-up">
             <div className="mx-auto max-w-[620px] text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7f85f7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
                 What we build
               </p>
-              <h2 className="mt-3 text-[34px] font-bold leading-tight text-[#1a1a2e] lg:text-[40px]">
+              <h2 className="mt-3 text-[#1a1a2e]">
                 Three things, done properly
               </h2>
-              <p className="mt-4 text-[15px] leading-[1.8] text-[#666]">
+              <p className="mt-4 text-[15px] leading-[1.8] text-muted">
                 We&apos;d rather be excellent at a few things than average at
                 everything. Here&apos;s what we take on, and what it usually
                 costs.
               </p>
-              <HubIntro hub="it" className="mt-3 text-[15px] leading-[1.8] text-[#666]" />
+              <HubIntro hub="it" className="mt-3 text-[15px] leading-[1.8] text-muted" />
               <HubBlogLinks hub="it" className="mt-3" />
             </div>
           </AnimateIn>
 
           {/* estimate explainer */}
           <AnimateIn animation="fade-up" delay={100}>
-            <div className="mx-auto mt-10 flex max-w-[760px] items-start gap-3 rounded-[14px] border border-[#f0c040] bg-[#fff8e1] px-5 py-4">
+            <div className="mx-auto mt-10 flex max-w-[760px] items-start gap-3 rounded-card border border-[#f0c040] bg-[#fff8e1] px-5 py-4">
               <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#f0c040]/25">
                 <Clock size={14} className="text-[#7d5a00]" />
               </span>
@@ -354,7 +324,7 @@ export default async function ITServicesPage() {
                 delay={(i % 3) * 150}
                 className="flex"
               >
-                <article className="group flex w-full flex-col overflow-hidden rounded-[22px] border border-[#e8e8f0] bg-white transition-all duration-500 hover:-translate-y-2 hover:border-[#c9ccfb] hover:shadow-[0_24px_60px_rgba(127,133,247,0.18)]">
+                <article className="group flex w-full flex-col overflow-hidden rounded-card border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-card-hover on-light">
                   {/* photo — doubles as the way into the service's own page */}
                   <Link
                     href={service.detailHref}
@@ -365,20 +335,20 @@ export default async function ITServicesPage() {
                       src={service.image}
                       alt={service.imageAlt}
                       fill
-                      className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-110"
+                      className="object-cover transition-transform ease-out"
                       fallbackIcon="Camera"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d1a]/85 via-[#0d0d1a]/25 to-transparent" />
+                    <div className="absolute inset-0 bg-brand-hero/55" />
 
                     {service.badge && (
-                      <span className="absolute right-4 top-4 rounded-full bg-[#7f85f7] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
+                      <span className="absolute right-4 top-4 rounded-full bg-brand-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-card-hover">
                         {service.badge}
                       </span>
                     )}
 
                     {/* icon chip + title sit on the photo */}
                     <div className="absolute inset-x-5 bottom-4 flex items-center gap-3">
-                      <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[12px] border border-white/20 bg-white/15 backdrop-blur transition-colors duration-500 group-hover:bg-[#7f85f7]">
+                      <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-card border border-white/20 bg-white/15 backdrop-blur transition-colors duration-200 group-hover:bg-brand-primary">
                         <DynamicIcon name={service.iconName} size={20} className="text-white" />
                       </span>
                       <div className="min-w-0">
@@ -394,36 +364,36 @@ export default async function ITServicesPage() {
 
                   {/* body */}
                   <div className="flex flex-1 flex-col p-6">
-                    <p className="text-[13px] font-semibold text-[#7f85f7]">{service.tagline}</p>
-                    <p className="mt-3 text-[14px] leading-[1.75] text-[#555]">
+                    <p className="text-[13px] font-semibold text-accent">{service.tagline}</p>
+                    <p className="mt-3 text-[14px] leading-[1.75] text-muted">
                       {service.description}
                     </p>
 
                     <div className="mt-5 flex flex-1 flex-col gap-2.5">
                       {service.features.map((f) => (
                         <div key={f} className="flex items-start gap-2.5">
-                          <span className="mt-0.5 flex h-[17px] w-[17px] flex-shrink-0 items-center justify-center rounded-full bg-[#eeedfe]">
+                          <span className="mt-0.5 flex h-[17px] w-[17px] flex-shrink-0 items-center justify-center rounded-full bg-brand-tint on-light">
                             <Check size={10} className="text-[#7f85f7]" strokeWidth={3} />
                           </span>
-                          <span className="text-[13px] leading-snug text-[#444]">{f}</span>
+                          <span className="text-[13px] leading-snug text-muted">{f}</span>
                         </div>
                       ))}
                     </div>
 
                     {/* estimate */}
-                    <div className="mt-6 rounded-[14px] border border-[#eeeeff] bg-[#f8f8ff] p-4">
+                    <div className="mt-6 rounded-card border border-line bg-surface p-4 on-light">
                       <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#9496a8]">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">
                           Estimated range
                         </p>
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#9496a8]">
+                        <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted on-light">
                           Guide only
                         </span>
                       </div>
-                      <p className="mt-1.5 text-[23px] font-extrabold leading-none text-[#7f85f7]">
+                      <p className="mt-1.5 text-[23px] font-bold leading-none text-accent">
                         {service.estimatedDisplay}
                       </p>
-                      <p className="mt-2 text-[11px] leading-snug text-[#9496a8]">
+                      <p className="mt-2 text-[11px] leading-snug text-muted">
                         Your price is confirmed in the free consultation.
                       </p>
                     </div>
@@ -431,7 +401,7 @@ export default async function ITServicesPage() {
                     <div className="mt-5 flex flex-col gap-2.5">
                       <Link
                         href={`/services/it-services/quote?service=${service.id}`}
-                        className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#1a1a2e] text-[14px] font-semibold text-white transition-all duration-300 hover:bg-[#7f85f7]"
+                        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-btn bg-brand-navy text-[14px] font-semibold text-white transition-all duration-200 hover:bg-brand-primary on-dark"
                       >
                         Describe my project
                         <ArrowRight
@@ -444,7 +414,7 @@ export default async function ITServicesPage() {
                           the home page. */}
                       <Link
                         href={service.detailHref}
-                        className="inline-flex h-[44px] w-full items-center justify-center gap-1.5 rounded-[12px] border border-[#e8e8f0] text-[13px] font-semibold text-[#1a1a2e] transition-all duration-300 hover:border-[#7f85f7] hover:bg-[#f8f8ff] hover:text-[#534ab7]"
+                        className="inline-flex h-[44px] w-full items-center justify-center gap-1.5 rounded-card border border-line text-[13px] font-semibold text-[#1a1a2e] transition-all duration-300 hover:border-brand-primary hover:bg-surface hover:text-accent"
                       >
                         See packages &amp; full detail
                         <ChevronRight size={14} />
@@ -459,23 +429,23 @@ export default async function ITServicesPage() {
       </section>
 
       {/* ─────────────── WHAT'S INCLUDED ─────────────── */}
-      <section className="bg-[#f4f4ff] py-[90px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-surface on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
             <AnimateIn animation="slide-right" className="lg:w-[36%]">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7f85f7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
                 Every project
               </p>
-              <h2 className="mt-3 text-[32px] font-bold leading-tight text-[#1a1a2e]">
+              <h2 className="mt-3 text-[#1a1a2e]">
                 What you get, whatever we build
               </h2>
-              <p className="mt-4 text-[15px] leading-[1.8] text-[#666]">
+              <p className="mt-4 text-[15px] leading-[1.8] text-muted">
                 The parts of a software project that go wrong are rarely
                 technical. These four are how we keep it boring.
               </p>
               <Link
                 href="/services/it-services/quote?service=it-consulting"
-                className="mt-7 inline-flex items-center gap-2 text-[14px] font-semibold text-[#7f85f7] transition-colors hover:text-[#534ab7]"
+                className="mt-7 inline-flex items-center gap-2 text-[14px] font-semibold text-accent transition-colors hover:text-accent"
               >
                 Book the free consultation
                 <ArrowRight size={15} />
@@ -485,12 +455,12 @@ export default async function ITServicesPage() {
             <div className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2">
               {INCLUDED.map((item, i) => (
                 <AnimateIn key={item.title} animation="fade-up" delay={(i % 2) * 100}>
-                  <div className="h-full rounded-[18px] border border-white bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(127,133,247,0.14)]">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#eeedfe]">
+                  <div className="h-full rounded-card border border-white bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover on-light">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-card bg-brand-tint on-light">
                       <item.Icon size={19} className="text-[#7f85f7]" />
                     </span>
                     <h3 className="mt-4 text-[16px] font-bold text-[#1a1a2e]">{item.title}</h3>
-                    <p className="mt-2 text-[13px] leading-[1.75] text-[#666]">{item.body}</p>
+                    <p className="mt-2 text-[13px] leading-[1.75] text-muted">{item.body}</p>
                   </div>
                 </AnimateIn>
               ))}
@@ -500,17 +470,17 @@ export default async function ITServicesPage() {
       </section>
 
       {/* ─────────────── PROCESS ─────────────── */}
-      <section className="bg-[#fefefd] py-[90px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-white on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <AnimateIn animation="fade-up">
             <div className="mx-auto max-w-[560px] text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7f85f7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
                 How it works
               </p>
-              <h2 className="mt-3 text-[34px] font-bold leading-tight text-[#1a1a2e]">
+              <h2 className="mt-3 text-[#1a1a2e]">
                 From first message to launch
               </h2>
-              <p className="mt-4 text-[15px] leading-[1.8] text-[#666]">
+              <p className="mt-4 text-[15px] leading-[1.8] text-muted">
                 Four steps. You can stop after any of them and it hasn&apos;t
                 cost you anything.
               </p>
@@ -519,17 +489,17 @@ export default async function ITServicesPage() {
 
           <div className="relative mt-14">
             {/* connector line behind the steps */}
-            <div className="absolute left-0 right-0 top-[26px] hidden h-px bg-gradient-to-r from-transparent via-[#d8daff] to-transparent lg:block" />
+            <div className="absolute left-0 right-0 top-[26px] hidden h-px bg-line lg:block" />
 
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
               {PROCESS.map((p, i) => (
                 <AnimateIn key={p.step} animation="fade-up" delay={i * 150}>
                   <div className="group relative text-center lg:text-left">
-                    <span className="relative z-10 mx-auto flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-[#e0e2ff] bg-white text-[15px] font-extrabold text-[#7f85f7] transition-all duration-500 group-hover:border-[#7f85f7] group-hover:bg-[#7f85f7] group-hover:text-white lg:mx-0">
+                    <span className="relative z-10 mx-auto flex h-12 w-[52px] items-center justify-center rounded-full border-2 border-line bg-white text-[15px] font-semibold text-accent transition-all duration-200 group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white lg:mx-0 on-light">
                       {p.step}
                     </span>
                     <h3 className="mt-5 text-[17px] font-bold text-[#1a1a2e]">{p.title}</h3>
-                    <p className="mt-2.5 text-[13px] leading-[1.8] text-[#666]">{p.body}</p>
+                    <p className="mt-2.5 text-[13px] leading-[1.8] text-muted">{p.body}</p>
                   </div>
                 </AnimateIn>
               ))}
@@ -542,16 +512,10 @@ export default async function ITServicesPage() {
       <PortfolioSection />
 
       {/* ─────────────── IT CONSULTING ─────────────── */}
-      <section className="relative overflow-hidden bg-[#0d0d1a] py-[90px]">
-        <div
-          className="pointer-events-none absolute -left-32 top-1/2 h-[460px] w-[460px] -translate-y-1/2 rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(127,133,247,0.18) 0%, transparent 65%)",
-          }}
-        />
-        <div className="relative z-10 mx-auto flex max-w-[1170px] flex-col items-center gap-14 px-4 lg:flex-row">
+      <section className="relative overflow-hidden bg-brand-hero on-dark py-16 lg:py-24">
+        <div className="relative z-10 mx-auto flex max-w-container flex-col items-center gap-14 px-4 sm:px-6 lg:px-8 lg:flex-row">
           <AnimateIn animation="slide-right" className="w-full lg:w-[45%]">
-            <div className="relative h-[320px] w-full overflow-hidden rounded-[24px] shadow-2xl lg:h-[400px]">
+            <div className="relative h-[320px] w-full overflow-hidden rounded-card shadow-card-hover lg:h-[400px]">
               <ImageWithFallback
                 src={itConsulting.image}
                 alt={itConsulting.imageAlt}
@@ -559,22 +523,21 @@ export default async function ITServicesPage() {
                 className="object-cover"
                 fallbackIcon="Camera"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#0d0d1a]/70 to-transparent" />
             </div>
           </AnimateIn>
 
           <AnimateIn animation="slide-left" delay={100} className="flex-1">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(127,133,247,0.3)] bg-[rgba(127,133,247,0.12)] px-4 py-1.5 text-[11px] font-semibold text-[#a5a8ff]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(127,133,247,0.3)] bg-[rgba(127,133,247,0.12)] px-4 py-1.5 text-[11px] font-semibold text-accent">
               <DynamicIcon name={itConsulting.iconName} size={13} />
               {itConsulting.name}
             </span>
 
-            <h2 className="mt-6 text-[30px] font-bold leading-tight text-white lg:text-[38px]">
+            <h2 className="mt-6 text-white">
               Not sure what your business
               <br className="hidden lg:block" /> actually needs?
             </h2>
 
-            <p className="mt-4 max-w-[520px] text-[15px] leading-[1.85] text-[#9496a8]">
+            <p className="mt-4 max-w-[520px] text-[15px] leading-[1.85] text-muted">
               Most businesses waste money on technology that solves the wrong
               problem. Give us half an hour and we&apos;ll tell you what
               we&apos;d do in your position — including when the answer is to do
@@ -597,7 +560,7 @@ export default async function ITServicesPage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/services/it-services/quote?service=it-consulting"
-                className="group inline-flex h-[54px] items-center justify-center gap-2 rounded-[10px] bg-[#7f85f7] px-8 text-[15px] font-bold text-white shadow-[0_10px_30px_rgba(127,133,247,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#6b71f0]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-btn bg-brand-primary px-8 text-[15px] font-semibold text-white transition-all duration-200 hover:bg-brand-hover"
               >
                 {itConsulting.callToAction}
                 <ArrowRight
@@ -607,26 +570,26 @@ export default async function ITServicesPage() {
               </Link>
               <a
                 href={telHref}
-                className="inline-flex h-[54px] items-center justify-center gap-2 rounded-[10px] border border-white/20 px-8 text-[15px] font-semibold text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-btn border border-white/20 px-8 text-[15px] font-semibold text-white transition-all duration-200 hover:border-white/40 hover:bg-white/5"
               >
                 <Phone size={16} />
                 {SITE_PHONE}
               </a>
-              <WhatsAppButton className="h-[54px] text-[15px]" />
+              <WhatsAppButton className="h-12 text-[15px]" />
             </div>
           </AnimateIn>
         </div>
       </section>
 
       {/* ─────────────── FAQ ─────────────── */}
-      <section className="bg-[#fefefd] py-[90px]">
+      <section className="bg-white on-light py-14 lg:py-20">
         <div className="mx-auto max-w-[820px] px-4">
           <AnimateIn animation="fade-up">
             <div className="text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7f85f7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
                 Before you ask
               </p>
-              <h2 className="mt-3 text-[34px] font-bold leading-tight text-[#1a1a2e]">
+              <h2 className="mt-3 text-[#1a1a2e]">
                 The questions we get every week
               </h2>
             </div>
@@ -644,33 +607,26 @@ export default async function ITServicesPage() {
       <TestimonialsStrip />
 
       {/* ─────────────── CLOSING CTA ─────────────── */}
-      <section className="bg-[#f4f4ff] py-[80px]">
-        <div className="mx-auto max-w-[1170px] px-4">
+      <section className="bg-surface on-light py-14 lg:py-20">
+        <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
           <AnimateIn animation="scale">
-            <div className="relative overflow-hidden rounded-[28px] bg-[#1a1a2e] px-8 py-14 text-center shadow-[0_30px_80px_rgba(26,26,46,0.25)] sm:px-14">
-              <div
-                className="pointer-events-none absolute -right-20 -top-20 h-[320px] w-[320px] rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(127,133,247,0.35) 0%, transparent 65%)",
-                }}
-              />
+            <div className="relative overflow-hidden rounded-card bg-brand-navy px-8 py-14 text-center shadow-card sm:px-14 on-dark">
               <div className="relative z-10">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[11px] font-semibold text-[#a5a8ff]">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[11px] font-semibold text-accent">
                   <ShieldCheck size={13} />
                   No obligation · No sales pitch
                 </span>
-                <h2 className="mx-auto mt-6 max-w-[640px] text-[30px] font-bold leading-tight text-white lg:text-[38px]">
+                <h2 className="mx-auto mt-6 max-w-[640px] text-white">
                   Tell us what you want built. We&apos;ll tell you what it takes.
                 </h2>
-                <p className="mx-auto mt-4 max-w-[520px] text-[15px] leading-[1.8] text-[#9496a8]">
+                <p className="mx-auto mt-4 max-w-[520px] text-[15px] leading-[1.8] text-muted">
                   Ten minutes on the brief, an estimate back within 24 hours,
                   then a free call to work out the real number together.
                 </p>
                 <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
                   <Link
                     href="/services/it-services/quote"
-                    className="group inline-flex h-[56px] items-center justify-center gap-2 rounded-[12px] bg-[#7f85f7] px-10 text-[16px] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#6b71f0]"
+                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-btn bg-brand-primary px-10 text-[16px] font-semibold text-white transition-all duration-200 hover:bg-brand-hover"
                   >
                     Start my project brief
                     <ArrowRight
@@ -680,12 +636,12 @@ export default async function ITServicesPage() {
                   </Link>
                   <a
                     href={telHref}
-                    className="inline-flex h-[56px] items-center justify-center gap-2 rounded-[12px] border border-white/25 px-10 text-[15px] font-semibold text-white transition-all duration-300 hover:bg-white/5"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-btn border border-white/25 px-10 text-[15px] font-semibold text-white transition-all duration-200 hover:bg-white/5"
                   >
                     <Phone size={16} />
                     Call {SITE_PHONE}
                   </a>
-                  <WhatsAppButton className="h-[56px] rounded-[12px] px-10 text-[15px]" />
+                  <WhatsAppButton className="h-12 text-[15px]" />
                 </div>
                 <ContactLine telHref={telHref} center />
               </div>

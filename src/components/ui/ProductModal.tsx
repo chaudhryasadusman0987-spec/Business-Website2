@@ -128,20 +128,20 @@ export default function ProductModal({
         role="dialog"
         aria-modal="true"
         aria-label={p.name}
-        className="relative flex w-full max-w-[860px] max-h-[92vh] flex-col overflow-hidden rounded-[20px] bg-white shadow-2xl lg:flex-row"
+        className="relative flex w-full max-w-[860px] max-h-[92vh] flex-col overflow-hidden rounded-card bg-white shadow-card-hover lg:flex-row on-light"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close product details"
-          className="absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#1a1a2e] text-white transition-colors duration-200 hover:bg-brand-primary"
+          className="absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-brand-navy text-white transition-colors duration-200 hover:bg-brand-primary on-dark"
         >
           <X size={15} />
         </button>
 
         {/* ── Left — zoomable image ── */}
-        <div className="flex min-h-[280px] flex-col border-b border-[#eeeeff] bg-[#f8f8ff] lg:min-h-0 lg:w-[45%] lg:border-b-0 lg:border-r">
+        <div className="flex min-h-[280px] flex-col border-b border-line bg-surface lg:min-h-0 lg:w-[45%] lg:border-b-0 lg:border-r on-light">
           <div
             ref={imageAreaRef}
             className="relative flex min-h-[260px] flex-1 items-center justify-center overflow-hidden"
@@ -178,7 +178,7 @@ export default function ProductModal({
                 />
               </>
             ) : (
-              <div className="flex h-[160px] w-[160px] flex-col items-center justify-center rounded-[16px] bg-[#eeedfe] text-[#c5c8fd]">
+              <div className="flex h-[160px] w-[160px] flex-col items-center justify-center rounded-card bg-brand-tint text-[#c5c8fd] on-light">
                 <svg
                   width="48"
                   height="48"
@@ -208,20 +208,20 @@ export default function ProductModal({
           </div>
 
           {p.imageUrl && (
-            <div className="flex flex-shrink-0 items-center justify-center gap-3 border-t border-[#eeeeff] py-3">
+            <div className="flex flex-shrink-0 items-center justify-center gap-3 border-t border-line py-3">
               <button
                 type="button"
                 onClick={() => applyZoom(-0.5)}
                 disabled={zoom <= MIN_ZOOM}
                 aria-label="Zoom out"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e8e8f0] text-[#666] transition-all hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-muted transition-all hover:border-brand-primary hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ZoomOut size={13} />
               </button>
               <button
                 type="button"
                 onClick={resetZoom}
-                className="min-w-[48px] text-center text-[12px] text-[#9496a8] transition-colors hover:text-brand-primary"
+                className="min-w-[48px] text-center text-[12px] text-muted transition-colors hover:text-accent"
               >
                 {Math.round(zoom * 100)}%
               </button>
@@ -230,7 +230,7 @@ export default function ProductModal({
                 onClick={() => applyZoom(0.5)}
                 disabled={zoom >= MAX_ZOOM}
                 aria-label="Zoom in"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e8e8f0] text-[#666] transition-all hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-muted transition-all hover:border-brand-primary hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ZoomIn size={13} />
               </button>
@@ -239,12 +239,12 @@ export default function ProductModal({
           )}
 
           {allProducts.length > 1 && index >= 0 && (
-            <div className="flex flex-shrink-0 border-t border-[#eeeeff]">
+            <div className="flex flex-shrink-0 border-t border-line">
               <button
                 type="button"
                 onClick={() => hasPrev && goTo(allProducts[index - 1])}
                 disabled={!hasPrev}
-                className="flex-1 border-r border-[#eeeeff] py-2.5 text-[12px] font-medium text-[#9496a8] transition-colors hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex-1 border-r border-line py-2.5 text-[12px] font-medium text-muted transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 ← Prev
               </button>
@@ -255,7 +255,7 @@ export default function ProductModal({
                 type="button"
                 onClick={() => hasNext && goTo(allProducts[index + 1])}
                 disabled={!hasNext}
-                className="flex-1 border-l border-[#eeeeff] py-2.5 text-[12px] font-medium text-[#9496a8] transition-colors hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex-1 border-l border-line py-2.5 text-[12px] font-medium text-muted transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 Next →
               </button>
@@ -272,10 +272,10 @@ export default function ProductModal({
 
             {p.sku && (
               <div className="mb-3 flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9496a8]">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                   SKU:
                 </span>
-                <span className="rounded-[4px] bg-[#f7f7f7] px-2 py-0.5 font-mono text-[13px] text-[#444]">
+                <span className="rounded-[4px] bg-surface px-2 py-0.5 font-mono text-[13px] text-muted on-light">
                   {p.sku}
                 </span>
               </div>
@@ -283,25 +283,25 @@ export default function ProductModal({
 
             {p.category && (
               <div className="mb-4 flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9496a8]">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                   Category:
                 </span>
-                <span className="text-[13px] font-semibold text-brand-primary">
+                <span className="text-[13px] font-semibold text-accent">
                   {p.category}
                 </span>
               </div>
             )}
 
-            <div className="mb-4 h-px w-full bg-[#f0f0f8]" />
+            <div className="mb-4 h-px w-full bg-line" />
 
             <div className="mb-5">
               {discounted ? (
                 <div className="flex flex-wrap items-end gap-3">
-                  <span className="text-[28px] font-extrabold text-[#0f6e56]">
+                  <span className="text-[28px] font-bold text-[#0f6e56]">
                     {formatAUD(finalPrice)}
                   </span>
                   <div className="mb-1 flex items-center gap-2">
-                    <span className="text-[16px] text-[#9496a8] line-through">
+                    <span className="text-[16px] text-muted line-through">
                       {formatAUD(p.price)}
                     </span>
                     <span className="rounded-full bg-[#e1f5ee] px-2 py-0.5 text-[11px] font-bold text-[#0f6e56]">
@@ -310,7 +310,7 @@ export default function ProductModal({
                   </div>
                 </div>
               ) : (
-                <span className="text-[28px] font-extrabold text-[#1a1a2e]">
+                <span className="text-[28px] font-bold text-[#1a1a2e]">
                   {formatAUD(p.price)}
                 </span>
               )}
@@ -333,12 +333,12 @@ export default function ProductModal({
 
             {p.description && (
               <>
-                <div className="mb-4 h-px w-full bg-[#f0f0f8]" />
+                <div className="mb-4 h-px w-full bg-line" />
                 <div className="mb-2">
-                  <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9496a8]">
+                  <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
                     Description
                   </h3>
-                  <p className="text-[14px] leading-[1.8] text-[#444]">
+                  <p className="text-[14px] leading-[1.8] text-muted">
                     {p.description}
                   </p>
                 </div>
@@ -346,13 +346,13 @@ export default function ProductModal({
             )}
           </div>
 
-          <div className="flex flex-shrink-0 flex-col gap-2.5 border-t border-[#f0f0f8] p-5">
+          <div className="flex flex-shrink-0 flex-col gap-2.5 border-t border-line p-5">
             <a
               href={`/services/security-solutions/quote?solution=${solutionId}&product=${p.id}`}
               className={`flex h-[50px] w-full items-center justify-center gap-2 rounded-[10px] text-[15px] font-bold transition-all duration-200 ${
                 p.inStock
-                  ? "bg-brand-primary text-white hover:bg-[#6b71f0]"
-                  : "pointer-events-none bg-[#f0f0f4] text-[#9496a8]"
+                  ? "bg-brand-primary text-white hover:bg-brand-hover"
+                  : "pointer-events-none bg-[#f0f0f4] text-muted"
               }`}
               aria-disabled={!p.inStock}
             >
@@ -360,7 +360,7 @@ export default function ProductModal({
             </a>
             <a
               href={`tel:${SITE_PHONE.replace(/\s/g, "")}`}
-              className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-[#e8e8f0] text-[14px] font-semibold text-[#1a1a2e] transition-all duration-200 hover:border-brand-primary hover:text-brand-primary"
+              className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-line text-[14px] font-semibold text-[#1a1a2e] transition-all duration-200 hover:border-brand-primary hover:text-accent"
             >
               <Phone size={15} />
               Call {SITE_PHONE}

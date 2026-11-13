@@ -90,99 +90,84 @@ export default function SolutionDetailPage({
         ])}
       />
       {/* HERO STRIP */}
-      <section className="bg-[#0d0d1a] py-20 relative overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(127,133,247,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,133,247,0.07) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        <div className="relative z-10 max-w-[1170px] mx-auto px-4 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <section className="bg-brand-hero relative overflow-hidden on-dark">
+        <div className="container-page relative grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:py-24">
           {/* Left col — text */}
-          <div className="flex-1">
-            <nav className="text-[12px] text-[#666880] mb-4 flex items-center gap-2">
-              <Link href="/" className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
+          <div>
+            <nav className="text-[12px] text-muted mb-4 flex items-center gap-2">
+              <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
                 Home
               </Link>
               <ChevronRight size={12} />
               <Link
                 href="/services/security-solutions"
-                className="inline-block py-1 hover:text-[#7f85f7] transition-colors"
+                className="inline-block py-1 hover:text-accent transition-colors"
               >
                 Security Solutions
               </Link>
               <ChevronRight size={12} />
-              <span className="text-[#9496a8]">{solution.name}</span>
+              <span className="text-muted">{solution.name}</span>
             </nav>
 
-            <h1 className="text-[40px] lg:text-[52px] font-extrabold text-white leading-[1.1]">
+            <h1 className="text-white">
               {solution.name}
             </h1>
-            <p className="text-[#7f85f7] text-[18px] font-medium mt-2">
+            <p className="mt-3 font-heading text-[1.25rem] font-semibold text-brand-primary">
               {solution.tagline}
             </p>
-            <p className="text-[15px] text-[#9496a8] mt-4 max-w-[600px]">
+            <p className="lead mt-4 max-w-[560px]">
               {solution.longDescription}
               <HubLink spoke={spoke} />
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-8">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-8">
               <Link
                 href="/services/security-solutions/quote"
-                className="inline-flex items-center justify-center bg-[#7f85f7] text-white rounded-[5px] text-[15px] font-medium h-[52px] px-8 hover:opacity-90 transition-all duration-300"
+                className="inline-flex items-center justify-center bg-brand-primary text-white rounded-btn text-[15px] font-semibold h-12 px-6 hover:bg-brand-hover transition-colors duration-200"
               >
                 Get a Quote
               </Link>
               <a
                 href="#products"
-                className="inline-flex items-center justify-center border border-[rgba(255,255,255,0.2)] text-white rounded-[5px] text-[15px] font-medium h-[52px] px-8 hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300"
+                className="inline-flex items-center justify-center border border-white/40 text-white rounded-btn text-[15px] font-semibold h-12 px-6 hover:border-white hover:bg-white/10 transition-colors duration-200"
               >
                 View Products
               </a>
             </div>
+            <p className="mt-5 flex items-center gap-2.5 text-[14px] text-muted">
+              <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#5dcaa5]" />
+              {solution.products.length} products available
+            </p>
           </div>
 
           {/* Right col — solution hero image */}
-          <div className="lg:w-[45%] w-full">
+          <div>
             {/* Product-cutout images sit on a white panel and are letterboxed
                 rather than cropped; scene photos still fill the frame. */}
             <div
-              className={`relative w-full h-[400px] lg:h-[480px] rounded-[24px] overflow-hidden ${
-                contain ? "bg-white" : ""
+              className={`relative aspect-[16/10] w-full overflow-hidden rounded-img lg:aspect-[4/5] ${
+                contain ? "bg-white on-light" : ""
               }`}
             >
               <ImageWithFallback
                 src={solution.heroImage}
                 alt={solution.heroImageAlt}
                 fill
+                sizes="(max-width: 1024px) 100vw, 440px"
                 className={`${
                   contain ? "object-contain p-8" : "object-cover"
                 } object-center`}
                 fallbackBg={solution.iconBg}
                 priority
               />
-              {!contain && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              )}
-              {/* Solution name overlay at bottom */}
-              <div className="absolute bottom-5 left-5">
-                <div className="inline-flex items-center gap-2 bg-black/50 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2">
-                  <span className="w-2 h-2 rounded-full bg-[#5dcaa5] animate-pulse" />
-                  <span className="text-white text-[12px] font-medium">
-                    {solution.products.length} products available
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* PRODUCTS GRID */}
-      <section id="products" className="bg-[#fefefd] pt-[80px] pb-[120px]">
-        <div className="max-w-[1170px] mx-auto px-4">
+      <section id="products" className="bg-white on-light py-14 lg:py-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <PackagesGrid slug={solution.slug} />
 
           <SectionTitle
@@ -195,7 +180,7 @@ export default function SolutionDetailPage({
           {/* All solutions serve their products from Postgres (see /api/products). */}
           <DbProductsGrid slug={solution.slug} solutionId={solution.id} />
 
-          <div className="bg-[#f0f0ff] border border-[#e0e0ff] rounded-[16px] p-5 text-center max-w-[600px] mx-auto mt-14">
+          <div className="bg-surface border border-line rounded-card p-5 text-center max-w-[600px] mx-auto mt-14 on-light">
             <p className="text-[14px] text-[#4a4a6a]">
               Prices shown per unit · Installation from {formatAUD(installFee)} ·
               GST added at checkout · Free site assessment available

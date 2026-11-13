@@ -43,11 +43,11 @@ export default function ITFaq() {
         return (
           <div
             key={item.q}
-            className={`rounded-[16px] border bg-white transition-all duration-300 ${
+            className={`rounded-card border bg-white transition-all duration-300 ${
               isOpen
-                ? "border-[#7f85f7] shadow-[0_8px_30px_rgba(127,133,247,0.12)]"
-                : "border-[#e8e8f0] hover:border-[#c9ccfb]"
-            }`}
+                ? "border-brand-primary shadow-card"
+                : "border-line hover:border-line"
+            } on-light`}
           >
             <button
               type="button"
@@ -57,14 +57,14 @@ export default function ITFaq() {
             >
               <span
                 className={`text-[15px] font-semibold transition-colors ${
-                  isOpen ? "text-[#534ab7]" : "text-[#1a1a2e]"
+                  isOpen ? "text-accent" : "text-[#1a1a2e]"
                 }`}
               >
                 {item.q}
               </span>
               <span
                 className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-                  isOpen ? "rotate-45 bg-[#7f85f7] text-white" : "bg-[#f0f0f8] text-[#666880]"
+                  isOpen ? "rotate-45 bg-brand-primary text-white" : "bg-line text-muted"
                 }`}
               >
                 <Plus size={15} />
@@ -78,7 +78,7 @@ export default function ITFaq() {
               }`}
             >
               <div className="overflow-hidden">
-                <p className="px-6 pb-6 text-[14px] leading-[1.8] text-[#555]">{item.a}</p>
+                <p className="px-6 pb-6 text-[14px] leading-[1.8] text-muted">{item.a}</p>
               </div>
             </div>
           </div>

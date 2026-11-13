@@ -22,7 +22,7 @@ function Section({
   return (
     <section className="mb-8">
       <h2 className="font-bold text-[18px] text-[#1a1a2e] mb-3">{title}</h2>
-      <div className="text-[14px] text-[#444] leading-relaxed space-y-3">
+      <div className="text-[14px] text-muted leading-relaxed space-y-3">
         {children}
       </div>
     </section>
@@ -38,14 +38,14 @@ export default function RentalTermsPage() {
           crumbs={serviceCrumbs("car-rental", { name: "Rental Terms", href: "/rental-terms" })}
         />
       </div>
-      <div className="max-w-[800px] mx-auto bg-white rounded-[20px] p-8 lg:p-12 shadow-sm">
-        <p className="text-[12px] font-bold text-[#7f85f7] uppercase tracking-wider mb-1">
+      <div className="max-w-[800px] mx-auto bg-white rounded-card p-8 lg:p-12 shadow-card on-light">
+        <p className="text-[12px] font-bold text-accent uppercase tracking-wider mb-1">
           Pak Oz Rentals — A Pak Oz Solutions Company
         </p>
         <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-4">
           Vehicle Lease Agreement — Terms &amp; Conditions
         </h1>
-        <p className="text-[14px] text-[#444] leading-relaxed mb-8">
+        <p className="text-[14px] text-muted leading-relaxed mb-8">
           The full conditions you sign before driving away.
           <HubLink spoke={spoke} tone="light" />
         </p>
@@ -59,13 +59,13 @@ export default function RentalTermsPage() {
           <p>Contact: 0424 948 512 / +61 480 488 080</p>
           <p>
             Questions about these terms?{" "}
-            <Link href="/contact" className="text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8]">
+            <Link href="/contact" className="text-accent font-medium underline decoration-current/30 underline-offset-2 hover:text-accent">
               Send us a message
             </Link>
             .
           </p>
           <p>Email: pakozsolutions.com.au</p>
-          <p className="text-[13px] text-[#666] italic">
+          <p className="text-[13px] text-muted italic">
             The parties choose the addresses stated in the signed agreement
             as their physical addresses at which legal proceedings may be
             instituted. Insurance covers Queensland only unless otherwise
@@ -188,7 +188,7 @@ export default function RentalTermsPage() {
         </Section>
 
         <Section title="Charges Explained">
-          <div className="border border-[#e8e8f0] rounded-[12px] overflow-hidden">
+          <div className="border border-line rounded-card overflow-hidden">
             {[
               ["Unpaid Toll Notice", "$5 + toll amount"],
               ["Infringement Nomination", "$10 + fine amount"],
@@ -206,15 +206,15 @@ export default function RentalTermsPage() {
               <div
                 key={label}
                 className={`flex justify-between px-4 py-3 text-[13px] ${
-                  i % 2 === 0 ? "bg-[#f8f8ff]" : "bg-white"
+                  i % 2 === 0 ? "bg-surface on-light" : "bg-white on-light"
                 }`}
               >
                 <span className="text-[#1a1a2e] font-medium">{label}</span>
-                <span className="text-[#666]">{fee}</span>
+                <span className="text-muted">{fee}</span>
               </div>
             ))}
           </div>
-          <p className="text-[13px] text-[#666] mt-3">
+          <p className="text-[13px] text-muted mt-3">
             Drivers must be aged 21–75, hold a current valid licence (not a
             learner&apos;s permit); international licences require a
             certified English translation. Only a driver nominated in
@@ -242,11 +242,11 @@ export default function RentalTermsPage() {
           </p>
         </Section>
 
-        <p className="text-[13px] font-semibold text-[#1a1a2e] border-t border-[#e8e8f0] pt-6">
+        <p className="text-[13px] font-semibold text-[#1a1a2e] border-t border-line pt-6">
           By signing a vehicle lease agreement, both parties acknowledge and
           agree to these terms.
         </p>
-        <p className="text-[12px] text-[#9496a8] mt-4">
+        <p className="text-[12px] text-muted mt-4">
           Pak Oz Rentals • 0424 948 512 / +61 480 488 080 •
           pakozsolutions.com.au
           <br />

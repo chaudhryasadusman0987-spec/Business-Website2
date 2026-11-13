@@ -11,6 +11,10 @@ export const SITE_TAGLINE     = "Better Solutions, Better Living.";
 export const SITE_DOMAIN      = "https://www.pakozsolutions.com.au";
 export const SITE_EMAIL       = "info@pakozsolutions.com.au";
 export const SITE_PHONE       = "+61 424 948 512";
+// Derived from SITE_PHONE so the number lives in one place: the local display
+// format ("0424 948 512") for buttons, and the tel: link.
+export const SITE_PHONE_LOCAL = SITE_PHONE.replace(/^\+61\s?/, "0");
+export const SITE_PHONE_HREF  = `tel:${SITE_PHONE.replace(/\s/g, "")}`;
 export const SITE_ADDRESS     = "Brisbane & Southeast QLD";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 // Machine-readable version of SITE_HOURS for schema.org JSON-LD. Change both

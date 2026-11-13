@@ -22,9 +22,9 @@ import {
 // visual language — none of them restyle the page they sit on.
 
 const DARK_LINK =
-  "text-[#a5a8ff] underline decoration-[#a5a8ff]/40 underline-offset-2 hover:text-white transition-colors"
+  "text-accent underline decoration-[#a5a8ff]/40 underline-offset-2 hover:text-white transition-colors"
 const LIGHT_LINK =
-  "text-[#7f85f7] font-medium underline decoration-[#7f85f7]/30 underline-offset-2 hover:text-[#5a60d8] transition-colors"
+  "text-accent font-medium underline decoration-current/30 underline-offset-2 hover:text-accent transition-colors"
 
 /**
  * The up-link sentence a spoke appends to its first paragraph:
@@ -113,13 +113,13 @@ function SpokeCard({ spoke, variant = 0 }: { spoke: Spoke; variant?: number }) {
   return (
     <Link
       href={spoke.href}
-      className="group flex h-full flex-col bg-white border border-[#e8e8f0] rounded-[12px] p-6 text-left hover:border-[#7f85f7] hover:shadow-[0_8px_30px_rgba(127,133,247,0.12)] transition-all duration-300"
+      className="group flex h-full flex-col bg-white border border-line rounded-card p-6 text-left hover:border-brand-primary hover:shadow-card-hover transition-all duration-300 on-light"
     >
-      <h3 className="font-bold text-[17px] text-[#1a1a2e] group-hover:text-[#7f85f7] transition-colors">
+      <h3 className="font-bold text-[17px] text-[#1a1a2e] group-hover:text-accent transition-colors">
         {spoke.name}
       </h3>
-      <p className="text-[14px] text-[#666] mt-2 leading-relaxed flex-1">{spoke.blurb}</p>
-      <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#7f85f7]">
+      <p className="text-[14px] text-muted mt-2 leading-relaxed flex-1">{spoke.blurb}</p>
+      <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent">
         {label.charAt(0).toUpperCase() + label.slice(1)}
         <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
       </span>
@@ -151,7 +151,7 @@ export function FromTheBlog({
   const posts = postsForTags(tags)
   if (posts.length === 0) return null
   return (
-    <p className={`text-[14px] text-[#666] leading-[1.8] ${className}`}>
+    <p className={`text-[14px] text-muted leading-[1.8] ${className}`}>
       From the blog:{" "}
       {posts.map((p, i) => (
         <span key={p.slug}>
@@ -176,7 +176,7 @@ export function HubBlogLinks({ hub, className = "" }: { hub: HubId; className?: 
  */
 export function RelatedServices({
   spoke,
-  className = "bg-[#fefefd] py-[60px]",
+  className = "bg-white py-[60px] on-light",
 }: {
   spoke: Spoke | undefined
   className?: string
@@ -192,7 +192,7 @@ export function RelatedServices({
     hub.quoteHref === spoke.href && hub.quoteAnchor ? `#${hub.quoteAnchor}` : hub.quoteHref
   return (
     <section className={className}>
-      <div className="max-w-[1170px] mx-auto px-4">
+      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="font-bold text-[24px] text-[#1a1a2e] text-center mb-8">
           Related services
         </h2>
@@ -215,7 +215,7 @@ export function RelatedServices({
         <div className="mt-10 text-center">
           <Link
             href={ctaHref}
-            className="inline-flex items-center justify-center gap-2 bg-[#7f85f7] text-white font-semibold rounded-[8px] h-[52px] px-8 hover:bg-[#6b71f0] transition-all"
+            className="inline-flex items-center justify-center gap-2 bg-brand-primary text-white font-semibold rounded-btn h-12 px-8 hover:bg-brand-hover transition-all"
           >
             {hub.quoteLabel}
             <ArrowRight size={16} />
@@ -247,16 +247,16 @@ export function Breadcrumbs({
       <nav
         aria-label="Breadcrumb"
         className={`flex flex-wrap items-center gap-2 text-[12px] ${
-          tone === "dark" ? "text-[#666880]" : "text-[#9496a8]"
+          tone === "dark" ? "text-muted" : "text-muted"
         } ${className}`}
       >
         {crumbs.map(([name, href], i) => (
           <span key={href} className="inline-flex items-center gap-2">
             {i > 0 && <ChevronRight size={12} />}
             {i === last ? (
-              <span className={tone === "dark" ? "text-[#9496a8]" : "text-[#444]"}>{name}</span>
+              <span className={tone === "dark" ? "text-muted" : "text-muted"}>{name}</span>
             ) : (
-              <Link href={href} className="inline-block py-1 hover:text-[#7f85f7] transition-colors">
+              <Link href={href} className="inline-block py-1 hover:text-accent transition-colors">
                 {name}
               </Link>
             )}
@@ -279,11 +279,11 @@ export function BlogServiceLinks({
   if (!picked) return null
   const { hub, spokes } = picked
   return (
-    <div className="mt-12 rounded-[20px] border border-[#e0e0ff] bg-[#f0f0ff] p-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7f85f7]">
+    <div className="mt-12 rounded-card border border-line bg-surface p-6 on-light">
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-accent">
         Related services
       </p>
-      <p className="mt-2 text-[15px] leading-[1.8] text-[#444]">
+      <p className="mt-2 text-[15px] leading-[1.8] text-muted">
         Need a hand with this? See our{" "}
         <Link href={hub.href} className={LIGHT_LINK}>
           {hubAnchor(hub.id, 1)}

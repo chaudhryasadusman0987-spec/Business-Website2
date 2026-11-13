@@ -1,56 +1,23 @@
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
-import ImageWithFallback from "@/components/ui/ImageWithFallback"
+import ServiceCard from "@/components/ui/ServiceCard"
 import type { SecuritySolution } from "@/data/security-solutions"
 
-// Landing-page grid card — Zlymo hover, with an image strip at the top.
+// Security hub grid card — the shared ServiceCard, fed from a solution.
 export default function SolutionCard({
   solution,
 }: {
   solution: SecuritySolution
 }) {
-  const contain = solution.heroImageFit !== "cover"
-
   return (
-    <Link
+    <ServiceCard
       href={`/services/security-solutions/${solution.slug}`}
-      className="group relative block w-full bg-brand-card rounded-[40px] overflow-hidden cursor-pointer transition-all duration-500 hover:bg-brand-primary hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(127,133,247,0.3)]"
-    >
-      {/* Image strip at top */}
-      <div
-        className={`relative w-full h-[140px] overflow-hidden ${
-          contain ? "bg-white" : ""
-        }`}
-      >
-        <ImageWithFallback
-          src={solution.heroImage}
-          alt={solution.heroImageAlt}
-          fill
-          className={`${
-            contain ? "object-contain p-3" : "object-cover"
-          } transition-transform duration-500 group-hover:scale-105`}
-          fallbackBg={solution.iconBg}
-        />
-        <div className="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/40 transition-all duration-500" />
-      </div>
-
-      {/* Card content below image */}
-      <div className="p-8 text-center">
-        <h3 className="font-bold text-[18px] text-[#1a1a2e] group-hover:text-white transition-colors duration-500">
-          {solution.name}
-        </h3>
-        <p className="text-brand-primary font-medium text-[12px] mt-1 group-hover:text-white/80 transition-colors duration-500">
-          {solution.tagline}
-        </p>
-        <p className="text-[13px] text-gray-500 mt-3 leading-relaxed group-hover:text-white/80 transition-colors duration-500">
-          {solution.description}
-        </p>
-      </div>
-
-      <ArrowRight
-        size={16}
-        className="absolute bottom-5 right-5 text-gray-300 group-hover:text-white/60 transition-colors duration-500"
-      />
-    </Link>
+      title={solution.name}
+      tagline={solution.tagline}
+      description={solution.description}
+      linkLabel={`Learn more about ${solution.name}`}
+      image={solution.heroImage}
+      imageAlt={solution.heroImageAlt}
+      imageFit={solution.heroImageFit !== "cover" ? "contain" : "cover"}
+      fallbackBg={solution.iconBg}
+    />
   )
 }
