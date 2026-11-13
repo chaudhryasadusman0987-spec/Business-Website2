@@ -115,9 +115,9 @@ export async function POST(req: Request) {
       ? `${normalised(licenceNo, (v) => validateLicence(v, licenceState))} (${licenceStateName(licenceState)})`
       : ""
     const vehicleName = get("vehicleName")
-    // The rego is internal — never taken from (or shown to) the customer. It is
-    // read from the database below and only goes to the owner. The customer
-    // quotes the vehicle's payment reference instead.
+    // The rego is read from the database below rather than trusted from the
+    // form, and goes in both the owner's and the customer's email. The bank
+    // transfer still quotes the vehicle's payment reference.
     let vehicleRego = ""
     const paymentRef = get("vehicleId") ? paymentReference({ id: get("vehicleId") }) : "your full name"
 
@@ -285,6 +285,11 @@ export async function POST(req: Request) {
               Vehicle Requested
             </p>
             <p style="font-weight:700;font-size:16px;color:#1a1a2e;margin:0">${esc(vehicleName)}</p>
+            ${
+              vehicleRego
+                ? `<p style="font-size:13px;color:#666880;margin:4px 0 0">Rego: ${esc(vehicleRego)}</p>`
+                : ""
+            }
             ${
               weeklyLabel
                 ? `<p style="font-weight:700;font-size:15px;color:#7f85f7;margin:10px 0 0">${esc(weeklyLabel)}${

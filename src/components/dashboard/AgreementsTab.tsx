@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { RefreshCw, AlertCircle, Copy, Check } from "lucide-react"
+import { vehicleLabel } from "@/lib/vehicles"
 
 interface Vehicle {
   id: string
@@ -19,6 +20,7 @@ interface Agreement {
   renterEmail: string
   make: string
   model: string
+  year?: string
   rego: string
   status: string
   createdAt: string
@@ -238,7 +240,7 @@ export default function AgreementsTab() {
               <option value="">— Choose a vehicle —</option>
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.name} ({v.rego})
+                  {vehicleLabel(v.name, v.rego)}
                 </option>
               ))}
             </select>
@@ -415,7 +417,10 @@ export default function AgreementsTab() {
                       <div className="text-[11px] text-[#9496a8]">{a.renterEmail}</div>
                     </td>
                     <td className="px-4 py-4 text-[13px] text-[#444]">
-                      {a.make} {a.model} ({a.rego})
+                      {vehicleLabel(
+                        [a.year, a.make, a.model].filter(Boolean).join(" "),
+                        a.rego,
+                      )}
                     </td>
                     <td className="px-4 py-4">
                       <span

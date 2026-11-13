@@ -216,7 +216,7 @@ contact                      Contact form → lead + emails
 quote/security               Security quote → emails customer + admin, logs lead
 quote/it-services            IT project brief → emails
 products, packages, catalog  Security catalog (Postgres)
-vehicles, vehicles/counts    Fleet (rego never exposed publicly)
+vehicles, vehicles/counts    Fleet (rego included in public responses)
 promo                        Category % discounts
 google-reviews               Places API reviews (env-gated)
 db/setup                     Create tables + one-time seed
@@ -399,8 +399,8 @@ discount twice.
 ## 8. Car rental (Pak Oz Rentals)
 
 - **Fleet** lives in Postgres `vehicles` table (`src/lib/vehicles.ts`), managed in
-  the dashboard. Status: `available` / `coming_soon` / `hidden`. **Rego is internal
-  only — never in the public API.** Nest the payload in API calls (`type` collides
+  the dashboard. Status: `available` / `coming_soon` / `hidden`. **Rego is public
+  (fleet cards, modal, `/api/vehicles`) and unique per vehicle.** Nest the payload in API calls (`type` collides
   with the route discriminator).
 - **Customer flow:** vehicle modal → 3-step rental application
   (`/api/rental-application`) → admin approves or counter-offers (price

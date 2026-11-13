@@ -9,11 +9,12 @@ import { withPhotoUrls } from "@/lib/vehicle-photos"
 // Query params:
 //   ?light=1   omit the photo galleries (see below)
 //   ?id=<id>   return just that one vehicle, galleries included
-//   ?all=1     admin only: every car, hidden ones and regos included — the
-//              dashboard needs them, the public grid does not
+//   ?all=1     admin only: every car, hidden ones included — the dashboard
+//              needs them, the public grid does not
 //
-// Public responses never carry the rego (it is internal) and never include a
-// hidden car, even by ?id=. Coming-soon cars are listed without a price.
+// Every response carries the rego: it is shown on the public fleet cards and
+// modal. Public responses never include a hidden car, even by ?id=, and
+// coming-soon cars are listed without a price.
 //
 // Photos uploaded from the dashboard are stored inline as data URLs, so a
 // fleet where every car has a full gallery is megabytes of JSON. The listing

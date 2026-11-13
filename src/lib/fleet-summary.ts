@@ -56,8 +56,8 @@ export function weeklyRange(s: Pick<FleetSummary, "minWeekly" | "maxWeekly">): s
 }
 
 /**
- * The public fleet for server-rendering VehicleGrid: listed cars, rego
- * blanked, no gallery, main photo as a cacheable URL. Null when the database
+ * The public fleet for server-rendering VehicleGrid: listed cars with their
+ * rego, no gallery, main photo as a cacheable URL. Null when the database
  * is unreachable, so the grid falls back to fetching on the client.
  */
 export const getPublicFleet = cache(async (): Promise<RentalVehicle[] | null> => {

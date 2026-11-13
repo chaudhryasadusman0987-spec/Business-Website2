@@ -17,8 +17,9 @@ export interface RentalVehicle {
   /** Body style — "Hatchback", "SUV", "Ute"… */
   type: string
   /**
-   * Internal only — used to match the owner's fleet list and on admin screens.
-   * Never sent to the public site: /api/vehicles strips it (see toPublicVehicle).
+   * Registration plate, e.g. "450PO8". Shown everywhere the car is — public
+   * fleet cards and modal, admin screens, the lease PDF and emails. Unique per
+   * vehicle; "" when the owner has not entered one yet.
    */
   rego: string
   /** Main photo on the listing card. An https URL or an inline data URL. */
@@ -76,22 +77,32 @@ export function isBookable(v: Pick<RentalVehicle, "status">): boolean {
 }
 
 /**
- * The record the public site gets: rego blanked, and no price on a car that
- * is not bookable yet.
+ * The record the public site gets: no price on a car that is not bookable
+ * yet. The rego is public and passes through unchanged.
  */
 export function toPublicVehicle(v: RentalVehicle): RentalVehicle {
   return {
     ...v,
-    rego: "",
     weeklyRate: isBookable(v) ? v.weeklyRate : 0,
     bond: isBookable(v) ? v.bond : 0,
   }
 }
 
+/** Plates are stored upper-case with no spaces: " 450 po8 " -> "450PO8". */
+export function normaliseRego(rego: string): string {
+  return rego.replace(/\s+/g, "").toUpperCase()
+}
+
+/** "2016 Toyota Camry · 450PO8" — the name alone when there is no rego. */
+export function vehicleLabel(name: string, rego?: string | null): string {
+  const plate = (rego ?? "").trim()
+  return plate ? `${name} · ${plate}` : name
+}
+
 /**
- * Bank-transfer reference for a car. Customers used to be told to quote the
- * rego, but the rego is internal now, so this is derived from the vehicle id
- * instead — stable, short, and the admin email prints it next to the rego.
+ * Bank-transfer reference for a car, derived from the vehicle id — stable,
+ * short, and set even for a car with no rego entered. The admin email prints
+ * it next to the rego.
  */
 export function paymentReference(v: Pick<RentalVehicle, "id">): string {
   const tail = v.id.split("-").pop() ?? v.id

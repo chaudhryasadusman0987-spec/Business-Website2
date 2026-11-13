@@ -20,6 +20,7 @@ import {
   VEHICLE_STATUSES,
   parseVehicleStatus,
   SEAT_OPTIONS,
+  vehicleLabel,
   type RentalVehicle,
   type VehicleInput,
 } from "@/lib/vehicles"
@@ -274,10 +275,10 @@ export default function VehiclesDbTab() {
               <div className="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-[#f0f0f8]">
                 <div className="min-w-0">
                   <p className="font-bold text-[15px] text-[#1a1a2e] truncate">
-                    {row.name || "Untitled vehicle"}
+                    {vehicleLabel(row.name || "Untitled vehicle", row.rego)}
                   </p>
                   <p className="text-[12px] text-[#9496a8]">
-                    {row.rego || "no rego"} ·{" "}
+                    {row.rego ? "" : "no rego · "}
                     {row.weeklyRate > 0
                       ? `$${row.weeklyRate.toLocaleString("en-AU")}/week`
                       : "no weekly rate set"}

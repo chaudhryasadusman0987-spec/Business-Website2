@@ -12,6 +12,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react"
+import { vehicleLabel } from "@/lib/vehicles"
 import RentalChecklist from "@/components/dashboard/RentalChecklist"
 
 interface Agreement {
@@ -154,8 +155,9 @@ export default function ActiveRentalsDbTab() {
                   <Fragment key={r.id}>
                     <tr className="border-b border-[#f0f0f8] last:border-0 align-top">
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-[14px] text-[#1a1a2e]">{r.vehicleName}</div>
-                        <div className="text-[11px] text-[#9496a8]">{r.vehicleRego}</div>
+                        <div className="font-semibold text-[14px] text-[#1a1a2e]">
+                          {vehicleLabel(r.vehicleName, r.vehicleRego)}
+                        </div>
                       </td>
                       <td className="px-5 py-4 text-[13px] text-[#444]">
                         <div className="flex items-center gap-1">

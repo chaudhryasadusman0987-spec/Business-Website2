@@ -207,6 +207,11 @@ export default function VehicleGrid({
                     <h3 className="font-bold text-[14px] text-[#1a1a2e] leading-snug">
                       {vehicle.name}
                     </h3>
+                    {vehicle.rego && (
+                      <p className="text-[11px] text-[#666880] mt-0.5">
+                        Rego: {vehicle.rego}
+                      </p>
+                    )}
                     <p className="text-[11px] text-[#9496a8] mt-1">
                       {vehicleSpecLine(vehicle)}
                     </p>

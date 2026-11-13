@@ -280,14 +280,15 @@ export default function VehicleModal({
   const bondAmountForWeeks = effectiveWeekly * bondWeeks
   const cardTotalToday = effectiveWeekly + bondAmountForWeeks
 
+  // Bank-transfer reference, derived from the vehicle id so it exists even for
+  // a car with no rego entered yet.
+  const payRef = paymentReference(v)
+
   // The specification grid, in reading order down two columns. Blanks render
   // as an em dash rather than an empty cell — a car the owner has not filled
   // in yet still lines up with the rest.
-  // Bank-transfer reference. Not the rego — that is internal and never sent
-  // to the browser.
-  const payRef = paymentReference(v)
-
   const specs: [string, string][] = [
+    ["REGISTRATION", v.rego],
     ["VARIANT", v.variant],
     ["FUEL TYPE", v.fuelType],
     ["ENGINE", v.engine],
@@ -855,7 +856,13 @@ export default function VehicleModal({
                       key={label}
                       className={`px-5 py-4 ${
                         i % 2 === 0 ? "border-r border-[#e8e8f0]" : ""
-                      } ${i < specs.length - 2 ? "border-b border-[#e8e8f0]" : ""}`}
+                      } ${
+                        // Every row but the last gets a rule under it; the
+                        // last row is two cells when the count is even.
+                        i < specs.length - (specs.length % 2 === 0 ? 2 : 1)
+                          ? "border-b border-[#e8e8f0]"
+                          : ""
+                      }`}
                     >
                       <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider mb-1.5">
                         {label}
@@ -904,10 +911,30 @@ export default function VehicleModal({
               <h3 className="font-bold text-[20px] text-[#1a1a2e] mb-1">
                 Your Details
               </h3>
-              <p className="text-[13px] text-[#9496a8] mb-6">
+              <p className="text-[13px] text-[#9496a8] mb-4">
                 Fill in your personal details. We will email you the rental quote
                 with weekly pricing.
               </p>
+
+              {/* Which car this application is for. */}
+              <div className="bg-[#f8f8ff] border border-[#e8e8f0] rounded-[12px] px-4 py-3 mb-6 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-[#9496a8] uppercase tracking-wider">
+                    Selected vehicle
+                  </p>
+                  <p className="font-bold text-[14px] text-[#1a1a2e] truncate">
+                    {v.name}
+                  </p>
+                  {v.rego && (
+                    <p className="text-[12px] text-[#666880]">Rego: {v.rego}</p>
+                  )}
+                </div>
+                {weeklyLabel && (
+                  <p className="text-[13px] font-bold text-[#534ab7] flex-shrink-0">
+                    {weeklyLabel} / week
+                  </p>
+                )}
+              </div>
 
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-3">
@@ -1742,7 +1769,8 @@ export default function VehicleModal({
               <p className="text-[#555] text-[14px] leading-relaxed mb-5">
                 Thank you <strong>{form.firstName}</strong>. We have received
                 your {payMethod === "card-pay" ? "payment" : "application and transfer confirmation"}{" "}
-                for <strong>{v.name}</strong>.
+                for <strong>{v.name}</strong>
+                {v.rego ? ` (rego ${v.rego})` : ""}.
               </p>
 
               {/* What happens next */}

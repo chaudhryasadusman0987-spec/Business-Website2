@@ -4,7 +4,12 @@ import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import { securitySolutions } from "@/data/security-solutions"
 import { seedVehicles as VEHICLE_SEED } from "@/data/car-rental"
 import type { Product, ProductInput } from "@/lib/products"
-import { parseVehicleStatus, type RentalVehicle, type VehicleInput } from "@/lib/vehicles"
+import {
+  normaliseRego,
+  parseVehicleStatus,
+  type RentalVehicle,
+  type VehicleInput,
+} from "@/lib/vehicles"
 import { photoPath } from "@/lib/vehicle-photos"
 
 // Database layer. Server-only (imports @neondatabase/serverless) — only import
@@ -178,6 +183,20 @@ export async function createVehiclesTable(): Promise<void> {
     SET status = CASE WHEN available THEN 'available' ELSE 'hidden' END
     WHERE status IS NULL
   `
+  // One plate, one car. Case-insensitive, and blank regos (a car added before
+  // its plate is known) are left out so several can coexist.
+  await db`
+    CREATE UNIQUE INDEX IF NOT EXISTS vehicles_rego_unique
+    ON vehicles (upper(rego))
+    WHERE rego IS NOT NULL AND rego <> ''
+  `
+}
+
+/** Turns the unique-index violation into a message the dashboard can show. */
+function regoTaken(err: unknown, rego: string): Error | null {
+  const e = err as { code?: string; message?: string }
+  const hit = e?.code === "23505" || /vehicles_rego_unique/.test(e?.message ?? "")
+  return hit ? new Error(`Rego ${rego} is already on another vehicle.`) : null
 }
 
 /** Create the active_rentals table if absent. Idempotent. */
@@ -575,8 +594,9 @@ export async function getFleetCounts(): Promise<{ onYard: number; available: num
  * fleet moves megabytes from Neon on every request (seconds of TTFB). This
  * leaves the gallery out and swaps an inline main photo for its
  * /api/vehicles/photo URL, versioned by an md5 Postgres computes in place.
- * Everything else matches getVehicles(), including the rego, so callers
- * still pass the result through toPublicVehicle before it leaves the server.
+ * Everything else matches getVehicles(), rego included. Callers still pass
+ * the result through toPublicVehicle, which drops the price of a car that is
+ * not bookable yet.
  *
  * Cached, because this query sits in front of the first byte of every car
  * rental page and a cold Neon connection costs a second or more of mobile
@@ -641,6 +661,7 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
   // not accept — send JSON text and cast it, the same way writeSetting does.
   const images = JSON.stringify(input.images)
   const colours = JSON.stringify(input.colours)
+  const rego = normaliseRego(input.rego)
   const rows = (await db`
     INSERT INTO vehicles
       (id, name, year, make, model, type, rego, image, images, image_alt,
@@ -653,7 +674,7 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
       ${input.make || null},
       ${input.model || null},
       ${input.type || null},
-      ${input.rego || null},
+      ${rego || null},
       ${input.image || null},
       ${images}::jsonb,
       ${input.imageAlt || null},
@@ -670,7 +691,9 @@ export async function createVehicle(input: VehicleInput): Promise<RentalVehicle>
       ${colours}::jsonb
     )
     RETURNING *
-  `) as VehicleRow[]
+  `.catch((err) => {
+    throw regoTaken(err, rego) ?? err
+  })) as VehicleRow[]
   vehiclesChanged()
   return toVehicle(rows[0])
 }
@@ -682,6 +705,7 @@ export async function updateVehicle(
   const db = sql()
   const images = JSON.stringify(input.images)
   const colours = JSON.stringify(input.colours)
+  const rego = normaliseRego(input.rego)
   const rows = (await db`
     UPDATE vehicles SET
       name        = ${input.name},
@@ -689,7 +713,7 @@ export async function updateVehicle(
       make        = ${input.make || null},
       model       = ${input.model || null},
       type        = ${input.type || null},
-      rego        = ${input.rego || null},
+      rego        = ${rego || null},
       image       = ${input.image || null},
       images      = ${images}::jsonb,
       image_alt   = ${input.imageAlt || null},
@@ -706,7 +730,9 @@ export async function updateVehicle(
       colours      = ${colours}::jsonb
     WHERE id = ${id}
     RETURNING *
-  `) as VehicleRow[]
+  `.catch((err) => {
+    throw regoTaken(err, rego) ?? err
+  })) as VehicleRow[]
   vehiclesChanged()
   return rows[0] ? toVehicle(rows[0]) : null
 }
