@@ -16,10 +16,6 @@ export const SITE_PHONE       = "+61 424 948 512";
 export const SITE_PHONE_LOCAL = SITE_PHONE.replace(/^\+61\s?/, "0");
 export const SITE_PHONE_HREF  = `tel:${SITE_PHONE.replace(/\s/g, "")}`;
 export const SITE_ADDRESS     = "Brisbane & Southeast QLD";
-// Temporary until the ATO issues the company ABN. The footer hides the ABN
-// line while this is empty or still says "Pending" — set it to e.g.
-// "ABN: 12 345 678 901" and it appears.
-export const SITE_ABN         = "ABN: Pending registration";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 // Machine-readable version of SITE_HOURS for schema.org JSON-LD. Change both
 // together.
@@ -27,8 +23,17 @@ export const SITE_OPENING_HOURS: { days: string[]; opens: string; closes: string
   { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "08:00", closes: "18:00" },
   { days: ["Saturday"], opens: "09:00", closes: "15:00" },
 ];
-export const SITE_COMPANY     = "PAK OZ SOLUTIONS PTY LTD";
-export const SITE_ACN         = "ACN: 700 444 695";
+// ============================================================
+//  LEGAL ENTITY — official ASIC details. Every page, email, PDF and
+//  JSON-LD block that names the company reads these; never hardcode them.
+// ============================================================
+export const COMPANY_LEGAL_NAME = "Pak Oz Solutions Pty Ltd";
+export const COMPANY_ACN        = "700 444 695";
+export const COMPANY_ABN        = "53 700 444 695";
+// Registered office locality only — no street address.
+export const COMPANY_OFFICE_LOCALITY = "Sunnybank Hills QLD 4109";
+// "Pak Oz Solutions Pty Ltd, ABN 53 700 444 695" — the line for emails and PDFs.
+export const COMPANY_LEGAL_LINE = `${COMPANY_LEGAL_NAME}, ABN ${COMPANY_ABN}`;
 // Security installer credential shown in trust strips. Replace with your real
 // number when available, e.g. "Queensland Security Licence: 1234567".
 export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
@@ -44,16 +49,17 @@ export const SITE_GOOGLE_REVIEW_URL =
 //  in both confirmation emails. Change here and every surface follows.
 // ============================================================
 export const BANK_NAME         = "Westpac";
-export const BANK_ACCOUNT_NAME = "Pak Oz Solutions Pty Ltd";
+export const BANK_ACCOUNT_NAME = COMPANY_LEGAL_NAME;
 export const BANK_BSB          = "034-076";
 export const BANK_ACCOUNT      = "841442";
-export const BANK_PAYID        = "53700444695";
+// The PayID is the company ABN, without spaces.
+export const BANK_PAYID        = COMPANY_ABN.replace(/\s/g, "");
 export const BANK_PAYID_TYPE   = "ABN (Australian Business Number)";
 
 // ============================================================
 //  SECURITY SUB-BRAND — used ONLY under /services/security-solutions
 //  and in the security quote email. Everything else on the site keeps
-//  SITE_FULL ("Pak Oz Solutions"). SITE_COMPANY stays the legal entity.
+//  SITE_FULL ("Pak Oz Solutions"). COMPANY_LEGAL_NAME stays the legal entity.
 // ============================================================
 export const SECURITY_BRAND   = "Pak Oz CCTV";
 export const SECURITY_TAGLINE = "Professional CCTV & Security Installation Brisbane";

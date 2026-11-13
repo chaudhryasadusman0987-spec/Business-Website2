@@ -1,4 +1,5 @@
 import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb } from "pdf-lib"
+import { COMPANY_LEGAL_LINE, COMPANY_ACN } from "@/data/site"
 import type {
   RentalAgreement,
   RentalEmailLogEntry,
@@ -173,7 +174,7 @@ const money = (n: number) => `$${n.toFixed(2)}`
 
 function header(w: Writer, title: string) {
   w.text("PAK OZ RENTALS", { size: 18, bold: true, gap: 2 })
-  w.text("Pak Oz Solutions Pty Ltd - ACN 700 444 695 - pakozsolutions.com.au", { size: 9, gap: 2 })
+  w.text(`${COMPANY_LEGAL_LINE} - ACN ${COMPANY_ACN} - pakozsolutions.com.au`, { size: 9, gap: 2 })
   w.text(title, { size: 13, bold: true, gap: 10 })
 }
 

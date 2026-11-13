@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+import { COMPANY_LEGAL_NAME, COMPANY_ABN, COMPANY_ACN } from "@/data/site"
 
 const spoke = getSpoke("rental-terms")
 
@@ -50,7 +51,10 @@ export default function RentalTermsPage() {
         </p>
 
         <Section title="Registered Owner">
-          <p>Pak Oz Solutions Pty Ltd (trading as Pak Oz Rentals)</p>
+          <p>{COMPANY_LEGAL_NAME} (trading as Pak Oz Rentals)</p>
+          <p>
+            ABN {COMPANY_ABN} · ACN {COMPANY_ACN}
+          </p>
           <p>1 Cedrus St, Sunnybank Hills QLD 4109</p>
           <p>Contact: 0424 948 512 / +61 480 488 080</p>
           <p>
@@ -245,6 +249,8 @@ export default function RentalTermsPage() {
         <p className="text-[12px] text-muted mt-4">
           Pak Oz Rentals • 0424 948 512 / +61 480 488 080 •
           pakozsolutions.com.au
+          <br />
+          {COMPANY_LEGAL_NAME} • ABN {COMPANY_ABN} • ACN {COMPANY_ACN}
         </p>
       </div>
       <RelatedServices spoke={spoke} className="pt-[60px]" />

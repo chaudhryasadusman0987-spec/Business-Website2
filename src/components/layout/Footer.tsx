@@ -9,9 +9,8 @@ import {
   SITE_EMAIL,
   SITE_ADDRESS,
   SITE_DOMAIN,
-  SITE_COMPANY,
-  SITE_ABN,
-  SITE_ACN,
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
   IT_WHATSAPP_LINK,
   IT_WHATSAPP_LOCAL,
 } from "@/data/site"
@@ -21,10 +20,6 @@ import {
 
 const LINK = "inline-block py-1 text-on-dark-muted transition-colors hover:text-white"
 const HEADING = "mb-4 font-body text-[14px] font-semibold uppercase tracking-[0.08em] text-white"
-
-// The ABN line only shows once a real number is set in site.ts — never
-// "Pending registration".
-const abn = SITE_ABN && !/pending/i.test(SITE_ABN) ? SITE_ABN : ""
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -135,12 +130,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[13px] md:flex-row md:items-center md:justify-between">
           <p>
-            © {year} {SITE_FULL}. All rights reserved.
-            <span className="block sm:inline">
-              <span className="hidden sm:inline"> · </span>
-              {SITE_COMPANY} · {SITE_ACN}
-              {abn && <> · {abn}</>}
-            </span>
+            © {year} {COMPANY_LEGAL_NAME} · ABN {COMPANY_ABN}
           </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-1">
             <li>

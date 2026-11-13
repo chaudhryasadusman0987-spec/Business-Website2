@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-import { SITE_FULL } from "@/data/site"
+import { SITE_FULL, COMPANY_LEGAL_LINE } from "@/data/site"
 
 // Hostinger SMTP settings
 // These must be set in Vercel environment
@@ -57,6 +57,19 @@ function htmlToText(html: string): string {
     .trim()
 }
 
+/**
+ * Legal footer appended to every outgoing email — quotes, confirmations,
+ * receipts and reminders all identify the company and its ABN. Added here so
+ * no template can be sent without it.
+ */
+function withLegalFooter(html: string): string {
+  if (html.includes(COMPANY_LEGAL_LINE)) return html
+  return (
+    html +
+    `<p style="font-family:Arial,sans-serif;font-size:11px;color:#777;text-align:center;margin:16px 0 0">${COMPANY_LEGAL_LINE}</p>`
+  )
+}
+
 /** File attached to an outgoing email (e.g. an uploaded licence photo). */
 export interface EmailAttachment {
   filename: string
@@ -72,6 +85,7 @@ export async function sendEmail(
 ): Promise<void> {
   const from = process.env.SMTP_FROM
     || "info@pakozsolutions.com.au"
+  html = withLegalFooter(html)
 
   console.log("Sending email:", {
     from,

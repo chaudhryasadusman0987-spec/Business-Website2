@@ -27,7 +27,7 @@ Three service brands, each with its own ad-focused landing page:
 7. ✅ AI chat agent (Gemini, §9), SEO (sitemap, robots, JSON-LD, OG image)
 8. 🚧 Lead finder (`/lead-finder`, own password) — on branch `lead-finder`, not yet merged
 
-Still pending on the business side: ABN registration, Google Business Profile
+Still pending on the business side: Google Business Profile
 verification (then set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID`).
 
 ---
@@ -36,7 +36,7 @@ verification (then set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID`).
 
 ### The business name is now "Pak Oz Solutions" — but the rule still applies.
 (The example values below are the original placeholders; see `src/data/site.ts`
-for the real ones, incl. SITE_COMPANY, SITE_ACN, bank/PayID and IT_WHATSAPP.)
+for the real ones, incl. COMPANY_LEGAL_NAME, COMPANY_ACN, COMPANY_ABN, bank/PayID and IT_WHATSAPP.)
 
 The name must be changeable in EXACTLY ONE place, after which the entire
 site updates — every page title, every heading, every email, every footer,
@@ -63,7 +63,7 @@ export const SITE_DOMAIN      = "https://auzserv.com.au";     // ← change when
 export const SITE_EMAIL       = "info@auzserv.com.au";        // ← change with domain
 export const SITE_PHONE       = "+61 400 000 000";            // ← real number when ready
 export const SITE_ADDRESS     = "Australia Wide";
-export const SITE_ABN         = "ABN: 00 000 000 000";        // ← real ABN when ready
+export const COMPANY_ABN        = "53 700 444 695";
 export const SITE_HOURS       = "Mon–Fri 8am–6pm, Sat 9am–3pm";
 ```
 
@@ -249,7 +249,7 @@ src/data/
   site.ts                ← THE ONE FILE TO CHANGE FOR BUSINESS NAME/DOMAIN
                            exports SITE_NAME, SITE_SUFFIX, SITE_FULL, SITE_TAGLINE,
                            SITE_DOMAIN, SITE_EMAIL, SITE_PHONE, SITE_ADDRESS,
-                           SITE_ABN, SITE_HOURS
+                           COMPANY_ABN, SITE_HOURS
   services.ts            Master services list (6 cards on home grid).
                            NOTE: the security entry now reads name "Security Solutions",
                            href "/services/security-solutions" (id still "cctv-installation")

@@ -55,7 +55,7 @@
 
 ## ⏳ REMAINING / BUSINESS-SIDE
 
-- Register ABN → update `SITE_ABN` in `site.ts`
+- ABN registered (53 700 444 695) → `COMPANY_ABN` in `site.ts`
 - Verify Google Business Profile → set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID`
   in Vercel, swap the temp Google review link
 - Enable BECS on the Stripe account → `STRIPE_BECS_ENABLED=true`

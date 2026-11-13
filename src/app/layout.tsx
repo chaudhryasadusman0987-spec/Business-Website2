@@ -12,7 +12,8 @@ import {
   SITE_EMAIL,
   SITE_PHONE,
   SITE_TAGLINE,
-  SITE_COMPANY,
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
 } from "@/data/site"
 import { openingHoursJsonLd } from "@/components/seo/JsonLd"
 
@@ -76,7 +77,8 @@ const localBusinessJsonLd = {
   "@type": "LocalBusiness",
   "@id": `${SITE_DOMAIN}/#business`,
   name: SITE_FULL,
-  legalName: SITE_COMPANY,
+  legalName: COMPANY_LEGAL_NAME,
+  taxID: COMPANY_ABN,
   slogan: SITE_TAGLINE,
   url: SITE_DOMAIN,
   logo: `${SITE_DOMAIN}/images/pak-oz-mark.png`,
