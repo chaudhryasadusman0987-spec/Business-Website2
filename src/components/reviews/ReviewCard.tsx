@@ -7,8 +7,8 @@ import type { GoogleReview } from "@/lib/googleReviews"
 // Reviews longer than this are collapsed behind "Read more".
 const LIMIT = 220
 
-// One Google review: author, photo when Google provides one, stars, Google's
-// relative time, and the text.
+// One Google review: author (linked to their Google profile when provided),
+// photo when Google provides one, stars, Google's relative time, and the text.
 export default function ReviewCard({ review }: { review: GoogleReview }) {
   const [open, setOpen] = useState(false)
   const long = review.text.length > LIMIT
@@ -41,16 +41,32 @@ export default function ReviewCard({ review }: { review: GoogleReview }) {
           </span>
         )}
         <div className="min-w-0">
-          <p className="truncate text-[15px] font-semibold text-ink">{review.author}</p>
+          <p className="truncate text-[15px] font-semibold text-ink">
+            {review.profileUrl ? (
+              <a
+                href={review.profileUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="hover:underline underline-offset-4"
+              >
+                {review.author}
+              </a>
+            ) : (
+              review.author
+            )}
+          </p>
           {review.when && <p className="text-[13px] text-muted">{review.when}</p>}
         </div>
       </div>
 
       <Stars rating={review.rating} className="mt-4" />
 
-      <p className="mt-3 whitespace-pre-line text-[15px] leading-[1.65] text-muted">
-        {open ? review.text : preview}
-      </p>
+      {/* Star-only reviews have no text: author and stars only. */}
+      {review.text && (
+        <p className="mt-3 whitespace-pre-line text-[15px] leading-[1.65] text-muted">
+          {open ? review.text : preview}
+        </p>
+      )}
       {long && (
         <button
           type="button"

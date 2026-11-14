@@ -22,9 +22,12 @@ export interface GoogleReview {
   author: string
   /** Reviewer's profile photo, when Google provides one. */
   photo: string
+  /** Reviewer's Google profile, when Google provides one. */
+  profileUrl: string
   rating: number
   /** e.g. "2 weeks ago" — Google's own wording. */
   when: string
+  /** Empty for star-only reviews. */
   text: string
 }
 
@@ -44,7 +47,7 @@ interface PlacesReview {
   rating?: number
   text?: { text?: string }
   originalText?: { text?: string }
-  authorAttribution?: { displayName?: string; photoUri?: string }
+  authorAttribution?: { displayName?: string; photoUri?: string; uri?: string }
   relativePublishTimeDescription?: string
 }
 
@@ -87,16 +90,19 @@ export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
     if (!res.ok) return EMPTY()
 
     const data = (await res.json()) as PlacesResponse
-    const reviews = (data.reviews ?? [])
-      .map((r, i): GoogleReview => ({
+    // Every review Google returns is shown — star-only ones included (the
+    // card then shows the author and stars without text).
+    const reviews = (data.reviews ?? []).map(
+      (r, i): GoogleReview => ({
         id: `google-${i}`,
         author: r.authorAttribution?.displayName ?? "Google user",
         photo: r.authorAttribution?.photoUri ?? "",
+        profileUrl: r.authorAttribution?.uri ?? "",
         rating: Math.max(0, Math.min(5, Math.round(r.rating ?? 0))),
         when: r.relativePublishTimeDescription ?? "",
         text: (r.text?.text ?? r.originalText?.text ?? "").trim(),
-      }))
-      .filter((r) => r.text.length > 0 && r.rating > 0)
+      }),
+    )
 
     const count = data.userRatingCount ?? 0
     const rating = data.rating ?? 0
