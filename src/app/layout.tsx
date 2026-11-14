@@ -16,6 +16,7 @@ import {
   COMPANY_ABN,
 } from "@/data/site"
 import { openingHoursJsonLd } from "@/components/seo/JsonLd"
+import { getGoogleReviews } from "@/lib/googleReviews"
 
 // Poppins is the brand font and is used for headings only (600–700). Inter
 // carries body copy and buttons. Both are exposed as CSS variables and wired
@@ -106,11 +107,28 @@ const localBusinessJsonLd = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Live Google rating (cached for an hour). AggregateRating is added only
+  // when Google reports at least one review.
+  const { rating, count } = await getGoogleReviews()
+  const businessJsonLd =
+    count > 0 && rating > 0
+      ? {
+          ...localBusinessJsonLd,
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: rating,
+            reviewCount: count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : localBusinessJsonLd
+
   return (
     <html lang="en-AU" className={`${inter.variable} ${poppins.variable}`}>
       <head>
@@ -122,7 +140,7 @@ export default function RootLayout({
         </noscript>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
       </head>
       <body>

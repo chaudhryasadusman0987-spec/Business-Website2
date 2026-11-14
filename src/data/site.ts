@@ -38,9 +38,6 @@ export const COMPANY_LEGAL_LINE = `${COMPANY_LEGAL_NAME}, ABN ${COMPANY_ABN}`;
 // number when available, e.g. "Queensland Security Licence: 1234567".
 export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
 
-// Fallback "find us on Google" link, used until the Google Business Profile is
-// verified. Once NEXT_PUBLIC_GOOGLE_PLACE_ID is set, the review buttons switch
-// to the direct write-a-review form instead of this search page.
 // Public Google profile — "See all reviews on Google".
 export const SITE_GOOGLE_REVIEWS_URL = "https://share.google/Rd0GFhyTvVhHKwi0e";
 // The Business Profile on Google Maps. It is a service-area business, so
@@ -51,8 +48,9 @@ export const SITE_GOOGLE_MAPS_URL =
 // address), used to centre the embedded map.
 export const SITE_GOOGLE_MAPS_CENTER = "-27.3821429,152.9931964";
 
-export const SITE_GOOGLE_REVIEW_URL =
-  "https://www.google.com/search?q=Pak+Oz+Solutions+Brisbane+review";
+// "Leave us a review" — the write-a-review link from the Business Profile.
+// The GOOGLE_REVIEW_URL env var overrides it when set.
+export const SITE_GOOGLE_REVIEW_URL = "https://g.page/r/CTVDLpfALOiFEAE/review";
 
 // ============================================================
 //  BANK DETAILS — shown on the car rental payment step and repeated

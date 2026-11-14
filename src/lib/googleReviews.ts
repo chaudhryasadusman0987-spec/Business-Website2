@@ -15,7 +15,7 @@
 //  Google's API returns at most the 5 most relevant reviews.
 // ============================================================
 
-import { SITE_GOOGLE_REVIEWS_URL } from "@/data/site"
+import { SITE_GOOGLE_REVIEWS_URL, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
 
 export interface GoogleReview {
   id: string
@@ -58,8 +58,8 @@ interface PlacesResponse {
 function links(): Pick<GoogleReviewSummary, "allReviewsUrl" | "writeReviewUrl"> {
   return {
     allReviewsUrl: SITE_GOOGLE_REVIEWS_URL,
-    // Falls back to the public profile link until GOOGLE_REVIEW_URL is set.
-    writeReviewUrl: process.env.GOOGLE_REVIEW_URL || SITE_GOOGLE_REVIEWS_URL,
+    // GOOGLE_REVIEW_URL overrides the profile's write-a-review link in site.ts.
+    writeReviewUrl: process.env.GOOGLE_REVIEW_URL || SITE_GOOGLE_REVIEW_URL,
   }
 }
 
