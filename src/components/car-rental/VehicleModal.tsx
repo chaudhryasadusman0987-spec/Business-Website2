@@ -1198,7 +1198,7 @@ export default function VehicleModal({
 
               <p className="mb-3 text-[13px] text-muted">
                 By applying you agree to our{" "}
-                <a href="/rental-terms" target="_blank" className="font-semibold text-accent underline">
+                <a href="/rental-terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-accent underline">
                   Rental terms
                 </a>
                 .

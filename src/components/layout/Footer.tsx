@@ -20,7 +20,7 @@ import {
 
 // 44px tall on phones for touch; compact rows on desktop.
 const LINK =
-  "inline-flex min-h-[44px] items-center text-on-dark-muted transition-colors hover:text-white md:min-h-0 md:py-1"
+  "inline-flex min-h-[44px] min-w-[44px] items-center text-on-dark-muted transition-colors hover:text-white md:min-h-0 md:min-w-0 md:py-1"
 const HEADING = "mb-3 font-body text-[14px] font-semibold uppercase tracking-[0.08em] text-white"
 
 // Legal pages for the bottom bar. Add an entry when the page exists — the bar
