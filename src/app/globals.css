@@ -118,6 +118,18 @@
   }
 }
 
+/* Phones have a fixed 56px action bar (see AIChatBubble). Pad the page so it
+   never covers content or the footer's ABN line, and hide it while the mobile
+   menu is open. */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+  body[data-menu-open] .mobile-bar {
+    display: none;
+  }
+}
+
 /* Visible keyboard focus everywhere. !important so per-element `outline-none`
    utilities can't hide it. */
 a:focus-visible,

@@ -7,8 +7,12 @@ interface ServiceCardProps {
   href: string
   title: string
   description: string
-  /** Text of the link at the bottom — keyword anchor text, not "Learn more". */
-  linkLabel: string
+  /**
+   * What the link is about — keyword anchor text. The link reads
+   * "Learn more about {linkTopic}"; on phones only "Learn more →" is shown and
+   * the rest stays in the link for search engines and screen readers.
+   */
+  linkTopic: string
   image?: string
   imageAlt?: string
   /** `contain` for product cut-outs on white; `cover` for photos. */
@@ -24,13 +28,13 @@ interface ServiceCardProps {
 }
 
 // The one service card: used by the homepage grid and the hub pages. The whole
-// card is clickable through the stretched link on the title, so there is a
-// single link per card with descriptive anchor text.
+// card is clickable through the stretched link, so there is a single link per
+// card with descriptive anchor text.
 export default function ServiceCard({
   href,
   title,
   description,
-  linkLabel,
+  linkTopic,
   image,
   imageAlt,
   imageFit = "cover",
@@ -68,19 +72,26 @@ export default function ServiceCard({
       <div className="flex flex-1 flex-col p-6">
         <h3 className={`text-ink${onFill}`}>{title}</h3>
         {tagline && <p className={`mt-1 text-[13px] font-semibold text-accent${onFill}`}>{tagline}</p>}
-        <p className={`mt-2 line-clamp-2 text-[15px] leading-[1.6] text-muted${onFill}`}>{description}</p>
+        {/* No line clamp: descriptions are written to fit, never cut mid-word. */}
+        <p className={`mt-2 text-[15px] leading-[1.6] text-muted${onFill}`}>{description}</p>
         {children}
-        <Link
-          href={href}
-          className={`mt-auto inline-flex items-center gap-1.5 pt-5 text-[15px] font-semibold text-accent after:absolute after:inset-0 after:content-['']${onFill}`}
-        >
-          <span className="underline-offset-4 group-hover:underline">{linkLabel}</span>
-          <ArrowRight
-            size={16}
-            aria-hidden="true"
-            className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-          />
-        </Link>
+        <p className="mt-auto pt-5">
+          {/* Inline, so the arrow always sits right after the last word. */}
+          <Link
+            href={href}
+            className={`inline-block min-h-[24px] text-[15px] font-semibold text-accent after:absolute after:inset-0 after:content-['']${onFill}`}
+          >
+            <span className="underline-offset-4 group-hover:underline">
+              Learn more
+              <span className="sr-only sm:not-sr-only"> about {linkTopic}</span>
+            </span>
+            <ArrowRight
+              size={16}
+              aria-hidden="true"
+              className="ml-1.5 inline-block align-[-3px] transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            />
+          </Link>
+        </p>
       </div>
     </article>
   )

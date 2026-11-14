@@ -99,7 +99,7 @@ export default function SecuritySolutionsPage() {
               <Link
                 key={a.slug}
                 href={`/services/security-solutions/areas/${a.slug}`}
-                className="bg-brand-primary text-white font-semibold rounded-full px-5 py-2 text-[14px] hover:bg-brand-hover transition-all"
+                className="inline-flex min-h-[44px] items-center bg-brand-primary text-white font-semibold rounded-full px-5 text-[14px] hover:bg-brand-hover transition-all"
               >
                 CCTV Installation {a.headline}
               </Link>

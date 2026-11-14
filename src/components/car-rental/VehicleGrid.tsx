@@ -262,7 +262,7 @@ export default function VehicleGrid({
                             e.stopPropagation()
                             openVehicle(vehicle, "offer")
                           }}
-                          className="flex items-center gap-1.5 mt-2 text-[12px] font-semibold text-accent hover:text-[#6b71f0] transition-colors"
+                          className="flex min-h-[44px] items-center gap-1.5 mt-1 text-[13px] font-semibold text-accent hover:text-[#6b71f0] transition-colors"
                         >
                           <span className="text-[14px]">💬</span>
                           Make an offer
@@ -279,7 +279,7 @@ export default function VehicleGrid({
                           e.stopPropagation()
                           openVehicle(vehicle, "apply")
                         }}
-                        className="w-full bg-brand-primary text-white rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider hover:bg-brand-hover transition-colors"
+                        className="w-full bg-brand-primary text-white rounded-btn h-11 font-bold text-[12px] uppercase tracking-wider hover:bg-brand-hover transition-colors"
                       >
                         Get on Rent
                       </button>
@@ -296,7 +296,7 @@ export default function VehicleGrid({
                       <button
                         type="button"
                         disabled
-                        className="w-full bg-line text-muted rounded-[8px] h-[40px] font-bold text-[12px] uppercase tracking-wider cursor-not-allowed"
+                        className="w-full bg-line text-muted rounded-btn h-11 font-bold text-[12px] uppercase tracking-wider cursor-not-allowed"
                       >
                         Get on Rent
                       </button>

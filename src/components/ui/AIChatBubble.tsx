@@ -1,19 +1,29 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { X, Send } from "lucide-react"
+import Link from "next/link"
+import { X, Send, Phone, MessageCircle } from "lucide-react"
 import type { Message } from "@/types"
 import { usePathname } from "next/navigation"
-import { IT_WHATSAPP_LINK, IT_WHATSAPP_LOCAL, SITE_FULL, SITE_PHONE } from "@/data/site"
+import { IT_WHATSAPP_LINK, SITE_WHATSAPP_LINK, SITE_FULL, SITE_PHONE_HREF } from "@/data/site"
+
+// "Get Quote" in the mobile bar goes to the quote page for the section the
+// visitor is in (car rental has no quote form — it goes to the fleet).
+function quoteHref(pathname: string): string {
+  if (pathname.startsWith("/services/car-rental")) return "/services/car-rental/vehicles"
+  if (pathname.startsWith("/services/security-solutions")) return "/services/security-solutions/quote"
+  if (pathname.startsWith("/services/it-services")) return "/services/it-services/quote"
+  return "/quote"
+}
 import { WhatsAppIcon } from "@/components/ui/WhatsAppButton"
 
 export default function AIChatBubble() {
-  // The floating WhatsApp button is IT-only (Pak Oz Technologies' number).
-  // Security and car rental pages keep just the call button.
-  const isITPage = usePathname()?.startsWith("/services/it-services") ?? false
+  const pathname = usePathname() ?? "/"
+  // WhatsApp: the IT number and "Pak Oz Technologies" message on IT pages,
+  // the main number and "Pak Oz Solutions" message everywhere else.
+  const isITPage = pathname.startsWith("/services/it-services")
+  const whatsappHref = isITPage ? IT_WHATSAPP_LINK : SITE_WHATSAPP_LINK
   const [isOpen, setIsOpen] = useState(false)
-  const [showBadge, setShowBadge] = useState(true)
-  const [showPulse, setShowPulse] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -24,12 +34,6 @@ export default function AIChatBubble() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Pulse animation after 3 seconds
-  useEffect(() => {
-    const t = setTimeout(() => setShowPulse(true), 3000)
-    return () => clearTimeout(t)
-  }, [])
-
   // Auto-scroll after every new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -37,8 +41,6 @@ export default function AIChatBubble() {
 
   function openPanel() {
     setIsOpen(true)
-    setShowBadge(false)
-    setShowPulse(false)
   }
 
   async function sendMessage() {
@@ -90,85 +92,58 @@ export default function AIChatBubble() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {!isOpen ? (
-        <>
-          {isITPage && (
-            <a
-              href={IT_WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Chat on WhatsApp ${IT_WHATSAPP_LOCAL}`}
-              className="group fixed bottom-[168px] right-6 z-50 flex items-center gap-3"
-            >
-              <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-brand-navy text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-card-hover whitespace-nowrap items-center gap-2 pointer-events-none on-dark">
-                <span className="text-[#25D366]">●</span>
-                WhatsApp {IT_WHATSAPP_LOCAL}
-              </div>
-              <div className="w-[56px] h-[56px] rounded-full bg-[#25D366] text-white flex items-center justify-center hover:bg-[#1ebe5b] transition-colors duration-200 shadow-card-hover">
-                <WhatsAppIcon size={28} />
-              </div>
-            </a>
-          )}
-          {/* Floating call button — real number from SITE_PHONE; tel: link opens
-              the device dialler pre-filled. Hover tooltip shows on desktop. */}
-          <a
-            href={`tel:${SITE_PHONE.replace(/\s/g, '')}`}
-            aria-label={`Call us on ${SITE_PHONE}`}
-            className="group fixed bottom-24 right-6 z-50 flex items-center gap-3"
-          >
-            {/* Tooltip — shows on hover desktop */}
-            <div className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 bg-brand-navy text-white text-[13px] font-semibold px-4 py-2.5 rounded-[10px] shadow-card-hover whitespace-nowrap items-center gap-2 pointer-events-none on-dark">
-              <span className="text-[#5dcaa5]">●</span>
-              {SITE_PHONE}
-              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 border-[6px] border-transparent border-l-[#1a1a2e]" />
-            </div>
+    <>
+      {/* Mobile: one slim bar instead of stacked floating circles. Hidden
+          while the mobile menu is open (see globals.css). */}
+      <nav
+        aria-label="Quick actions"
+        className="mobile-bar on-dark fixed inset-x-0 bottom-0 z-50 box-content grid h-14 grid-cols-[1fr_1fr_1fr_56px] border-t border-white/10 bg-brand-navy pb-[env(safe-area-inset-bottom)] text-[14px] font-semibold text-white md:hidden"
+      >
+        <a href={SITE_PHONE_HREF} className="flex items-center justify-center gap-2 active:bg-white/10">
+          <Phone size={17} aria-hidden="true" />
+          Call
+        </a>
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 border-l border-white/10 active:bg-white/10"
+        >
+          <WhatsAppIcon size={17} className="text-[#25D366]" />
+          WhatsApp
+        </a>
+        <Link
+          href={quoteHref(pathname)}
+          className="flex items-center justify-center bg-brand-primary active:bg-brand-hover"
+        >
+          Get Quote
+        </Link>
+        <button
+          type="button"
+          onClick={() => (isOpen ? setIsOpen(false) : openPanel())}
+          aria-label={isOpen ? "Close chat" : "Open chat"}
+          aria-expanded={isOpen}
+          className="flex items-center justify-center active:bg-white/10"
+        >
+          {isOpen ? <X size={20} aria-hidden="true" /> : <MessageCircle size={20} aria-hidden="true" />}
+        </button>
+      </nav>
 
-            {/* Green phone circle button */}
-            <div className="w-[56px] h-[56px] rounded-full bg-[#22c55e] shadow-card-hover flex items-center justify-center hover:bg-[#16a34a] transition-colors duration-200">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C9.6 21 3 14.4 3 6c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
-              </svg>
-            </div>
-          </a>
+      {/* Desktop: one small chat button. */}
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={openPanel}
+          aria-label="Open chat"
+          className="fixed bottom-6 right-6 z-50 hidden h-12 w-12 items-center justify-center rounded-full bg-brand-primary text-white shadow-card-hover transition-colors duration-200 hover:bg-brand-hover md:flex"
+        >
+          <MessageCircle size={22} aria-hidden="true" />
+        </button>
+      )}
 
-          {/* Chat launcher */}
-          <div className="flex flex-col items-center gap-3">
-          <button
-            onClick={openPanel}
-            aria-label="Open chat"
-            className="relative w-[60px] h-[60px] rounded-full bg-brand-primary text-white flex items-center justify-center cursor-pointer shadow-card-hover"
-          >
-          {showPulse && (
-            <span className="animate-ping absolute inset-0 rounded-full bg-brand-primary opacity-30" />
-          )}
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            {/* Chat bubble base */}
-            <path
-              d="M16 3C9.373 3 4 7.925 4 14c0 2.607.96 5.002 2.556 6.88L4.5 26.5l6.316-2.105A13.144 13.144 0 0016 25c6.627 0 12-4.925 12-11S22.627 3 16 3z"
-              fill="white"
-              fillOpacity="0.95"
-            />
-            {/* AI brain dots — 3 dots suggesting intelligence */}
-            <circle cx="11" cy="14" r="1.8" fill="#7f85f7" />
-            <circle cx="16" cy="14" r="1.8" fill="#7f85f7" />
-            <circle cx="21" cy="14" r="1.8" fill="#7f85f7" />
-          </svg>
-          {showBadge && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
-          )}
-          </button>
-          </div>
-        </>
-      ) : (
-        <div className="w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-white rounded-card shadow-card-hover flex flex-col overflow-hidden on-light">
+      {isOpen && (
+      <div className="fixed bottom-[calc(68px+env(safe-area-inset-bottom))] right-3 z-[70] md:bottom-6 md:right-6">
+        <div className="w-[380px] max-w-[calc(100vw-24px)] h-[520px] max-h-[calc(100dvh-160px)] bg-white rounded-card shadow-card-hover flex flex-col overflow-hidden on-light">
           {/* Header */}
           <div className="bg-brand-dark rounded-t-card px-4 py-3 flex items-center justify-between">
             <span className="text-white font-semibold text-sm">{SITE_FULL}</span>
@@ -220,13 +195,14 @@ export default function AIChatBubble() {
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
               aria-label="Send message"
-              className="bg-brand-primary text-white rounded-full w-9 h-9 flex items-center justify-center hover:opacity-90 disabled:opacity-50"
+              className="bg-brand-primary text-white rounded-full w-11 h-11 flex-shrink-0 flex items-center justify-center hover:opacity-90 disabled:opacity-50"
             >
               <Send size={16} />
             </button>
           </div>
         </div>
+      </div>
       )}
-    </div>
+    </>
   )
 }

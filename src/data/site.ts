@@ -41,6 +41,9 @@ export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
 // Fallback "find us on Google" link, used until the Google Business Profile is
 // verified. Once NEXT_PUBLIC_GOOGLE_PLACE_ID is set, the review buttons switch
 // to the direct write-a-review form instead of this search page.
+// Public Google profile — "See all reviews on Google".
+export const SITE_GOOGLE_REVIEWS_URL = "https://share.google/Rd0GFhyTvVhHKwi0e";
+
 export const SITE_GOOGLE_REVIEW_URL =
   "https://www.google.com/search?q=Pak+Oz+Solutions+Brisbane+review";
 
@@ -73,6 +76,13 @@ export const RENTAL_BRAND     = "Pak Oz Rentals";
 export const RENTAL_LOCALITY  = "Sunnybank Hills";
 export const RENTAL_REGION    = "QLD";
 export const RENTAL_POSTCODE  = "4109";
+// Yard street address and second rental phone. Printed ONLY on the rental
+// terms page and the signed lease agreement PDF — never in JSON-LD or the
+// general site contact details.
+export const RENTAL_STREET_ADDRESS = `1 Cedrus St, ${RENTAL_LOCALITY} ${RENTAL_REGION} ${RENTAL_POSTCODE}`;
+export const RENTAL_PHONE_ALT      = "+61 480 488 080";
+// "0424 948 512 / +61 480 488 080"
+export const RENTAL_CONTACT_LINE   = `${SITE_PHONE_LOCAL} / ${RENTAL_PHONE_ALT}`;
 
 // ============================================================
 //  IT SUB-BRAND — used ONLY on the IT landing page, its project
@@ -93,3 +103,10 @@ export const IT_WHATSAPP_LOCAL = IT_WHATSAPP.replace(/^\+61\s?/, "0")
 export const IT_WHATSAPP_LINK =
   "https://wa.me/" + IT_WHATSAPP.replace(/\D/g, "") + "?text=" +
   encodeURIComponent("Hi, I'm interested in Pak Oz Technologies IT services (website / app / AI automation).")
+
+// WhatsApp on the main number, for every page outside /services/it-services.
+// The pre-filled message names the parent company; the IT link above names
+// the IT sub-brand and is used on IT pages only.
+export const SITE_WHATSAPP_LINK =
+  "https://wa.me/" + SITE_PHONE.replace(/\D/g, "") + "?text=" +
+  encodeURIComponent(`Hi, I'd like to ask about ${SITE_FULL} services.`)

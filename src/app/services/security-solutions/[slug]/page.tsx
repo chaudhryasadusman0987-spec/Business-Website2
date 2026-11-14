@@ -95,13 +95,13 @@ export default function SolutionDetailPage({
           {/* Left col — text */}
           <div>
             <nav className="text-[12px] text-muted mb-4 flex items-center gap-2">
-              <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
+              <Link href="/" className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
                 Home
               </Link>
               <ChevronRight size={12} />
               <Link
                 href="/services/security-solutions"
-                className="inline-block py-1 hover:text-accent transition-colors"
+                className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors"
               >
                 Security Solutions
               </Link>

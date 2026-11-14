@@ -30,7 +30,7 @@ export default function ServicesGrid() {
                 title={service.name}
                 description={service.description}
                 // Keyword anchor text from the internal-linking map.
-                linkLabel={`Learn more about ${cardAnchors[service.href] ?? service.name}`}
+                linkTopic={cardAnchors[service.href] ?? service.name}
                 image={service.image}
                 imageAlt={service.imageAlt}
                 fallbackIcon={service.iconName}

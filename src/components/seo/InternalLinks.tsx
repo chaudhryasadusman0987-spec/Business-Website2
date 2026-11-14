@@ -256,7 +256,7 @@ export function Breadcrumbs({
             {i === last ? (
               <span className={tone === "dark" ? "text-muted" : "text-muted"}>{name}</span>
             ) : (
-              <Link href={href} className="inline-block py-1 hover:text-accent transition-colors">
+              <Link href={href} className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
                 {name}
               </Link>
             )}

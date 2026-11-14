@@ -6,7 +6,7 @@ export const services: Service[] = [
     id: "web-development",
     name: "Web Development",
     description:
-      "Fast, modern websites that convert. Built for performance, SEO, and your brand.",
+      "Fast, modern websites built for performance, SEO and your brand.",
     href: "/services/it-services/web-development",
     iconName: "Globe",
     comingSoon: false,
@@ -18,19 +18,18 @@ export const services: Service[] = [
     id: "app-development",
     name: "App Development",
     description:
-      "Native and cross-platform mobile apps designed and built end-to-end for your business.",
+      "iOS and Android apps designed and built end to end for your business.",
     href: "/services/it-services/app-development",
     iconName: "Smartphone",
     comingSoon: false,
-    image:
-      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Mobile app development Australia",
+    image: "/images/it-services/app-code.jpg",
+    imageAlt: "Application source code on a screen",
   },
   {
     id: "ai-automation",
     name: "AI Automation",
     description:
-      "Custom AI agents and automations that save time, cut costs, and scale your operations.",
+      "AI agents and automations that save time, cut costs and scale with you.",
     href: "/services/it-services/ai-automation",
     iconName: "Bot",
     comingSoon: false,
@@ -42,7 +41,7 @@ export const services: Service[] = [
     id: "cctv-installation",
     name: "Security Solutions",
     description:
-      "Surveillance, deterrence, access control, intercoms and more — fully installed.",
+      "CCTV, alarms, access control and intercoms, fully installed.",
     href: "/services/security-solutions",
     iconName: "Shield",
     comingSoon: false,
@@ -53,7 +52,7 @@ export const services: Service[] = [
     id: "car-rental",
     name: "Car Rental",
     description:
-      "Flexible, well-maintained vehicles for every need. Weekly rates with a 4-week minimum, then week-to-week.",
+      "Well-maintained cars by the week. 4-week minimum, then week-to-week.",
     href: "/services/car-rental",
     iconName: "Car",
     comingSoon: false,
@@ -65,7 +64,7 @@ export const services: Service[] = [
     id: "it-consulting",
     name: "IT Consulting",
     description:
-      "Strategic technology advice, infrastructure, and support to keep your business running.",
+      "Practical technology advice and support to keep your business running.",
     href: "/services/it-services",
     iconName: "Monitor",
     comingSoon: false,

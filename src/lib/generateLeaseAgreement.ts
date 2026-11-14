@@ -1,5 +1,15 @@
 import { PDFDocument, PDFFont, StandardFonts, rgb } from "pdf-lib"
-import { COMPANY_LEGAL_LINE, COMPANY_LEGAL_NAME, COMPANY_ABN, COMPANY_ACN } from "@/data/site"
+import {
+  COMPANY_LEGAL_LINE,
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
+  COMPANY_ACN,
+  RENTAL_BRAND,
+  RENTAL_CONTACT_LINE,
+  RENTAL_STREET_ADDRESS,
+  SITE_DOMAIN,
+  SITE_EMAIL,
+} from "@/data/site"
 
 // Generates the Pak Oz Rentals vehicle lease agreement PDF — used both for a
 // blank agreement (no signature yet) and the finalised, signed copy attached
@@ -117,11 +127,11 @@ export async function generateLeaseAgreementPdf(
 
   // ── REGISTERED OWNER ──
   heading("Registered Owner")
-  row("Name:", `${COMPANY_LEGAL_NAME} (trading as Pak Oz Rentals)`)
+  row("Name:", `${COMPANY_LEGAL_NAME} (trading as ${RENTAL_BRAND})`)
   row("ABN / ACN:", `ABN ${COMPANY_ABN} / ACN ${COMPANY_ACN}`)
-  row("Address:", "1 Cedrus St, Sunnybank Hills QLD 4109")
-  row("Contact:", "0424 948 512 / +61 480 488 080")
-  row("Email:", "pakozsolutions.com.au")
+  row("Address:", RENTAL_STREET_ADDRESS)
+  row("Contact:", RENTAL_CONTACT_LINE)
+  row("Email:", SITE_EMAIL)
 
   // ── RENTEE DETAILS ──
   heading("Rentee Details")
@@ -342,7 +352,7 @@ export async function generateLeaseAgreementPdf(
   }
 
   drawText(
-    "Pak Oz Rentals • 0424 948 512 / +61 480 488 080 • pakozsolutions.com.au",
+    `${RENTAL_BRAND} • ${RENTAL_CONTACT_LINE} • ${SITE_DOMAIN.replace(/^https?:\/\//, "")}`,
     { size: 8, color: [0.5, 0.5, 0.5] },
   )
   drawText(COMPANY_LEGAL_LINE, { size: 8, color: [0.5, 0.5, 0.5] })

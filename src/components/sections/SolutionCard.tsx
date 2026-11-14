@@ -13,7 +13,7 @@ export default function SolutionCard({
       title={solution.name}
       tagline={solution.tagline}
       description={solution.description}
-      linkLabel={`Learn more about ${solution.name}`}
+      linkTopic={solution.name}
       image={solution.heroImage}
       imageAlt={solution.heroImageAlt}
       imageFit={solution.heroImageFit !== "cover" ? "contain" : "cover"}

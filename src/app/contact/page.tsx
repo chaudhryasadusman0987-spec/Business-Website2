@@ -87,7 +87,7 @@ export default function ContactPage() {
       <section className="relative overflow-hidden bg-brand-hero text-center on-dark py-16 lg:py-24">
         <div className="relative z-10 max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-center gap-2 text-[12px] text-muted mb-6">
-            <Link href="/" className="inline-block py-1 hover:text-accent transition-colors">
+            <Link href="/" className="inline-flex min-h-[44px] items-center hover:text-accent transition-colors">
               Home
             </Link>
             <ChevronRight size={12} />

@@ -138,6 +138,12 @@ export default async function CarRentalPage() {
                 <Phone size={16} aria-hidden="true" />
                 Call {SITE_PHONE_LOCAL}
               </a>
+              <Link
+                href="/rental-terms"
+                className="flex h-12 items-center justify-center px-2 text-[15px] font-semibold text-white underline underline-offset-4 hover:text-on-dark-muted"
+              >
+                Read our rental terms
+              </Link>
             </div>
 
             {/* Live availability — a plain status line, not a card floating

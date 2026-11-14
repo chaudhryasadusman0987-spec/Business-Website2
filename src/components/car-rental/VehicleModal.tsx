@@ -1196,6 +1196,13 @@ export default function VehicleModal({
                 </a>
               </div>
 
+              <p className="mb-3 text-[13px] text-muted">
+                By applying you agree to our{" "}
+                <a href="/rental-terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-accent underline">
+                  Rental terms
+                </a>
+                .
+              </p>
               <label className="flex items-start gap-3 cursor-pointer mb-4">
                 <input
                   type="checkbox"
