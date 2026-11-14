@@ -100,7 +100,7 @@ export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
 
     const count = data.userRatingCount ?? 0
     const rating = data.rating ?? 0
-    // A rating without a single review to show is not worth claiming.
+    // No reviews at all → the "be one of our first reviewers" state.
     if (count === 0 || rating === 0) return EMPTY()
 
     return { rating, count, reviews, ...links() }
@@ -110,7 +110,11 @@ export async function getGoogleReviews(): Promise<GoogleReviewSummary> {
   }
 }
 
-/** True when there is at least one real review to show. */
+/**
+ * True when Google reports at least one real review. The individual reviews
+ * may still be empty: Google can report a rating and count before its API
+ * returns review text, and star-only reviews have no text to show.
+ */
 export function hasReviews(s: GoogleReviewSummary): boolean {
-  return s.count > 0 && s.reviews.length > 0
+  return s.count > 0 && s.rating > 0
 }
