@@ -18,6 +18,8 @@ const EXTERNAL = { target: "_blank", rel: "noopener noreferrer" } as const
 // Google rating + review cards. Used by /testimonials (all reviews, invite
 // state when empty) and the homepage / hub pages (top 3, hidden when empty).
 // Only ever shows what Google returned — no sample or placeholder reviews.
+// With a rating but no written reviews yet, it shows the rating summary and
+// the buttons without cards.
 export default function ReviewsBlock({ summary, limit, as: Heading = "h2", empty = "hide" }: Props) {
   const real = hasReviews(summary)
   if (!real && empty === "hide") return null
@@ -50,18 +52,18 @@ export default function ReviewsBlock({ summary, limit, as: Heading = "h2", empty
           )}
         </div>
 
-        {real && (
-          <>
-            <ul className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((r) => (
-                <li key={r.id} className="flex">
-                  <ReviewCard review={r} />
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-center text-[13px] text-muted">Reviews from Google</p>
-          </>
+        {/* Cards only when Google returned written reviews; the rating and
+            count above can exist without them. */}
+        {real && reviews.length > 0 && (
+          <ul className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((r) => (
+              <li key={r.id} className="flex">
+                <ReviewCard review={r} />
+              </li>
+            ))}
+          </ul>
         )}
+        {real && <p className="mt-6 text-center text-[13px] text-muted">Reviews from Google</p>}
 
         <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
           {real && (
