@@ -18,11 +18,13 @@ export default function Stars({
       ))}
     </span>
   )
+  // w-fit + self-start: inside a flex column the row would otherwise stretch
+  // to full width, and the % overlay would then fill every star.
   return (
     <span
       role="img"
       aria-label={`${rating.toFixed(1).replace(/\.0$/, "")} out of 5 stars`}
-      className={`relative inline-flex ${className}`}
+      className={`relative inline-flex w-fit self-start ${className}`}
     >
       {row("#d8dbe3")}
       <span className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${pct}%` }}>
