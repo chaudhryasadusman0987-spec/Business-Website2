@@ -27,8 +27,8 @@ const HEADING = "mb-3 font-body text-[14px] font-semibold uppercase tracking-[0.
 // shows only links that lead somewhere real. (Rental terms are linked from the
 // car rental pages, not from here.)
 const LEGAL_LINKS: { label: string; href: string }[] = [
-  // { label: "Privacy Policy", href: "/privacy" },
-  // { label: "Terms", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
 ]
 
 export default function Footer() {
