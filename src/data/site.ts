@@ -76,6 +76,13 @@ export const RENTAL_BRAND     = "Pak Oz Rentals";
 export const RENTAL_LOCALITY  = "Sunnybank Hills";
 export const RENTAL_REGION    = "QLD";
 export const RENTAL_POSTCODE  = "4109";
+// Yard street address and second rental phone. Printed ONLY on the rental
+// terms page and the signed lease agreement PDF — never in JSON-LD or the
+// general site contact details.
+export const RENTAL_STREET_ADDRESS = `1 Cedrus St, ${RENTAL_LOCALITY} ${RENTAL_REGION} ${RENTAL_POSTCODE}`;
+export const RENTAL_PHONE_ALT      = "+61 480 488 080";
+// "0424 948 512 / +61 480 488 080"
+export const RENTAL_CONTACT_LINE   = `${SITE_PHONE_LOCAL} / ${RENTAL_PHONE_ALT}`;
 
 // ============================================================
 //  IT SUB-BRAND — used ONLY on the IT landing page, its project

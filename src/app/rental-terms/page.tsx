@@ -1,15 +1,26 @@
 import Link from "next/link"
 import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
-import { COMPANY_LEGAL_NAME, COMPANY_ABN, COMPANY_ACN } from "@/data/site"
+import {
+  COMPANY_LEGAL_NAME,
+  COMPANY_ABN,
+  COMPANY_ACN,
+  RENTAL_BRAND,
+  RENTAL_CONTACT_LINE,
+  RENTAL_STREET_ADDRESS,
+  SITE_DOMAIN,
+  SITE_EMAIL,
+  SITE_FULL,
+} from "@/data/site"
 
 const spoke = getSpoke("rental-terms")
+const DOMAIN = SITE_DOMAIN.replace(/^https?:\/\//, "")
 
 export const metadata = {
   alternates: { canonical: "/rental-terms" },
   title: "Car Rental Terms & Conditions",
   description:
-    "Full terms and conditions for Pak Oz Rentals vehicle hire in Brisbane.",
+    `Full terms and conditions for ${RENTAL_BRAND} vehicle hire in Brisbane.`,
 }
 
 function Section({
@@ -40,7 +51,7 @@ export default function RentalTermsPage() {
       </div>
       <div className="max-w-[800px] mx-auto bg-white rounded-card p-8 lg:p-12 shadow-card on-light">
         <p className="text-[12px] font-bold text-accent uppercase tracking-wider mb-1">
-          Pak Oz Rentals — A Pak Oz Solutions Company
+          {RENTAL_BRAND} — A {SITE_FULL} Company
         </p>
         <h1 className="font-bold text-[28px] text-[#1a1a2e] mb-4">
           Vehicle Lease Agreement — Terms &amp; Conditions
@@ -51,12 +62,21 @@ export default function RentalTermsPage() {
         </p>
 
         <Section title="Registered Owner">
-          <p>{COMPANY_LEGAL_NAME} (trading as Pak Oz Rentals)</p>
+          <p>{COMPANY_LEGAL_NAME} (trading as {RENTAL_BRAND})</p>
           <p>
             ABN {COMPANY_ABN} · ACN {COMPANY_ACN}
           </p>
-          <p>1 Cedrus St, Sunnybank Hills QLD 4109</p>
-          <p>Contact: 0424 948 512 / +61 480 488 080</p>
+          <p>{RENTAL_STREET_ADDRESS}</p>
+          <p>Contact: {RENTAL_CONTACT_LINE}</p>
+          <p>
+            Email:{" "}
+            <a
+              href={`mailto:${SITE_EMAIL}`}
+              className="text-accent font-medium underline decoration-current/30 underline-offset-2 break-all"
+            >
+              {SITE_EMAIL}
+            </a>
+          </p>
           <p>
             Questions about these terms?{" "}
             <Link href="/contact" className="text-accent font-medium underline decoration-current/30 underline-offset-2 hover:text-accent">
@@ -64,7 +84,6 @@ export default function RentalTermsPage() {
             </Link>
             .
           </p>
-          <p>Email: pakozsolutions.com.au</p>
           <p className="text-[13px] text-muted italic">
             The parties choose the addresses stated in the signed agreement
             as their physical addresses at which legal proceedings may be
@@ -247,8 +266,7 @@ export default function RentalTermsPage() {
           agree to these terms.
         </p>
         <p className="text-[12px] text-muted mt-4">
-          Pak Oz Rentals • 0424 948 512 / +61 480 488 080 •
-          pakozsolutions.com.au
+          {RENTAL_BRAND} • {RENTAL_CONTACT_LINE} • {DOMAIN}
           <br />
           {COMPANY_LEGAL_NAME} • ABN {COMPANY_ABN} • ACN {COMPANY_ACN}
         </p>
