@@ -43,6 +43,13 @@ export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
 // to the direct write-a-review form instead of this search page.
 // Public Google profile — "See all reviews on Google".
 export const SITE_GOOGLE_REVIEWS_URL = "https://share.google/Rd0GFhyTvVhHKwi0e";
+// The Business Profile on Google Maps. It is a service-area business, so
+// Google shows the service area, not an address.
+export const SITE_GOOGLE_MAPS_URL =
+  "https://www.google.com/maps/place/Pak+Oz+Solutions+Pty+Ltd/@-27.3821429,152.9931964,10z/data=!3m1!4b1!4m6!3m5!1s0x25ba189ea457737f:0x85e82cc0972e4335!8m2!3d-27.3821429!4d152.9931964!16s%2Fg%2F11_07bn2_g";
+// Centre of the service area as Google shows it on the listing (not an
+// address), used to centre the embedded map.
+export const SITE_GOOGLE_MAPS_CENTER = "-27.3821429,152.9931964";
 
 export const SITE_GOOGLE_REVIEW_URL =
   "https://www.google.com/search?q=Pak+Oz+Solutions+Brisbane+review";

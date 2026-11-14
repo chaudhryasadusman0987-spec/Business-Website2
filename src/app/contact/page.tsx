@@ -14,7 +14,16 @@ import {
   COMPANY_ABN,
   COMPANY_ACN,
   COMPANY_OFFICE_LOCALITY,
+  SITE_ADDRESS,
+  SITE_GOOGLE_MAPS_URL,
+  SITE_GOOGLE_MAPS_CENTER,
 } from "@/data/site"
+
+// Plain map of the service area, centred where Google centres our listing.
+// No search query: the business is service-area only (no pin), and searching
+// its name makes Google pin other, similarly named businesses instead.
+const SERVICE_AREA_MAP =
+  "https://maps.google.com/maps?ll=" + SITE_GOOGLE_MAPS_CENTER + "&z=10&output=embed"
 
 // Shared field styles live in globals.css (.field / .field-label).
 const INPUT = "field"
@@ -254,12 +263,40 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ── 3. MAP PLACEHOLDER ── */}
-      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 pb-[80px]">
-        <div className="bg-surface rounded-card h-[200px] flex items-center justify-center text-muted text-[14px] text-center px-4 on-light">
-          🗺️ Service Area: Brisbane &amp; Southeast QLD
+      {/* ── 3. SERVICE AREA MAP ── */}
+      <section
+        aria-labelledby="service-area-heading"
+        className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 pb-[80px]"
+      >
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 id="service-area-heading" className="text-ink">
+              Our service area
+            </h2>
+            <p className="mt-1 text-[15px] text-muted">
+              {SITE_ADDRESS} — we come to you.
+            </p>
+          </div>
+          <a
+            href={SITE_GOOGLE_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-accent hover:underline underline-offset-4"
+          >
+            <MapPin size={16} aria-hidden="true" />
+            View {SITE_FULL} on Google Maps
+          </a>
         </div>
-      </div>
+        <div className="overflow-hidden rounded-card border border-line bg-surface on-light">
+          <iframe
+            src={SERVICE_AREA_MAP}
+            title={`Map of the ${SITE_FULL} service area: ${SITE_ADDRESS}`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="block h-[320px] w-full border-0 lg:h-[420px]"
+          />
+        </div>
+      </section>
     </>
   )
 }
