@@ -180,7 +180,11 @@ export const spokes: Spoke[] = [
     blurb: "Keypads, biometric readers and gate control.",
     related: ["cctv", "intercoms", "commercial"],
     tags: ["access-control", "keypads", "biometric", "gates"],
-    upLink: { lead: "It integrates with everything in our", tail: ".", anchor: 1 },
+    upLink: {
+      lead: "Readers and locks can be linked to your CCTV cameras and video intercom, so it fits with the rest of our",
+      tail: ".",
+      anchor: 1,
+    },
   },
   {
     id: "smoke-alarms",
@@ -459,18 +463,19 @@ export type Segment = string | { spoke: string; anchor?: number }
 
 export const hubIntros: Record<HubId, Segment[]> = {
   security: [
-    `${SECURITY_BRAND} installs `,
+    // Two sentences (homes, then businesses) rather than one long list.
+    `For homes, ${SECURITY_BRAND} installs `,
     { spoke: "cctv", anchor: 0 },
     ", ",
-    { spoke: "deterrence", anchor: 1 },
-    ", ",
-    { spoke: "commercial", anchor: 0 },
-    ", ",
-    { spoke: "access-control", anchor: 0 },
-    ", ",
+    { spoke: "deterrence", anchor: 0 },
+    " and ",
     { spoke: "smoke-alarms", anchor: 0 },
-    " and handles ",
-    { spoke: "intercoms", anchor: 1 },
+    ". For businesses and shared buildings, we fit ",
+    { spoke: "commercial", anchor: 0 },
+    " and ",
+    { spoke: "access-control", anchor: 0 },
+    ", and handle ",
+    { spoke: "intercoms", anchor: 0 },
     ". Compare our ",
     { spoke: "packages", anchor: 0 },
     " or browse ",

@@ -9,6 +9,7 @@ import AnimateIn from "@/components/ui/AnimateIn"
 import VehicleGrid from "@/components/car-rental/VehicleGrid"
 import { SITE_PHONE, SITE_PHONE_LOCAL, RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
 import { getFleetCounts } from "@/lib/db"
+import { withSocial } from "@/lib/seo"
 
 // The fleet is dashboard-managed, so the hero counts have to be read at request
 // time — a car added in the dashboard should change "N cars on the yard" on the
@@ -19,13 +20,13 @@ export const dynamic = "force-dynamic"
 
 // The hub targets the broad "car rental Brisbane"; "long term / weekly" and
 // "rideshare / Uber" each have their own page, linked from here.
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/services/car-rental" },
   title: { absolute: `Car Rental Brisbane: Weekly & Rideshare | ${RENTAL_BRAND}` },
   description:
     `${RENTAL_BRAND}: car rental in Brisbane by the week. 4-week minimum, ` +
     "rideshare-ready cars, servicing and roadside assistance included.",
-}
+})
 
 const tel = `tel:${SITE_PHONE.replace(/\s/g, "")}`
 

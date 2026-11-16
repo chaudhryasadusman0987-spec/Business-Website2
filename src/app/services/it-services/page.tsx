@@ -34,6 +34,7 @@ import {
   SITE_PHONE,
   SITE_PHONE_LOCAL,
 } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
 /** "Call … · WhatsApp …" line shown under the hero and closing CTA buttons. */
 function ContactLine({ telHref, center = false }: { telHref: string; center?: boolean }) {
@@ -60,7 +61,7 @@ function ContactLine({ telHref, center = false }: { telHref: string; center?: bo
 // must not be baked at build time — otherwise admin edits never appear.
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/services/it-services" },
   // `absolute` because the root layout appends "| Pak Oz Solutions" to every
   // title — without it the tab would read "… | Pak Oz Technologies | Pak Oz
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
     "Web development, app development, AI automation and IT consulting for " +
     "Brisbane businesses. Estimated pricing shown up front. Real price " +
     "confirmed in a free 30-minute consultation.",
-}
+})
 
 /* What we promise every client — commitments, not sales numbers. */
 const PROMISES: { value: number; label: string; prefix?: string; suffix?: string }[] = [

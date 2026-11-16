@@ -13,6 +13,7 @@ import { serviceAreas, getServiceArea } from "@/data/service-areas"
 import { SECURITY_BRAND } from "@/data/site"
 import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpokeByHref } from "@/data/internal-links"
+import { withSocial } from "@/lib/seo"
 
 export function generateStaticParams() {
   return serviceAreas.map((a) => ({ slug: a.slug }))
@@ -25,11 +26,11 @@ export function generateMetadata({
 }): Metadata {
   const area = getServiceArea(params.slug)
   if (!area) return {}
-  return {
+  return withSocial({
     title: { absolute: `CCTV Installation ${area.headline} | ${SECURITY_BRAND}` },
     description: area.metaDescription,
     alternates: { canonical: `/services/security-solutions/areas/${area.slug}` },
-  }
+  })
 }
 
 export default function ServiceAreaPage({

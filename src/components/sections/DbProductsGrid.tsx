@@ -1,50 +1,25 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import DbProductCard from "./DbProductCard"
 import ProductModal from "@/components/ui/ProductModal"
 import { productCategories, type Product } from "@/lib/products"
 
-// DB-backed product grid for a single security solution. Fetches from
-// /api/products?slug=… on mount (the page itself is statically generated, so
-// data loads client-side). Shows category filter tabs, discount strikethrough,
-// badges and an out-of-stock state.
+// Product grid for a single security solution. The products are read from
+// Postgres on the server (solution page) and passed in, so they are in the
+// HTML for crawlers — no client fetch, no loading state. The page hides this
+// grid entirely when there are no products. Client-side only for the category
+// filter tabs and the detail modal.
 
 export default function DbProductsGrid({
-  slug,
+  products,
   solutionId,
 }: {
-  slug: string
+  products: Product[]
   solutionId: string
 }) {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const [active, setActive] = useState("All")
   const [modalProduct, setModalProduct] = useState<Product | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    fetch(`/api/products?slug=${encodeURIComponent(slug)}`, {
-      cache: "no-store",
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (cancelled) return
-        // The route answers 200 with `error` set when the DB read failed, so
-        // surface it here instead of showing a silent "no products" state.
-        if (data?.error) console.error("Products API error:", data.error)
-        setProducts(Array.isArray(data.products) ? data.products : [])
-      })
-      .catch((err) => {
-        console.error("Products fetch failed:", err)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [slug])
 
   const categories = useMemo(() => productCategories(products), [products])
   const tabs = useMemo(() => ["All", ...categories], [categories])
@@ -54,21 +29,7 @@ export default function DbProductsGrid({
       ? products
       : products.filter((p) => p.category === active)
 
-  if (loading) {
-    return (
-      <p className="mt-12 text-center text-[15px] text-muted">
-        Loading products…
-      </p>
-    )
-  }
-
-  if (products.length === 0) {
-    return (
-      <p className="mt-12 text-center text-[15px] text-muted">
-        No products available right now. Please check back soon.
-      </p>
-    )
-  }
+  if (products.length === 0) return null
 
   return (
     <div className="mt-10">

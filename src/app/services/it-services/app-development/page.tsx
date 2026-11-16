@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import ITServiceDetail from "@/components/sections/ITServiceDetail"
 import { getITService } from "@/lib/it-services-server"
+import { withSocial } from "@/lib/seo"
 
 // Dashboard edits are merged in per request, so prices/copy update without a
 // redeploy. Static rendering would freeze them at build time.
@@ -8,11 +9,11 @@ export const dynamic = "force-dynamic"
 
 export async function generateMetadata(): Promise<Metadata> {
   const service = await getITService("app-development")
-  return {
+  return withSocial({
     title: "App Development",
     description: service.description,
     alternates: { canonical: "/services/it-services/app-development" },
-  }
+  })
 }
 
 export default async function AppDevelopmentPage() {

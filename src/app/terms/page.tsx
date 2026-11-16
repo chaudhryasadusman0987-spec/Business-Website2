@@ -12,12 +12,13 @@ import {
   SITE_PHONE,
   SITE_PHONE_HREF,
 } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/terms" },
   title: "Terms of Use",
   description: `The terms that apply when you use the ${SITE_FULL} website, request a quote or use our services.`,
-}
+})
 
 // Change this whenever the terms change.
 const UPDATED = "13 November 2026"

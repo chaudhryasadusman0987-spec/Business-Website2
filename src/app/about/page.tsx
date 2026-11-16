@@ -7,14 +7,15 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback"
 import BrandLogo from "@/components/ui/BrandLogo"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/about" },
   title: "About Us",
   description:
     `Learn about ${SITE_FULL} — Australian-owned multi-service business. ` +
     "Security, mobility and technology solutions.",
-}
+})
 
 const values = [
   {

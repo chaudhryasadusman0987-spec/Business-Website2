@@ -177,9 +177,12 @@ export function HubBlogLinks({ hub, className = "" }: { hub: HubId; className?: 
 export function RelatedServices({
   spoke,
   className = "bg-white py-[60px] on-light",
+  ctaLabel,
 }: {
   spoke: Spoke | undefined
   className?: string
+  /** Overrides the hub's generic quote label, e.g. "Get a free access control quote". */
+  ctaLabel?: string
 }) {
   if (!spoke) return null
   // 2–3 siblings for most spokes; suburb pages carry 4 (CCTV, packages and
@@ -217,7 +220,7 @@ export function RelatedServices({
             href={ctaHref}
             className="inline-flex items-center justify-center gap-2 bg-brand-primary text-white font-semibold rounded-btn h-12 px-8 hover:bg-brand-hover transition-all"
           >
-            {hub.quoteLabel}
+            {ctaLabel ?? hub.quoteLabel}
             <ArrowRight size={16} />
           </Link>
         </div>

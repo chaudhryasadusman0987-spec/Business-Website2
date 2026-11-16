@@ -1,13 +1,14 @@
 import type { Metadata } from "next"
 import { SITE_FULL } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/contact" },
   title: "Contact",
   description:
     `Contact ${SITE_FULL}. Free quotes on security, car rental and IT ` +
     "services. Based in Brisbane, servicing Brisbane & Southeast QLD.",
-}
+})
 
 export default function ContactLayout({
   children,

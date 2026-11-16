@@ -19,6 +19,7 @@ import { rideshareFaqs } from "@/data/car-rental-pages"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
 import { RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
 import { getFleetSummary, weeklyRange } from "@/lib/fleet-summary"
+import { withSocial } from "@/lib/seo"
 
 // Prices and the car list come from the live fleet, like the hub.
 export const dynamic = "force-dynamic"
@@ -29,13 +30,13 @@ const spoke = getSpoke("rideshare")
 export async function generateMetadata(): Promise<Metadata> {
   const fleet = await getFleetSummary()
   const from = fleet ? ` from $${fleet.minWeekly}/week` : ""
-  return {
+  return withSocial({
     title: { absolute: "Rideshare Car Rental Brisbane | Uber & DiDi Cars" },
     description:
       `Rideshare car rental in Brisbane for Uber and DiDi drivers${from}. ` +
       "Unlimited km, servicing and roadside included. 4-week minimum.",
     alternates: { canonical: PATH },
-  }
+  })
 }
 
 export default async function RidesharePage() {
