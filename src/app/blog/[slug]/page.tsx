@@ -8,6 +8,7 @@ import { blogPosts, getPostBySlug, getRelatedPosts } from "@/data/blog"
 import { SITE_DOMAIN } from "@/data/site"
 import { BlogServiceLinks } from "@/components/seo/InternalLinks"
 import type { HubId } from "@/data/internal-links"
+import { withSocial } from "@/lib/seo"
 
 // Used when a post has no tags that match a spoke.
 const CATEGORY_HUB: Record<string, HubId> = {
@@ -55,7 +56,7 @@ export function generateMetadata({
 }): Metadata {
   const post = getPostBySlug(params.slug)
   if (!post) return {}
-  return {
+  return withSocial({
     title: post.title,
     description: post.excerpt,
     alternates: { canonical: `/blog/${post.slug}` },
@@ -65,7 +66,7 @@ export function generateMetadata({
       description: post.excerpt,
       images: [{ url: post.image, alt: post.title }],
     },
-  }
+  })
 }
 
 export default function BlogPostPage({

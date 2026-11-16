@@ -37,6 +37,13 @@ export const COMPANY_LEGAL_LINE = `${COMPANY_LEGAL_NAME}, ABN ${COMPANY_ABN}`;
 // Security installer credential shown in trust strips. Replace with your real
 // number when available, e.g. "Queensland Security Licence: 1234567".
 export const SITE_SECURITY_LICENCE = "Licensed & Insured Installers";
+// Queensland security licence NUMBER only, e.g. "1234567". While it is "":
+//  - Vercel previews / local builds show the "[QLD SECURITY LICENCE NO.]" placeholder
+//  - production hides the licence item and the security hub drops "Licensed".
+export const SECURITY_LICENCE_NO = "";
+// Security install terms, as given by the business.
+export const SECURITY_WARRANTY      = "3-year hardware warranty";
+export const SECURITY_PAYMENT_TERMS = "75% deposit, 25% on completion";
 
 // Public Google profile — "See all reviews on Google".
 export const SITE_GOOGLE_REVIEWS_URL = "https://share.google/Rd0GFhyTvVhHKwi0e";

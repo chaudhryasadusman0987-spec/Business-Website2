@@ -5,16 +5,17 @@ import { installFee } from "@/data/security-solutions"
 import { formatAUD } from "@/lib/formatters"
 import { Breadcrumbs, HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
+import { withSocial } from "@/lib/seo"
 
 const spoke = getSpoke("products")
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/services/security-solutions/products" },
   title: "All Security Products",
   description:
     "Browse every security product we supply and install across Australia — " +
     "cameras, alarms, access control, smoke alarms, intercoms and more.",
-}
+})
 
 export default function AllProductsPage() {
   return (

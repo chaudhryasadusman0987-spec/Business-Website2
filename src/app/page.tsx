@@ -6,15 +6,16 @@ import WhyChooseUs from "@/components/sections/WhyChooseUs"
 import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { SITE_FULL } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/" },
   title: {
     absolute: `${SITE_FULL} | CCTV & Security, Car Rental, IT Services Brisbane`,
   },
   description:
     "Brisbane CCTV and security installation, long-term car rental and IT & AI services under one roof. Licensed and insured. Get a free quote today.",
-}
+})
 
 export default function Home() {
   return (

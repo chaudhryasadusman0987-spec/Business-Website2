@@ -10,12 +10,13 @@ import {
   SITE_PHONE,
   SITE_PHONE_HREF,
 } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/privacy" },
   title: "Privacy Policy",
   description: `How ${SITE_FULL} collects, uses, stores and protects your personal information.`,
-}
+})
 
 // Change this whenever the policy text changes.
 const UPDATED = "13 November 2026"

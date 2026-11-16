@@ -40,14 +40,6 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_FULL}`,
   },
   description: `${SITE_FULL} — Professional security installation, car rental and IT services across Brisbane and Australia. Free quotes. Licensed and insured.`,
-  keywords: [
-    SITE_FULL,
-    "security Brisbane",
-    "CCTV installation Brisbane",
-    "car rental Brisbane",
-    "IT services Brisbane",
-    "AI automation Australia",
-  ],
   metadataBase: new URL(SITE_DOMAIN),
   openGraph: {
     siteName: SITE_FULL,

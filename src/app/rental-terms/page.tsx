@@ -12,16 +12,17 @@ import {
   SITE_EMAIL,
   SITE_FULL,
 } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
 const spoke = getSpoke("rental-terms")
 const DOMAIN = SITE_DOMAIN.replace(/^https?:\/\//, "")
 
-export const metadata = {
+export const metadata = withSocial({
   alternates: { canonical: "/rental-terms" },
   title: "Car Rental Terms & Conditions",
   description:
     `Full terms and conditions for ${RENTAL_BRAND} vehicle hire in Brisbane.`,
-}
+})
 
 function Section({
   title,

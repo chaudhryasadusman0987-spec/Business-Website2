@@ -9,32 +9,35 @@ import TestimonialsStrip from "@/components/sections/TestimonialsStrip"
 import QuoteCTABanner from "@/components/sections/QuoteCTABanner"
 import { securitySolutions } from "@/data/security-solutions"
 import { serviceAreas } from "@/data/service-areas"
-import { SECURITY_BRAND, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
+import { SECURITY_BRAND, SECURITY_WARRANTY, SITE_GOOGLE_REVIEW_URL } from "@/data/site"
+import SecurityTrustBar from "@/components/sections/SecurityTrustBar"
+import FaqSection from "@/components/sections/FaqSection"
+import { securityHubFaqs } from "@/data/security-faqs"
 import Link from "next/link"
 import { HubIntro, HubBlogLinks, SpokeCards } from "@/components/seo/InternalLinks"
+import { withSocial } from "@/lib/seo"
 
-// Suburbs listed for local SEO — Brisbane southside focus plus wider regions.
-const serviceSuburbs = [
-  "Brisbane CBD", "Sunnybank", "Sunnybank Hills", "Runcorn", "Calamvale",
-  "Parkinson", "Rochedale", "Eight Mile Plains", "Springwood", "Logan",
-  "Loganholme", "Beenleigh", "Browns Plains", "Mount Gravatt", "Mansfield",
-  "Wishart", "Stretton", "Carindale", "Macgregor", "Algester", "Acacia Ridge",
-  "Coopers Plains", "Moorooka", "Salisbury", "Nathan", "Holland Park",
-  "Tarragindi", "Yeronga", "Annerley", "Greenslopes", "Woolloongabba",
-  "South Brisbane", "West End", "Highgate Hill", "Gold Coast", "Ipswich",
-  "Redlands",
-]
+// Suburbs shown as a plain list under the linked region pages. Taken from the
+// region data so the hub and the region pages never disagree. No separate
+// suburb pages: thin near-duplicate pages hurt rankings.
+const suburbGroups: { name: string; suburbs: string[] }[] = [
+  { name: "Brisbane Southside", area: "brisbane-southside" },
+  { name: "Logan", area: "logan" },
+  { name: "Bayside", area: "redlands" },
+].map(({ name, area }) => ({
+  name,
+  suburbs: serviceAreas.find((a) => a.slug === area)?.suburbs ?? [],
+}))
 
 // `absolute` bypasses the root layout's `%s | Pak Oz Solutions` template so the
 // security section carries the CCTV sub-brand in the tab title instead.
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/services/security-solutions" },
   title: { absolute: `Security Solutions | ${SECURITY_BRAND}` },
   description:
-    `${SECURITY_BRAND} — Professional CCTV and security camera installation ` +
-    "in Brisbane & Southeast QLD. Free site assessment. Licensed installers. " +
-    "Same-week service available.",
-}
+    "CCTV, alarm, access control and intercom installation in Brisbane & " +
+    `Southeast QLD. Phone viewing, ${SECURITY_WARRANTY}, free site assessment.`,
+})
 
 export default function SecuritySolutionsPage() {
   return (
@@ -55,13 +58,14 @@ export default function SecuritySolutionsPage() {
         ])}
       />
       <SecuritySolutionsHero />
+      <SecurityTrustBar />
 
       {/* Solutions grid */}
       <section id="solutions" className="bg-white on-light py-14 lg:py-20">
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             title="Our Solutions"
-            subtitle="Click any solution to explore products and pricing"
+            subtitle="Choose a solution to see products and starting prices"
             eyebrow="What we install"
           />
           <HubIntro
@@ -93,7 +97,11 @@ export default function SecuritySolutionsPage() {
       {/* Areas We Service — suburb coverage for local SEO */}
       <section className="bg-white on-light py-14 lg:py-20">
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-ink text-center mb-8">Areas We Service</h2>
+          <h2 className="text-ink text-center mb-4">Areas We Service</h2>
+          <p className="text-[15px] text-muted text-center max-w-[640px] mx-auto mb-8">
+            We install across Brisbane and Southeast QLD. Each region page below
+            covers what properties there typically need.
+          </p>
           <div className="flex flex-wrap justify-center gap-3 mb-6">
             {serviceAreas.map((a) => (
               <Link
@@ -105,14 +113,12 @@ export default function SecuritySolutionsPage() {
               </Link>
             ))}
           </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            {serviceSuburbs.map((suburb) => (
-              <span
-                key={suburb}
-                className="bg-white border border-line rounded-full px-4 py-2 text-[13px] text-muted hover:border-brand-primary hover:text-accent transition-all on-light"
-              >
-                {suburb}
-              </span>
+          <div className="mx-auto mt-10 grid max-w-[960px] grid-cols-1 gap-8 text-left sm:grid-cols-3">
+            {suburbGroups.map((g) => (
+              <div key={g.name}>
+                <h3 className="text-[16px] font-semibold text-ink">{g.name}</h3>
+                <p className="mt-2 text-[14px] leading-[1.8] text-muted">{g.suburbs.join(", ")}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -147,6 +153,11 @@ export default function SecuritySolutionsPage() {
           </p>
         </div>
       </section>
+
+      <FaqSection
+        faqs={securityHubFaqs()}
+        subtitle="Costs, cameras, recording, warranty and payment — answered."
+      />
 
       <QuoteCTABanner href="/services/security-solutions/quote" />
       <TestimonialsStrip />

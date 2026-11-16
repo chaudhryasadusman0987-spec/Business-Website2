@@ -18,6 +18,7 @@ import {
 import { rentalSuburbs, getRentalSuburb } from "@/data/car-rental-pages"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
 import { RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
+import { withSocial } from "@/lib/seo"
 
 // Static suburb landing pages: no database read, so they are prerendered and
 // fast. Static siblings (vehicles, rideshare, long-term) take precedence over
@@ -31,11 +32,11 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { suburb: string } }): Metadata {
   const s = getRentalSuburb(params.suburb)
   if (!s) return {}
-  return {
+  return withSocial({
     title: { absolute: s.title },
     description: s.metaDescription,
     alternates: { canonical: `/services/car-rental/${s.slug}` },
-  }
+  })
 }
 
 export default function SuburbRentalPage({ params }: { params: { suburb: string } }) {

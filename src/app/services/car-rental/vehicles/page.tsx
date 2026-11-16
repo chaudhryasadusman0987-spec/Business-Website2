@@ -6,6 +6,7 @@ import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
 import { RENTAL_BRAND } from "@/data/site"
 import { getPublicFleet } from "@/lib/fleet-summary"
+import { withSocial } from "@/lib/seo"
 
 const spoke = getSpoke("fleet")
 
@@ -18,14 +19,14 @@ const spoke = getSpoke("fleet")
 // starts loading straight away instead of after a client-side fetch.
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSocial({
   alternates: { canonical: "/services/car-rental/vehicles" },
   // Not "long-term car rental": that keyword belongs to /long-term.
   title: { absolute: `Rental Car Fleet Brisbane: Weekly Rates | ${RENTAL_BRAND}` },
   description:
     "The full Pak Oz Rentals fleet in Brisbane — weekly hire with a four-week " +
     "minimum. Roadside assistance, servicing and maintenance included.",
-}
+})
 
 export default async function VehiclesPage() {
   const fleet = await getPublicFleet()

@@ -13,9 +13,35 @@ import { SECURITY_BRAND } from "@/data/site"
 import { formatAUD } from "@/lib/formatters"
 import { HubLink, RelatedServices } from "@/components/seo/InternalLinks"
 import { getSpokeByHref } from "@/data/internal-links"
+import { getProducts } from "@/lib/db"
+import type { Product } from "@/lib/products"
+import { withSocial } from "@/lib/seo"
+import { AccessControlIntro, AccessControlMore } from "@/components/sections/AccessControlDetail"
 
-export function generateStaticParams() {
-  return securitySolutions.map((s) => ({ slug: s.slug }))
+// Rendered per request: the product grid is read from Postgres on the server so
+// it is in the HTML (no client "Loading products…"), and dashboard edits show
+// on the next page load. Explicit, because the try/catch in loadProducts would
+// otherwise swallow the dynamic-usage signal during the build and freeze an
+// empty list into a static page.
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
+async function loadProducts(slug: string): Promise<Product[]> {
+  try {
+    return await getProducts(slug)
+  } catch (err) {
+    console.error("Solution page products read failed:", slug, err)
+    return []
+  }
+}
+
+// Title / H1 overrides per solution, keyed by slug. Unlisted slugs use the
+// solution name.
+const pageTitles: Record<string, string> = {
+  "access-control": `Access Control Systems Brisbane — Prices & Installation | ${SECURITY_BRAND}`,
+}
+const pageH1s: Record<string, string> = {
+  "access-control": "Access Control Systems in Brisbane & Southeast QLD",
 }
 
 // Brisbane-specific meta descriptions per solution, keyed by slug. Overrides the
@@ -33,8 +59,8 @@ const metaDescriptions: Record<string, string> = {
     "offices, retail and warehouses. Free assessment. Enterprise-grade " +
     "installation.",
   "access-control":
-    "Access control installation Brisbane. Keypads, biometric readers, gate " +
-    "systems. Control who enters your property. Free quote. Licensed installers.",
+    "Access control installation in Brisbane: keypads, key fobs and phone " +
+    "access for homes and businesses. Free quote and site assessment.",
   "smoke-alarms":
     "Smoke alarm installation Brisbane. AS3786 compliant photoelectric alarms. " +
     "Hardwired and wireless systems. Licensed installers. Free quote.",
@@ -50,18 +76,18 @@ export function generateMetadata({
 }): Metadata {
   const solution = securitySolutions.find((s) => s.slug === params.slug)
   if (!solution) return {}
-  return {
+  return withSocial({
     // `absolute` so the root `%s | Pak Oz Solutions` template doesn't override
     // the security sub-brand.
-    title: { absolute: `${solution.name} | ${SECURITY_BRAND}` },
+    title: { absolute: pageTitles[params.slug] ?? `${solution.name} | ${SECURITY_BRAND}` },
     description:
       metaDescriptions[params.slug] ??
       `${solution.description} — ${SECURITY_BRAND}, Brisbane.`,
     alternates: { canonical: `/services/security-solutions/${solution.slug}` },
-  }
+  })
 }
 
-export default function SolutionDetailPage({
+export default async function SolutionDetailPage({
   params,
 }: {
   params: { slug: string }
@@ -71,6 +97,8 @@ export default function SolutionDetailPage({
 
   const contain = solution.heroImageFit !== "cover"
   const spoke = getSpokeByHref(`/services/security-solutions/${solution.slug}`)
+  const products = await loadProducts(solution.slug)
+  const isAccess = solution.slug === "access-control"
 
   return (
     <>
@@ -110,7 +138,7 @@ export default function SolutionDetailPage({
             </nav>
 
             <h1 className="text-white">
-              {solution.name}
+              {pageH1s[solution.slug] ?? solution.name}
             </h1>
             <p className="mt-3 font-heading text-[1.25rem] font-semibold text-brand-primary">
               {solution.tagline}
@@ -127,17 +155,22 @@ export default function SolutionDetailPage({
               >
                 Get a Quote
               </Link>
-              <a
-                href="#products"
-                className="inline-flex items-center justify-center border border-white/40 text-white rounded-btn text-[15px] font-semibold h-12 px-6 hover:border-white hover:bg-white/10 transition-colors duration-200"
-              >
-                View Products
-              </a>
+              {/* Only link to sections that are actually on the page. */}
+              {(products.length > 0 || isAccess) && (
+                <a
+                  href={products.length > 0 ? "#products" : "#pricing"}
+                  className="inline-flex items-center justify-center border border-white/40 text-white rounded-btn text-[15px] font-semibold h-12 px-6 hover:border-white hover:bg-white/10 transition-colors duration-200"
+                >
+                  {products.length > 0 ? "View Products" : "See Prices"}
+                </a>
+              )}
             </div>
-            <p className="mt-5 flex items-center gap-2.5 text-[14px] text-muted">
-              <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#5dcaa5]" />
-              {solution.products.length} products available
-            </p>
+            {products.length > 0 && (
+              <p className="mt-5 flex items-center gap-2.5 text-[14px] text-muted">
+                <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#5dcaa5]" />
+                {products.length} {products.length === 1 ? "product" : "products"} available
+              </p>
+            )}
           </div>
 
           {/* Right col — solution hero image */}
@@ -165,7 +198,10 @@ export default function SolutionDetailPage({
         </div>
       </section>
 
-      {/* PRODUCTS GRID */}
+      {isAccess && <AccessControlIntro />}
+
+      {/* PRODUCTS GRID — hidden entirely when the solution has no products */}
+      {products.length > 0 && (
       <section id="products" className="bg-white on-light py-14 lg:py-20">
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
           <PackagesGrid slug={solution.slug} />
@@ -177,8 +213,8 @@ export default function SolutionDetailPage({
             )} · GST additional`}
           />
 
-          {/* All solutions serve their products from Postgres (see /api/products). */}
-          <DbProductsGrid slug={solution.slug} solutionId={solution.id} />
+          {/* Read from Postgres on the server (loadProducts above). */}
+          <DbProductsGrid products={products} solutionId={solution.id} />
 
           <div className="bg-surface border border-line rounded-card p-5 text-center max-w-[600px] mx-auto mt-14 on-light">
             <p className="text-[14px] text-[#4a4a6a]">
@@ -188,8 +224,14 @@ export default function SolutionDetailPage({
           </div>
         </div>
       </section>
+      )}
 
-      <RelatedServices spoke={spoke} />
+      {isAccess && <AccessControlMore />}
+
+      <RelatedServices
+        spoke={spoke}
+        ctaLabel={isAccess ? "Get a free access control quote" : undefined}
+      />
 
       <QuoteCTABanner href="/services/security-solutions/quote" />
     </>

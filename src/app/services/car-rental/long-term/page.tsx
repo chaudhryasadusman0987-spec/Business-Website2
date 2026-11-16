@@ -18,6 +18,7 @@ import { longTermFaqs } from "@/data/car-rental-pages"
 import { getSpoke, serviceCrumbs } from "@/data/internal-links"
 import { RENTAL_BRAND, RENTAL_LOCALITY } from "@/data/site"
 import { getFleetSummary, weeklyRange } from "@/lib/fleet-summary"
+import { withSocial } from "@/lib/seo"
 
 // The price range is read from the live fleet, like the hub.
 export const dynamic = "force-dynamic"
@@ -31,13 +32,13 @@ const WEEKS_PER_MONTH = 52 / 12
 export async function generateMetadata(): Promise<Metadata> {
   const fleet = await getFleetSummary()
   const from = fleet ? ` from $${fleet.minWeekly}/week` : ""
-  return {
+  return withSocial({
     title: { absolute: "Long Term Car Rental Brisbane | Weekly Car Hire" },
     description:
       `Long term car rental in Brisbane${from}. 4-week minimum, then week to week. ` +
       "Servicing, insurance and roadside assistance included.",
     alternates: { canonical: PATH },
-  }
+  })
 }
 
 export default async function LongTermPage() {

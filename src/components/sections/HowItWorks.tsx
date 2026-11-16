@@ -1,8 +1,16 @@
-import { ClipboardCheck, PencilRuler, Wrench } from "lucide-react"
+import { ClipboardCheck, PencilRuler, Wrench, type LucideIcon } from "lucide-react"
 import SectionTitle from "@/components/ui/SectionTitle"
 import AnimateIn from "@/components/ui/AnimateIn"
+import { HAS_LICENCE } from "@/data/security-offer"
 
-const steps = [
+export interface HowItWorksStep {
+  icon: LucideIcon
+  title: string
+  text: string
+}
+
+// "Licensed" is only claimed once a licence number is set in site.ts.
+const defaultSteps: HowItWorksStep[] = [
   {
     icon: ClipboardCheck,
     title: "Free Site Assessment",
@@ -16,21 +24,24 @@ const steps = [
   {
     icon: Wrench,
     title: "Professional Installation",
-    text: "Our licensed installers fit everything cleanly, test it, and show you how it all works.",
+    text: `Our ${HAS_LICENCE ? "licensed " : ""}installers fit everything cleanly, test it, and show you how it all works.`,
   },
 ]
 
-export default function HowItWorks() {
+export default function HowItWorks({
+  steps = defaultSteps,
+  subtitle = "From first call to fully installed — three simple steps.",
+}: {
+  steps?: HowItWorksStep[]
+  subtitle?: string
+}) {
+  const cols = steps.length === 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"
   return (
     <section className="section bg-surface">
       <div className="container-page">
-        <SectionTitle
-          eyebrow="The process"
-          title="How It Works"
-          subtitle="From first call to fully installed — three simple steps."
-        />
+        <SectionTitle eyebrow="The process" title="How It Works" subtitle={subtitle} />
 
-        <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <ol className={`mt-12 grid grid-cols-1 gap-6 ${cols}`}>
           {steps.map((step, i) => (
             <li key={step.title} className="flex">
               <AnimateIn animation="fade-up" delay={i * 100} className="flex w-full">
